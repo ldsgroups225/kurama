@@ -79,7 +79,7 @@ export function AchievementBadge({
                 "rounded-full flex items-center justify-center shadow-lg ring-4 ring-background",
                 isLocked
                   ? "bg-muted"
-                  : `bg-gradient-to-br ${rarityColors[achievement.rarity || "common"]}`
+                  : `bg-linear-to-br ${rarityColors[achievement.rarity || "common"]}`
               )}
             >
               {isLocked ? (
@@ -126,7 +126,7 @@ export function AchievementBadge({
                     "h-full rounded-full transition-all duration-500",
                     isLocked
                       ? "bg-muted-foreground"
-                      : `bg-gradient-to-r ${rarityColors[achievement.rarity || "common"]}`
+                      : `bg-linear-to-r ${rarityColors[achievement.rarity || "common"]}`
                   )}
                   style={{ width: `${progressPercent}%` }}
                 />

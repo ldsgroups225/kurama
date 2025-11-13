@@ -84,7 +84,7 @@ export function RewardAnimation({ reward, onClose, show }: RewardAnimationProps)
         <CardContent className="p-0">
           {/* Animated Background */}
           <div className={cn(
-            "relative p-8 bg-gradient-to-br",
+            "relative p-8 bg-linear-to-br",
             getRewardColor()
           )}>
             {/* Sparkles Animation */}
