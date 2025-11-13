@@ -1,6 +1,6 @@
 # MCP (Model Context Protocol) Usage Guidelines
 
-This project has several MCP servers configured. Use them proactively in your workflow.
+Kurama project has several MCP servers configured. Use them proactively in your workflow.
 
 ## Available MCP Servers
 
@@ -9,18 +9,19 @@ This project has several MCP servers configured. Use them proactively in your wo
 
 **When to use**:
 - Searching for latest documentation, examples, or best practices
-- Finding real-world usage patterns for libraries/frameworks
+- Finding real-world usage patterns for TanStack Start, Hono, Better Auth
 - Getting fresh context about APIs, SDKs, or frameworks
-- Researching solutions to technical problems
+- Researching solutions to technical problems specific to Kurama's stack
 
 **Key tools**:
 - `mcp_exa_web_search_exa`: General web search with content scraping
 - `mcp_exa_get_code_context_exa`: Get high-quality code context for programming tasks (use for ANY code-related questions)
 
 **Examples**:
-- "How to implement Durable Objects with Hono"
-- "TanStack Start server functions best practices"
-- "Better Auth with Polar integration examples"
+- "TanStack Start file-based routing best practices"
+- "Better Auth with Google OAuth integration"
+- "Polar SDK payment integration patterns"
+- "Drizzle ORM with multiple database adapters"
 
 ### Context7 MCP
 **Purpose**: Library documentation lookup
@@ -35,9 +36,11 @@ This project has several MCP servers configured. Use them proactively in your wo
 - `mcp_context7_get_library_docs`: Fetch documentation for a library
 
 **Examples**:
-- Getting TanStack Router documentation
+- Getting TanStack Start/Router documentation
 - Looking up Drizzle ORM API reference
 - Finding Hono framework guides
+- Better Auth configuration and integration patterns
+- Tailwind CSS v4 documentation
 
 ### Git MCP
 **Purpose**: Git operations and repository inspection
@@ -80,12 +83,12 @@ This project has several MCP servers configured. Use them proactively in your wo
 **Purpose**: Browser automation and testing
 
 **When to use**:
-- Testing the user-application in browser
-- Debugging UI issues
-- Taking screenshots of components
-- Inspecting network requests
-- Analyzing performance
-- Interacting with the application
+- Testing kurama-frontend (user-application) in browser
+- Debugging UI issues or authentication flows
+- Taking screenshots of components or pages
+- Inspecting network requests to kurama-backend
+- Analyzing performance of the PWA
+- Testing offline functionality and responsive design
 
 **Key tools**:
 - `mcp_chrome_devtools_navigate_page`: Navigate to URLs
@@ -98,19 +101,22 @@ This project has several MCP servers configured. Use them proactively in your wo
 - `mcp_chrome_devtools_performance_start_trace`: Analyze performance
 
 **Examples**:
-- Testing authentication flow
+- Testing Google OAuth authentication flow
 - Verifying Polar payment integration
-- Checking responsive design
-- Debugging API calls to data-service
+- Checking responsive design on different devices
+- Debugging API calls to kurama-backend
+- Testing PWA offline functionality
+- Analyzing Core Web Vitals performance
 
 ### Shadcn MCP
 **Purpose**: shadcn/ui component management
 
 **When to use**:
-- Adding new UI components
-- Finding component examples and demos
-- Viewing component implementation details
-- Getting usage patterns for components
+- Adding new shadcn/ui components to kurama-frontend
+- Finding component examples and implementation demos
+- Viewing component implementation details and dependencies
+- Getting usage patterns for Radix UI primitives
+- Checking component compatibility with current setup
 
 **Key tools**:
 - `mcp_shadcn_search_items_in_registries`: Search for components
@@ -120,9 +126,11 @@ This project has several MCP servers configured. Use them proactively in your wo
 - `mcp_shadcn_get_audit_checklist`: Verify component setup
 
 **Examples**:
-- Adding a new dialog component
-- Finding examples of form patterns
-- Checking how to use a specific Radix UI component
+- Adding a new dialog or sheet component for study modes
+- Finding examples of form patterns for user registration
+- Checking how to implement specific Radix UI components
+- Getting the add command for new shadcn components
+- Running audit checklist after component setup
 
 ## Workflow Integration
 
@@ -137,9 +145,11 @@ This project has several MCP servers configured. Use them proactively in your wo
 3. Use **Git MCP** to track changes incrementally
 
 ### Testing & Verification
-1. Use **Chrome DevTools MCP** to test user-application
+1. Use **Chrome DevTools MCP** to test kurama-frontend
 2. Use **Git MCP** to review diffs before committing
 3. Use **Shadcn MCP** audit checklist after adding components
+4. Test authentication flows and Polar payment integration
+5. Verify PWA functionality and offline capabilities
 
 ### When Stuck
 1. Use **Exa MCP** to search for solutions
@@ -150,6 +160,8 @@ This project has several MCP servers configured. Use them proactively in your wo
 
 - **Be proactive**: Don't wait to be asked - use MCP tools when they're relevant
 - **Combine tools**: Use multiple MCPs together (e.g., Exa for research + Context7 for docs)
-- **Verify work**: Use Chrome DevTools MCP to test changes in user-application
-- **Stay current**: Use Exa MCP to find latest patterns and best practices
+- **Verify work**: Use Chrome DevTools MCP to test changes in kurama-frontend
+- **Stay current**: Use Exa MCP to find latest patterns and best practices for TanStack/Hono stack
 - **Check before commit**: Use Git MCP to review changes before committing
+- **Package awareness**: Remember package names (kurama-frontend, kurama-backend, @kurama/data-ops) when using workspace filtering
+- **Build dependencies**: Always build data-ops package before running applications
