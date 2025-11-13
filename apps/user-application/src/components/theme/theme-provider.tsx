@@ -122,7 +122,7 @@ export function ThemeProvider({
     if (!enableSystem || typeof window === "undefined") return;
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    
+
     const handleSystemThemeChange = (e: MediaQueryListEvent) => {
       setSystemTheme(e.matches ? "dark" : "light");
     };
@@ -134,43 +134,17 @@ export function ThemeProvider({
     };
   }, [enableSystem]);
 
-  // Hydration effect - apply theme immediately on client
+  // Hydration effect - mark as mounted and apply theme if needed
   React.useEffect(() => {
     setIsMounted(true);
-    
-    // Immediately apply the correct theme on hydration
-    const currentTheme = theme === "system" ? systemTheme : theme;
-    applyTheme(currentTheme);
-  }, [theme, systemTheme, applyTheme]);
+  }, []);
 
-  // Prevent flash during SSR by applying theme via script
+  // Apply theme when it changes (after initial mount)
   React.useEffect(() => {
-    if (typeof document === "undefined") return;
-
-    // Create a script that runs before React hydration to prevent FOIT
-    const script = document.createElement("script");
-    script.innerHTML = `
-      try {
-        var theme = localStorage.getItem('${storageKey}') || '${defaultTheme}';
-        var systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        var resolvedTheme = theme === 'system' ? systemTheme : theme;
-        
-        if (resolvedTheme === 'dark') {
-          document.documentElement.classList.add('dark');
-          document.documentElement.classList.remove('light');
-        } else {
-          document.documentElement.classList.add('light');
-          document.documentElement.classList.remove('dark');
-        }
-      } catch (e) {}
-    `;
-
-    // Only add if not already present
-    if (!document.querySelector(`script[data-theme-script]`)) {
-      script.setAttribute('data-theme-script', 'true');
-      document.head.appendChild(script);
+    if (isMounted) {
+      applyTheme(resolvedTheme);
     }
-  }, [storageKey, defaultTheme]);
+  }, [resolvedTheme, applyTheme, isMounted]);
 
   const value = React.useMemo(
     () => ({
