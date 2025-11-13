@@ -7,12 +7,16 @@ import { OnboardingScreen } from "@/components/onboarding/onboarding-screen";
 import { AuthScreen } from "@/components/auth";
 import { useSession } from "@/lib/auth-client";
 import { NavigationBar } from "@/components/navigation";
-import { HeroSection } from "@/components/landing/hero-section";
-import { FeaturesSection } from "@/components/landing/features-section";
-import { ClaudeCodeSection } from "@/components/landing/claude-code-section";
-import { CoursePromoSection } from "@/components/landing/course-promo-section";
-import { Footer } from "@/components/landing/footer";
-import { MiddlewareDemo } from "@/components/demo";
+import {
+  HeroSection,
+  StatsSection,
+  SubjectsSection,
+  FeaturesSection,
+  HowItWorksSection,
+  TestimonialsSection,
+  CTASection,
+  Footer
+} from "@/components/landing";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -38,10 +42,12 @@ function LandingPage() {
         <NavigationBar />
         <main>
           <HeroSection />
-          <ClaudeCodeSection />
+          <StatsSection />
+          <SubjectsSection />
           <FeaturesSection />
-          <MiddlewareDemo />
-          <CoursePromoSection />
+          <HowItWorksSection />
+          <TestimonialsSection />
+          <CTASection />
         </main>
         <Footer />
       </div>
@@ -72,18 +78,16 @@ function LandingPage() {
     return <AuthScreen />;
   }
 
-  // Show main app after authentication
+  // Redirect authenticated users to app
+  if (typeof window !== "undefined") {
+    window.location.href = "/app";
+    return null;
+  }
+
+  // Fallback for SSR
   return (
-    <div className="min-h-screen bg-background">
-      <NavigationBar />
-      <main>
-        <HeroSection />
-        <ClaudeCodeSection />
-        <FeaturesSection />
-        <MiddlewareDemo />
-        <CoursePromoSection />
-      </main>
-      <Footer />
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <p className="text-muted-foreground">Redirection...</p>
     </div>
   );
 }

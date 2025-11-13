@@ -4,10 +4,10 @@ import { CheckCircle } from "lucide-react";
 
 export function CoursePromoSection() {
   return (
-    <section className="w-full py-16 bg-gradient-to-b from-background to-muted/20">
+    <section className="w-full py-16 bg-linear-to-b from-background to-muted/20">
       <div className="container mx-auto px-4 md:px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="aspect-video w-full bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg flex items-center justify-center border border-border/50">
+          <div className="aspect-video w-full bg-linear-to-r from-primary/10 to-secondary/10 rounded-lg flex items-center justify-center border border-border/50">
             <div className="text-center p-8">
               <h3 className="text-2xl font-bold mb-4">Commencez votre apprentissage</h3>
               <p className="text-muted-foreground mb-6">Rejoignez des milliers d'étudiants qui réussissent grâce à Kurama</p>

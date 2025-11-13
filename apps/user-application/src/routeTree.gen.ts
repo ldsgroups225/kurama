@@ -13,6 +13,10 @@ import { Route as AuthRouteRouteImport } from './routes/_auth/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthAppIndexRouteImport } from './routes/_auth/app/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as AuthAppProgressRouteImport } from './routes/_auth/app/progress'
+import { Route as AuthAppProfileRouteImport } from './routes/_auth/app/profile'
+import { Route as AuthAppLessonsRouteImport } from './routes/_auth/app/lessons'
+import { Route as AuthAppGroupsRouteImport } from './routes/_auth/app/groups'
 import { Route as AuthAppPolarSubscriptionsRouteImport } from './routes/_auth/app/polar/subscriptions'
 import { Route as AuthAppPolarPortalRouteImport } from './routes/_auth/app/polar/portal'
 import { Route as AuthAppPolarCheckoutSuccessRouteImport } from './routes/_auth/app/polar/checkout.success'
@@ -36,6 +40,26 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthAppProgressRoute = AuthAppProgressRouteImport.update({
+  id: '/app/progress',
+  path: '/app/progress',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthAppProfileRoute = AuthAppProfileRouteImport.update({
+  id: '/app/profile',
+  path: '/app/profile',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthAppLessonsRoute = AuthAppLessonsRouteImport.update({
+  id: '/app/lessons',
+  path: '/app/lessons',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthAppGroupsRoute = AuthAppGroupsRouteImport.update({
+  id: '/app/groups',
+  path: '/app/groups',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
 const AuthAppPolarSubscriptionsRoute =
   AuthAppPolarSubscriptionsRouteImport.update({
     id: '/app/polar/subscriptions',
@@ -56,6 +80,10 @@ const AuthAppPolarCheckoutSuccessRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app/groups': typeof AuthAppGroupsRoute
+  '/app/lessons': typeof AuthAppLessonsRoute
+  '/app/profile': typeof AuthAppProfileRoute
+  '/app/progress': typeof AuthAppProgressRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/app': typeof AuthAppIndexRoute
   '/app/polar/portal': typeof AuthAppPolarPortalRoute
@@ -64,6 +92,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app/groups': typeof AuthAppGroupsRoute
+  '/app/lessons': typeof AuthAppLessonsRoute
+  '/app/profile': typeof AuthAppProfileRoute
+  '/app/progress': typeof AuthAppProgressRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/app': typeof AuthAppIndexRoute
   '/app/polar/portal': typeof AuthAppPolarPortalRoute
@@ -74,6 +106,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_auth': typeof AuthRouteRouteWithChildren
+  '/_auth/app/groups': typeof AuthAppGroupsRoute
+  '/_auth/app/lessons': typeof AuthAppLessonsRoute
+  '/_auth/app/profile': typeof AuthAppProfileRoute
+  '/_auth/app/progress': typeof AuthAppProgressRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_auth/app/': typeof AuthAppIndexRoute
   '/_auth/app/polar/portal': typeof AuthAppPolarPortalRoute
@@ -84,6 +120,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/app/groups'
+    | '/app/lessons'
+    | '/app/profile'
+    | '/app/progress'
     | '/api/auth/$'
     | '/app'
     | '/app/polar/portal'
@@ -92,6 +132,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/app/groups'
+    | '/app/lessons'
+    | '/app/profile'
+    | '/app/progress'
     | '/api/auth/$'
     | '/app'
     | '/app/polar/portal'
@@ -101,6 +145,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_auth'
+    | '/_auth/app/groups'
+    | '/_auth/app/lessons'
+    | '/_auth/app/profile'
+    | '/_auth/app/progress'
     | '/api/auth/$'
     | '/_auth/app/'
     | '/_auth/app/polar/portal'
@@ -144,6 +192,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_auth/app/progress': {
+      id: '/_auth/app/progress'
+      path: '/app/progress'
+      fullPath: '/app/progress'
+      preLoaderRoute: typeof AuthAppProgressRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/app/profile': {
+      id: '/_auth/app/profile'
+      path: '/app/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AuthAppProfileRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/app/lessons': {
+      id: '/_auth/app/lessons'
+      path: '/app/lessons'
+      fullPath: '/app/lessons'
+      preLoaderRoute: typeof AuthAppLessonsRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/app/groups': {
+      id: '/_auth/app/groups'
+      path: '/app/groups'
+      fullPath: '/app/groups'
+      preLoaderRoute: typeof AuthAppGroupsRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
     '/_auth/app/polar/subscriptions': {
       id: '/_auth/app/polar/subscriptions'
       path: '/app/polar/subscriptions'
@@ -169,6 +245,10 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthRouteRouteChildren {
+  AuthAppGroupsRoute: typeof AuthAppGroupsRoute
+  AuthAppLessonsRoute: typeof AuthAppLessonsRoute
+  AuthAppProfileRoute: typeof AuthAppProfileRoute
+  AuthAppProgressRoute: typeof AuthAppProgressRoute
   AuthAppIndexRoute: typeof AuthAppIndexRoute
   AuthAppPolarPortalRoute: typeof AuthAppPolarPortalRoute
   AuthAppPolarSubscriptionsRoute: typeof AuthAppPolarSubscriptionsRoute
@@ -176,6 +256,10 @@ interface AuthRouteRouteChildren {
 }
 
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthAppGroupsRoute: AuthAppGroupsRoute,
+  AuthAppLessonsRoute: AuthAppLessonsRoute,
+  AuthAppProfileRoute: AuthAppProfileRoute,
+  AuthAppProgressRoute: AuthAppProgressRoute,
   AuthAppIndexRoute: AuthAppIndexRoute,
   AuthAppPolarPortalRoute: AuthAppPolarPortalRoute,
   AuthAppPolarSubscriptionsRoute: AuthAppPolarSubscriptionsRoute,
