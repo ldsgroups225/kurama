@@ -1,15 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { 
-  Route, 
-  Database, 
-  Zap, 
-  Shield, 
-  Palette, 
-  Code,
-  Server,
-  Layers,
-  GitBranch
+import {
+  Route,
+  Database,
+  Zap,
+  Shield,
+  Palette,
+  Code
 } from "lucide-react"
 
 const features = [
@@ -86,7 +83,7 @@ export function FeaturesSection() {
   return (
     <section id="features" className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-  {/* Kurama Platform Features Section */}
+        {/* Kurama Platform Features Section */}
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Plateforme d'Excellence
@@ -95,7 +92,7 @@ export function FeaturesSection() {
             Construite avec les meilleures technologies pour offrir une expérience d'apprentissage exceptionnelle
           </p>
         </div>
-        
+
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-6 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-2 xl:grid-cols-4">
           {templateFeatures.map((feature) => {
             return (
@@ -103,8 +100,8 @@ export function FeaturesSection() {
                 <CardHeader>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background p-2">
-                      <img 
-                        src={feature.image} 
+                      <img
+                        src={feature.image}
                         alt={feature.title}
                         className="h-full w-full object-contain"
                       />
@@ -134,7 +131,7 @@ export function FeaturesSection() {
             Des outils pédagogiques avancés conçus pour maximiser votre réussite aux examens
           </p>
         </div>
-        
+
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-6 lg:mx-0 lg:max-w-none lg:grid-cols-2 xl:grid-cols-4">
           {features.map((feature) => {
             const IconComponent = feature.icon

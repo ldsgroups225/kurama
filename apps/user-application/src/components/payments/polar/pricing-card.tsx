@@ -67,7 +67,7 @@ export function PricingCard({
 
   const renderButton = () => {
     if (subscription) {
-      if (subscription.productId === price.productId) {
+      if (price && subscription.productId === price.productId) {
         return (
           <div className="space-y-2">
             <div className="text-center">
@@ -95,6 +95,14 @@ export function PricingCard({
           </div>
         );
       }
+    }
+
+    if (!price) {
+      return (
+        <Button disabled className="w-full" size="lg">
+          Price Unavailable
+        </Button>
+      );
     }
 
     return (
@@ -125,8 +133,8 @@ export function PricingCard({
 
       <CardContent>
         <div className="mb-6">
-          <div className="text-3xl font-bold">{formatPrice(price)}</div>
-          {price.type === "recurring" && (
+          <div className="text-3xl font-bold">{price ? formatPrice(price) : "Price unavailable"}</div>
+          {price && price.type === "recurring" && (
             <div className="text-sm text-muted-foreground">
               per {price.recurringInterval}
             </div>
@@ -137,7 +145,7 @@ export function PricingCard({
           <div className="space-y-3 mb-6">
             {features.map((feature, index) => (
               <div key={index} className="flex items-start gap-2">
-                <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                <Check className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
                 <span className="text-sm">{feature}</span>
               </div>
             ))}

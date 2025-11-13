@@ -63,17 +63,7 @@ export function NavigationBar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleSmoothScroll = (elementId: string) => {
-    const element = document.getElementById(elementId);
-    if (element) {
-      element.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  };
-
-  const handleNavClick = (item: NavigationItem) => {
+  const handleNavClick = () => {
     setIsOpen(false);
   };
 
@@ -94,7 +84,7 @@ export function NavigationBar() {
             className="group flex items-center space-x-3 no-underline"
           >
             <div className="flex flex-col">
-              <span className="text-lg lg:text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent group-hover:from-primary group-hover:to-primary/80 transition-all duration-300">
+              <span className="text-lg lg:text-xl font-bold bg-linear-to-r from-foreground to-foreground/80 bg-clip-text text-transparent group-hover:from-primary group-hover:to-primary/80 transition-all duration-300">
                 Kurama
               </span>
               <span className="text-xs text-muted-foreground font-medium tracking-wider">
@@ -124,13 +114,13 @@ export function NavigationBar() {
                 ) : (
                   <Link
                     to={item.href}
-                    onClick={() => handleNavClick(item)}
+                    onClick={handleNavClick}
                     className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 hover:bg-accent/50 block"
                   >
                     {item.label}
                   </Link>
                 )}
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-primary to-primary/80 transition-all duration-300 group-hover:w-3/4" />
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-linear-to-r from-primary to-primary/80 transition-all duration-300 group-hover:w-3/4" />
               </div>
             ))}
 
@@ -193,7 +183,7 @@ export function NavigationBar() {
                 className="w-[300px] bg-background/95 backdrop-blur-xl border-l border-border/50"
               >
                 <SheetHeader className="text-left space-y-1 pb-6">
-                  <SheetTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                  <SheetTitle className="text-xl font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                     Navigation
                   </SheetTitle>
                   <SheetDescription className="text-muted-foreground">
@@ -222,7 +212,7 @@ export function NavigationBar() {
                       ) : (
                         <Link
                           to={item.href}
-                          onClick={() => handleNavClick(item)}
+                          onClick={handleNavClick}
                           className="flex items-center w-full px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 hover:bg-accent/50 text-left"
                         >
                           {item.label}

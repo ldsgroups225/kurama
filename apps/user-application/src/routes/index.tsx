@@ -4,6 +4,8 @@ import { useAtom } from "jotai";
 import { hasCompletedOnboardingAtom } from "@/lib/atoms";
 import { WelcomeScreen } from "@/components/onboarding/welcome-screen";
 import { OnboardingScreen } from "@/components/onboarding/onboarding-screen";
+import { AuthScreen } from "@/components/auth";
+import { useSession } from "@/lib/auth-client";
 import { NavigationBar } from "@/components/navigation";
 import { HeroSection } from "@/components/landing/hero-section";
 import { FeaturesSection } from "@/components/landing/features-section";
@@ -22,6 +24,7 @@ function LandingPage() {
   );
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  const { data: session, isPending } = useSession();
 
   // Wait for hydration to complete before showing conditional content
   useEffect(() => {
@@ -29,7 +32,7 @@ function LandingPage() {
   }, []);
 
   // Prevent hydration mismatch by waiting for client-side hydration
-  if (!isHydrated) {
+  if (!isHydrated || isPending) {
     return (
       <div className="min-h-screen bg-background">
         <NavigationBar />
@@ -64,7 +67,12 @@ function LandingPage() {
     );
   }
 
-  // Show main app after onboarding
+  // Show auth screen if not authenticated
+  if (!session) {
+    return <AuthScreen />;
+  }
+
+  // Show main app after authentication
   return (
     <div className="min-h-screen bg-background">
       <NavigationBar />
