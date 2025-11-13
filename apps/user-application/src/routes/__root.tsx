@@ -25,12 +25,25 @@ export const Route = createRootRouteWithContext<{
       },
       {
         name: "viewport",
-        content: "width=device-width, initial-scale=1",
+        content:
+          "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
+      },
+      {
+        name: "apple-mobile-web-app-capable",
+        content: "yes",
+      },
+      {
+        name: "apple-mobile-web-app-status-bar-style",
+        content: "black-translucent",
+      },
+      {
+        name: "theme-color",
+        content: "#f97316",
       },
       ...seo({
-        title:
-          "TanStack Start | Type-Safe, Client-First, Full-Stack React Framework",
-        description: `TanStack Start is a type-safe, client-first, full-stack React framework. `,
+        title: "Kurama - Votre compagnon d'apprentissage intelligent",
+        description:
+          "Réussissez le BEPC et le BAC en Côte d'Ivoire avec Kurama. Apprentissage personnalisé, révision intelligente et disponible hors ligne.",
       }),
     ],
     links: [
