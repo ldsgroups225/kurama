@@ -15,81 +15,69 @@ import {
 const features = [
   {
     icon: Route,
-    title: "TanStack Router",
-    description: "Type-safe, file-based routing with powerful features like nested layouts, loaders, and search params validation.",
-    badge: "Type-Safe"
+    title: "Répétition Espacée",
+    description: "Algorithme scientifique SM-2 optimisé pour maximiser la rétention et vous montrer les cartes au moment parfait.",
+    badge: "Apprentissage"
   },
   {
     icon: Database,
-    title: "TanStack Query",
-    description: "Powerful data synchronization with server state management, caching, and background updates built-in.",
-    badge: "Server State"
+    title: "Contenu Officiel",
+    description: "Matériaux d'étude alignés avec le programme du Ministère de l'Éducation pour BEPC et BAC en Côte d'Ivoire.",
+    badge: "Programme"
   },
   {
     icon: Code,
-    title: "React 19",
-    description: "Latest React with concurrent features, improved performance, and modern development patterns.",
-    badge: "Latest"
+    title: "Modes d'Étude",
+    description: "Flashcards, quiz, questions-réponses chronométrées et simulateur d'examen pour un apprentissage varié.",
+    badge: "Pratique"
   },
   {
     icon: Zap,
-    title: "Vite",
-    description: "Lightning-fast build tool with hot module replacement and optimized production builds.",
-    badge: "Fast"
+    title: "Hors-Ligne PWA",
+    description: "Étudiez n'importe où, même sans connexion Internet. Vos progrès se synchronisent automatiquement.",
+    badge: "Mobile"
   },
   {
     icon: Shield,
-    title: "TypeScript",
-    description: "Full TypeScript support with strict typing, IntelliSense, and compile-time error checking.",
-    badge: "Type-Safe"
+    title: "Analytique Intelligent",
+    description: "Suivez vos progrès avec des statistiques détaillées et des informations sur votre apprentissage.",
+    badge: "Progression"
   },
   {
     icon: Palette,
-    title: "Tailwind CSS v4",
-    description: "Modern utility-first CSS framework with CSS variables and a comprehensive design system.",
-    badge: "Styling"
-  },
-  {
-    icon: Server,
-    title: "SSR Ready",
-    description: "Server-side rendering support with seamless hydration and SEO optimization out of the box.",
-    badge: "Performance"
-  },
-  {
-    icon: Layers,
-    title: "Shadcn/UI",
-    description: "Beautiful, accessible component library with customizable themes and modern design patterns.",
-    badge: "Components"
+    title: "Apprentissage Social",
+    description: "Créez des groupes d'étude, partagez des ressources et competez avec vos camarades.",
+    badge: "Communauté"
   }
 ]
 
 const templateFeatures = [
   {
     image: "/cloudflare.png",
-    title: "Edge Database",
-    description: "Serverless PostgreSQL with Cloudflare D1 or Hyperdrive. Edge-optimized with connection pooling and HTTP proxy to prevent connection overwhelm.",
-    badge: "Database",
+    title: "Technology Edge",
+    description: "Application web progressive (PWA) construite avec TanStack Start, React 19 et optimisée pour Cloudflare.",
+    badge: "Performance",
     highlight: true
   },
   {
     image: "/better-auth.png",
-    title: "Better Auth",
-    description: "Complete authentication solution with social providers, email/password, and session management. Database-agnostic and edge-compatible.",
-    badge: "Authentication",
+    title: "Sécurité & Vie Privée",
+    description: "Authentification sécurisée et protection des données des étudiants conforme aux normes de confidentialité.",
+    badge: "Confiance",
     highlight: true
   },
   {
     image: "/polar.png",
-    title: "Polar Payments",
-    description: "Modern subscription management and payment processing. No webhooks needed, developer-focused API with built-in product metadata.",
-    badge: "Payments",
+    title: "Accessible à Tous",
+    description: "Application gratuite pour les étudiants avec des fonctionnalités premium optionnelles pour un apprentissage avancé.",
+    badge: "Gratuit",
     highlight: true
   },
   {
     image: "/pnpm.webp",
-    title: "Monorepo Architecture",
-    description: "Organized workspace structure with pnpm. Shared components, utilities, and configurations across multiple applications.",
-    badge: "Architecture",
+    title: "Architecture Moderne",
+    description: "Base de code robuste avec TypeScript, tests automatisés et déploiement continu pour une qualité optimale.",
+    badge: "Qualité",
     highlight: true
   }
 ]
@@ -98,13 +86,13 @@ export function FeaturesSection() {
   return (
     <section id="features" className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        {/* Template Features Section */}
+  {/* Kurama Platform Features Section */}
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Production-Ready SaaS Template
+            Plateforme d'Excellence
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Pre-configured with authentication, database, and payments - ready to deploy
+            Construite avec les meilleures technologies pour offrir une expérience d'apprentissage exceptionnelle
           </p>
         </div>
         
@@ -137,13 +125,13 @@ export function FeaturesSection() {
           })}
         </div>
 
-        {/* Core Technologies Section */}
+        {/* Learning Features Section */}
         <div className="mx-auto max-w-2xl text-center mt-24">
           <h3 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Built with Modern Technologies
+            Fonctionnalités d'Apprentissage
           </h3>
           <p className="mt-4 text-lg text-muted-foreground">
-            A carefully curated stack of the best tools and libraries for React development
+            Des outils pédagogiques avancés conçus pour maximiser votre réussite aux examens
           </p>
         </div>
         

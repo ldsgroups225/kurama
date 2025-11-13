@@ -163,8 +163,8 @@ This setup occurs in your server entry point, typically `src/server.ts`, where y
 
 ```typescript
 // src/server.ts - TanStack Start Server Entry
-import { setAuth } from "@repo/data-ops/auth/server";
-import { initDatabase } from "@repo/data-ops/database/setup";
+import { setAuth } from "@kurama/data-ops/auth/server";
+import { initDatabase } from "@kurama/data-ops/database/setup";
 import handler from "@tanstack/react-start/server-entry";
 import { env } from "cloudflare:workers";
 
@@ -203,8 +203,8 @@ export default {
 
 ```typescript
 // src/server.ts - TanStack Start Server Entry
-import { setAuth } from "@repo/data-ops/auth/server";
-import { initDatabase } from "@repo/data-ops/database/setup";
+import { setAuth } from "@kurama/data-ops/auth/server";
+import { initDatabase } from "@kurama/data-ops/database/setup";
 import handler from "@tanstack/react-start/server-entry";
 import { env } from "cloudflare:workers";
 
@@ -243,8 +243,8 @@ export default {
 
 ```typescript
 // src/server.ts - TanStack Start Server Entry
-import { setAuth } from "@repo/data-ops/auth/server";
-import { initDatabase } from "@repo/data-ops/database/setup";
+import { setAuth } from "@kurama/data-ops/auth/server";
+import { initDatabase } from "@kurama/data-ops/database/setup";
 import handler from "@tanstack/react-start/server-entry";
 import { env } from "cloudflare:workers";
 
@@ -286,7 +286,7 @@ TanStack Start uses file-based routing for API endpoints. The `auth.$.tsx` route
 ```typescript
 // src/routes/api/auth.$.tsx
 import { createFileRoute } from "@tanstack/react-router";
-import { getAuth } from "@repo/data-ops/auth/server";
+import { getAuth } from "@kurama/data-ops/auth/server";
 
 export const Route = createFileRoute("/api/auth/$")({
   server: {

@@ -1,7 +1,7 @@
 {
-  "name": "@repo/data-ops",
+  "name": "@kurama/data-ops",
   "version": "1.0.0",
-  "description": "Manage auth, database, schemas, and queries",
+  "description": "Shared utilities for Kurama - auth, database, schemas, and queries",
   "exports": {
     "./auth/*": {
       "default": "./dist/auth/*.js",

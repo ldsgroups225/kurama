@@ -26,47 +26,47 @@ export const Route = createFileRoute("/_static/docs/")({
 const gettingStartedSteps = [
   {
     name: "database",
-    title: "Database Setup",
+    title: "Configuration de la Base",
     description:
-      "Configure your serverless database with edge optimization and HTTP proxying to prevent connection overwhelm in isolated environments.",
+      "Configurez votre base de données pour le contenu éducatif avec synchronisation hors-ligne et optimisation edge.",
     icon: DatabaseIcon,
     image: "/cloudflare.png",
     badgeVariant: "default" as const,
     features: [
-      "Edge Optimized",
-      "Connection Pooling",
-      "HTTP Proxy",
-      "Serverless Ready",
+      "Synchronisation Hors-Ligne",
+      "Contenu Éducatif",
+      "Progression Sauvegardée",
+      "Multi-Dispositifs",
     ],
   },
   {
     name: "authentication",
-    title: "Authentication Setup",
+    title: "Comptes Étudiants",
     description:
-      "Set up comprehensive authentication with Better Auth, including social providers, email/password, and session management for serverless environments.",
+      "Configurez l'authentification sécurisée pour les étudiants et enseignants avec options sociales et gestion des profils.",
     icon: ShieldCheckIcon,
     image: "/better-auth.png",
     badgeVariant: "secondary" as const,
     features: [
-      "Social OAuth",
-      "Session Management",
-      "Database Agnostic",
-      "Edge Compatible",
+      "Profils Étudiants",
+      "Connexion Sécure",
+      "Classes & Groupes",
+      "Confidentialité",
     ],
   },
   {
     name: "polar",
-    title: "Payment Integration",
+    title: "Fonctionnalités Premium",
     description:
-      "Integrate Polar for modern subscription management and payment processing without webhooks or external database tables.",
+      "Accédez à des fonctionnalités avancées avec des options premium pour l'apprentissage et le suivi personnalisé.",
     icon: CreditCardIcon,
     image: "/polar.png",
     badgeVariant: "outline" as const,
     features: [
-      "Subscription Management",
-      "No Webhooks",
-      "Developer Focused",
-      "API Integration",
+      "Contenu Exclusif",
+      "Analytique Avancée",
+      "Support Prioritaire",
+      "Personnalisation",
     ],
   },
 ];
@@ -83,12 +83,11 @@ function RouteComponent() {
           Documentation
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
-          Comprehensive guides for your mono repo SaaS kit built with TanStack
-          Start, covering authentication, database setup, and payment
-          integration.
+          Guide complet pour votre plateforme d'apprentissage Kurama, construite avec TanStack
+          Start, couvrant l'authentification, la base de données et les fonctionnalités d'étude.
         </p>
         <Badge variant="secondary" className="text-sm">
-          Mono Repo Architecture
+          Plateforme d'Éducation
         </Badge>
       </div>
 
@@ -170,11 +169,11 @@ function RouteComponent() {
       <div className="mb-12">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold tracking-tight mb-4">
-            Getting Started Guide
+            Guide de Démarrage
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Follow these steps in order to set up your SaaS application. Each
-            step builds on the previous one.
+            Suivez ces étapes pour configurer votre plateforme éducative. Chaque
+            étape s'appuie sur la précédente.
           </p>
         </div>
 
@@ -223,7 +222,7 @@ function RouteComponent() {
                     className="block"
                   >
                     <Button className="w-full group-hover:bg-primary/90 transition-colors">
-                      Start {step.title}
+                      Commencer {step.title}
                       <ArrowRightIcon className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
@@ -277,104 +276,52 @@ function RouteComponent() {
         </CardContent>
       </Card>
 
-      {/* Course Promo Section */}
+      {/* Learning Resources Section */}
       <div className="mt-16 mb-8 bg-gradient-to-b from-background to-muted/20 -mx-4 px-4 py-8">
-        <div className="aspect-video w-full bg-black rounded-lg overflow-hidden">
-          <iframe
-            className="w-full h-full"
-            src="https://www.youtube.com/embed/1-dXh8J08UI?si=aSyQCYk1YVJAlG7X"
-            title="YouTube video player"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
-          />
-        </div>
-
-        <div className="mt-8 text-center">
+        <div className="text-center">
           <Badge className="mb-4" variant="secondary">
-            9 Modules • 11 Hours • 58 Video Lessons
+            Ressources Éducatives
           </Badge>
 
           <h2 className="text-2xl md:text-3xl font-bold mb-4">
-            Master Full-Stack Development on Cloudflare Workers
+            Ressources d'Apprentissage
           </h2>
 
-          <p className="text-lg text-muted-foreground mb-6 max-w-3xl mx-auto">
-            Take your skills to the next level with our comprehensive course.
-            Build production-ready SaaS applications with sub-50ms response
-            times globally.
+          <p className="text-lg text-muted-foreground mb-8 max-w-3xl mx-auto">
+            Explorez nos guides et tutoriels pour tirer le meilleur parti de Kurama
+            et optimiser votre préparation aux examens.
           </p>
 
-          <div className="grid md:grid-cols-2 gap-6 mb-8 text-left max-w-3xl mx-auto">
-            <div className="space-y-3">
-              <h3 className="font-semibold text-lg mb-2">What You'll Build</h3>
-              <div className="space-y-2">
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
-                  <span className="text-sm">
-                    SmartLinks - Complete short link service
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
-                  <span className="text-sm">
-                    Location-based intelligent redirects
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
-                  <span className="text-sm">AI-powered link analysis</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
-                  <span className="text-sm">Real-time analytics dashboard</span>
-                </div>
-              </div>
-            </div>
+          <div className="grid md:grid-cols-3 gap-6 mb-8 max-w-4xl mx-auto">
+            <Card className="text-center hover:shadow-lg transition-all">
+              <CardContent className="p-6">
+                <BookOpenIcon className="h-12 w-12 text-primary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Guides d'Étude</h3>
+                <p className="text-sm text-muted-foreground">
+                  Techniques efficaces de répétition espacée et méthodes d'apprentissage
+                </p>
+              </CardContent>
+            </Card>
 
-            <div className="space-y-3">
-              <h3 className="font-semibold text-lg mb-2">
-                Technologies Covered
-              </h3>
-              <div className="space-y-2">
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
-                  <span className="text-sm">
-                    Cloudflare D1, KV, R2, Workers AI
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
-                  <span className="text-sm">
-                    Durable Objects for state management
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
-                  <span className="text-sm">
-                    Better Auth & Stripe integration
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
-                  <span className="text-sm">TypeScript, Drizzle ORM, pnpm</span>
-                </div>
-              </div>
-            </div>
-          </div>
+            <Card className="text-center hover:shadow-lg transition-all">
+              <CardContent className="p-6">
+                <Bot className="h-12 w-12 text-primary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Contenu Officiel</h3>
+                <p className="text-sm text-muted-foreground">
+                  Matériaux d'étude alignés avec le programme BEPC/BAC de Côte d'Ivoire
+                </p>
+              </CardContent>
+            </Card>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" asChild>
-              <a
-                href="https://learn.backpine.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Enroll in Course
-                <ArrowRightIcon className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
+            <Card className="text-center hover:shadow-lg transition-all">
+              <CardContent className="p-6">
+                <Sparkles className="h-12 w-12 text-primary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Analytique</h3>
+                <p className="text-sm text-muted-foreground">
+                  Suivez vos progrès et identifiez les domaines à améliorer
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

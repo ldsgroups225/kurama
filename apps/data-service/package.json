@@ -1,5 +1,5 @@
 {
-  "name": "data-service",
+  "name": "kurama-backend",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -17,7 +17,7 @@
     "wrangler": "^4.24.3"
   },
   "dependencies": {
-    "@repo/data-ops": "workspace:*",
+    "@kurama/data-ops": "workspace:*",
     "hono": "^4.8.3",
     "zod": "^3.25.67"
   }

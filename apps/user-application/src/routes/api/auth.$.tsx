@@ -1,7 +1,7 @@
 // apps/user-application/src/routes/api/auth.$.tsx
 
 import { createFileRoute } from "@tanstack/react-router";
-import { getAuth } from "@repo/data-ops/auth/server";
+import { getAuth } from "@kurama/data-ops/auth/server";
 
 export const Route = createFileRoute("/api/auth/$")({
   server: {

@@ -1,4 +1,4 @@
-import { getAuth } from "@repo/data-ops/auth/server";
+import { getAuth } from "@kurama/data-ops/auth/server";
 import { createMiddleware } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 

@@ -1,7 +1,7 @@
 // DO NOT DELETE THIS FILE!!!
 // This file is a good smoke test to make sure the custom server entry is working
-import { setAuth } from "@repo/data-ops/auth/server";
-import { initDatabase } from "@repo/data-ops/database/setup";
+import { setAuth } from "@kurama/data-ops/auth/server";
+import { initDatabase } from "@kurama/data-ops/database/setup";
 import handler from "@tanstack/react-start/server-entry";
 import { env } from "cloudflare:workers";
 

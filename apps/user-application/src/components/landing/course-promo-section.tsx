@@ -7,87 +7,81 @@ export function CoursePromoSection() {
     <section className="w-full py-16 bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto px-4 md:px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="aspect-video w-full bg-black rounded-lg overflow-hidden">
-            <iframe
-              className="w-full h-full"
-              src="https://www.youtube.com/embed/1-dXh8J08UI?si=aSyQCYk1YVJAlG7X"
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            />
+          <div className="aspect-video w-full bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg flex items-center justify-center border border-border/50">
+            <div className="text-center p-8">
+              <h3 className="text-2xl font-bold mb-4">Commencez votre apprentissage</h3>
+              <p className="text-muted-foreground mb-6">Rejoignez des milliers d'étudiants qui réussissent grâce à Kurama</p>
+            </div>
           </div>
         </div>
 
         <div className="max-w-4xl mx-auto mt-12 text-center">
           <Badge className="mb-4" variant="secondary">
-            9 Modules • 11 Hours • 58 Video Lessons
+            Matières • Progression • Examen Pratique
           </Badge>
 
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Full-Stack SaaS Development on Cloudflare Workers
+            Maximisez votre Réussite aux Examens
           </h2>
 
           <p className="text-lg text-muted-foreground mb-8">
-            Build blazing-fast, globally distributed applications with sub-50ms
-            response times. Master the Cloudflare ecosystem through
-            project-based learning.
+            Une plateforme d'apprentissage intelligente conçue spécifiquement pour les
+            étudiants préparant le BEPC et le BAC en Côte d'Ivoire.
           </p>
 
           <div className="grid md:grid-cols-2 gap-6 mb-8 text-left">
             <div className="space-y-3">
-              <h3 className="font-semibold text-lg mb-2">What You'll Build</h3>
+              <h3 className="font-semibold text-lg mb-2">Fonctionnalités Clés</h3>
               <div className="space-y-2">
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
                   <span className="text-sm">
-                    SmartLinks - Complete short link service
+                    Contenu aligné avec le programme officiel
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
                   <span className="text-sm">
-                    Location-based intelligent redirects
+                    Répétition espacée pour mémorisation optimale
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
-                  <span className="text-sm">AI-powered link analysis</span>
+                  <span className="text-sm">Étude hors-ligne avec PWA</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
-                  <span className="text-sm">Real-time analytics dashboard</span>
+                  <span className="text-sm">Suivi des progrès et analytiques</span>
                 </div>
               </div>
             </div>
 
             <div className="space-y-3">
               <h3 className="font-semibold text-lg mb-2">
-                Technologies Covered
+                Technologies Modernes
               </h3>
               <div className="space-y-2">
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
                   <span className="text-sm">
-                    Cloudflare D1, KV, R2, Workers AI
+                    TanStack Start avec React 19
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
                   <span className="text-sm">
-                    Durable Objects for state management
+                    Base de données PostgreSQL synchronisée
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
                   <span className="text-sm">
-                    Better Auth & Stripe integration
+                    Authentification sécurisée et privée
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
-                  <span className="text-sm">TypeScript, Drizzle ORM, pnpm</span>
+                  <span className="text-sm">Déploiement Cloudflare optimisé</span>
                 </div>
               </div>
             </div>
@@ -96,11 +90,10 @@ export function CoursePromoSection() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button size="lg" asChild>
               <a
-                href="https://learn.backpine.com/"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#features"
+                className="text-white"
               >
-                Start Learning Now
+                Découvrir les Fonctionnalités
               </a>
             </Button>
           </div>

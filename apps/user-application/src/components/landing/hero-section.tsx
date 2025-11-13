@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Github, Sparkles, Zap, Shield } from "lucide-react";
+import { ArrowRight, Github, Sparkles, BookOpen, Trophy } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 export function HeroSection() {
@@ -10,47 +10,46 @@ export function HeroSection() {
         <div className="mb-8 flex flex-wrap justify-center gap-2">
           <Badge variant="secondary" className="mb-4">
             <Sparkles className="mr-1 h-3 w-3" />
-            Production-Ready
+            Répétition Espacée
           </Badge>
           <Badge variant="secondary" className="mb-4">
-            <Zap className="mr-1 h-3 w-3" />
-            Edge-Optimized
+            <BookOpen className="mr-1 h-3 w-3" />
+            BEPC & BAC
           </Badge>
           <Badge variant="secondary" className="mb-4">
-            <Shield className="mr-1 h-3 w-3" />
-            Type-Safe
+            <Trophy className="mr-1 h-3 w-3" />
+            Hors-Ligne
           </Badge>
         </div>
 
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
-          Modern SaaS
-          <span className="block text-primary">Starter Kit</span>
+          Préparez votre
+          <span className="block text-primary">BEPC/BAC</span>
         </h1>
 
         <p className="mt-6 text-lg leading-8 text-muted-foreground max-w-2xl mx-auto">
-          Ship your SaaS faster with pre-configured authentication, database,
-          and payments. Built on TanStack Start with React 19, TypeScript, and
-          edge-ready infrastructure. Everything you need to launch your next
-          project.
+          La plateforme d'étude ultime pour les étudiants en Côte d'Ivoire.
+          Apprentissage intelligent avec répétition espacée, contenu aligné avec le
+          programme officiel, et étude hors-ligne. Réussissez vos examens avec confiance.
         </p>
 
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link to="/docs">
+          <Link to="/app">
             <Button size="lg" className="group">
-              Get Started
+              Commencer à étudier
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
 
           <Button variant="outline" size="lg" asChild>
             <a
-              href="https://github.com/backpine/saas-kit"
+              href="https://github.com/your-org/kurama"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center"
             >
               <Github className="mr-2 h-4 w-4" />
-              View on GitHub
+              Voir sur GitHub
             </a>
           </Button>
         </div>

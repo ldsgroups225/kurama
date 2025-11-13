@@ -1,14 +1,14 @@
 {
-  "name": "saas-kit",
+  "name": "kurama",
   "version": "1.0.0",
-  "description": "",
+  "description": "Plateforme d'étude intelligente pour les étudiants préparant BEPC/BAC en Côte d'Ivoire",
   "scripts": {
     "setup": "pnpm i && pnpm run build:data-ops",
     "build:data-ops": "pnpm run --filter data-ops build",
-    "dev:user-application": "pnpm run --filter user-application dev",
-    "deploy:user-application": "pnpm run build:data-ops && pnpm run --filter user-application deploy",
-    "dev:data-service": "pnpm run --filter data-service dev",
-    "deploy:data-service": "pnpm run build:data-ops && pnpm run --filter data-service deploy"
+    "dev:kurama-frontend": "pnpm run --filter kurama-frontend dev",
+    "deploy:kurama-frontend": "pnpm run build:data-ops && pnpm run --filter kurama-frontend deploy",
+    "dev:kurama-backend": "pnpm run --filter kurama-backend dev",
+    "deploy:kurama-backend": "pnpm run build:data-ops && pnpm run --filter kurama-backend deploy"
   },
   "keywords": [],
   "author": "",

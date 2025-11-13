@@ -177,7 +177,7 @@ export function getDb() {
 **Server Entry Point:**
 ```typescript
 // src/server.ts - TanStack Start Server Entry
-import { initDatabase } from "@repo/data-ops/database/setup";
+import { initDatabase } from "@kurama/data-ops/database/setup";
 import handler from "@tanstack/react-start/server-entry";
 import { env } from "cloudflare:workers";
 
@@ -231,7 +231,7 @@ export function getDb() {
 **Server Entry Point:**
 ```typescript
 // src/server.ts - TanStack Start Server Entry
-import { initDatabase } from "@repo/data-ops/database/setup";
+import { initDatabase } from "@kurama/data-ops/database/setup";
 import handler from "@tanstack/react-start/server-entry";
 import { env } from "cloudflare:workers";
 
@@ -281,7 +281,7 @@ export function getDb() {
 **Server Entry Point:**
 ```typescript
 // src/server.ts - TanStack Start Server Entry
-import { initDatabase } from "@repo/data-ops/database/setup";
+import { initDatabase } from "@kurama/data-ops/database/setup";
 import handler from "@tanstack/react-start/server-entry";
 import { env } from "cloudflare:workers";
 
@@ -385,7 +385,7 @@ The data-ops package is already configured to export all queries under the `./qu
 ```json
 // packages/data-ops/package.json
 {
-  "name": "@repo/data-ops",
+  "name": "@kurama/data-ops",
   "exports": {
     "./queries/*": {
       "default": "./dist/queries/*.js",
@@ -409,7 +409,7 @@ Your applications need to include the data-ops package as a dependency to use th
 {
   "name": "user-application",
   "dependencies": {
-    "@repo/data-ops": "workspace:^"
+    "@kurama/data-ops": "workspace:^"
   }
 }
 ```
@@ -430,7 +430,7 @@ import { createServerFn } from "@tanstack/react-start";
 import {
   updateSubscription,
   getSubscription,
-} from "@repo/data-ops/queries/polar";
+} from "@kurama/data-ops/queries/polar";
 import { protectedFunctionMiddleware } from "@/server/middleware/auth";
 
 export const baseFunction = createServerFn().middleware([
@@ -480,7 +480,7 @@ Queries can also be used in middleware for authentication, authorization, and re
 ```typescript
 // apps/user-application/src/server/middleware/user.ts
 import { createMiddleware } from "@tanstack/react-start";
-import { getUserByEmail } from "@repo/data-ops/queries/users";
+import { getUserByEmail } from "@kurama/data-ops/queries/users";
 
 export const userLookupMiddleware = createMiddleware({
   type: "function",
@@ -509,7 +509,7 @@ Import and use queries in API routes for handling webhooks, REST endpoints, and 
 // apps/user-application/src/routes/api/webhook/polar.ts
 import { Subscription } from "@polar-sh/sdk/models/components/subscription.js";
 import { Webhooks } from "@polar-sh/tanstack-start";
-import { updateSubscription } from "@repo/data-ops/queries/polar";
+import { updateSubscription } from "@kurama/data-ops/queries/polar";
 import { createServerFileRoute } from "@tanstack/react-start/server";
 import { env } from "cloudflare:workers";
 

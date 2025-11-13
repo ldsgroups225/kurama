@@ -24,15 +24,15 @@ interface NavigationItem {
 }
 
 const navigationItems: NavigationItem[] = [
-  { label: "Features", href: "/#features", scrollTo: "features" },
+  { label: "Fonctionnalités", href: "/#features", scrollTo: "features" },
   {
-    label: "Documentation",
+    label: "Guide",
     href: "/docs",
     isExternal: false,
   },
   {
     label: "GitHub",
-    href: "https://github.com/backpine/saas-kit",
+    href: "https://github.com/your-org/kurama",
     isExternal: true,
   },
 ];
@@ -95,10 +95,10 @@ export function NavigationBar() {
           >
             <div className="flex flex-col">
               <span className="text-lg lg:text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent group-hover:from-primary group-hover:to-primary/80 transition-all duration-300">
-                SaaS Starter Kit
+                Kurama
               </span>
               <span className="text-xs text-muted-foreground font-medium tracking-wider">
-                on CLOUDFLARE
+                Préparez votre BEPC/BAC
               </span>
             </div>
           </Link>
@@ -197,7 +197,7 @@ export function NavigationBar() {
                     Navigation
                   </SheetTitle>
                   <SheetDescription className="text-muted-foreground">
-                    Explore TanStack Start
+                    Explorez Kurama
                   </SheetDescription>
                 </SheetHeader>
 

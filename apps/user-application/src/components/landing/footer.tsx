@@ -3,26 +3,26 @@ import { FaXTwitter, FaGithub } from "react-icons/fa6";
 
 const navigation = {
   main: [
-    { name: "TanStack Start", href: "https://tanstack.com/start" },
-    { name: "TanStack Router", href: "https://tanstack.com/router" },
-    { name: "TanStack Query", href: "https://tanstack.com/query" },
-    { name: "React", href: "https://react.dev" },
+    { name: "À Propos", href: "#" },
+    { name: "Fonctionnalités", href: "#features" },
+    { name: "Pour les Étudiants", href: "#" },
+    { name: "Pour les Enseignants", href: "#" },
   ],
-  tools: [
-    { name: "Vite", href: "https://vitejs.dev" },
-    { name: "Shadcn/UI", href: "https://ui.shadcn.com" },
-    { name: "pnpm Workspaces", href: "https://pnpm.io/workspaces" },
-    { name: "Drizzle ORM", href: "https://orm.drizzle.team" },
+  learn: [
+    { name: "BEPC", href: "#" },
+    { name: "BAC", href: "#" },
+    { name: "Matières", href: "#" },
+    { name: "Guide d'Utilisation", href: "#" },
   ],
   social: [
     {
       name: "GitHub",
-      href: "https://github.com/backpine/saas-kit",
+      href: "https://github.com/your-org/kurama",
       icon: FaGithub,
     },
     {
       name: "X",
-      href: "https://x.com/backpinelabs",
+      href: "https://x.com/kurama_app",
       icon: FaXTwitter,
     },
   ],
@@ -35,19 +35,16 @@ export function Footer() {
         <div className="flex flex-col md:flex-row md:items-center md:space-x-8 space-y-6 md:space-y-0">
           <div>
             <h3 className="text-sm font-semibold text-foreground">
-              TanStack Ecosystem
+              Kurama
             </h3>
             <ul role="list" className="mt-2 space-y-1">
               {navigation.main.map((item) => (
                 <li key={item.name}>
                   <a
                     href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center group"
+                    className="text-sm text-muted-foreground hover:text-foreground"
                   >
                     {item.name}
-                    <ExternalLink className="ml-1 h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </a>
                 </li>
               ))}
@@ -56,19 +53,16 @@ export function Footer() {
 
           <div>
             <h3 className="text-sm font-semibold text-foreground">
-              Development Tools
+              Apprentissage
             </h3>
             <ul role="list" className="mt-2 space-y-1">
-              {navigation.tools.map((item) => (
+              {navigation.learn.map((item) => (
                 <li key={item.name}>
                   <a
                     href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center group"
+                    className="text-sm text-muted-foreground hover:text-foreground"
                   >
                     {item.name}
-                    <ExternalLink className="ml-1 h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </a>
                 </li>
               ))}
@@ -97,10 +91,10 @@ export function Footer() {
 
           <div className="text-center md:text-right">
             <p className="text-xs text-muted-foreground">
-              Built with TanStack Start
+              Construit avec ❤️ pour les étudiants en Côte d'Ivoire
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              &copy; {new Date().getFullYear()} Backpine SaaS Kit. MIT Licensed.
+              &copy; {new Date().getFullYear()} Kurama. Tous droits réservés.
             </p>
           </div>
         </div>
