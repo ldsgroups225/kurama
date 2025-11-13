@@ -1,7 +1,9 @@
 import { Bell } from "lucide-react";
+import { useAtom } from "jotai";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "@/lib/auth-client";
+import { userProfileAtom } from "@/lib/atoms";
 import { LevelBadge } from "@/components/gamification";
 
 interface AppHeaderProps {
@@ -23,6 +25,9 @@ export function AppHeader({
   showLevel = false,
   userLevel
 }: AppHeaderProps) {
+  // Use cached profile data from localStorage for instant access
+  const [userProfile] = useAtom(userProfileAtom);
+  // Fallback to session data if profile not cached
   const { data: session } = useSession();
 
   const getGreeting = () => {
@@ -33,13 +38,29 @@ export function AppHeader({
   };
 
   const getUserInitials = () => {
-    if (!session?.user?.name) return "U";
-    return session.user.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+    // Try to get initials from cached profile first
+    if (userProfile?.firstName && userProfile?.lastName) {
+      return `${userProfile.firstName[0]}${userProfile.lastName[0]}`.toUpperCase();
+    }
+    // Fallback to session name
+    if (session?.user?.name) {
+      return session.user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return "U";
+  };
+
+  const getUserDisplayName = () => {
+    // Try cached profile first for instant display
+    if (userProfile?.firstName) {
+      return userProfile.firstName;
+    }
+    // Fallback to session
+    return session?.user?.name || "Étudiant";
   };
 
   return (
@@ -62,7 +83,7 @@ export function AppHeader({
                 <>
                   <p className="text-sm text-muted-foreground">{getGreeting()}</p>
                   <h1 className="text-lg font-bold text-foreground">
-                    {session?.user?.name || "Étudiant"}
+                    {getUserDisplayName()}
                   </h1>
                 </>
               )}

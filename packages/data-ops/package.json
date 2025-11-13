@@ -11,6 +11,10 @@
       "default": "./dist/database/*.js",
       "types": "./dist/database/*.d.ts"
     },
+    "./drizzle/*": {
+      "default": "./dist/drizzle/*.js",
+      "types": "./dist/drizzle/*.d.ts"
+    },
     "./zod-schema/*": {
       "default": "./dist/zod-schema/*.js",
       "types": "./dist/zod-schema/*.d.ts"
@@ -25,7 +29,9 @@
     "better-auth:generate": "mkdir -p src/drizzle && npx @better-auth/cli@latest generate --config ./config/auth.ts --output ./src/drizzle/auth-schema.ts",
     "drizzle:generate": "drizzle-kit generate --config drizzle.config.ts",
     "drizzle:migrate": "drizzle-kit migrate --config drizzle.config.ts",
-    "drizzle:pull": "drizzle-kit pull --config drizzle.config.ts"
+    "drizzle:pull": "drizzle-kit pull --config drizzle.config.ts",
+    "seed": "tsx src/database/seed-db.ts",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
@@ -45,10 +51,12 @@
     "@cloudflare/workers-types": "^4.20250823.0",
     "@types/better-sqlite3": "^7.6.13",
     "better-sqlite#": "link:@types/better-sqlite#",
+    "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.4",
     "mysql2": "^3.14.3",
     "postgres": "^3.4.7",
     "tsc-alias": "^1.8.16",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.2"
   }
 }
