@@ -269,8 +269,8 @@ export function OnboardingScreen({
                   key={index}
                   onClick={() => handleDotClick(index)}
                   className={`h-2 rounded-full transition-all duration-300 ${index === currentStep
-                      ? `w-8 bg-linear-to-r ${step.color}`
-                      : "w-2 bg-gray-300"
+                    ? `w-8 bg-linear-to-r ${step.color}`
+                    : "w-2 bg-gray-300"
                     }`}
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}
