@@ -4,12 +4,15 @@
  */
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "saas-kit-data-service",
+  "name": "back-kurama",
   "main": "./src/index.ts",
   "compatibility_date": "2025-04-01",
-  "compatibility_flags": ["nodejs_compat"],
-
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "observability": {
-    "enabled": true,
+    "enabled": true
   },
+  "workers_dev": true,
+  "preview_urls": true
 }
