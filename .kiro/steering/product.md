@@ -14,3 +14,41 @@ The stack is optimized for Cloudflare deployment with full-stack TypeScript, fea
 - Multiple study modes (flashcards, quizzes, exam simulator)
 - Social learning features (study groups, leaderboards)
 - Offline-first PWA capabilities
+- Comprehensive gamification system (XP, levels, achievements, streaks)
+
+## Core Features
+
+### Learning System
+- **Curriculum**: 13 grade levels (CP1 to Tle) with 4 Lycée series (A, C, D, E)
+- **Subjects**: 12 core subjects with proper coefficients matching Ivorian curriculum
+- **Study Modes**: Flashcards, quizzes, exam simulator
+- **Spaced Repetition**: SM-2 algorithm for optimal retention
+
+### User Profiles
+- **Student Profiles**: Grade level, series (for Lycée), subjects with coefficients
+- **Parent Profiles**: Multiple children management, progress monitoring
+- **Profile Completion**: Required before accessing main app features
+
+### Gamification (Fully Implemented)
+- **XP System**: Earn experience points for study activities
+- **Leveling**: Progressive level system with visual badges
+- **Achievements**: Rarity-based badges (Common, Rare, Epic, Legendary)
+- **Daily Streaks**: Streak tracking with calendar visualization
+- **Leaderboards**: Competitive rankings with rank change indicators
+- **Reward Animations**: Celebratory animations for milestones
+
+### Social Features
+- Study groups
+- Leaderboards
+- Community engagement
+
+### Payments
+- Polar SDK integration for subscriptions
+- Multiple pricing tiers
+
+## Localization
+
+- **Language**: French (Ivorian context)
+- **Timezone**: Africa/Abidjan
+- **Curriculum**: Aligned with Ivorian Ministry of Education
+- **Cultural Context**: School calendar awareness, exam preparation focus

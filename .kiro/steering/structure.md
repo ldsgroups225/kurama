@@ -19,8 +19,20 @@ src/
 ├── components/
 │   ├── auth/              # Authentication components
 │   ├── demo/              # Demo/example components
+│   ├── gamification/      # Gamification system components
+│   │   ├── achievement-badge.tsx
+│   │   ├── achievement-showcase.tsx
+│   │   ├── gamification-summary.tsx
+│   │   ├── leaderboard-widget.tsx
+│   │   ├── level-badge.tsx
+│   │   ├── reward-animation.tsx
+│   │   └── streak-calendar.tsx
 │   ├── landing/           # Landing page sections
 │   ├── navigation/        # Nav bar, menus
+│   ├── onboarding/        # User profile setup
+│   │   ├── onboarding-screen.tsx
+│   │   ├── parent-profile-form.tsx
+│   │   └── student-profile-form.tsx
 │   ├── payments/polar/    # Polar payment integration
 │   ├── theme/             # Theme provider and toggle
 │   └── ui/                # shadcn/ui components
@@ -31,11 +43,15 @@ src/
 │   └── tanstack-query/    # Query client setup
 ├── lib/                   # Utilities (auth-client, utils)
 ├── routes/                # File-based routes
+│   ├── _auth/            # Protected routes
+│   │   └── app/          # Main app routes (dashboard, lessons, progress, groups)
+│   ├── onboarding/       # Profile setup flow
+│   └── [public routes]   # Landing, auth, etc.
 ├── utils/                 # Helper functions (SEO, etc)
 ├── router.tsx             # Router configuration
 ├── server.ts              # Server entry point
 ├── start.tsx              # Client entry point
-└── styles.css             # Global Tailwind styles
+└── styles.css             # Global Tailwind styles with semantic color utilities
 ```
 
 ## Data Service (`apps/data-service` - package name: `kurama-backend`)
@@ -55,9 +71,15 @@ src/
 ├── auth/                  # Better Auth setup
 ├── config/                # Configuration files (auth.ts)
 ├── database/              # Database connection setup
-├── drizzle/               # Migrations and auth schemas
-├── queries/               # Database queries (Polar, etc)
+├── drizzle/               # Migrations and schemas
+│   ├── auth-schema.ts    # Better Auth tables
+│   └── schema.ts         # User profiles, curriculum data
+├── queries/               # Database queries
+│   ├── polar.ts          # Polar payment queries
+│   └── profiles.ts       # User profile queries
 └── zod-schema/            # Zod validation schemas
+    ├── onboarding.ts     # Profile validation
+    └── [other schemas]
 ```
 
 Note: Package exports are structured by functionality:
@@ -65,6 +87,12 @@ Note: Package exports are structured by functionality:
 - `./database/*` - Database connection and setup
 - `./zod-schema/*` - Validation schemas
 - `./queries/*` - Database queries
+
+### Database Schema
+- **User Profiles**: Students and parents with grade/series/subjects
+- **Curriculum**: Grades, series, subjects with coefficients
+- **Auth**: Better Auth tables for authentication
+- **Polar**: Payment and subscription data
 
 ## Key Conventions
 
@@ -101,6 +129,11 @@ Note: Package exports are structured by functionality:
 - Style variant: New York (shadcn/ui)
 - Global styles in `src/styles.css`
 - Shadcn components configured with CSS variables enabled
+- **Semantic Color System**: All colors use utility classes (no inline colors)
+  - Gamification: `bg-gradient-xp`, `bg-gradient-level`, `bg-gradient-streak`, etc.
+  - Status: `bg-success`, `bg-error`, `bg-warning`, `bg-info`
+  - Subjects: `text-subject-math`, `text-subject-physics`, etc.
+  - Supports light/dark themes automatically
 
 ### Environment
 - `.env` files for local development
@@ -118,3 +151,10 @@ Note: Package exports are structured by functionality:
 2. Build data-ops package: `pnpm run build:data-ops` (required before running apps)
 3. Start development servers using individual app commands
 4. Use workspace filtering for package-specific operations
+
+### Recent Implementations
+- ✅ **Gamification System**: Complete XP, levels, achievements, streaks, leaderboards
+- ✅ **Color System Migration**: All inline colors converted to semantic utilities
+- ✅ **User Profiles**: Student/parent profiles with curriculum integration
+- ✅ **Onboarding Flow**: Multi-step profile setup with validation
+- ✅ **Profile Guard**: Redirect to onboarding if profile incomplete
