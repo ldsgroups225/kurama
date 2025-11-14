@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LucideIcon, Lock } from "lucide-react";
+import { type LucideIcon, Lock } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 export interface Achievement {

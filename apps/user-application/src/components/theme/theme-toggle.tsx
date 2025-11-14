@@ -1,4 +1,4 @@
-import { Monitor, Moon, Sun, Check } from "lucide-react";
+import { Monitor, Moon, Sun, Check } from "@/lib/icons";
 
 import { Button } from "@/components/ui/button";
 import {

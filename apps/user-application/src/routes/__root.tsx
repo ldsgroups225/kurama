@@ -5,8 +5,6 @@ import {
   Scripts,
   createRootRouteWithContext,
 } from "@tanstack/react-router";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import * as React from "react";
 import type { QueryClient } from "@tanstack/react-query";
 import { DefaultCatchBoundary } from "@/components/default-catch-boundary";
@@ -14,6 +12,9 @@ import { NotFound } from "@/components/not-found";
 import { ThemeProvider } from "@/components/theme";
 import appCss from "@/styles.css?url";
 import { seo } from "@/utils/seo";
+import { initPerformanceMonitoring } from "@/lib/performance-monitor";
+import { initPreloading } from "@/lib/preload";
+import { useLocation } from "@tanstack/react-router";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -48,6 +49,11 @@ export const Route = createRootRouteWithContext<{
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      // Resource hints for performance optimization
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "dns-prefetch", href: "https://accounts.google.com" },
+      { rel: "dns-prefetch", href: "https://api.polar.sh" },
       {
         rel: "apple-touch-icon",
         sizes: "180x180",
@@ -81,6 +87,19 @@ export const Route = createRootRouteWithContext<{
 });
 
 function RootComponent() {
+  const location = useLocation();
+
+  // Initialize performance monitoring on mount
+  React.useEffect(() => {
+    initPerformanceMonitoring();
+  }, []);
+
+  // Initialize intelligent preloading based on current route
+  React.useEffect(() => {
+    const cleanup = initPreloading(location.pathname);
+    return cleanup;
+  }, [location.pathname]);
+
   return (
     <RootDocument>
       <ThemeProvider
@@ -122,10 +141,50 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
-        <TanStackRouterDevtools position="bottom-right" />
-        <ReactQueryDevtools buttonPosition="bottom-left" />
+        {import.meta.env.DEV && <DevTools />}
         <Scripts />
       </body>
     </html>
   );
 }
+
+/**
+ * Lazy-loaded devtools component
+ * Only loaded in development mode
+ */
+function DevTools() {
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  return (
+    <React.Suspense fallback={null}>
+      <LazyDevTools />
+    </React.Suspense>
+  );
+}
+
+/**
+ * Lazy load devtools to avoid including them in the main bundle
+ */
+const LazyDevTools = React.lazy(() =>
+  Promise.all([
+    import("@tanstack/react-router-devtools").then((m) => ({
+      RouterDevtools: m.TanStackRouterDevtools,
+    })),
+    import("@tanstack/react-query-devtools").then((m) => ({
+      QueryDevtools: m.ReactQueryDevtools,
+    })),
+  ]).then(([router, query]) => ({
+    default: () => (
+      <>
+        <router.RouterDevtools position="bottom-right" />
+        <query.QueryDevtools buttonPosition="bottom-left" />
+      </>
+    ),
+  }))
+);

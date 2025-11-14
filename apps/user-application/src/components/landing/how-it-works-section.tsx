@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, BookOpen, Brain, Trophy } from "lucide-react";
+import { UserPlus, BookOpen, Brain, Trophy } from "@/lib/icons";
 
 const steps = [
   {
@@ -90,3 +90,5 @@ export function HowItWorksSection() {
     </section>
   );
 }
+
+export default HowItWorksSection;

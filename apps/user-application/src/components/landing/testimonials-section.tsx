@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, Quote } from "lucide-react";
+import { Star, Quote } from "@/lib/icons";
 
 const testimonials = [
   {
@@ -95,3 +95,5 @@ export function TestimonialsSection() {
     </section>
   );
 }
+
+export default TestimonialsSection;

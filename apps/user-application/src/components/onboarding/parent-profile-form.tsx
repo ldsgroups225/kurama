@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Loader2, ArrowRight, Plus, X } from "lucide-react";
+import { ArrowLeft, Loader2, ArrowRight, Plus, X } from "@/lib/icons";
 import type { ParentProfile } from "@kurama/data-ops/zod-schema/profile";
 import { useMutation } from "@tanstack/react-query";
 import { submitProfile } from "@/core/functions/profile";
@@ -370,3 +370,5 @@ export function ParentProfileForm({
     </div>
   );
 }
+
+export default ParentProfileForm;

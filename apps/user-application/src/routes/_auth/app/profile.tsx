@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { AppHeader, BottomNav } from "@/components/main";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useSession } from "@/lib/auth-client";
+import { trackRouteLoad } from "@/lib/performance-monitor";
 import {
   User,
   Settings,
@@ -23,6 +25,12 @@ export const Route = createFileRoute("/_auth/app/profile")({
 function ProfilePage() {
   const { data: session } = useSession();
   const navigate = useNavigate();
+
+  // Track route load performance
+  useEffect(() => {
+    const endTracking = trackRouteLoad('app-profile');
+    return endTracking;
+  }, []);
 
   const getUserInitials = () => {
     if (!session?.user?.name) return "U";

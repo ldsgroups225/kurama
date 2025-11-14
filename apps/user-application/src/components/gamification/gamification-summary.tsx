@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, Flame, Star, TrendingUp } from "lucide-react";
+import { Trophy, Flame, Star, TrendingUp } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 interface GamificationSummaryProps {

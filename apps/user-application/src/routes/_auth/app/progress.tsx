@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { AppHeader, BottomNav, StatsGrid } from "@/components/main";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { trackRouteLoad } from "@/lib/performance-monitor";
 import {
   TrendingUp,
   Target,
@@ -17,6 +19,12 @@ export const Route = createFileRoute("/_auth/app/progress")({
 });
 
 function ProgressPage() {
+  // Track route load performance
+  useEffect(() => {
+    const endTracking = trackRouteLoad('app-progress');
+    return endTracking;
+  }, []);
+
   const stats = [
     {
       icon: BookOpen,

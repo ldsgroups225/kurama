@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Github, Sparkles, BookOpen, Trophy } from "lucide-react";
+import { ArrowRight, Github, Sparkles, BookOpen, Trophy } from "@/lib/icons";
 import { Link } from "@tanstack/react-router";
 
 export function HeroSection() {
@@ -35,7 +35,7 @@ export function HeroSection() {
 
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link to="/app">
-            <Button size="lg" className="group">
+            <Button size="lg" className="group" data-get-started-button>
               Commencer à étudier
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
@@ -68,3 +68,5 @@ export function HeroSection() {
     </section>
   );
 }
+
+export default HeroSection;

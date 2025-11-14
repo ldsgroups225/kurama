@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
+import { ArrowLeft, Loader2, RefreshCw } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "@tanstack/react-router";
@@ -210,3 +210,5 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
     </div>
   );
 }
+
+export default OtpStep;

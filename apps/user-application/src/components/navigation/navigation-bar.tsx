@@ -137,6 +137,7 @@ export function NavigationBar() {
                 <Button
                   variant="ghost"
                   className="flex items-center gap-2 px-3"
+                  data-profile-button
                 >
                   <Avatar className="h-7 w-7">
                     <AvatarImage
@@ -157,6 +158,7 @@ export function NavigationBar() {
                 onClick={handleGoogleSignIn}
                 variant="default"
                 className="gap-2"
+                data-login-button
               >
                 <LogIn className="h-4 w-4" />
                 Sign In
@@ -225,7 +227,7 @@ export function NavigationBar() {
                 {/* Mobile Auth */}
                 <div className="pt-4 border-t border-border/50">
                   {session ? (
-                    <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-accent/30">
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-accent/30" data-profile-button>
                       <Avatar className="h-10 w-10">
                         <AvatarImage
                           src={user?.image || undefined}
@@ -249,6 +251,7 @@ export function NavigationBar() {
                       onClick={handleGoogleSignIn}
                       variant="default"
                       className="w-full gap-2"
+                      data-login-button
                     >
                       <LogIn className="h-4 w-4" />
                       Sign In with Google

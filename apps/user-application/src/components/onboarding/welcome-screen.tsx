@@ -256,3 +256,5 @@ export function WelcomeScreen({ onGetStarted }: WelcomeScreenProps) {
     </div>
   );
 }
+
+export default WelcomeScreen;

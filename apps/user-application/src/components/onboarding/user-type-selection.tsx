@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Users, ArrowRight } from "lucide-react";
+import { GraduationCap, Users, ArrowRight } from "@/lib/icons";
 import type { UserType } from "@kurama/data-ops/zod-schema/profile";
 
 interface UserTypeSelectionProps {
@@ -98,3 +98,5 @@ export function UserTypeSelection({ onSelect }: UserTypeSelectionProps) {
     </div>
   );
 }
+
+export default UserTypeSelection;

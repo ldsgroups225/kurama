@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Trophy, Star, Zap } from "lucide-react";
+import { Sparkles, Trophy, Star, Zap } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 export interface Reward {

@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Flame, Trophy } from "lucide-react";
+import { Flame, Trophy } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 interface StreakDay {

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as AuthRouteRouteImport } from './routes/_auth/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiMetricsRouteImport } from './routes/api/metrics'
 import { Route as AuthAppIndexRouteImport } from './routes/_auth/app/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AuthAppProgressRouteImport } from './routes/_auth/app/progress'
@@ -26,7 +27,7 @@ const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/onboarding.lazy').then((d) => d.Route))
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/_auth',
   getParentRoute: () => rootRouteImport,
@@ -35,12 +36,19 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+const ApiMetricsRoute = ApiMetricsRouteImport.update({
+  id: '/api/metrics',
+  path: '/api/metrics',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthAppIndexRoute = AuthAppIndexRouteImport.update({
   id: '/app/',
   path: '/app/',
   getParentRoute: () => AuthRouteRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_auth/app/index.lazy').then((d) => d.Route),
+)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -87,6 +95,7 @@ const AuthAppPolarCheckoutSuccessRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
+  '/api/metrics': typeof ApiMetricsRoute
   '/app/groups': typeof AuthAppGroupsRoute
   '/app/lessons': typeof AuthAppLessonsRoute
   '/app/profile': typeof AuthAppProfileRoute
@@ -100,6 +109,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
+  '/api/metrics': typeof ApiMetricsRoute
   '/app/groups': typeof AuthAppGroupsRoute
   '/app/lessons': typeof AuthAppLessonsRoute
   '/app/profile': typeof AuthAppProfileRoute
@@ -115,6 +125,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_auth': typeof AuthRouteRouteWithChildren
   '/onboarding': typeof OnboardingRoute
+  '/api/metrics': typeof ApiMetricsRoute
   '/_auth/app/groups': typeof AuthAppGroupsRoute
   '/_auth/app/lessons': typeof AuthAppLessonsRoute
   '/_auth/app/profile': typeof AuthAppProfileRoute
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/onboarding'
+    | '/api/metrics'
     | '/app/groups'
     | '/app/lessons'
     | '/app/profile'
@@ -143,6 +155,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/onboarding'
+    | '/api/metrics'
     | '/app/groups'
     | '/app/lessons'
     | '/app/profile'
@@ -157,6 +170,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_auth'
     | '/onboarding'
+    | '/api/metrics'
     | '/_auth/app/groups'
     | '/_auth/app/lessons'
     | '/_auth/app/profile'
@@ -172,6 +186,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
+  ApiMetricsRoute: typeof ApiMetricsRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -196,6 +211,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/metrics': {
+      id: '/api/metrics'
+      path: '/api/metrics'
+      fullPath: '/api/metrics'
+      preLoaderRoute: typeof ApiMetricsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_auth/app/': {
@@ -294,6 +316,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
+  ApiMetricsRoute: ApiMetricsRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

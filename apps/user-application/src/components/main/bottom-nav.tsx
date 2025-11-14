@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, BookOpen, Users, BarChart3, User } from "lucide-react";
+import { Home, BookOpen, Users, BarChart3, User } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 const navItems = [

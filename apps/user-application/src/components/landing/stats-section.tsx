@@ -1,4 +1,4 @@
-import { Users, BookOpen, Trophy, TrendingUp } from "lucide-react";
+import { Users, BookOpen, Trophy, TrendingUp } from "@/lib/icons";
 
 const stats = [
   {
@@ -68,3 +68,5 @@ export function StatsSection() {
     </section>
   );
 }
+
+export default StatsSection;

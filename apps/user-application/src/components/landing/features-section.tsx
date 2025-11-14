@@ -7,7 +7,7 @@ import {
   Shield,
   Palette,
   Code
-} from "lucide-react"
+} from "@/lib/icons"
 
 const features = [
   {
@@ -161,3 +161,5 @@ export function FeaturesSection() {
     </section>
   )
 }
+
+export default FeaturesSection;

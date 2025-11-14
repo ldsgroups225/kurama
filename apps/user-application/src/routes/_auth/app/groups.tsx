@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { AppHeader, BottomNav } from "@/components/main";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { trackRouteLoad } from "@/lib/performance-monitor";
 import { Users, Plus, MessageCircle } from "lucide-react";
 
 export const Route = createFileRoute("/_auth/app/groups")({
@@ -35,6 +37,12 @@ const groups = [
 ];
 
 function GroupsPage() {
+  // Track route load performance
+  useEffect(() => {
+    const endTracking = trackRouteLoad('app-groups');
+    return endTracking;
+  }, []);
+
   return (
     <div className="min-h-screen bg-background pb-24">
       <AppHeader title="Groupes d'Étude" showAvatar={false} />

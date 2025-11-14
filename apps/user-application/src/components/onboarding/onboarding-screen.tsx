@@ -322,3 +322,5 @@ export function OnboardingScreen({
     </motion.div>
   );
 }
+
+export default OnboardingScreen;

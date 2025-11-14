@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Loader2, ArrowRight } from "lucide-react";
+import { ArrowLeft, Loader2, ArrowRight } from "@/lib/icons";
 import { getEducationalData, submitProfile } from "@/core/functions/profile";
 import { ProgressIndicator } from "./progress-indicator";
 import type { StudentProfile } from "@kurama/data-ops/zod-schema/profile";
@@ -519,3 +519,5 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
     </div>
   );
 }
+
+export default StudentProfileForm;

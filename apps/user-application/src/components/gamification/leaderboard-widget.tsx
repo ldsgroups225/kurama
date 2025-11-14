@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trophy, Medal, Award, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Trophy, Medal, Award, TrendingUp, TrendingDown, Minus } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 export interface LeaderboardEntry {

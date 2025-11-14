@@ -5,10 +5,20 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "build": "vite build",
-    "deploy": "pnpm run build && wrangler deploy",
+    "build:production": "vite build && pnpm run perf:check-bundles",
+    "build:analyze": "vite build && open dist/stats.html",
+    "analyze": "vite build --mode production && open dist/stats.html",
+    "deploy": "pnpm run build:production && wrangler deploy",
     "serve": "vite preview",
     "cf-typegen": "wrangler types --env-interface Env",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "perf:check": "tsx scripts/check-performance.ts",
+    "perf:check-bundles": "tsx scripts/check-bundle-size.ts",
+    "perf:validate": "pnpm run build && pnpm run perf:check-bundles",
+    "validate:optimizations": "tsx scripts/validate-optimizations.ts",
+    "validate:all": "pnpm run typecheck && pnpm run build && pnpm run validate:optimizations",
+    "test": "vitest --run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@kurama/data-ops": "workspace:^",
@@ -63,6 +73,8 @@
     "@types/remark-prism": "^1.3.7",
     "@vitejs/plugin-react": "^4.7.0",
     "jsdom": "^26.1.0",
+    "rollup-plugin-visualizer": "^6.0.5",
+    "tsx": "^4.19.2",
     "typescript": "^5.9.3",
     "vite": "7.1.2",
     "vitest": "^3.2.4",

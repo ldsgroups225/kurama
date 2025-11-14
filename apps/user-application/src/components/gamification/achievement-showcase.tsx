@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AchievementBadge, Achievement } from "./achievement-badge";
-import { Trophy, Lock } from "lucide-react";
+import { Trophy, Lock } from "@/lib/icons";
 
 interface AchievementShowcaseProps {
   achievements: Achievement[];

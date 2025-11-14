@@ -1,4 +1,4 @@
-import { Bell } from "lucide-react";
+import { Bell } from "@/lib/icons";
 import { useAtom } from "jotai";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

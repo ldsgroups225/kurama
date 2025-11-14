@@ -9,7 +9,7 @@ import {
   Landmark,
   FlaskConical,
   Brain
-} from "lucide-react";
+} from "@/lib/icons";
 
 const subjects = [
   {
@@ -118,3 +118,5 @@ export function SubjectsSection() {
     </section>
   );
 }
+
+export default SubjectsSection;

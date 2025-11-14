@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, TrendingUp } from "lucide-react";
+import { Sparkles, TrendingUp } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 interface LevelBadgeProps {

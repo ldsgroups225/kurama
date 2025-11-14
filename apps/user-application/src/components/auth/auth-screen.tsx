@@ -1,7 +1,10 @@
-import { useState } from "react";
-import { EmailStep } from "./email-step";
-import { OtpStep } from "./otp-step";
+import { useState, Suspense } from "react";
+import { createLazyComponent } from "@/lib/lazy-component";
 import { SocialAuth } from "./social-auth";
+
+// Lazy load auth step components
+const EmailStep = createLazyComponent(() => import("./email-step"));
+const OtpStep = createLazyComponent(() => import("./otp-step"));
 
 type AuthStep = "email" | "otp";
 
@@ -37,11 +40,16 @@ export function AuthScreen() {
 
         {/* Auth Card */}
         <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 p-8">
-          {step === "email" ? (
-            <EmailStep onSubmit={handleEmailSubmit} />
-          ) : (
-            <OtpStep email={email} onBack={handleBackToEmail} />
-          )}
+          <Suspense fallback={<div className="animate-pulse space-y-4">
+            <div className="h-10 bg-muted rounded" />
+            <div className="h-10 bg-muted rounded" />
+          </div>}>
+            {step === "email" ? (
+              <EmailStep onSubmit={handleEmailSubmit} />
+            ) : (
+              <OtpStep email={email} onBack={handleBackToEmail} />
+            )}
+          </Suspense>
 
           {/* Divider */}
           <div className="relative my-6">
@@ -74,3 +82,5 @@ export function AuthScreen() {
     </div>
   );
 }
+
+export default AuthScreen;

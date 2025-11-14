@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { AppHeader, BottomNav } from "@/components/main";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { trackRouteLoad } from "@/lib/performance-monitor";
 import {
   Calculator,
   Atom,
@@ -70,6 +72,12 @@ const subjects = [
 ];
 
 function LessonsPage() {
+  // Track route load performance
+  useEffect(() => {
+    const endTracking = trackRouteLoad('app-lessons');
+    return endTracking;
+  }, []);
+
   return (
     <div className="min-h-screen bg-background pb-24">
       <AppHeader title="Mes Leçons" showAvatar={false} />

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "@/lib/icons";
 import { Link } from "@tanstack/react-router";
 
 export function CTASection() {
@@ -34,7 +34,7 @@ export function CTASection() {
 
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link to="/app">
-            <Button size="lg" className="group text-lg px-8 py-6">
+            <Button size="lg" className="group text-lg px-8 py-6" data-get-started-button>
               Commencer Gratuitement
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Button>
@@ -53,3 +53,5 @@ export function CTASection() {
     </section>
   );
 }
+
+export default CTASection;

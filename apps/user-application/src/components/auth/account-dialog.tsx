@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { authClient } from "@/lib/auth-client";
-import { LogOut, Palette } from "lucide-react";
+import { LogOut, Palette } from "@/lib/icons";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 interface AccountDialogProps {
