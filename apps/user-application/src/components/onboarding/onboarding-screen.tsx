@@ -23,24 +23,24 @@ const onboardingSteps = [
     title: "Leçons interactives",
     description:
       "Découvrez des cours alignés sur le programme du Ministère de l'Éducation avec des explications claires et des exemples pratiques.",
-    color: "from-blue-500 to-cyan-500",
-    bgColor: "bg-linear-to-br from-blue-50 to-cyan-50",
+    color: "bg-gradient-xp",
+    bgColor: "bg-xp",
   },
   {
     icon: Brain,
     title: "Révision intelligente",
     description:
       "Notre système de répétition espacée vous aide à mémoriser efficacement. Révisez au bon moment pour maximiser votre apprentissage.",
-    color: "from-purple-500 to-pink-500",
-    bgColor: "bg-linear-to-br from-purple-50 to-pink-50",
+    color: "bg-gradient-epic",
+    bgColor: "bg-epic",
   },
   {
     icon: Users,
     title: "Apprendre ensemble",
     description:
       "Rejoignez des groupes d'étude, participez à des défis et comparez vos progrès avec d'autres étudiants.",
-    color: "from-orange-500 to-red-500",
-    bgColor: "bg-linear-to-br from-orange-50 to-red-50",
+    color: "bg-gradient-streak",
+    bgColor: "bg-streak",
   },
 ];
 
@@ -156,7 +156,6 @@ export function OnboardingScreen({
   return (
     <motion.div
       className={`min-h-screen ${step.bgColor} flex flex-col`}
-      animate={{ backgroundColor: step.bgColor }}
       transition={{ duration: 0.5 }}
     >
       {/* Header */}
@@ -171,7 +170,7 @@ export function OnboardingScreen({
             {currentStep > 0 && (
               <motion.button
                 onClick={handlePrevious}
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
@@ -185,7 +184,7 @@ export function OnboardingScreen({
         </div>
         <motion.button
           onClick={onSkip}
-          className="text-sm text-gray-600 hover:text-gray-900 font-semibold transition-colors"
+          className="text-sm text-muted-foreground hover:text-foreground font-semibold transition-colors"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -222,7 +221,7 @@ export function OnboardingScreen({
             <div className="flex justify-center relative">
               <div className="relative">
                 <motion.div
-                  className={`w-36 h-36 bg-linear-to-br ${step.color} rounded-3xl flex items-center justify-center shadow-2xl`}
+                  className={`w-36 h-36 ${step.color} rounded-3xl flex items-center justify-center shadow-2xl`}
                   variants={iconVariants}
                   initial="initial"
                   animate="animate"
@@ -233,7 +232,7 @@ export function OnboardingScreen({
                 </motion.div>
                 {/* Decorative sparkle */}
                 <motion.div
-                  className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg"
+                  className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-warning rounded-full flex items-center justify-center shadow-lg"
                   variants={sparkleVariants}
                   animate="animate"
                 >
@@ -249,10 +248,10 @@ export function OnboardingScreen({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <h2 className="text-2xl font-bold text-gray-900 leading-tight">
+              <h2 className="text-2xl font-bold text-foreground leading-tight">
                 {step.title}
               </h2>
-              <p className="text-base text-gray-600 leading-relaxed px-2">
+              <p className="text-base text-muted-foreground leading-relaxed px-2">
                 {step.description}
               </p>
             </motion.div>
@@ -269,8 +268,8 @@ export function OnboardingScreen({
                   key={index}
                   onClick={() => handleDotClick(index)}
                   className={`h-2 rounded-full transition-all duration-300 ${index === currentStep
-                    ? `w-8 bg-linear-to-r ${step.color}`
-                    : "w-2 bg-gray-300"
+                    ? `w-8 ${step.color}`
+                    : "w-2 bg-muted"
                     }`}
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}
@@ -282,7 +281,7 @@ export function OnboardingScreen({
             {/* Swipe hint - only show on first step and not while dragging */}
             {currentStep === 0 && !isDragging && (
               <motion.div
-                className="flex items-center justify-center gap-2 text-gray-400 text-sm mt-6"
+                className="flex items-center justify-center gap-2 text-muted-foreground text-sm mt-6"
                 variants={swipeHintVariants}
                 initial="initial"
                 animate="animate"
@@ -306,7 +305,7 @@ export function OnboardingScreen({
           <Button
             onClick={handleNext}
             size="lg"
-            className={`w-full bg-linear-to-r ${step.color} hover:opacity-90 text-white font-semibold py-6 rounded-full shadow-xl transition-all duration-300 group`}
+            className={`w-full ${step.color} hover:opacity-90 text-white font-semibold py-6 rounded-full shadow-xl transition-all duration-300 group`}
           >
             {isLastStep ? "Commencer" : "Suivant"}
             <motion.div

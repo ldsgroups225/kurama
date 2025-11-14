@@ -30,11 +30,11 @@ export function LeaderboardWidget({
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Trophy className="h-5 w-5 text-amber-500" />;
+        return <Trophy className="h-5 w-5 text-level" />;
       case 2:
-        return <Medal className="h-5 w-5 text-gray-400" />;
+        return <Medal className="h-5 w-5 text-muted-foreground" />;
       case 3:
-        return <Award className="h-5 w-5 text-orange-600" />;
+        return <Award className="h-5 w-5 text-streak" />;
       default:
         return null;
     }
@@ -46,14 +46,14 @@ export function LeaderboardWidget({
 
     if (change > 0) {
       return (
-        <Badge variant="secondary" className="gap-1 bg-green-500/10 text-green-600">
+        <Badge variant="secondary" className="gap-1 bg-success text-success">
           <TrendingUp className="h-3 w-3" />
           +{change}
         </Badge>
       );
     } else if (change < 0) {
       return (
-        <Badge variant="secondary" className="gap-1 bg-red-500/10 text-red-600">
+        <Badge variant="secondary" className="gap-1 bg-error text-error">
           <TrendingDown className="h-3 w-3" />
           {change}
         </Badge>

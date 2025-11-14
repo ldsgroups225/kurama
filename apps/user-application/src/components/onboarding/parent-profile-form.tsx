@@ -23,18 +23,18 @@ function ProgressIndicator({ steps, currentStep }: { steps: any[], currentStep: 
         <div key={step.id} className="flex items-center flex-1">
           <div className="flex flex-col items-center flex-1">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${index <= currentStep
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-200 text-gray-500'
+              ? 'bg-gradient-xp text-white'
+              : 'bg-muted text-muted-foreground'
               }`}>
               {index + 1}
             </div>
-            <span className={`text-xs mt-1 ${index <= currentStep ? 'text-blue-500' : 'text-gray-500'
+            <span className={`text-xs mt-1 ${index <= currentStep ? 'text-xp' : 'text-muted-foreground'
               }`}>
               {step.label}
             </span>
           </div>
           {index < steps.length - 1 && (
-            <div className={`h-0.5 flex-1 ${index < currentStep ? 'bg-blue-500' : 'bg-gray-200'
+            <div className={`h-0.5 flex-1 ${index < currentStep ? 'bg-gradient-xp-horizontal' : 'bg-muted'
               }`} />
           )}
         </div>
@@ -176,16 +176,16 @@ export function ParentProfileForm({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-orange-50 via-white to-orange-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-streak p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-blue-600 mb-4 shadow-lg">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-xp mb-4 shadow-lg">
             <span className="text-xl font-bold text-white">K</span>
           </div>
         </div>
 
-        <Card className="bg-white dark:bg-zinc-900 shadow-xl border border-zinc-200 dark:border-zinc-800">
+        <Card className="shadow-xl">
           <CardHeader>
             <div className="flex items-center gap-4 mb-2">
               <Button
@@ -196,11 +196,11 @@ export function ParentProfileForm({
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <CardTitle className="text-zinc-900 dark:text-zinc-50">
+              <CardTitle className="text-foreground">
                 Profil Parent
               </CardTitle>
             </div>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm text-muted-foreground">
               {currentStep === "personal"
                 ? "Commençons par vos informations personnelles"
                 : "Liez vos enfants par matricule (optionnel)"}
@@ -228,7 +228,7 @@ export function ParentProfileForm({
                       autoFocus
                     />
                     {errors.firstName && (
-                      <p className="text-sm text-red-500">
+                      <p className="text-sm text-error">
                         {errors.firstName}
                       </p>
                     )}
@@ -247,7 +247,7 @@ export function ParentProfileForm({
                       disabled={isSubmitting}
                     />
                     {errors.lastName && (
-                      <p className="text-sm text-red-500">
+                      <p className="text-sm text-error">
                         {errors.lastName}
                       </p>
                     )}
@@ -284,7 +284,7 @@ export function ParentProfileForm({
                     </div>
 
                     {(!formData.childrenMatricules || formData.childrenMatricules.length === 0) && (
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-4">
+                      <p className="text-sm text-muted-foreground text-center py-4">
                         Aucun enfant ajouté. Cliquez sur "Ajouter" pour lier un enfant.
                       </p>
                     )}
@@ -321,14 +321,14 @@ export function ParentProfileForm({
                       </div>
                     ))}
 
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    <p className="text-xs text-muted-foreground">
                       Cette information nous aide à personnaliser votre expérience
                     </p>
                   </div>
 
                   {/* Submit Error */}
                   {errors.submit && (
-                    <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
+                    <div className="p-3 rounded-lg bg-error text-error text-sm">
                       {errors.submit}
                     </div>
                   )}

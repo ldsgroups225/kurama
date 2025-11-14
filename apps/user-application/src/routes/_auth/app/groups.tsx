@@ -18,21 +18,21 @@ const groups = [
     members: 24,
     messages: 156,
     lastActivity: "Il y a 2h",
-    color: "bg-blue-500",
+    color: "bg-gradient-xp",
   },
   {
     name: "BEPC Sciences",
     members: 18,
     messages: 89,
     lastActivity: "Il y a 5h",
-    color: "bg-purple-500",
+    color: "bg-gradient-epic",
   },
   {
     name: "Groupe Abidjan",
     members: 32,
     messages: 234,
     lastActivity: "Il y a 1j",
-    color: "bg-green-500",
+    color: "bg-gradient-success",
   },
 ];
 

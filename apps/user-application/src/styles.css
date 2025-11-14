@@ -36,6 +36,56 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.871 0.006 286.286);
+
+  /* Gamification Colors - XP System */
+  --xp-from: oklch(0.7 0.19 252);
+  --xp-to: oklch(0.55 0.22 264);
+  --xp-bg: oklch(0.95 0.02 252);
+
+  /* Gamification Colors - Level/Achievement System */
+  --level-from: oklch(0.75 0.15 65);
+  --level-to: oklch(0.65 0.20 45);
+  --level-bg: oklch(0.97 0.03 65);
+
+  /* Gamification Colors - Streak System */
+  --streak-from: oklch(0.70 0.19 45);
+  --streak-to: oklch(0.55 0.24 25);
+  --streak-bg: oklch(0.97 0.03 45);
+
+  /* Gamification Colors - Rare Achievement */
+  --rare-from: oklch(0.7 0.19 252);
+  --rare-to: oklch(0.55 0.22 264);
+  --rare-bg: oklch(0.95 0.02 252);
+
+  /* Gamification Colors - Epic Achievement */
+  --epic-from: oklch(0.65 0.24 295);
+  --epic-to: oklch(0.55 0.26 285);
+  --epic-bg: oklch(0.95 0.03 295);
+
+  /* Gamification Colors - Legendary Achievement */
+  --legendary-from: oklch(0.75 0.15 65);
+  --legendary-to: oklch(0.65 0.20 45);
+  --legendary-bg: oklch(0.97 0.03 65);
+
+  /* Status Colors */
+  --success-from: oklch(0.65 0.17 145);
+  --success-to: oklch(0.55 0.20 155);
+  --success-bg: oklch(0.95 0.03 145);
+
+  /* Warning Colors */
+  --warning-from: oklch(0.75 0.15 85);
+  --warning-to: oklch(0.65 0.20 75);
+  --warning-bg: oklch(0.97 0.03 85);
+
+  /* Error Colors */
+  --error-from: oklch(0.60 0.22 25);
+  --error-to: oklch(0.50 0.24 15);
+  --error-bg: oklch(0.97 0.03 25);
+
+  /* Info Colors */
+  --info-from: oklch(0.65 0.18 230);
+  --info-to: oklch(0.55 0.20 240);
+  --info-bg: oklch(0.95 0.02 230);
 }
 
 .dark {
@@ -71,6 +121,56 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.274 0.006 286.033);
   --sidebar-ring: oklch(0.442 0.017 285.786);
+
+  /* Gamification Colors - XP System (Dark) */
+  --xp-from: oklch(0.65 0.22 252);
+  --xp-to: oklch(0.50 0.24 264);
+  --xp-bg: oklch(0.20 0.03 252);
+
+  /* Gamification Colors - Level/Achievement System (Dark) */
+  --level-from: oklch(0.70 0.18 65);
+  --level-to: oklch(0.60 0.22 45);
+  --level-bg: oklch(0.22 0.04 65);
+
+  /* Gamification Colors - Streak System (Dark) */
+  --streak-from: oklch(0.65 0.22 45);
+  --streak-to: oklch(0.50 0.26 25);
+  --streak-bg: oklch(0.22 0.04 45);
+
+  /* Gamification Colors - Rare Achievement (Dark) */
+  --rare-from: oklch(0.65 0.22 252);
+  --rare-to: oklch(0.50 0.24 264);
+  --rare-bg: oklch(0.20 0.03 252);
+
+  /* Gamification Colors - Epic Achievement (Dark) */
+  --epic-from: oklch(0.60 0.26 295);
+  --epic-to: oklch(0.50 0.28 285);
+  --epic-bg: oklch(0.20 0.04 295);
+
+  /* Gamification Colors - Legendary Achievement (Dark) */
+  --legendary-from: oklch(0.70 0.18 65);
+  --legendary-to: oklch(0.60 0.22 45);
+  --legendary-bg: oklch(0.22 0.04 65);
+
+  /* Status Colors (Dark) */
+  --success-from: oklch(0.60 0.20 145);
+  --success-to: oklch(0.50 0.22 155);
+  --success-bg: oklch(0.20 0.04 145);
+
+  /* Warning Colors (Dark) */
+  --warning-from: oklch(0.70 0.18 85);
+  --warning-to: oklch(0.60 0.22 75);
+  --warning-bg: oklch(0.22 0.04 85);
+
+  /* Error Colors (Dark) */
+  --error-from: oklch(0.55 0.24 25);
+  --error-to: oklch(0.45 0.26 15);
+  --error-bg: oklch(0.22 0.04 25);
+
+  /* Info Colors (Dark) */
+  --info-from: oklch(0.60 0.20 230);
+  --info-to: oklch(0.50 0.22 240);
+  --info-bg: oklch(0.20 0.03 230);
 }
 
 @theme inline {
@@ -110,13 +210,277 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Gamification Color Tokens */
+  --color-xp-from: var(--xp-from);
+  --color-xp-to: var(--xp-to);
+  --color-xp-bg: var(--xp-bg);
+  --color-level-from: var(--level-from);
+  --color-level-to: var(--level-to);
+  --color-level-bg: var(--level-bg);
+  --color-streak-from: var(--streak-from);
+  --color-streak-to: var(--streak-to);
+  --color-streak-bg: var(--streak-bg);
+  --color-rare-from: var(--rare-from);
+  --color-rare-to: var(--rare-to);
+  --color-rare-bg: var(--rare-bg);
+  --color-epic-from: var(--epic-from);
+  --color-epic-to: var(--epic-to);
+  --color-epic-bg: var(--epic-bg);
+  --color-legendary-from: var(--legendary-from);
+  --color-legendary-to: var(--legendary-to);
+  --color-legendary-bg: var(--legendary-bg);
+  --color-success-from: var(--success-from);
+  --color-success-to: var(--success-to);
+  --color-success-bg: var(--success-bg);
+  --color-warning-from: var(--warning-from);
+  --color-warning-to: var(--warning-to);
+  --color-warning-bg: var(--warning-bg);
+  --color-error-from: var(--error-from);
+  --color-error-to: var(--error-to);
+  --color-error-bg: var(--error-bg);
+  --color-info-from: var(--info-from);
+  --color-info-to: var(--info-to);
+  --color-info-bg: var(--info-bg);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+
+  /* XP System Gradients */
+  .bg-gradient-xp {
+    background: linear-gradient(to bottom right, var(--xp-from), var(--xp-to));
+  }
+
+  .bg-gradient-xp-horizontal {
+    background: linear-gradient(to right, var(--xp-from), var(--xp-to));
+  }
+
+  .text-xp {
+    color: var(--xp-to);
+  }
+
+  .bg-xp {
+    background-color: var(--xp-bg);
+  }
+
+  /* Level/Achievement System Gradients */
+  .bg-gradient-level {
+    background: linear-gradient(to bottom right, var(--level-from), var(--level-to));
+  }
+
+  .bg-gradient-level-horizontal {
+    background: linear-gradient(to right, var(--level-from), var(--level-to));
+  }
+
+  .text-level {
+    color: var(--level-to);
+  }
+
+  .bg-level {
+    background-color: var(--level-bg);
+  }
+
+  /* Streak System Gradients */
+  .bg-gradient-streak {
+    background: linear-gradient(to bottom right, var(--streak-from), var(--streak-to));
+  }
+
+  .bg-gradient-streak-horizontal {
+    background: linear-gradient(to right, var(--streak-from), var(--streak-to));
+  }
+
+  .text-streak {
+    color: var(--streak-to);
+  }
+
+  .bg-streak {
+    background-color: var(--streak-bg);
+  }
+
+  /* Rare Achievement Gradients */
+  .bg-gradient-rare {
+    background: linear-gradient(to bottom right, var(--rare-from), var(--rare-to));
+  }
+
+  .bg-gradient-rare-horizontal {
+    background: linear-gradient(to right, var(--rare-from), var(--rare-to));
+  }
+
+  .text-rare {
+    color: var(--rare-to);
+  }
+
+  .bg-rare {
+    background-color: var(--rare-bg);
+  }
+
+  /* Epic Achievement Gradients */
+  .bg-gradient-epic {
+    background: linear-gradient(to bottom right, var(--epic-from), var(--epic-to));
+  }
+
+  .bg-gradient-epic-horizontal {
+    background: linear-gradient(to right, var(--epic-from), var(--epic-to));
+  }
+
+  .text-epic {
+    color: var(--epic-to);
+  }
+
+  .bg-epic {
+    background-color: var(--epic-bg);
+  }
+
+  /* Legendary Achievement Gradients */
+  .bg-gradient-legendary {
+    background: linear-gradient(to bottom right, var(--legendary-from), var(--legendary-to));
+  }
+
+  .bg-gradient-legendary-horizontal {
+    background: linear-gradient(to right, var(--legendary-from), var(--legendary-to));
+  }
+
+  .text-legendary {
+    color: var(--legendary-to);
+  }
+
+  .bg-legendary {
+    background-color: var(--legendary-bg);
+  }
+
+  /* Success Status Gradients */
+  .bg-gradient-success {
+    background: linear-gradient(to bottom right, var(--success-from), var(--success-to));
+  }
+
+  .bg-gradient-success-horizontal {
+    background: linear-gradient(to right, var(--success-from), var(--success-to));
+  }
+
+  .text-success {
+    color: var(--success-to);
+  }
+
+  .bg-success {
+    background-color: var(--success-bg);
+  }
+
+  /* Warning Status Gradients */
+  .bg-gradient-warning {
+    background: linear-gradient(to bottom right, var(--warning-from), var(--warning-to));
+  }
+
+  .bg-gradient-warning-horizontal {
+    background: linear-gradient(to right, var(--warning-from), var(--warning-to));
+  }
+
+  .text-warning {
+    color: var(--warning-to);
+  }
+
+  .bg-warning {
+    background-color: var(--warning-bg);
+  }
+
+  /* Error Status Gradients */
+  .bg-gradient-error {
+    background: linear-gradient(to bottom right, var(--error-from), var(--error-to));
+  }
+
+  .bg-gradient-error-horizontal {
+    background: linear-gradient(to right, var(--error-from), var(--error-to));
+  }
+
+  .text-error {
+    color: var(--error-to);
+  }
+
+  .bg-error {
+    background-color: var(--error-bg);
+  }
+
+  /* Info Status Gradients */
+  .bg-gradient-info {
+    background: linear-gradient(to bottom right, var(--info-from), var(--info-to));
+  }
+
+  .bg-gradient-info-horizontal {
+    background: linear-gradient(to right, var(--info-from), var(--info-to));
+  }
+
+  .text-info {
+    color: var(--info-to);
+  }
+
+  .bg-info {
+    background-color: var(--info-bg);
+  }
+
+  /* Rarity-based utilities (for achievement badges) */
+  .bg-gradient-common {
+    background: linear-gradient(to bottom right, oklch(0.65 0.02 286), oklch(0.55 0.03 286));
+  }
+
+  .bg-gradient-common-horizontal {
+    background: linear-gradient(to right, oklch(0.65 0.02 286), oklch(0.55 0.03 286));
+  }
+
+  /* Subject/Feature Colors - for lessons, modes, etc */
+  .text-subject-math {
+    color: var(--xp-to);
+  }
+
+  .bg-subject-math {
+    background-color: var(--xp-bg);
+  }
+
+  .text-subject-physics {
+    color: var(--epic-to);
+  }
+
+  .bg-subject-physics {
+    background-color: var(--epic-bg);
+  }
+
+  .text-subject-english {
+    color: oklch(0.55 0.22 264);
+  }
+
+  .bg-subject-english {
+    background-color: oklch(0.95 0.02 264);
+  }
+
+  .text-subject-french {
+    color: var(--error-to);
+  }
+
+  .bg-subject-french {
+    background-color: var(--error-bg);
+  }
+
+  .text-subject-history {
+    color: var(--level-to);
+  }
+
+  .bg-subject-history {
+    background-color: var(--level-bg);
+  }
+
+  .text-subject-philosophy {
+    color: oklch(0.60 0.24 330);
+  }
+
+  .bg-subject-philosophy {
+    background-color: oklch(0.97 0.03 330);
   }
 }

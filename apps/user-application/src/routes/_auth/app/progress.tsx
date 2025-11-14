@@ -31,7 +31,7 @@ function ProgressPage() {
       label: "Total Cartes",
       value: "1,247",
       subValue: "Sur 5,000",
-      color: "text-blue-500",
+      color: "text-xp",
       progress: 25,
     },
     {
@@ -39,7 +39,7 @@ function ProgressPage() {
       label: "Points",
       value: "8,450",
       subValue: "Top 15%",
-      color: "text-amber-500",
+      color: "text-level",
       progress: 85,
     },
     {
@@ -47,7 +47,7 @@ function ProgressPage() {
       label: "Série",
       value: "12 jours",
       subValue: "Record: 28",
-      color: "text-orange-500",
+      color: "text-streak",
       progress: 43,
     },
     {
@@ -55,7 +55,7 @@ function ProgressPage() {
       label: "Temps Total",
       value: "24h",
       subValue: "Ce mois",
-      color: "text-green-500",
+      color: "text-success",
       progress: 60,
     },
   ];
@@ -116,11 +116,11 @@ function ProgressPage() {
 
           <div className="grid grid-cols-4 gap-3">
             {[
-              { icon: Award, label: "Débutant", unlocked: true, color: "text-amber-500" },
-              { icon: Flame, label: "Série 7j", unlocked: true, color: "text-orange-500" },
-              { icon: Target, label: "100 Cartes", unlocked: true, color: "text-blue-500" },
-              { icon: TrendingUp, label: "Progrès", unlocked: true, color: "text-green-500" },
-              { icon: Calendar, label: "Régulier", unlocked: true, color: "text-purple-500" },
+              { icon: Award, label: "Débutant", unlocked: true, color: "text-level" },
+              { icon: Flame, label: "Série 7j", unlocked: true, color: "text-streak" },
+              { icon: Target, label: "100 Cartes", unlocked: true, color: "text-xp" },
+              { icon: TrendingUp, label: "Progrès", unlocked: true, color: "text-success" },
+              { icon: Calendar, label: "Régulier", unlocked: true, color: "text-epic" },
               { icon: Trophy, label: "Expert", unlocked: false, color: "text-muted-foreground" },
               { icon: BookOpen, label: "Lecteur", unlocked: false, color: "text-muted-foreground" },
               { icon: Award, label: "Champion", unlocked: false, color: "text-muted-foreground" },

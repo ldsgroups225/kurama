@@ -39,30 +39,30 @@ export function RewardAnimation({ reward, onClose, show }: RewardAnimationProps)
 
     switch (reward.type) {
       case "xp":
-        return <Zap className="h-12 w-12 text-blue-500" />;
+        return <Zap className="h-12 w-12 text-white" />;
       case "achievement":
-        return <Trophy className="h-12 w-12 text-amber-500" />;
+        return <Trophy className="h-12 w-12 text-white" />;
       case "level_up":
-        return <Star className="h-12 w-12 text-purple-500" />;
+        return <Star className="h-12 w-12 text-white" />;
       case "streak":
-        return <Sparkles className="h-12 w-12 text-orange-500" />;
+        return <Sparkles className="h-12 w-12 text-white" />;
       default:
-        return <Trophy className="h-12 w-12 text-primary" />;
+        return <Trophy className="h-12 w-12 text-white" />;
     }
   };
 
-  const getRewardColor = () => {
+  const getRewardGradient = () => {
     switch (reward.type) {
       case "xp":
-        return "from-blue-400 to-blue-600";
+        return "bg-gradient-xp";
       case "achievement":
-        return "from-amber-400 to-orange-500";
+        return "bg-gradient-level";
       case "level_up":
-        return "from-purple-400 to-purple-600";
+        return "bg-gradient-epic";
       case "streak":
-        return "from-orange-400 to-red-500";
+        return "bg-gradient-streak";
       default:
-        return "from-primary to-primary";
+        return "bg-gradient-to-br from-primary to-primary";
     }
   };
 
@@ -84,8 +84,8 @@ export function RewardAnimation({ reward, onClose, show }: RewardAnimationProps)
         <CardContent className="p-0">
           {/* Animated Background */}
           <div className={cn(
-            "relative p-8 bg-linear-to-br",
-            getRewardColor()
+            "relative p-8",
+            getRewardGradient()
           )}>
             {/* Sparkles Animation */}
             <div className="absolute inset-0 overflow-hidden">

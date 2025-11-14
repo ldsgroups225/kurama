@@ -8,28 +8,28 @@ const steps = [
     step: "01",
     title: "Créez votre Compte",
     description: "Inscription gratuite en quelques secondes avec Google ou email. Commencez immédiatement.",
-    color: "bg-blue-500/10 text-blue-500"
+    color: "bg-xp text-xp"
   },
   {
     icon: BookOpen,
     step: "02",
     title: "Choisissez vos Matières",
     description: "Sélectionnez les matières que vous préparez pour le BEPC ou le BAC. Personnalisez votre parcours.",
-    color: "bg-purple-500/10 text-purple-500"
+    color: "bg-epic text-epic"
   },
   {
     icon: Brain,
     step: "03",
     title: "Étudiez Intelligemment",
     description: "Notre algorithme de répétition espacée vous montre les cartes au moment optimal pour maximiser la rétention.",
-    color: "bg-green-500/10 text-green-500"
+    color: "bg-success text-success"
   },
   {
     icon: Trophy,
     step: "04",
     title: "Réussissez vos Examens",
     description: "Suivez vos progrès, pratiquez avec des examens blancs et atteignez vos objectifs académiques.",
-    color: "bg-amber-500/10 text-amber-500"
+    color: "bg-level text-level"
   }
 ];
 

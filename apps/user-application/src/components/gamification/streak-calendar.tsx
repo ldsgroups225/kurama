@@ -33,7 +33,7 @@ export function StreakCalendar({
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-linear-to-br from-orange-400 to-red-500 flex items-center justify-center shadow-lg">
+            <div className="h-12 w-12 rounded-full bg-gradient-streak flex items-center justify-center shadow-lg">
               <Flame className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -76,7 +76,7 @@ export function StreakCalendar({
                   className={cn(
                     "aspect-square rounded-lg flex items-center justify-center transition-all",
                     isCompleted
-                      ? "bg-linear-to-br from-orange-400 to-red-500 shadow-md"
+                      ? "bg-gradient-streak shadow-md"
                       : "bg-muted",
                     isToday && "ring-2 ring-primary ring-offset-2"
                   )}

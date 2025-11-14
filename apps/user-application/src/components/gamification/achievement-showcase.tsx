@@ -26,7 +26,7 @@ export function AchievementShowcase({
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-amber-500" />
+            <Trophy className="h-5 w-5 text-level" />
             <h3 className="text-lg font-bold text-foreground">{title}</h3>
           </div>
           <Badge variant="secondary">

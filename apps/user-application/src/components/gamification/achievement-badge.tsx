@@ -22,11 +22,18 @@ interface AchievementBadgeProps {
   onClick?: () => void;
 }
 
-const rarityColors = {
-  common: "from-gray-400 to-gray-500",
-  rare: "from-blue-400 to-blue-600",
-  epic: "from-purple-400 to-purple-600",
-  legendary: "from-amber-400 to-orange-500",
+const rarityGradients = {
+  common: "bg-gradient-common",
+  rare: "bg-gradient-rare",
+  epic: "bg-gradient-epic",
+  legendary: "bg-gradient-legendary",
+};
+
+const rarityGradientsHorizontal = {
+  common: "bg-gradient-common-horizontal",
+  rare: "bg-gradient-rare-horizontal",
+  epic: "bg-gradient-epic-horizontal",
+  legendary: "bg-gradient-legendary-horizontal",
 };
 
 const rarityLabels = {
@@ -79,7 +86,7 @@ export function AchievementBadge({
                 "rounded-full flex items-center justify-center shadow-lg ring-4 ring-background",
                 isLocked
                   ? "bg-muted"
-                  : `bg-linear-to-br ${rarityColors[achievement.rarity || "common"]}`
+                  : rarityGradients[achievement.rarity || "common"]
               )}
             >
               {isLocked ? (
@@ -96,9 +103,9 @@ export function AchievementBadge({
                   variant="secondary"
                   className={cn(
                     "text-[10px] px-1.5 py-0 h-5",
-                    achievement.rarity === "legendary" && "bg-amber-500 text-white",
-                    achievement.rarity === "epic" && "bg-purple-500 text-white",
-                    achievement.rarity === "rare" && "bg-blue-500 text-white"
+                    achievement.rarity === "legendary" && "bg-gradient-legendary text-white",
+                    achievement.rarity === "epic" && "bg-gradient-epic text-white",
+                    achievement.rarity === "rare" && "bg-gradient-rare text-white"
                   )}
                 >
                   {rarityLabels[achievement.rarity]}
@@ -126,7 +133,7 @@ export function AchievementBadge({
                     "h-full rounded-full transition-all duration-500",
                     isLocked
                       ? "bg-muted-foreground"
-                      : `bg-linear-to-r ${rarityColors[achievement.rarity || "common"]}`
+                      : rarityGradientsHorizontal[achievement.rarity || "common"]
                   )}
                   style={{ width: `${progressPercent}%` }}
                 />

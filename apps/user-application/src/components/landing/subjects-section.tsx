@@ -17,56 +17,56 @@ const subjects = [
     name: "Mathématiques",
     description: "Algèbre, géométrie, statistiques",
     cards: "5,200+",
-    color: "text-blue-500"
+    color: "text-xp"
   },
   {
     icon: Atom,
     name: "Physique-Chimie",
     description: "Mécanique, électricité, réactions",
     cards: "4,800+",
-    color: "text-purple-500"
+    color: "text-epic"
   },
   {
     icon: FlaskConical,
     name: "SVT",
     description: "Biologie, géologie, écologie",
     cards: "4,500+",
-    color: "text-green-500"
+    color: "text-success"
   },
   {
     icon: Languages,
     name: "Français",
     description: "Grammaire, littérature, expression",
     cards: "3,900+",
-    color: "text-red-500"
+    color: "text-error"
   },
   {
     icon: Globe,
     name: "Anglais",
     description: "Vocabulaire, grammaire, compréhension",
     cards: "3,600+",
-    color: "text-indigo-500"
+    color: "text-rare"
   },
   {
     icon: Landmark,
     name: "Histoire-Géo",
     description: "Événements, cartes, civilisations",
     cards: "4,200+",
-    color: "text-amber-500"
+    color: "text-level"
   },
   {
     icon: BookText,
     name: "Philosophie",
     description: "Concepts, auteurs, dissertations",
     cards: "2,800+",
-    color: "text-pink-500"
+    color: "text-warning"
   },
   {
     icon: Brain,
     name: "Autres Matières",
     description: "Économie, arts, langues vivantes",
     cards: "3,100+",
-    color: "text-cyan-500"
+    color: "text-info"
   }
 ];
 
