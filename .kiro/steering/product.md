@@ -18,11 +18,19 @@ The stack is optimized for Cloudflare deployment with full-stack TypeScript, fea
 
 ## Core Features
 
-### Learning System
+### Learning System (Fully Implemented)
 - **Curriculum**: 13 grade levels (CP1 to Tle) with 4 Lycée series (A, C, D, E)
 - **Subjects**: 12 core subjects with proper coefficients matching Ivorian curriculum
-- **Study Modes**: Flashcards, quizzes, exam simulator
-- **Spaced Repetition**: SM-2 algorithm for optimal retention
+- **Study Modes**: Flashcards (implemented), quizzes (planned), exam simulator (planned)
+- **Spaced Repetition**: SM-2 algorithm for optimal retention (database schema ready)
+- **Learning Flow**:
+  1. **Subject Selection**: Browse subjects with color-coded icons
+  2. **Lesson Selection**: View lessons with difficulty badges and estimated duration
+  3. **Mode Selection**: Choose between Flashcards, Quiz, or Exam mode
+  4. **Learning Session**: Interactive study session with progress tracking
+  5. **Session Summary**: Performance feedback with XP rewards and statistics
+- **Content Structure**: Subjects → Lessons → Flashcards with front/back content
+- **Progress Tracking**: Per-card progress with SM-2 algorithm support
 
 ### User Profiles
 - **Student Profiles**: Grade level, series (for Lycée), subjects with coefficients

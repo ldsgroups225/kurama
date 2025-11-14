@@ -38,13 +38,25 @@ src/
 │   └── ui/                # shadcn/ui components
 ├── core/
 │   ├── functions/         # TanStack server functions
+│   │   ├── profile.ts     # User profile operations
+│   │   ├── learning.ts    # Learning content (subjects, lessons, cards)
+│   │   └── payments.ts    # Polar payment integration
 │   └── middleware/        # Auth, Polar middleware
 ├── integrations/
 │   └── tanstack-query/    # Query client setup
 ├── lib/                   # Utilities (auth-client, utils)
 ├── routes/                # File-based routes
 │   ├── _auth/            # Protected routes
-│   │   └── app/          # Main app routes (dashboard, lessons, progress, groups)
+│   │   └── app/          # Main app routes
+│   │       ├── index.tsx              # Dashboard/home
+│   │       ├── subjects.index.tsx     # Subject selection (learning flow entry)
+│   │       ├── subjects.$subjectId.tsx # Lesson selection for subject
+│   │       ├── lessons.$lessonId.tsx   # Learning mode selection
+│   │       ├── lessons.$lessonId.session.tsx  # Active learning session
+│   │       ├── lessons.$lessonId.summary.tsx  # Session results
+│   │       ├── progress.tsx           # Progress tracking
+│   │       ├── groups.tsx             # Study groups
+│   │       └── profile.tsx            # User profile
 │   ├── onboarding/       # Profile setup flow
 │   └── [public routes]   # Landing, auth, etc.
 ├── utils/                 # Helper functions (SEO, etc)
@@ -91,6 +103,8 @@ Note: Package exports are structured by functionality:
 ### Database Schema
 - **User Profiles**: Students and parents with grade/series/subjects
 - **Curriculum**: Grades, series, subjects with coefficients
+- **Learning Content**: Subjects, lessons, flashcards with SM-2 spaced repetition
+- **Progress Tracking**: User progress per card, study sessions
 - **Auth**: Better Auth tables for authentication
 - **Polar**: Payment and subscription data
 
@@ -115,6 +129,10 @@ Note: Package exports are structured by functionality:
 - File-based routing via TanStack Router
 - Routes auto-generated in `routeTree.gen.ts`
 - Route files in `src/routes/`
+- **Important**: For routes with children, use `.index.tsx` for the parent route
+  - Example: `subjects.index.tsx` (parent) + `subjects.$subjectId.tsx` (child)
+  - This prevents the parent from becoming a layout route
+- Dynamic routes use `$paramName` syntax (e.g., `$subjectId`, `$lessonId`)
 
 ### Configuration Files
 - `wrangler.jsonc` for Cloudflare Workers config (both apps)
@@ -158,3 +176,9 @@ Note: Package exports are structured by functionality:
 - ✅ **User Profiles**: Student/parent profiles with curriculum integration
 - ✅ **Onboarding Flow**: Multi-step profile setup with validation
 - ✅ **Profile Guard**: Redirect to onboarding if profile incomplete
+- ✅ **Learning Flow**: Complete subject → lesson → mode → session → summary flow
+  - Subject selection with icons and colors
+  - Lesson browsing with difficulty badges and duration
+  - Learning mode selection (Flashcards, Quiz, Exam)
+  - Interactive flashcard session with flip animations
+  - Session summary with XP rewards and performance feedback
