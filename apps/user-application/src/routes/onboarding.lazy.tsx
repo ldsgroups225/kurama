@@ -39,13 +39,13 @@ function OnboardingPage() {
     setSelectedUserType(null);
   };
 
-  const handleSuccess = (profileData?: any) => {
+  const handleSuccess = (profileData?: UserProfileData) => {
     // Mark onboarding as completed
     setHasCompletedOnboarding(true);
 
     // Save user profile data to localStorage for quick access
     if (profileData) {
-      setUserProfile(profileData as UserProfileData);
+      setUserProfile(profileData);
     }
 
     // Redirect to main app after successful profile completion

@@ -17,11 +17,15 @@ import { Route as AuthAppIndexRouteImport } from './routes/_auth/app/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AuthAppProgressRouteImport } from './routes/_auth/app/progress'
 import { Route as AuthAppProfileRouteImport } from './routes/_auth/app/profile'
-import { Route as AuthAppLessonsRouteImport } from './routes/_auth/app/lessons'
 import { Route as AuthAppGroupsRouteImport } from './routes/_auth/app/groups'
+import { Route as AuthAppSubjectsIndexRouteImport } from './routes/_auth/app/subjects.index'
+import { Route as AuthAppSubjectsSubjectIdRouteImport } from './routes/_auth/app/subjects.$subjectId'
 import { Route as AuthAppPolarSubscriptionsRouteImport } from './routes/_auth/app/polar/subscriptions'
 import { Route as AuthAppPolarPortalRouteImport } from './routes/_auth/app/polar/portal'
+import { Route as AuthAppLessonsLessonIdRouteImport } from './routes/_auth/app/lessons.$lessonId'
 import { Route as AuthAppPolarCheckoutSuccessRouteImport } from './routes/_auth/app/polar/checkout.success'
+import { Route as AuthAppLessonsLessonIdSummaryRouteImport } from './routes/_auth/app/lessons.$lessonId.summary'
+import { Route as AuthAppLessonsLessonIdSessionRouteImport } from './routes/_auth/app/lessons.$lessonId.session'
 
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
@@ -64,16 +68,22 @@ const AuthAppProfileRoute = AuthAppProfileRouteImport.update({
   path: '/app/profile',
   getParentRoute: () => AuthRouteRoute,
 } as any)
-const AuthAppLessonsRoute = AuthAppLessonsRouteImport.update({
-  id: '/app/lessons',
-  path: '/app/lessons',
-  getParentRoute: () => AuthRouteRoute,
-} as any)
 const AuthAppGroupsRoute = AuthAppGroupsRouteImport.update({
   id: '/app/groups',
   path: '/app/groups',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const AuthAppSubjectsIndexRoute = AuthAppSubjectsIndexRouteImport.update({
+  id: '/app/subjects/',
+  path: '/app/subjects/',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthAppSubjectsSubjectIdRoute =
+  AuthAppSubjectsSubjectIdRouteImport.update({
+    id: '/app/subjects/$subjectId',
+    path: '/app/subjects/$subjectId',
+    getParentRoute: () => AuthRouteRoute,
+  } as any)
 const AuthAppPolarSubscriptionsRoute =
   AuthAppPolarSubscriptionsRouteImport.update({
     id: '/app/polar/subscriptions',
@@ -85,11 +95,28 @@ const AuthAppPolarPortalRoute = AuthAppPolarPortalRouteImport.update({
   path: '/app/polar/portal',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const AuthAppLessonsLessonIdRoute = AuthAppLessonsLessonIdRouteImport.update({
+  id: '/app/lessons/$lessonId',
+  path: '/app/lessons/$lessonId',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
 const AuthAppPolarCheckoutSuccessRoute =
   AuthAppPolarCheckoutSuccessRouteImport.update({
     id: '/app/polar/checkout/success',
     path: '/app/polar/checkout/success',
     getParentRoute: () => AuthRouteRoute,
+  } as any)
+const AuthAppLessonsLessonIdSummaryRoute =
+  AuthAppLessonsLessonIdSummaryRouteImport.update({
+    id: '/summary',
+    path: '/summary',
+    getParentRoute: () => AuthAppLessonsLessonIdRoute,
+  } as any)
+const AuthAppLessonsLessonIdSessionRoute =
+  AuthAppLessonsLessonIdSessionRouteImport.update({
+    id: '/session',
+    path: '/session',
+    getParentRoute: () => AuthAppLessonsLessonIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -97,13 +124,17 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/api/metrics': typeof ApiMetricsRoute
   '/app/groups': typeof AuthAppGroupsRoute
-  '/app/lessons': typeof AuthAppLessonsRoute
   '/app/profile': typeof AuthAppProfileRoute
   '/app/progress': typeof AuthAppProgressRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/app': typeof AuthAppIndexRoute
+  '/app/lessons/$lessonId': typeof AuthAppLessonsLessonIdRouteWithChildren
   '/app/polar/portal': typeof AuthAppPolarPortalRoute
   '/app/polar/subscriptions': typeof AuthAppPolarSubscriptionsRoute
+  '/app/subjects/$subjectId': typeof AuthAppSubjectsSubjectIdRoute
+  '/app/subjects': typeof AuthAppSubjectsIndexRoute
+  '/app/lessons/$lessonId/session': typeof AuthAppLessonsLessonIdSessionRoute
+  '/app/lessons/$lessonId/summary': typeof AuthAppLessonsLessonIdSummaryRoute
   '/app/polar/checkout/success': typeof AuthAppPolarCheckoutSuccessRoute
 }
 export interface FileRoutesByTo {
@@ -111,13 +142,17 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/api/metrics': typeof ApiMetricsRoute
   '/app/groups': typeof AuthAppGroupsRoute
-  '/app/lessons': typeof AuthAppLessonsRoute
   '/app/profile': typeof AuthAppProfileRoute
   '/app/progress': typeof AuthAppProgressRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/app': typeof AuthAppIndexRoute
+  '/app/lessons/$lessonId': typeof AuthAppLessonsLessonIdRouteWithChildren
   '/app/polar/portal': typeof AuthAppPolarPortalRoute
   '/app/polar/subscriptions': typeof AuthAppPolarSubscriptionsRoute
+  '/app/subjects/$subjectId': typeof AuthAppSubjectsSubjectIdRoute
+  '/app/subjects': typeof AuthAppSubjectsIndexRoute
+  '/app/lessons/$lessonId/session': typeof AuthAppLessonsLessonIdSessionRoute
+  '/app/lessons/$lessonId/summary': typeof AuthAppLessonsLessonIdSummaryRoute
   '/app/polar/checkout/success': typeof AuthAppPolarCheckoutSuccessRoute
 }
 export interface FileRoutesById {
@@ -127,13 +162,17 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/api/metrics': typeof ApiMetricsRoute
   '/_auth/app/groups': typeof AuthAppGroupsRoute
-  '/_auth/app/lessons': typeof AuthAppLessonsRoute
   '/_auth/app/profile': typeof AuthAppProfileRoute
   '/_auth/app/progress': typeof AuthAppProgressRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_auth/app/': typeof AuthAppIndexRoute
+  '/_auth/app/lessons/$lessonId': typeof AuthAppLessonsLessonIdRouteWithChildren
   '/_auth/app/polar/portal': typeof AuthAppPolarPortalRoute
   '/_auth/app/polar/subscriptions': typeof AuthAppPolarSubscriptionsRoute
+  '/_auth/app/subjects/$subjectId': typeof AuthAppSubjectsSubjectIdRoute
+  '/_auth/app/subjects/': typeof AuthAppSubjectsIndexRoute
+  '/_auth/app/lessons/$lessonId/session': typeof AuthAppLessonsLessonIdSessionRoute
+  '/_auth/app/lessons/$lessonId/summary': typeof AuthAppLessonsLessonIdSummaryRoute
   '/_auth/app/polar/checkout/success': typeof AuthAppPolarCheckoutSuccessRoute
 }
 export interface FileRouteTypes {
@@ -143,13 +182,17 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/api/metrics'
     | '/app/groups'
-    | '/app/lessons'
     | '/app/profile'
     | '/app/progress'
     | '/api/auth/$'
     | '/app'
+    | '/app/lessons/$lessonId'
     | '/app/polar/portal'
     | '/app/polar/subscriptions'
+    | '/app/subjects/$subjectId'
+    | '/app/subjects'
+    | '/app/lessons/$lessonId/session'
+    | '/app/lessons/$lessonId/summary'
     | '/app/polar/checkout/success'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -157,13 +200,17 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/api/metrics'
     | '/app/groups'
-    | '/app/lessons'
     | '/app/profile'
     | '/app/progress'
     | '/api/auth/$'
     | '/app'
+    | '/app/lessons/$lessonId'
     | '/app/polar/portal'
     | '/app/polar/subscriptions'
+    | '/app/subjects/$subjectId'
+    | '/app/subjects'
+    | '/app/lessons/$lessonId/session'
+    | '/app/lessons/$lessonId/summary'
     | '/app/polar/checkout/success'
   id:
     | '__root__'
@@ -172,13 +219,17 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/api/metrics'
     | '/_auth/app/groups'
-    | '/_auth/app/lessons'
     | '/_auth/app/profile'
     | '/_auth/app/progress'
     | '/api/auth/$'
     | '/_auth/app/'
+    | '/_auth/app/lessons/$lessonId'
     | '/_auth/app/polar/portal'
     | '/_auth/app/polar/subscriptions'
+    | '/_auth/app/subjects/$subjectId'
+    | '/_auth/app/subjects/'
+    | '/_auth/app/lessons/$lessonId/session'
+    | '/_auth/app/lessons/$lessonId/summary'
     | '/_auth/app/polar/checkout/success'
   fileRoutesById: FileRoutesById
 }
@@ -248,18 +299,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAppProfileRouteImport
       parentRoute: typeof AuthRouteRoute
     }
-    '/_auth/app/lessons': {
-      id: '/_auth/app/lessons'
-      path: '/app/lessons'
-      fullPath: '/app/lessons'
-      preLoaderRoute: typeof AuthAppLessonsRouteImport
-      parentRoute: typeof AuthRouteRoute
-    }
     '/_auth/app/groups': {
       id: '/_auth/app/groups'
       path: '/app/groups'
       fullPath: '/app/groups'
       preLoaderRoute: typeof AuthAppGroupsRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/app/subjects/': {
+      id: '/_auth/app/subjects/'
+      path: '/app/subjects'
+      fullPath: '/app/subjects'
+      preLoaderRoute: typeof AuthAppSubjectsIndexRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/app/subjects/$subjectId': {
+      id: '/_auth/app/subjects/$subjectId'
+      path: '/app/subjects/$subjectId'
+      fullPath: '/app/subjects/$subjectId'
+      preLoaderRoute: typeof AuthAppSubjectsSubjectIdRouteImport
       parentRoute: typeof AuthRouteRoute
     }
     '/_auth/app/polar/subscriptions': {
@@ -276,6 +334,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAppPolarPortalRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_auth/app/lessons/$lessonId': {
+      id: '/_auth/app/lessons/$lessonId'
+      path: '/app/lessons/$lessonId'
+      fullPath: '/app/lessons/$lessonId'
+      preLoaderRoute: typeof AuthAppLessonsLessonIdRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
     '/_auth/app/polar/checkout/success': {
       id: '/_auth/app/polar/checkout/success'
       path: '/app/polar/checkout/success'
@@ -283,28 +348,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAppPolarCheckoutSuccessRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_auth/app/lessons/$lessonId/summary': {
+      id: '/_auth/app/lessons/$lessonId/summary'
+      path: '/summary'
+      fullPath: '/app/lessons/$lessonId/summary'
+      preLoaderRoute: typeof AuthAppLessonsLessonIdSummaryRouteImport
+      parentRoute: typeof AuthAppLessonsLessonIdRoute
+    }
+    '/_auth/app/lessons/$lessonId/session': {
+      id: '/_auth/app/lessons/$lessonId/session'
+      path: '/session'
+      fullPath: '/app/lessons/$lessonId/session'
+      preLoaderRoute: typeof AuthAppLessonsLessonIdSessionRouteImport
+      parentRoute: typeof AuthAppLessonsLessonIdRoute
+    }
   }
 }
 
+interface AuthAppLessonsLessonIdRouteChildren {
+  AuthAppLessonsLessonIdSessionRoute: typeof AuthAppLessonsLessonIdSessionRoute
+  AuthAppLessonsLessonIdSummaryRoute: typeof AuthAppLessonsLessonIdSummaryRoute
+}
+
+const AuthAppLessonsLessonIdRouteChildren: AuthAppLessonsLessonIdRouteChildren =
+  {
+    AuthAppLessonsLessonIdSessionRoute: AuthAppLessonsLessonIdSessionRoute,
+    AuthAppLessonsLessonIdSummaryRoute: AuthAppLessonsLessonIdSummaryRoute,
+  }
+
+const AuthAppLessonsLessonIdRouteWithChildren =
+  AuthAppLessonsLessonIdRoute._addFileChildren(
+    AuthAppLessonsLessonIdRouteChildren,
+  )
+
 interface AuthRouteRouteChildren {
   AuthAppGroupsRoute: typeof AuthAppGroupsRoute
-  AuthAppLessonsRoute: typeof AuthAppLessonsRoute
   AuthAppProfileRoute: typeof AuthAppProfileRoute
   AuthAppProgressRoute: typeof AuthAppProgressRoute
   AuthAppIndexRoute: typeof AuthAppIndexRoute
+  AuthAppLessonsLessonIdRoute: typeof AuthAppLessonsLessonIdRouteWithChildren
   AuthAppPolarPortalRoute: typeof AuthAppPolarPortalRoute
   AuthAppPolarSubscriptionsRoute: typeof AuthAppPolarSubscriptionsRoute
+  AuthAppSubjectsSubjectIdRoute: typeof AuthAppSubjectsSubjectIdRoute
+  AuthAppSubjectsIndexRoute: typeof AuthAppSubjectsIndexRoute
   AuthAppPolarCheckoutSuccessRoute: typeof AuthAppPolarCheckoutSuccessRoute
 }
 
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
   AuthAppGroupsRoute: AuthAppGroupsRoute,
-  AuthAppLessonsRoute: AuthAppLessonsRoute,
   AuthAppProfileRoute: AuthAppProfileRoute,
   AuthAppProgressRoute: AuthAppProgressRoute,
   AuthAppIndexRoute: AuthAppIndexRoute,
+  AuthAppLessonsLessonIdRoute: AuthAppLessonsLessonIdRouteWithChildren,
   AuthAppPolarPortalRoute: AuthAppPolarPortalRoute,
   AuthAppPolarSubscriptionsRoute: AuthAppPolarSubscriptionsRoute,
+  AuthAppSubjectsSubjectIdRoute: AuthAppSubjectsSubjectIdRoute,
+  AuthAppSubjectsIndexRoute: AuthAppSubjectsIndexRoute,
   AuthAppPolarCheckoutSuccessRoute: AuthAppPolarCheckoutSuccessRoute,
 }
 

@@ -95,8 +95,8 @@ export class PerformanceMonitor {
     const sorted = [...values].sort((a, b) => a - b)
     return {
       avg: values.reduce((a, b) => a + b, 0) / values.length,
-      min: sorted[0],
-      max: sorted[sorted.length - 1],
+      min: sorted[0] ?? 0,
+      max: sorted[sorted.length - 1] ?? 0,
       p95: this.percentile(sorted, 0.95),
       count: values.length,
     }
@@ -164,7 +164,7 @@ export class PerformanceMonitor {
   private percentile(sortedValues: number[], p: number): number {
     if (sortedValues.length === 0) return 0
     const index = Math.floor(sortedValues.length * p)
-    return sortedValues[Math.min(index, sortedValues.length - 1)]
+    return sortedValues[Math.min(index, sortedValues.length - 1)] ?? 0
   }
 }
 
@@ -223,7 +223,7 @@ export function trackCoreWebVitals(): void {
         perfMonitor.recordWebVital('FID', inp)
       }
     })
-    inpObserver.observe({ type: 'event', buffered: true, durationThreshold: 16 })
+    inpObserver.observe({ type: 'event', buffered: true, durationThreshold: 16 } as PerformanceObserverInit)
   } catch (e) {
     // Fallback to first-input for older browsers
     try {

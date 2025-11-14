@@ -31,6 +31,10 @@
     "drizzle:migrate": "drizzle-kit migrate --config drizzle.config.ts",
     "drizzle:pull": "drizzle-kit pull --config drizzle.config.ts",
     "seed": "tsx src/database/seed-db.ts",
+    "seed:lessons": "tsx src/database/seed-lessons.ts",
+    "seed:lessons:extended": "tsx src/database/seed-lessons-extended.ts",
+    "seed:all": "tsx src/database/seed-db.ts && tsx src/database/seed-lessons.ts",
+    "seed:full": "tsx src/database/seed-db.ts && tsx src/database/seed-lessons.ts && tsx src/database/seed-lessons-extended.ts",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],

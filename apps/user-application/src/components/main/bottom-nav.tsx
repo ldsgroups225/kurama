@@ -11,7 +11,7 @@ const navItems = [
   {
     icon: BookOpen,
     label: "Leçons",
-    href: "/app/lessons" as const,
+    href: "/app/subjects" as const,
   },
   {
     icon: Users,
@@ -40,7 +40,7 @@ export function BottomNav() {
         <div className="flex items-center justify-around px-2 py-3">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = currentPath === item.href || currentPath.startsWith(item.href + "/");
+            const isActive = currentPath === item.href;
 
             return (
               <Link

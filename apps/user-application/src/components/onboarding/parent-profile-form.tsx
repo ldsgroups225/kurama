@@ -8,6 +8,11 @@ import type { ParentProfile } from "@kurama/data-ops/zod-schema/profile";
 import { useMutation } from "@tanstack/react-query";
 import { submitProfile } from "@/core/functions/profile";
 
+interface Steps {
+  id: string;
+  label: string;
+}
+
 interface ParentProfileFormProps {
   onBack: () => void;
   onSuccess: (profileData?: Partial<ParentProfile>) => void;
@@ -16,7 +21,7 @@ interface ParentProfileFormProps {
 type FormStep = "personal" | "children";
 
 // Mock progress indicator component
-function ProgressIndicator({ steps, currentStep }: { steps: any[], currentStep: number }) {
+function ProgressIndicator({ steps, currentStep }: { steps: Steps[], currentStep: number }) {
   return (
     <div className="flex items-center justify-between mb-6">
       {steps.map((step, index) => (
@@ -57,7 +62,7 @@ export function ParentProfileForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const steps = [
+  const steps: Steps[] = [
     { id: "personal", label: "Informations" },
     { id: "children", label: "Enfants" },
   ];
