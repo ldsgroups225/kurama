@@ -1,16 +1,22 @@
+import { generateUUID } from '@/utils/generateUUID'
+
 export function StatsSkeleton() {
   return (
-    <section className="py-16 bg-muted/50">
+    <section className="bg-muted/50 py-16">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 animate-pulse">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="text-center space-y-2">
-              <div className="h-12 bg-muted rounded w-24 mx-auto" />
-              <div className="h-4 bg-muted rounded w-32 mx-auto" />
+        <div className={`
+          grid animate-pulse grid-cols-2 gap-8
+          md:grid-cols-4
+        `}
+        >
+          {Array.from({ length: 4 }).map(() => (
+            <div key={generateUUID()} className="space-y-2 text-center">
+              <div className="mx-auto h-12 w-24 rounded-sm bg-muted" />
+              <div className="mx-auto h-4 w-32 rounded-sm bg-muted" />
             </div>
           ))}
         </div>
       </div>
     </section>
-  );
+  )
 }

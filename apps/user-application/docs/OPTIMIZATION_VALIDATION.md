@@ -7,6 +7,7 @@ This document provides a comprehensive checklist for validating the bundle optim
 Before running validation, ensure you have:
 
 1. **Clean installation:**
+
    ```bash
    pnpm install
    ```
@@ -25,7 +26,9 @@ Before running validation, ensure you have:
 **Objective:** Verify that routes are split into separate chunks.
 
 **Steps:**
+
 1. Build the application:
+
    ```bash
    pnpm run build
    ```
@@ -36,11 +39,13 @@ Before running validation, ensure you have:
    ```
 
 **Expected Results:**
+
 - ✅ Separate chunks for each route (landing, auth, onboarding, app routes)
 - ✅ Main bundle under 150 KB (gzipped)
 - ✅ Route chunks under 60 KB each (gzipped)
 
 **Verification:**
+
 ```bash
 # List all JavaScript bundles with sizes
 find dist/client/assets -name "*.js" -exec ls -lh {} \;
@@ -53,7 +58,9 @@ find dist/client/assets -name "*.js" -exec ls -lh {} \;
 **Objective:** Verify that components are lazy loaded with Suspense boundaries.
 
 **Steps:**
+
 1. Check landing page components:
+
    ```bash
    grep -r "createLazyComponent" src/routes/index.lazy.tsx
    ```
@@ -64,6 +71,7 @@ find dist/client/assets -name "*.js" -exec ls -lh {} \;
    ```
 
 **Expected Results:**
+
 - ✅ Landing sections use `createLazyComponent`
 - ✅ Each lazy component wrapped with `Suspense`
 - ✅ Appropriate loading skeletons provided
@@ -75,6 +83,7 @@ find dist/client/assets -name "*.js" -exec ls -lh {} \;
 **Objective:** Verify that vendor dependencies are split into separate chunks.
 
 **Steps:**
+
 1. Build and check for vendor chunks:
    ```bash
    pnpm run build
@@ -82,6 +91,7 @@ find dist/client/assets -name "*.js" -exec ls -lh {} \;
    ```
 
 **Expected Results:**
+
 - ✅ `vendor-react` chunk exists (React + React DOM)
 - ✅ `vendor-tanstack` chunk exists (Router + Query)
 - ✅ `vendor-radix` chunk exists (Radix UI components)
@@ -94,17 +104,20 @@ find dist/client/assets -name "*.js" -exec ls -lh {} \;
 **Objective:** Verify all bundles are within performance budgets.
 
 **Steps:**
+
 1. Run bundle size validation:
    ```bash
    pnpm run perf:validate
    ```
 
 **Expected Results:**
+
 - ✅ All bundles pass size checks
 - ✅ Total initial load under 250 KB (gzipped)
 - ✅ No budget violations reported
 
 **If validation fails:**
+
 1. Review bundle analysis:
    ```bash
    pnpm run analyze
@@ -119,7 +132,9 @@ find dist/client/assets -name "*.js" -exec ls -lh {} \;
 **Objective:** Verify performance monitoring is working.
 
 **Steps:**
+
 1. Start development server:
+
    ```bash
    pnpm run dev
    ```
@@ -131,11 +146,13 @@ find dist/client/assets -name "*.js" -exec ls -lh {} \;
 4. Navigate between routes
 
 **Expected Results:**
+
 - ✅ Performance metrics logged in console (dev mode)
 - ✅ Route load times tracked
 - ✅ No console errors related to performance monitoring
 
 **Check metrics endpoint:**
+
 ```bash
 # After building and serving
 pnpm run build
@@ -152,7 +169,9 @@ curl http://localhost:4173/api/metrics
 **Objective:** Verify error boundaries handle lazy loading failures.
 
 **Steps:**
+
 1. Check for error boundary implementation:
+
    ```bash
    grep -r "LazyErrorBoundary" src/components/
    ```
@@ -163,6 +182,7 @@ curl http://localhost:4173/api/metrics
    ```
 
 **Expected Results:**
+
 - ✅ Error boundaries wrap lazy components
 - ✅ Retry logic implemented for failed chunks
 - ✅ User-friendly error messages
@@ -174,7 +194,9 @@ curl http://localhost:4173/api/metrics
 **Objective:** Verify devtools are excluded from production builds.
 
 **Steps:**
+
 1. Build for production:
+
    ```bash
    NODE_ENV=production pnpm run build
    ```
@@ -185,6 +207,7 @@ curl http://localhost:4173/api/metrics
    ```
 
 **Expected Results:**
+
 - ✅ No devtools code in production bundles
 - ✅ Devtools only load in development mode
 - ✅ Lazy loading of devtools in development
@@ -196,7 +219,9 @@ curl http://localhost:4173/api/metrics
 **Objective:** Verify intelligent preloading is working.
 
 **Steps:**
+
 1. Start development server:
+
    ```bash
    pnpm run dev
    ```
@@ -206,6 +231,7 @@ curl http://localhost:4173/api/metrics
 3. Hover over navigation links
 
 **Expected Results:**
+
 - ✅ Route chunks prefetched on hover
 - ✅ `<link rel="prefetch">` tags added to DOM
 - ✅ No duplicate prefetch requests
@@ -217,7 +243,9 @@ curl http://localhost:4173/api/metrics
 **Objective:** Generate and review bundle composition.
 
 **Steps:**
+
 1. Generate analysis report:
+
    ```bash
    pnpm run analyze
    ```
@@ -225,12 +253,14 @@ curl http://localhost:4173/api/metrics
 2. Review `dist/stats.html` in browser
 
 **Expected Results:**
+
 - ✅ Clear visualization of bundle composition
 - ✅ No unexpected large dependencies
 - ✅ No duplicate modules
 - ✅ Vendor chunks properly separated
 
 **Look for:**
+
 - Large dependencies that could be lazy loaded
 - Duplicate versions of the same package
 - Opportunities for further optimization
@@ -242,7 +272,9 @@ curl http://localhost:4173/api/metrics
 **Objective:** Verify performance meets Core Web Vitals targets.
 
 **Steps:**
+
 1. Build and serve:
+
    ```bash
    pnpm run build
    pnpm run serve
@@ -254,6 +286,7 @@ curl http://localhost:4173/api/metrics
    - Run performance audit
 
 **Expected Results:**
+
 - ✅ LCP (Largest Contentful Paint) < 2.5s
 - ✅ FID (First Input Delay) < 100ms
 - ✅ CLS (Cumulative Layout Shift) < 0.1
@@ -266,7 +299,9 @@ curl http://localhost:4173/api/metrics
 **Objective:** Verify loading states are displayed during lazy loading.
 
 **Steps:**
+
 1. Start development server with network throttling:
+
    ```bash
    pnpm run dev
    ```
@@ -276,6 +311,7 @@ curl http://localhost:4173/api/metrics
 3. Navigate between routes
 
 **Expected Results:**
+
 - ✅ Skeleton screens displayed while loading
 - ✅ No layout shift when content loads
 - ✅ Smooth transitions between loading and loaded states
@@ -287,11 +323,13 @@ curl http://localhost:4173/api/metrics
 **Objective:** Verify no TypeScript errors.
 
 **Steps:**
+
 ```bash
 pnpm run typecheck
 ```
 
 **Expected Results:**
+
 - ✅ No TypeScript errors
 - ✅ All types properly defined
 - ✅ No `any` types in critical paths
@@ -313,11 +351,13 @@ echo "✅ All validations passed!"
 ## Performance Benchmarks
 
 ### Before Optimization (Baseline)
+
 - Main bundle: 440.12 KB (136.42 KB gzipped)
 - Total initial load: 440.12 KB
 - Route chunks: None (monolithic bundle)
 
 ### After Optimization (Target)
+
 - Main bundle: < 150 KB (gzipped)
 - Total initial load: < 250 KB (gzipped)
 - Route chunks: 6-8 separate chunks
@@ -328,6 +368,7 @@ echo "✅ All validations passed!"
 ### Issue: Bundle size exceeds budget
 
 **Solution:**
+
 1. Run bundle analysis: `pnpm run analyze`
 2. Identify large dependencies
 3. Consider lazy loading or alternatives
@@ -336,6 +377,7 @@ echo "✅ All validations passed!"
 ### Issue: Lazy loading errors in production
 
 **Solution:**
+
 1. Verify chunk names are stable
 2. Check CDN/hosting configuration
 3. Ensure proper cache headers
@@ -344,6 +386,7 @@ echo "✅ All validations passed!"
 ### Issue: Performance metrics not tracking
 
 **Solution:**
+
 1. Check browser console for errors
 2. Verify `initPerformanceMonitoring()` is called
 3. Check `/api/metrics` endpoint
@@ -352,6 +395,7 @@ echo "✅ All validations passed!"
 ### Issue: Devtools appearing in production
 
 **Solution:**
+
 1. Verify `NODE_ENV=production` during build
 2. Check Vite config external rules
 3. Ensure `import.meta.env.DEV` checks are correct
@@ -375,20 +419,20 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '20'
-          cache: 'pnpm'
-      
+          cache: pnpm
+
       - name: Install dependencies
         run: pnpm install
-      
+
       - name: Type check
         run: pnpm run typecheck
-      
+
       - name: Build
         run: pnpm run build
-      
+
       - name: Validate bundle sizes
         run: pnpm run perf:check-bundles
-      
+
       - name: Upload bundle analysis
         uses: actions/upload-artifact@v3
         with:

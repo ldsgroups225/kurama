@@ -1,104 +1,138 @@
-import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Sparkles, Trophy, Star, Zap } from "@/lib/icons";
-import { cn } from "@/lib/utils";
+import { useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Sparkles, Star, Trophy, Zap } from '@/lib/icons'
+import { cn } from '@/lib/utils'
+import { generateUUID } from '@/utils/generateUUID'
 
 export interface Reward {
-  type: "xp" | "achievement" | "level_up" | "streak";
-  title: string;
-  description: string;
-  value?: number;
-  icon?: React.ReactNode;
+  type: 'xp' | 'achievement' | 'level_up' | 'streak'
+  title: string
+  description: string
+  value?: number
+  icon?: React.ReactNode
 }
 
 interface RewardAnimationProps {
-  reward: Reward;
-  onClose: () => void;
-  show: boolean;
+  reward: Reward
+  onClose: () => void
+  show: boolean
+}
+
+interface AnimationState {
+  isVisible: boolean
+  sparkleStyles: (React.CSSProperties & { id: string })[]
 }
 
 export function RewardAnimation({ reward, onClose, show }: RewardAnimationProps) {
-  const [isVisible, setIsVisible] = useState(false);
+  const [animation, setAnimation] = useState<AnimationState>(() => ({
+    isVisible: false,
+    sparkleStyles: [],
+  }))
 
   useEffect(() => {
     if (show) {
-      setIsVisible(true);
+      // Use a microtask to defer the state update
+      queueMicrotask(() => {
+        const styles = Array.from({ length: 20 }).map(() => ({
+          id: generateUUID(),
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+          animationDelay: `${Math.random() * 2}s`,
+          animationDuration: `${2 + Math.random() * 2}s`,
+        }))
+        setAnimation({ isVisible: true, sparkleStyles: styles })
+      })
     }
-  }, [show]);
+  }, [show])
 
   const handleClose = () => {
-    setIsVisible(false);
-    setTimeout(onClose, 300);
-  };
+    setAnimation(prev => ({ ...prev, isVisible: false }))
+    setTimeout(onClose, 300)
+  }
 
-  if (!show && !isVisible) return null;
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleClose()
+    }
+  }
+
+  if (!show && !animation.isVisible)
+    return null
 
   const getRewardIcon = () => {
-    if (reward.icon) return reward.icon;
+    if (reward.icon)
+      return reward.icon
 
     switch (reward.type) {
-      case "xp":
-        return <Zap className="h-12 w-12 text-white" />;
-      case "achievement":
-        return <Trophy className="h-12 w-12 text-white" />;
-      case "level_up":
-        return <Star className="h-12 w-12 text-white" />;
-      case "streak":
-        return <Sparkles className="h-12 w-12 text-white" />;
+      case 'xp':
+        return <Zap className="h-12 w-12 text-white" />
+      case 'achievement':
+        return <Trophy className="h-12 w-12 text-white" />
+      case 'level_up':
+        return <Star className="h-12 w-12 text-white" />
+      case 'streak':
+        return <Sparkles className="h-12 w-12 text-white" />
       default:
-        return <Trophy className="h-12 w-12 text-white" />;
+        return <Trophy className="h-12 w-12 text-white" />
     }
-  };
+  }
 
   const getRewardGradient = () => {
     switch (reward.type) {
-      case "xp":
-        return "bg-gradient-xp";
-      case "achievement":
-        return "bg-gradient-level";
-      case "level_up":
-        return "bg-gradient-epic";
-      case "streak":
-        return "bg-gradient-streak";
+      case 'xp':
+        return 'bg-gradient-xp'
+      case 'achievement':
+        return 'bg-gradient-level'
+      case 'level_up':
+        return 'bg-gradient-epic'
+      case 'streak':
+        return 'bg-gradient-streak'
       default:
-        return "bg-gradient-to-br from-primary to-primary";
+        return 'bg-gradient-to-br from-primary to-primary'
     }
-  };
+  }
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="reward-title"
+      aria-describedby="reward-description"
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm transition-opacity duration-300",
-        isVisible ? "opacity-100" : "opacity-0"
+        `
+          fixed inset-0 z-50 flex items-center justify-center bg-background/80
+          p-4 backdrop-blur-sm transition-opacity duration-300
+        `,
+        animation.isVisible ? 'opacity-100' : 'opacity-0',
       )}
       onClick={handleClose}
+      onKeyDown={handleKeyDown}
     >
-      <Card
+      <div
         className={cn(
-          "max-w-sm w-full overflow-hidden shadow-2xl transition-all duration-300",
-          isVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
+          `
+            w-full max-w-sm overflow-hidden rounded-lg border bg-card
+            text-card-foreground shadow-2xl transition-all duration-300
+          `,
+          animation.isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0',
         )}
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
-        <CardContent className="p-0">
+        <div className="p-0">
           {/* Animated Background */}
           <div className={cn(
-            "relative p-8",
-            getRewardGradient()
-          )}>
+            'relative p-8',
+            getRewardGradient(),
+          )}
+          >
             {/* Sparkles Animation */}
             <div className="absolute inset-0 overflow-hidden">
-              {[...Array(20)].map((_, i) => (
+              {animation.sparkleStyles.map(style => (
                 <div
-                  key={i}
-                  className="absolute animate-float"
-                  style={{
-                    left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 100}%`,
-                    animationDelay: `${Math.random() * 2}s`,
-                    animationDuration: `${2 + Math.random() * 2}s`,
-                  }}
+                  key={style.id}
+                  className="animate-float absolute"
+                  style={style}
                 >
                   <Sparkles className="h-4 w-4 text-white/30" />
                 </div>
@@ -106,39 +140,50 @@ export function RewardAnimation({ reward, onClose, show }: RewardAnimationProps)
             </div>
 
             {/* Icon */}
-            <div className="relative flex justify-center mb-4">
+            <div className="relative mb-4 flex justify-center">
               <div className="animate-bounce-slow">
-                <div className="h-24 w-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                <div className={`
+                  flex h-24 w-24 items-center justify-center rounded-full
+                  bg-white/20 shadow-lg backdrop-blur-sm
+                `}
+                >
                   {getRewardIcon()}
                 </div>
               </div>
             </div>
 
             {/* Title */}
-            <h2 className="text-2xl font-bold text-white text-center mb-2">
+            <h2
+              id="reward-title"
+              className="mb-2 text-center text-2xl font-bold text-white"
+            >
               {reward.title}
             </h2>
 
             {/* Value */}
             {reward.value && (
-              <div className="text-center mb-2">
+              <div className="mb-2 text-center">
                 <span className="text-4xl font-bold text-white">
-                  +{reward.value}
+                  +
+                  {reward.value}
                 </span>
-                <span className="text-lg text-white/80 ml-2">
-                  {reward.type === "xp" ? "XP" : "points"}
+                <span className="ml-2 text-lg text-white/80">
+                  {reward.type === 'xp' ? 'XP' : 'points'}
                 </span>
               </div>
             )}
 
             {/* Description */}
-            <p className="text-white/90 text-center text-sm">
+            <p
+              id="reward-description"
+              className="text-center text-sm text-white/90"
+            >
               {reward.description}
             </p>
           </div>
 
           {/* Action Button */}
-          <div className="p-6 bg-background">
+          <div className="bg-background p-6">
             <Button
               onClick={handleClose}
               className="w-full"
@@ -147,10 +192,11 @@ export function RewardAnimation({ reward, onClose, show }: RewardAnimationProps)
               Continuer
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <style>{`
+      <style>
+        {`
         @keyframes float {
           0%, 100% {
             transform: translateY(0) rotate(0deg);
@@ -181,7 +227,8 @@ export function RewardAnimation({ reward, onClose, show }: RewardAnimationProps)
         .animate-bounce-slow {
           animation: bounce-slow 2s ease-in-out infinite;
         }
-      `}</style>
+      `}
+      </style>
     </div>
-  );
+  )
 }

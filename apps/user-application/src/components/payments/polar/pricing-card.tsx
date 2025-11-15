@@ -1,20 +1,21 @@
+import type { Price, Product, Subscription } from './types'
+import { Check } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Check } from "lucide-react";
-import { Price, Product, Subscription } from "./types";
+} from '@/components/ui/card'
+import { generateUUID } from '@/utils/generateUUID'
 
 interface PricingCardProps {
-  product: Product;
-  subscription: Subscription;
-  onCheckout: (productId: string) => void;
-  isCheckoutPending: boolean;
+  product: Product
+  subscription: Subscription
+  onCheckout: (productId: string) => void
+  isCheckoutPending: boolean
 }
 
 export function PricingCard({
@@ -23,47 +24,47 @@ export function PricingCard({
   onCheckout,
   isCheckoutPending,
 }: PricingCardProps) {
-  const price = product.prices[0];
+  const price = product.prices[0]
 
   const formatPrice = (price: Price) => {
     if (!price) {
-      return "Price unavailable";
+      return 'Price unavailable'
     }
-    if (price.type !== "recurring") {
-      return "Currency not specified";
-    }
-
-    if (price.amountType === "fixed" && price.priceAmount) {
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: price.priceCurrency.toUpperCase(),
-      }).format(price.priceAmount / 100);
+    if (price.type !== 'recurring') {
+      return 'Currency not specified'
     }
 
-    if (price.amountType === "custom") {
-      const min = price.minimumAmount ? price.minimumAmount / 100 : 0;
-      const max = price.maximumAmount ? price.maximumAmount / 100 : null;
-      const formatter = new Intl.NumberFormat("en-US", {
-        style: "currency",
+    if (price.amountType === 'fixed' && price.priceAmount) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
         currency: price.priceCurrency.toUpperCase(),
-      });
+      }).format(price.priceAmount / 100)
+    }
+
+    if (price.amountType === 'custom') {
+      const min = price.minimumAmount ? price.minimumAmount / 100 : 0
+      const max = price.maximumAmount ? price.maximumAmount / 100 : null
+      const formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: price.priceCurrency.toUpperCase(),
+      })
 
       if (max) {
-        return `${formatter.format(min)} - ${formatter.format(max)}`;
+        return `${formatter.format(min)} - ${formatter.format(max)}`
       }
-      return `From ${formatter.format(min)}`;
+      return `From ${formatter.format(min)}`
     }
 
-    return "Custom pricing";
-  };
+    return 'Custom pricing'
+  }
 
   const getFeatures = (metadata: Record<string, any>) => {
     return Object.entries(metadata)
-      .filter(([key]) => key.includes("feature"))
-      .map(([_, value]) => value);
-  };
+      .filter(([key]) => key.includes('feature'))
+      .map(([, value]) => value)
+  }
 
-  const features = getFeatures(product.metadata);
+  const features = getFeatures(product.metadata)
 
   const renderButton = () => {
     if (subscription) {
@@ -75,25 +76,28 @@ export function PricingCard({
                 Current Plan
               </Badge>
               <p className="text-sm text-muted-foreground">
-                Status: {subscription.status}
+                Status:
+                {' '}
+                {subscription.status}
               </p>
             </div>
             <Button asChild className="w-full" size="lg" variant="outline">
               <a href="/app/polar/portal">Manage Subscription</a>
             </Button>
           </div>
-        );
-      } else {
+        )
+      }
+      else {
         return (
           <div className="text-center">
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="mb-4 text-sm text-muted-foreground">
               Manage your subscription in the portal
             </p>
             <Button asChild className="w-full" size="lg" variant="secondary">
               <a href="/app/polar/portal">Go to Portal</a>
             </Button>
           </div>
-        );
+        )
       }
     }
 
@@ -102,7 +106,7 @@ export function PricingCard({
         <Button disabled className="w-full" size="lg">
           Price Unavailable
         </Button>
-      );
+      )
     }
 
     return (
@@ -114,8 +118,8 @@ export function PricingCard({
       >
         Get Started
       </Button>
-    );
-  };
+    )
+  }
 
   return (
     <Card key={product.id} className="relative">
@@ -133,19 +137,21 @@ export function PricingCard({
 
       <CardContent>
         <div className="mb-6">
-          <div className="text-3xl font-bold">{price ? formatPrice(price) : "Price unavailable"}</div>
-          {price && price.type === "recurring" && (
+          <div className="text-3xl font-bold">{price ? formatPrice(price) : 'Price unavailable'}</div>
+          {price && price.type === 'recurring' && (
             <div className="text-sm text-muted-foreground">
-              per {price.recurringInterval}
+              per
+              {' '}
+              {price.recurringInterval}
             </div>
           )}
         </div>
 
         {features.length > 0 && (
-          <div className="space-y-3 mb-6">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-start gap-2">
-                <Check className="w-4 h-4 text-success mt-0.5 shrink-0" />
+          <div className="mb-6 space-y-3">
+            {features.map(feature => (
+              <div key={generateUUID()} className="flex items-start gap-2">
+                <Check className="text-success mt-0.5 h-4 w-4 shrink-0" />
                 <span className="text-sm">{feature}</span>
               </div>
             ))}
@@ -155,5 +161,5 @@ export function PricingCard({
         {renderButton()}
       </CardContent>
     </Card>
-  );
+  )
 }

@@ -4,13 +4,14 @@
  * Checks if bundle sizes are within performance budgets
  */
 
-import { readFileSync, readdirSync, statSync } from 'fs'
-import { join } from 'path'
-import { gzipSync } from 'zlib'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { join } from 'node:path'
+import process from 'node:process'
+import { gzipSync } from 'node:zlib'
 import {
-  isBundleWithinBudget,
   formatBytes,
   getBudgetStatusEmoji,
+  isBundleWithinBudget,
 } from '../src/config/performance-budgets'
 
 interface BundleInfo {
@@ -32,7 +33,8 @@ function getBundleFiles(distPath: string): BundleInfo[] {
 
     for (const file of files) {
       // Only process JavaScript files
-      if (!file.endsWith('.js')) continue
+      if (!file.endsWith('.js'))
+        continue
 
       const filePath = join(assetsPath, file)
       const stats = statSync(filePath)
@@ -46,7 +48,8 @@ function getBundleFiles(distPath: string): BundleInfo[] {
         gzipSize,
       })
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error reading bundle files:', error)
     process.exit(1)
   }
@@ -68,7 +71,7 @@ function checkBundleSizes(bundles: BundleInfo[]): {
   console.log('\n📦 Bundle Size Analysis\n')
   console.log('─'.repeat(80))
   console.log(
-    `${'Bundle'.padEnd(30)} ${'Size'.padEnd(15)} ${'Gzipped'.padEnd(15)} ${'Budget'.padEnd(10)} Status`
+    `${'Bundle'.padEnd(30)} ${'Size'.padEnd(15)} ${'Gzipped'.padEnd(15)} ${'Budget'.padEnd(10)} Status`,
   )
   console.log('─'.repeat(80))
 
@@ -80,7 +83,7 @@ function checkBundleSizes(bundles: BundleInfo[]): {
     const { withinBudget, budget, percentage } = isBundleWithinBudget(
       bundle.name,
       bundle.gzipSize,
-      true
+      true,
     )
 
     const emoji = getBudgetStatusEmoji(percentage)
@@ -88,44 +91,44 @@ function checkBundleSizes(bundles: BundleInfo[]): {
     const budgetStr = budget ? formatBytes(budget.maxSizeGzip) : 'N/A'
 
     console.log(
-      `${bundle.name.padEnd(30)} ${formatBytes(bundle.size).padEnd(15)} ${formatBytes(bundle.gzipSize).padEnd(15)} ${budgetStr.padEnd(10)} ${emoji} ${status}`
+      `${bundle.name.padEnd(30)} ${formatBytes(bundle.size).padEnd(15)} ${formatBytes(bundle.gzipSize).padEnd(15)} ${budgetStr.padEnd(10)} ${emoji} ${status}`,
     )
 
     if (!withinBudget && budget) {
       violations.push(
-        `${bundle.name}: ${formatBytes(bundle.gzipSize)} exceeds budget of ${formatBytes(budget.maxSizeGzip)} (${percentage.toFixed(1)}%)`
+        `${bundle.name}: ${formatBytes(bundle.gzipSize)} exceeds budget of ${formatBytes(budget.maxSizeGzip)} (${percentage.toFixed(1)}%)`,
       )
     }
   }
 
   console.log('─'.repeat(80))
   console.log(
-    `${'TOTAL'.padEnd(30)} ${formatBytes(totalSize).padEnd(15)} ${formatBytes(totalGzipSize).padEnd(15)}`
+    `${'TOTAL'.padEnd(30)} ${formatBytes(totalSize).padEnd(15)} ${formatBytes(totalGzipSize).padEnd(15)}`,
   )
   console.log('─'.repeat(80))
 
   // Check total initial load size (main + vendor bundles)
   const initialLoadBundles = bundles.filter(
-    (b) =>
-      b.name.includes('main') ||
-      b.name.includes('vendor') ||
-      b.name.includes('index')
+    b =>
+      b.name.includes('main')
+      || b.name.includes('vendor')
+      || b.name.includes('index'),
   )
   const initialLoadSize = initialLoadBundles.reduce(
     (sum, b) => sum + b.gzipSize,
-    0
+    0,
   )
   const maxInitialLoad = 250 * 1024 // 250 KB target
 
   console.log(`\n📊 Initial Load Size: ${formatBytes(initialLoadSize)}`)
   console.log(`   Target: ${formatBytes(maxInitialLoad)}`)
   console.log(
-    `   Status: ${initialLoadSize <= maxInitialLoad ? '✅ PASS' : '❌ FAIL'}`
+    `   Status: ${initialLoadSize <= maxInitialLoad ? '✅ PASS' : '❌ FAIL'}`,
   )
 
   if (initialLoadSize > maxInitialLoad) {
     violations.push(
-      `Initial load size ${formatBytes(initialLoadSize)} exceeds target of ${formatBytes(maxInitialLoad)}`
+      `Initial load size ${formatBytes(initialLoadSize)} exceeds target of ${formatBytes(maxInitialLoad)}`,
     )
   }
 
@@ -156,7 +159,7 @@ function main() {
   if (!passed) {
     console.log('\n❌ Bundle size check FAILED\n')
     console.log('Violations:')
-    violations.forEach((v) => console.log(`  - ${v}`))
+    violations.forEach(v => console.log(`  - ${v}`))
     console.log('\n💡 Tips to reduce bundle size:')
     console.log('  - Review bundle analysis report (npm run analyze)')
     console.log('  - Check for duplicate dependencies')

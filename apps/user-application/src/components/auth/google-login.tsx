@@ -1,23 +1,26 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { authClient } from "@/lib/auth-client";
+} from '@/components/ui/card'
+import { authClient } from '@/lib/auth-client'
 
 export function GoogleLogin() {
   const handleGoogleSignIn = async () => {
     await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/app",
-    });
-  };
+      provider: 'google',
+      callbackURL: '/app',
+    })
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className={`
+      flex min-h-screen items-center justify-center bg-background p-4
+    `}
+    >
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
@@ -26,7 +29,7 @@ export function GoogleLogin() {
         <CardContent>
           <Button
             onClick={handleGoogleSignIn}
-            className="w-full h-12 text-base"
+            className="h-12 w-full text-base"
             variant="outline"
           >
             <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -40,7 +43,7 @@ export function GoogleLogin() {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }
 
-export default GoogleLogin;
+export default GoogleLogin

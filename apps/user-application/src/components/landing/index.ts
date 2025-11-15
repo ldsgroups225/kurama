@@ -1,8 +1,8 @@
-export { HeroSection } from "./hero-section";
-export { FeaturesSection } from "./features-section";
-export { SubjectsSection } from "./subjects-section";
-export { StatsSection } from "./stats-section";
-export { HowItWorksSection } from "./how-it-works-section";
-export { TestimonialsSection } from "./testimonials-section";
-export { CTASection } from "./cta-section";
-export { Footer } from "./footer";
+export { CTASection } from './cta-section'
+export { FeaturesSection } from './features-section'
+export { Footer } from './footer'
+export { HeroSection } from './hero-section'
+export { HowItWorksSection } from './how-it-works-section'
+export { StatsSection } from './stats-section'
+export { SubjectsSection } from './subjects-section'
+export { TestimonialsSection } from './testimonials-section'

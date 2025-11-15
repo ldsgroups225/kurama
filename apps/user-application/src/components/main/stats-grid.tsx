@@ -1,13 +1,14 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { type LucideIcon } from "@/lib/icons";
+import type { LucideIcon } from '@/lib/icons'
+import { Card, CardContent } from '@/components/ui/card'
+import { generateUUID } from '@/utils/generateUUID'
 
 interface StatCardProps {
-  icon: LucideIcon;
-  label: string;
-  value: string;
-  subValue?: string;
-  color?: string;
-  progress?: number;
+  icon: LucideIcon
+  label: string
+  value: string
+  subValue?: string
+  color?: string
+  progress?: number
 }
 
 export function StatCard({
@@ -15,14 +16,22 @@ export function StatCard({
   label,
   value,
   subValue,
-  color = "text-primary",
-  progress
+  color = 'text-primary',
+  progress,
 }: StatCardProps) {
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
+    <Card className={`
+      overflow-hidden transition-shadow
+      hover:shadow-md
+    `}
+    >
       <CardContent className="p-4">
-        <div className="flex items-center gap-3 mb-3">
-          <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-muted ${color}`}>
+        <div className="mb-3 flex items-center gap-3">
+          <div className={`
+            flex h-10 w-10 items-center justify-center rounded-full bg-muted
+            ${color}
+          `}
+          >
             <Icon className="h-5 w-5" />
           </div>
           <div className="flex-1">
@@ -33,9 +42,11 @@ export function StatCard({
 
         {progress !== undefined && (
           <div className="space-y-1">
-            <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full bg-primary rounded-full transition-all duration-500"
+                className={`
+                  h-full rounded-full bg-primary transition-all duration-500
+                `}
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -46,19 +57,19 @@ export function StatCard({
         )}
       </CardContent>
     </Card>
-  );
+  )
 }
 
 interface StatsGridProps {
-  stats: StatCardProps[];
+  stats: StatCardProps[]
 }
 
 export function StatsGrid({ stats }: StatsGridProps) {
   return (
     <div className="grid grid-cols-2 gap-4">
-      {stats.map((stat, index) => (
-        <StatCard key={index} {...stat} />
+      {stats.map(stat => (
+        <StatCard key={generateUUID()} {...stat} />
       ))}
     </div>
-  );
+  )
 }

@@ -5,9 +5,9 @@
  */
 
 import {
-  performanceBudgets,
   areWebVitalsWithinBudget,
   formatBytes,
+  performanceBudgets,
 } from '../src/config/performance-budgets'
 
 /**
@@ -28,7 +28,7 @@ function displayBudgets() {
   console.log('\nBundle Size Budgets:')
   performanceBudgets.bundles.forEach((budget) => {
     console.log(
-      `  ${budget.name.padEnd(20)} ≤ ${formatBytes(budget.maxSizeGzip)} (gzipped)`
+      `  ${budget.name.padEnd(20)} ≤ ${formatBytes(budget.maxSizeGzip)} (gzipped)`,
     )
   })
   console.log('─'.repeat(60))
@@ -61,9 +61,10 @@ function validateSampleMetrics() {
 
   if (withinBudget) {
     console.log('\n✅ All metrics are within budget!')
-  } else {
+  }
+  else {
     console.log('\n❌ Some metrics exceed budget:')
-    violations.forEach((v) => console.log(`  - ${v}`))
+    violations.forEach(v => console.log(`  - ${v}`))
   }
 
   console.log('─'.repeat(60))

@@ -130,10 +130,10 @@ export const performanceBudgets: PerformanceBudget = {
 export function isBundleWithinBudget(
   bundleName: string,
   actualSize: number,
-  isGzipped: boolean = false
-): { withinBudget: boolean; budget: BundleBudget | null; percentage: number } {
-  const budget = performanceBudgets.bundles.find((b) =>
-    bundleName.toLowerCase().includes(b.name.toLowerCase())
+  isGzipped: boolean = false,
+): { withinBudget: boolean, budget: BundleBudget | null, percentage: number } {
+  const budget = performanceBudgets.bundles.find(b =>
+    bundleName.toLowerCase().includes(b.name.toLowerCase()),
   )
 
   if (!budget) {
@@ -164,31 +164,31 @@ export function areWebVitalsWithinBudget(metrics: {
 
   if (metrics.LCP && metrics.LCP > performanceBudgets.maxLCP) {
     violations.push(
-      `LCP: ${metrics.LCP.toFixed(0)}ms exceeds budget of ${performanceBudgets.maxLCP}ms`
+      `LCP: ${metrics.LCP.toFixed(0)}ms exceeds budget of ${performanceBudgets.maxLCP}ms`,
     )
   }
 
   if (metrics.FID && metrics.FID > performanceBudgets.maxFID) {
     violations.push(
-      `FID: ${metrics.FID.toFixed(0)}ms exceeds budget of ${performanceBudgets.maxFID}ms`
+      `FID: ${metrics.FID.toFixed(0)}ms exceeds budget of ${performanceBudgets.maxFID}ms`,
     )
   }
 
   if (metrics.INP && metrics.INP > performanceBudgets.maxINP) {
     violations.push(
-      `INP: ${metrics.INP.toFixed(0)}ms exceeds budget of ${performanceBudgets.maxINP}ms`
+      `INP: ${metrics.INP.toFixed(0)}ms exceeds budget of ${performanceBudgets.maxINP}ms`,
     )
   }
 
   if (metrics.CLS && metrics.CLS > performanceBudgets.maxCLS) {
     violations.push(
-      `CLS: ${metrics.CLS.toFixed(3)} exceeds budget of ${performanceBudgets.maxCLS}`
+      `CLS: ${metrics.CLS.toFixed(3)} exceeds budget of ${performanceBudgets.maxCLS}`,
     )
   }
 
   if (metrics.TTFB && metrics.TTFB > performanceBudgets.maxTTFB) {
     violations.push(
-      `TTFB: ${metrics.TTFB.toFixed(0)}ms exceeds budget of ${performanceBudgets.maxTTFB}ms`
+      `TTFB: ${metrics.TTFB.toFixed(0)}ms exceeds budget of ${performanceBudgets.maxTTFB}ms`,
     )
   }
 
@@ -202,19 +202,22 @@ export function areWebVitalsWithinBudget(metrics: {
  * Format bytes to human-readable size
  */
 export function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B'
+  if (bytes === 0)
+    return '0 B'
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`
+  return `${(bytes / k ** i).toFixed(2)} ${sizes[i]}`
 }
 
 /**
  * Get budget status color
  */
 export function getBudgetStatusColor(percentage: number): string {
-  if (percentage <= 80) return 'green'
-  if (percentage <= 100) return 'yellow'
+  if (percentage <= 80)
+    return 'green'
+  if (percentage <= 100)
+    return 'yellow'
   return 'red'
 }
 
@@ -222,7 +225,9 @@ export function getBudgetStatusColor(percentage: number): string {
  * Get budget status emoji
  */
 export function getBudgetStatusEmoji(percentage: number): string {
-  if (percentage <= 80) return '✅'
-  if (percentage <= 100) return '⚠️'
+  if (percentage <= 80)
+    return '✅'
+  if (percentage <= 100)
+    return '⚠️'
   return '❌'
 }

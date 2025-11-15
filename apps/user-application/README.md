@@ -42,10 +42,10 @@ pnpm cf-typegen
 This creates type definitions allowing you to safely import and use Cloudflare environment variables:
 
 ```typescript
-import { env } from "cloudflare:workers";
+import { env } from 'cloudflare:workers'
 
 // Now env is fully typed with your Wrangler configuration
-console.log(env.MY_VAR); // TypeScript knows this exists
+console.log(env.MY_VAR) // TypeScript knows this exists
 ```
 
 ### Wrangler Configuration
@@ -58,7 +58,7 @@ The `wrangler.jsonc` file configures your Cloudflare deployment:
   "name": "tanstack-start-app",
   "compatibility_date": "2025-09-02",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "./src/server.ts",  // Custom server entry point
+  "main": "./src/server.ts", // Custom server entry point
   "vars": {
     "MY_VAR": "Hello from Cloudflare"
   }
@@ -70,7 +70,7 @@ The `wrangler.jsonc` file configures your Cloudflare deployment:
 The `src/server.ts` file is your custom Cloudflare Workers entry point where you can add additional Cloudflare features:
 
 ```typescript
-import handler from "@tanstack/react-start/server-entry";
+import handler from '@tanstack/react-start/server-entry'
 
 export default {
   fetch(request: Request) {
@@ -78,7 +78,7 @@ export default {
       context: {
         fromFetch: true,
       },
-    });
+    })
   },
 
   // Add other Cloudflare Workers features:
@@ -86,12 +86,13 @@ export default {
   // - Scheduled events: scheduled(event, env) { ... }
   // - Durable Object handlers
   // - etc.
-};
+}
 ```
 
 ## 🎨 Styling & Components
 
 ### Tailwind CSS v4
+
 This project uses the latest Tailwind CSS v4 with CSS variables for theming:
 
 ```bash
@@ -100,6 +101,7 @@ This project uses the latest Tailwind CSS v4 with CSS variables for theming:
 ```
 
 ### Shadcn/UI Components
+
 Add beautiful, accessible components using Shadcn/UI:
 
 ```bash
@@ -111,8 +113,6 @@ pnpx shadcn@latest add form
 # Components use semantic color tokens and CSS variables
 # Perfect for light/dark theme support
 ```
-
-
 
 ## 🗂️ File-Based Routing
 
@@ -131,7 +131,7 @@ Now that you have two routes you can use a `Link` component to navigate between 
 To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
 
 ```tsx
-import { Link } from "@tanstack/react-router";
+import { Link } from '@tanstack/react-router'
 ```
 
 Then anywhere in your JSX you can use it like so:
@@ -151,10 +151,9 @@ In the File Based Routing setup the layout is located in `src/routes/__root.tsx`
 Here is an example layout that includes a header:
 
 ```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
 
-import { Link } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 export const Route = createRootRoute({
   component: () => (
@@ -176,7 +175,6 @@ The `<TanStackRouterDevtools />` component is not required so you can remove it 
 
 More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
 
-
 ## 🔄 Data Fetching & Server Functions
 
 This template demonstrates modern server-side patterns with TanStack Start's server functions, middleware, and seamless client integration.
@@ -190,24 +188,24 @@ Server functions run exclusively on the server and maintain type safety across n
 export const exampleMiddleware = createMiddleware({
   type: 'function'
 }).server(async ({ next }) => {
-  console.log('Middleware executing on server');
+  console.log('Middleware executing on server')
   return next({
     context: {
       data: 'Context from middleware'
     }
-  });
-});
+  })
+})
 
 // src/core/functions/example-functions.ts
 const ExampleInputSchema = z.object({
   exampleKey: z.string().min(1),
-});
+})
 
-type ExampleInput = z.infer<typeof ExampleInputSchema>;
+type ExampleInput = z.infer<typeof ExampleInputSchema>
 
 const baseFunction = createServerFn().middleware([
   exampleMiddleware,
-]);
+])
 
 export const exampleFunction = baseFunction
   .inputValidator((data: ExampleInput) => ExampleInputSchema.parse(data))
@@ -215,8 +213,8 @@ export const exampleFunction = baseFunction
     // Access validated input: ctx.data
     // Access middleware context: ctx.context
     // Access Cloudflare env: env.MY_VAR
-    return 'Server response';
-  });
+    return 'Server response'
+  })
 ```
 
 ### Client Integration with TanStack Query
@@ -224,15 +222,15 @@ export const exampleFunction = baseFunction
 Server functions integrate seamlessly with TanStack Query for optimal UX:
 
 ```tsx
-import { useMutation } from '@tanstack/react-query';
-import { exampleFunction } from '@/core/functions/example-functions';
+import { useMutation } from '@tanstack/react-query'
+import { exampleFunction } from '@/core/functions/example-functions'
 
 function MyComponent() {
   const mutation = useMutation({
     mutationFn: exampleFunction,
-    onSuccess: (data) => console.log('Success:', data),
-    onError: (error) => console.error('Error:', error),
-  });
+    onSuccess: data => console.log('Success:', data),
+    onError: error => console.error('Error:', error),
+  })
 
   return (
     <button
@@ -241,7 +239,7 @@ function MyComponent() {
     >
       {mutation.isPending ? 'Loading...' : 'Call Server Function'}
     </button>
-  );
+  )
 }
 ```
 
@@ -275,25 +273,30 @@ pnpm test
 This template includes the latest and greatest from the React ecosystem:
 
 ### **Core Framework**
+
 - **TanStack Start** - Full-stack React framework with SSR
 - **React 19** - Latest React with concurrent features
 - **TypeScript** - Strict type checking enabled
 
 ### **Routing & Data**
+
 - **TanStack Router** - Type-safe, file-based routing
 - **TanStack Query** - Server state management with SSR integration
 
 ### **Styling & UI**
+
 - **Tailwind CSS v4** - Utility-first CSS with CSS variables
 - **Shadcn/UI** - Beautiful, accessible component library
 - **Lucide React** - Consistent icon set
 
 ### **Development Tools**
+
 - **Vite** - Lightning-fast build tool and dev server
 - **Vitest** - Unit testing with jsdom
 - **TypeScript** - Full type safety across client and server
 
 ### **Deployment**
+
 - **Cloudflare Workers** - Edge computing platform
 - **Wrangler** - Cloudflare deployment and development CLI
 

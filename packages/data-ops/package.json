@@ -54,7 +54,6 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250823.0",
     "@types/better-sqlite3": "^7.6.13",
-    "better-sqlite#": "link:@types/better-sqlite#",
     "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.4",
     "mysql2": "^3.14.3",

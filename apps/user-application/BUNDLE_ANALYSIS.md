@@ -20,11 +20,13 @@ pnpm run build
 ### Viewing Bundle Analysis
 
 After running any of the above commands, a bundle visualization report will be generated at:
+
 ```
 dist/stats.html
 ```
 
 The report includes:
+
 - **Treemap visualization** of bundle composition
 - **Gzip and Brotli sizes** for all chunks
 - **Detailed breakdown** of dependencies and their sizes
@@ -63,15 +65,15 @@ The application tracks the following Core Web Vitals:
 ### Using the Performance Monitor
 
 ```typescript
-import { perfMonitor, initPerformanceMonitoring } from '@/lib/performance-monitor';
+import { initPerformanceMonitoring, perfMonitor } from '@/lib/performance-monitor'
 
 // Initialize monitoring (call once on app start)
-initPerformanceMonitoring();
+initPerformanceMonitoring()
 
 // Measure route load time
-const endMeasure = perfMonitor.measureRouteLoad('/app/dashboard');
+const endMeasure = perfMonitor.measureRouteLoad('/app/dashboard')
 // ... route loads ...
-endMeasure();
+endMeasure()
 
 // Track bundle metrics
 perfMonitor.trackBundleMetrics({
@@ -80,18 +82,18 @@ perfMonitor.trackBundleMetrics({
   loadTime: 150, // ms
   timeToInteractive: 500, // ms
   timestamp: Date.now(),
-});
+})
 
 // Get statistics for a metric
-const stats = perfMonitor.getStats('route:/app/dashboard:load');
-console.log(stats); // { avg, min, max, p95, count }
+const stats = perfMonitor.getStats('route:/app/dashboard:load')
+console.log(stats) // { avg, min, max, p95, count }
 
 // Check Core Web Vitals against budget
-const vitals = await perfMonitor.trackCoreWebVitals();
+const vitals = await perfMonitor.trackCoreWebVitals()
 if (vitals) {
-  const budgetCheck = perfMonitor.checkBudget(vitals);
+  const budgetCheck = perfMonitor.checkBudget(vitals)
   if (!budgetCheck.passed) {
-    console.warn('Budget violations:', budgetCheck.violations);
+    console.warn('Budget violations:', budgetCheck.violations)
   }
 }
 ```
@@ -101,26 +103,26 @@ if (vitals) {
 ```typescript
 import {
   checkBundleBudget,
-  checkRouteBudget,
   checkMetricBudget,
-} from '@/config/performance-budgets';
+  checkRouteBudget,
+} from '@/config/performance-budgets'
 
 // Check bundle size
-const bundleCheck = checkBundleBudget('main', 153600, 51200);
+const bundleCheck = checkBundleBudget('main', 153600, 51200)
 if (!bundleCheck.passed) {
-  console.warn(bundleCheck.violations);
+  console.warn(bundleCheck.violations)
 }
 
 // Check route performance
-const routeCheck = checkRouteBudget('/app/dashboard', 65536, 2100);
+const routeCheck = checkRouteBudget('/app/dashboard', 65536, 2100)
 if (!routeCheck.passed) {
-  console.warn(routeCheck.violations);
+  console.warn(routeCheck.violations)
 }
 
 // Check individual metric
-const metricCheck = checkMetricBudget('LCP', 2800);
+const metricCheck = checkMetricBudget('LCP', 2800)
 if (!metricCheck.passed) {
-  console.warn(metricCheck.violation);
+  console.warn(metricCheck.violation)
 }
 ```
 
@@ -129,17 +131,20 @@ if (!metricCheck.passed) {
 The Vite configuration includes:
 
 ### Bundle Visualization
+
 - **rollup-plugin-visualizer**: Generates interactive bundle analysis
 - **Output**: `dist/stats.html`
 - **Formats**: Treemap with gzip and brotli sizes
 
 ### Build Optimization
+
 - **Manual chunks**: Vendor splitting for better caching
 - **Chunk size warning**: 500 kB threshold
 - **Compressed size reporting**: Enabled
 - **Dependency pre-bundling**: Critical dependencies included
 
 ### Configuration Location
+
 All bundle optimization settings are in `vite.config.ts`.
 
 ## Development Workflow
@@ -156,12 +161,13 @@ All bundle optimization settings are in `vite.config.ts`.
 The performance monitor automatically tracks metrics in development mode. To enable in production:
 
 1. Initialize monitoring in your app entry point:
+
 ```typescript
-import { initPerformanceMonitoring } from '@/lib/performance-monitor';
+import { initPerformanceMonitoring } from '@/lib/performance-monitor'
 
 // In your app initialization
 if (typeof window !== 'undefined') {
-  initPerformanceMonitoring();
+  initPerformanceMonitoring()
 }
 ```
 

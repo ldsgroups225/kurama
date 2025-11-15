@@ -1,5 +1,7 @@
 # Better Auth Setup
+
 ---
+
 ## Overview
 
 Better Auth provides a comprehensive authentication solution that works seamlessly with serverless and edge environments. It offers built-in support for multiple authentication strategies including social providers, email/password, and session management.
@@ -11,6 +13,7 @@ The authentication system is designed with **database-agnostic architecture** an
 - **Database Integration** - Works with PostgreSQL, MySQL, and SQLite and other providers through Drizzle ORM
 - **Type Safety** - Full TypeScript support with auto-generated schemas
 - **Edge Compatible** - Optimized for serverless and edge runtime environments
+
 ---
 
 ## Step 1: Configure environment variables
@@ -66,10 +69,10 @@ Update your `packages/data-ops/config/auth.ts` file based on your database provi
 ### PostgreSQL CLI Configuration
 
 ```typescript
+import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 // packages/data-ops/config/auth.ts
-import { createBetterAuth } from "../src/auth/setup";
-import { initDatabase } from "../src/database/setup";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { createBetterAuth } from '../src/auth/setup'
+import { initDatabase } from '../src/database/setup'
 
 export const auth = createBetterAuth({
   database: drizzleAdapter(
@@ -79,19 +82,19 @@ export const auth = createBetterAuth({
       username: process.env.DATABASE_USERNAME!,
     }),
     {
-      provider: "pg",
+      provider: 'pg',
     },
   ),
-});
+})
 ```
 
 ### MySQL CLI Configuration
 
 ```typescript
+import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 // packages/data-ops/config/auth.ts
-import { createBetterAuth } from "../src/auth/setup";
-import { initDatabase } from "../src/database/setup";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { createBetterAuth } from '../src/auth/setup'
+import { initDatabase } from '../src/database/setup'
 
 export const auth = createBetterAuth({
   database: drizzleAdapter(
@@ -101,26 +104,26 @@ export const auth = createBetterAuth({
       username: process.env.DATABASE_USERNAME!,
     }),
     {
-      provider: "mysql",
+      provider: 'mysql',
     },
   ),
-});
+})
 ```
 
 ### Cloudflare D1 CLI Configuration
 
 ```typescript
+import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import Database from 'better-sqlite3'
 // packages/data-ops/config/auth.ts
-import { createBetterAuth } from "../src/auth/setup";
-import Database from "better-sqlite3";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { createBetterAuth } from '../src/auth/setup'
 
 // For CLI use - uses dummy SQLite database
 export const auth = createBetterAuth({
-  database: drizzleAdapter(new Database("./config/test.sqlite"), {
-    provider: "sqlite",
+  database: drizzleAdapter(new Database('./config/test.sqlite'), {
+    provider: 'sqlite',
   }),
-});
+})
 ```
 
 ## Step 3: Generate authentication schemas
@@ -163,10 +166,10 @@ This setup occurs in your server entry point, typically `src/server.ts`, where y
 
 ```typescript
 // src/server.ts - TanStack Start Server Entry
-import { setAuth } from "@kurama/data-ops/auth/server";
-import { initDatabase } from "@kurama/data-ops/database/setup";
-import handler from "@tanstack/react-start/server-entry";
-import { env } from "cloudflare:workers";
+import { setAuth } from '@kurama/data-ops/auth/server'
+import { initDatabase } from '@kurama/data-ops/database/setup'
+import handler from '@tanstack/react-start/server-entry'
+import { env } from 'cloudflare:workers'
 
 export default {
   fetch(request: Request) {
@@ -174,7 +177,7 @@ export default {
       host: env.DATABASE_HOST,
       username: env.DATABASE_USERNAME,
       password: env.DATABASE_PASSWORD,
-    });
+    })
 
     setAuth({
       secret: env.BETTER_AUTH_SECRET,
@@ -186,27 +189,27 @@ export default {
       },
       adapter: {
         drizzleDb: db,
-        provider: "pg",
+        provider: 'pg',
       },
-    });
+    })
 
     return handler.fetch(request, {
       context: {
         fromFetch: true,
       },
-    });
+    })
   },
-};
+}
 ```
 
 ### MySQL Runtime Setup
 
 ```typescript
 // src/server.ts - TanStack Start Server Entry
-import { setAuth } from "@kurama/data-ops/auth/server";
-import { initDatabase } from "@kurama/data-ops/database/setup";
-import handler from "@tanstack/react-start/server-entry";
-import { env } from "cloudflare:workers";
+import { setAuth } from '@kurama/data-ops/auth/server'
+import { initDatabase } from '@kurama/data-ops/database/setup'
+import handler from '@tanstack/react-start/server-entry'
+import { env } from 'cloudflare:workers'
 
 export default {
   fetch(request: Request) {
@@ -214,7 +217,7 @@ export default {
       host: env.DATABASE_HOST,
       username: env.DATABASE_USERNAME,
       password: env.DATABASE_PASSWORD,
-    });
+    })
 
     setAuth({
       secret: env.BETTER_AUTH_SECRET,
@@ -226,31 +229,31 @@ export default {
       },
       adapter: {
         drizzleDb: db,
-        provider: "mysql",
+        provider: 'mysql',
       },
-    });
+    })
 
     return handler.fetch(request, {
       context: {
         fromFetch: true,
       },
-    });
+    })
   },
-};
+}
 ```
 
 ### Cloudflare D1 Runtime Setup
 
 ```typescript
 // src/server.ts - TanStack Start Server Entry
-import { setAuth } from "@kurama/data-ops/auth/server";
-import { initDatabase } from "@kurama/data-ops/database/setup";
-import handler from "@tanstack/react-start/server-entry";
-import { env } from "cloudflare:workers";
+import { setAuth } from '@kurama/data-ops/auth/server'
+import { initDatabase } from '@kurama/data-ops/database/setup'
+import handler from '@tanstack/react-start/server-entry'
+import { env } from 'cloudflare:workers'
 
 export default {
   fetch(request: Request) {
-    const db = initDatabase(env.DB); // D1 binding
+    const db = initDatabase(env.DB) // D1 binding
 
     setAuth({
       secret: env.BETTER_AUTH_SECRET,
@@ -262,17 +265,17 @@ export default {
       },
       adapter: {
         drizzleDb: db,
-        provider: "sqlite",
+        provider: 'sqlite',
       },
-    });
+    })
 
     return handler.fetch(request, {
       context: {
         fromFetch: true,
       },
-    });
+    })
   },
-};
+}
 ```
 
 ## Step 5: API route integration
@@ -284,38 +287,41 @@ Create API routes to handle authentication requests. Better Auth provides a sing
 TanStack Start uses file-based routing for API endpoints. The `auth.$.tsx` route creates a catch-all API handler that processes all authentication-related requests under `/api/auth/*`.
 
 ```typescript
+import { getAuth } from '@kurama/data-ops/auth/server'
 // src/routes/api/auth.$.tsx
-import { createFileRoute } from "@tanstack/react-router";
-import { getAuth } from "@kurama/data-ops/auth/server";
+import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute("/api/auth/$")({
+export const Route = createFileRoute('/api/auth/$')({
   server: {
     handlers: {
       GET: ({ request }) => {
-        const auth = getAuth();
-        return auth.handler(request);
+        const auth = getAuth()
+        return auth.handler(request)
       },
       POST: ({ request }) => {
-        const auth = getAuth();
-        return auth.handler(request);
+        const auth = getAuth()
+        return auth.handler(request)
       },
     },
   },
-});
+})
 ```
 
 ### How TanStack Start API Routes Work
 
 **File-based Routing:**
+
 - `auth.$.tsx` - The `$` creates a splat/catch-all route that matches `/api/auth/*`
 - Automatically handles all authentication endpoints: `/api/auth/sign-in`, `/api/auth/callback/google`, `/api/auth/session`, etc.
 
 **Server Handlers:**
+
 - `server.handlers` - Defines HTTP methods (GET, POST) for server-side processing
 - `request` parameter - Contains the full HTTP request with headers, body, and URL
 - Each handler returns a Response object that TanStack Start automatically serves
 
 **Better Auth Integration:**
+
 - `getAuth()` - Retrieves the initialized Better Auth instance from your server setup
 - `auth.handler(request)` - Single method that routes requests to appropriate Better Auth endpoints
 - Handles OAuth callbacks, session validation, sign-in/out, and token refresh automatically
@@ -356,7 +362,7 @@ export function LoginButton() {
 
 # Better Auth Client Integration
 
-*Client Guide*
+_Client Guide_
 
 Implement secure authentication on the client side with React hooks
 
@@ -380,9 +386,9 @@ The client automatically handles session management, token refresh, and provides
 
 ```typescript
 // src/components/auth/client.ts
-import { createAuthClient } from "better-auth/react";
+import { createAuthClient } from 'better-auth/react'
 
-export const authClient = createAuthClient();
+export const authClient = createAuthClient()
 ```
 
 > **Automatic Configuration:** The client automatically detects the base URL and configures endpoints based on your server setup. For custom configurations, you can pass options like `baseURL` to override defaults.
@@ -622,12 +628,14 @@ function RouteComponent() {
 ### Key Differences Between Approaches
 
 **Client-side:**
+
 - Authentication check happens in the browser
 - Loading state while checking session
 - Better for dynamic user experiences
 - Requires handling pending states
 
 **Server-side (SSR):**
+
 - Authentication validated on server
 - No loading state - immediate auth decision
 - Better security and SEO

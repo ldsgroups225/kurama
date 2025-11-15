@@ -1,56 +1,59 @@
-import { atomWithStorage } from "jotai/utils";
+import { atomWithStorage } from 'jotai/utils'
 
-const defaultOpts = { getOnInit: true };
+const defaultOpts = { getOnInit: true }
 
 // Check if we're on the client side
-const isClient = typeof window !== "undefined";
+const isClient = typeof window !== 'undefined'
 
-export const atomWithLocalStorageBooleanStorage = (
-  key: string,
-  initialValue: boolean
-) =>
-  atomWithStorage(
+export function atomWithLocalStorageBooleanStorage(key: string, initialValue: boolean) {
+  return atomWithStorage(
     key,
     initialValue,
     {
       getItem(key, initialValue: boolean) {
-        if (!isClient) return initialValue;
-        const item = localStorage.getItem(key);
-        if (item === null) return initialValue;
-        return item === "true";
+        if (!isClient)
+          return initialValue
+        const item = localStorage.getItem(key)
+        if (item === null)
+          return initialValue
+        return item === 'true'
       },
       setItem: (key, newValue) => {
-        if (!isClient) return;
-        localStorage.setItem(key, String(newValue));
+        if (!isClient)
+          return
+        localStorage.setItem(key, String(newValue))
       },
       removeItem: (key) => {
-        if (!isClient) return;
-        localStorage.removeItem(key);
+        if (!isClient)
+          return
+        localStorage.removeItem(key)
       },
     },
-    defaultOpts
-  );
+    defaultOpts,
+  )
+}
 
-export const atomWithLocalStorageStringStorage = (
-  key: string,
-  initialValue: string
-) =>
-  atomWithStorage(
+export function atomWithLocalStorageStringStorage(key: string, initialValue: string) {
+  return atomWithStorage(
     key,
     initialValue,
     {
       getItem(key, initialValue: string) {
-        if (!isClient) return initialValue;
-        return localStorage.getItem(key) ?? initialValue;
+        if (!isClient)
+          return initialValue
+        return localStorage.getItem(key) ?? initialValue
       },
       setItem: (key, newValue) => {
-        if (!isClient) return;
-        localStorage.setItem(key, newValue);
+        if (!isClient)
+          return
+        localStorage.setItem(key, newValue)
       },
       removeItem: (key) => {
-        if (!isClient) return;
-        localStorage.removeItem(key);
+        if (!isClient)
+          return
+        localStorage.removeItem(key)
       },
     },
-    defaultOpts
-  );
+    defaultOpts,
+  )
+}

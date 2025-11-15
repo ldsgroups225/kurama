@@ -5,112 +5,112 @@
  */
 
 // Export LucideIcon type for component props
-export type { LucideIcon } from 'lucide-react';
+export type { LucideIcon } from 'lucide-react'
 
 // UI Component Icons
 export {
-  XIcon as X,
   CheckIcon as Check,
   ChevronDownIcon as ChevronDown,
-  ChevronUpIcon as ChevronUp,
   ChevronRightIcon as ChevronRight,
+  ChevronUpIcon as ChevronUp,
   CircleIcon as Circle,
-} from 'lucide-react';
+  XIcon as X,
+} from 'lucide-react'
 
 // Navigation Icons
 export {
-  Home,
-  Menu,
   ArrowLeft,
   ArrowRight,
-  Search,
   Bell,
+  ExternalLink,
+  Home,
   LogIn,
   LogOut,
-  ExternalLink,
-} from 'lucide-react';
+  Menu,
+  Search,
+} from 'lucide-react'
 
 // User & Profile Icons
 export {
-  User,
-  Users,
   GraduationCap,
+  User,
   UserPlus,
-} from 'lucide-react';
+  Users,
+} from 'lucide-react'
 
 // Content & Learning Icons
 export {
   BookOpen,
   Brain,
-  Trophy,
-  Star,
-  Sparkles,
-  Flame,
   Crown,
-  Shield,
+  Flame,
   Lock,
   Play,
   Rocket,
-} from 'lucide-react';
+  Shield,
+  Sparkles,
+  Star,
+  Trophy,
+} from 'lucide-react'
 
 // Communication Icons
 export {
   Mail,
   MessageCircle,
   Quote,
-} from 'lucide-react';
+} from 'lucide-react'
 
 // Action Icons
 export {
-  Plus,
-  Loader2,
-  RefreshCw,
+  AlertCircle,
   CheckCircle,
   CheckCircle2,
-  AlertCircle,
-} from 'lucide-react';
+  Loader2,
+  Plus,
+  RefreshCw,
+} from 'lucide-react'
 
 // Stats & Analytics Icons
 export {
-  TrendingUp,
-  TrendingDown,
   BarChart3,
   Minus,
-} from 'lucide-react';
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react'
 
 // Gamification Icons
 export {
-  Medal,
   Award,
+  Medal,
   Zap,
-} from 'lucide-react';
+} from 'lucide-react'
 
 // Theme Icons
 export {
   Monitor,
   Moon,
-  Sun,
   Palette,
-} from 'lucide-react';
+  Sun,
+} from 'lucide-react'
 
 // Subject Icons
 export {
-  Calculator,
-  Globe,
-  FlaskConical,
-  Languages,
-  Landmark,
-  Code,
   Atom,
   BookText,
-} from 'lucide-react';
+  Calculator,
+  Code,
+  FlaskConical,
+  Globe,
+  Landmark,
+  Languages,
+} from 'lucide-react'
 
 // Miscellaneous Icons
 export {
-  Github,
-  FileQuestion,
   Bug,
   Clock,
-  Route,
   Database,
-} from 'lucide-react';
+  FileQuestion,
+  Github,
+  Route,
+} from 'lucide-react'

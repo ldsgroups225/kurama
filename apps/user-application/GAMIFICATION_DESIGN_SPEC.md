@@ -20,12 +20,14 @@ This document outlines the comprehensive gamification system designed for Kurama
 **Purpose**: Provide continuous progression feedback
 
 **Mechanics**:
+
 - Students earn XP for completing study activities
 - XP accumulates to unlock new levels
 - Each level requires progressively more XP
 - Visual progress bar shows advancement
 
 **XP Awards**:
+
 - Complete flashcard: 10 XP
 - Finish quiz: 50 XP
 - Perfect quiz score: +25 bonus XP
@@ -33,6 +35,7 @@ This document outlines the comprehensive gamification system designed for Kurama
 - Study streak milestone: 50-200 XP
 
 **Level Progression**:
+
 ```
 Level 1-10: 500 XP per level
 Level 11-25: 750 XP per level
@@ -45,6 +48,7 @@ Level 51+: 1500 XP per level
 **Purpose**: Recognize specific accomplishments and milestones
 
 **Rarity Tiers**:
+
 1. **Common** (Gray): Basic achievements, 60% unlock rate
 2. **Rare** (Blue): Moderate difficulty, 30% unlock rate
 3. **Epic** (Purple): Challenging, 8% unlock rate
@@ -53,27 +57,32 @@ Level 51+: 1500 XP per level
 **Achievement Categories**:
 
 **Learning Achievements**:
+
 - "Premier Pas" (Common): Complete first lesson
 - "Étudiant Assidu" (Rare): Complete 50 lessons
 - "Maître du Savoir" (Epic): Complete 200 lessons
 - "Génie Académique" (Legendary): Complete all subjects
 
 **Quiz Achievements**:
+
 - "Débutant Quiz" (Common): Complete 10 quizzes
 - "Maître du Quiz" (Epic): Get 100% on 10 quizzes
 - "Champion Quiz" (Legendary): Get 100% on 50 quizzes
 
 **Streak Achievements**:
+
 - "Série de Feu" (Rare): 7-day streak
 - "Fusée" (Rare): 30-day streak
 - "Légende" (Legendary): 100-day streak
 
 **Subject Mastery**:
+
 - "Mathématicien" (Epic): Complete all math chapters
 - "Scientifique" (Epic): Complete all science chapters
 - "Littéraire" (Epic): Complete all literature chapters
 
 **Social Achievements**:
+
 - "Ami Studieux" (Common): Join a study group
 - "Leader" (Rare): Top 10 on leaderboard
 - "Champion" (Legendary): #1 on leaderboard for 4 weeks
@@ -83,12 +92,14 @@ Level 51+: 1500 XP per level
 **Purpose**: Build consistent study habits
 
 **Mechanics**:
+
 - Streak increments with daily study activity (minimum 15 minutes)
 - Streak resets if a day is missed
 - Visual calendar shows last 14 days
 - Motivational messages based on streak length
 
 **Streak Milestones**:
+
 - 3 days: "Bon début !" + 50 XP
 - 7 days: "Une semaine !" + 100 XP + "Série de Feu" badge
 - 14 days: "Deux semaines !" + 150 XP
@@ -96,6 +107,7 @@ Level 51+: 1500 XP per level
 - 100 days: "Centenaire !" + 1000 XP + "Légende" badge
 
 **Streak Protection**:
+
 - Students can earn "Streak Freeze" items
 - One freeze allows missing one day without breaking streak
 - Earned through special challenges or achievements
@@ -105,6 +117,7 @@ Level 51+: 1500 XP per level
 **Purpose**: Foster healthy competition and community
 
 **Types**:
+
 1. **Weekly Leaderboard**: Resets every Monday
 2. **Monthly Leaderboard**: Resets first of month
 3. **All-Time Leaderboard**: Permanent rankings
@@ -112,6 +125,7 @@ Level 51+: 1500 XP per level
 5. **Class Leaderboards**: School/class specific
 
 **Ranking System**:
+
 - Based on total points earned in period
 - Points = XP + Achievement bonuses
 - Top 3 get special visual treatment (Trophy, Medal, Award icons)
@@ -119,6 +133,7 @@ Level 51+: 1500 XP per level
 - Rank change indicators (↑↓→)
 
 **Privacy**:
+
 - Students can opt-out of public leaderboards
 - Display name customization
 - Avatar selection
@@ -128,12 +143,14 @@ Level 51+: 1500 XP per level
 **Purpose**: Provide focused daily goals
 
 **Structure**:
+
 - One challenge per day
 - Resets at midnight (Abidjan timezone)
 - Countdown timer shows time remaining
 - Bonus XP for completion (100-200 XP)
 
 **Challenge Types**:
+
 - "Révision Rapide": Complete 25 flashcards
 - "Quiz Master": Complete 3 quizzes with 80%+ score
 - "Sujet du Jour": Study specific subject for 30 minutes
@@ -145,11 +162,13 @@ Level 51+: 1500 XP per level
 ### Color Palette
 
 **Primary Colors**:
+
 - Primary: `hsl(var(--primary))` - Brand color
 - Background: `hsl(var(--background))` - Main background
 - Foreground: `hsl(var(--foreground))` - Text color
 
 **Gamification Colors**:
+
 - XP/Common: Blue (#60A5FA to #3B82F6)
 - Achievements: Amber/Orange (#FBBF24 to #F97316)
 - Level Up: Purple (#C084FC to #9333EA)
@@ -159,6 +178,7 @@ Level 51+: 1500 XP per level
 - Error: Red (#F87171)
 
 **Rarity Colors**:
+
 - Common: Gray (#9CA3AF to #6B7280)
 - Rare: Blue (#60A5FA to #2563EB)
 - Epic: Purple (#C084FC to #7C3AED)
@@ -167,11 +187,13 @@ Level 51+: 1500 XP per level
 ### Typography
 
 **Font Family**: System font stack (optimized for French)
+
 ```css
-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 ```
 
 **Font Sizes**:
+
 - Heading 1: 2xl (24px) - Section titles
 - Heading 2: lg (18px) - Subsection titles
 - Body: sm (14px) - Regular text
@@ -179,6 +201,7 @@ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica N
 - Badge: 2xl-4xl (24-36px) - Level numbers
 
 **Font Weights**:
+
 - Bold: 700 - Headings, important numbers
 - Semibold: 600 - Labels
 - Medium: 500 - Body text
@@ -187,6 +210,7 @@ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica N
 ### Spacing System
 
 Based on 4px grid:
+
 - xs: 4px (0.25rem)
 - sm: 8px (0.5rem)
 - md: 16px (1rem)
@@ -197,6 +221,7 @@ Based on 4px grid:
 ### Component Specifications
 
 #### Level Badge (Full)
+
 - **Size**: Full width, 80px height
 - **Border Radius**: 12px
 - **Shadow**: lg (0 10px 15px -3px rgba(0,0,0,0.1))
@@ -205,12 +230,14 @@ Based on 4px grid:
 - **Animation**: Pulse on level up
 
 #### Level Badge (Compact)
+
 - **Size**: Full width, 40px height
 - **Badge Circle**: 40px diameter
 - **Progress Bar**: 6px height
 - **Icon**: 16px sparkle
 
 #### Achievement Badge
+
 - **Small**: 64px circle, 16px icon
 - **Medium**: 80px circle, 36px icon
 - **Large**: 96px circle, 44px icon
@@ -219,6 +246,7 @@ Based on 4px grid:
 - **Shadow**: Hover elevation
 
 #### Streak Calendar
+
 - **Grid**: 7 columns (days of week)
 - **Cell Size**: 40x40px
 - **Cell Spacing**: 8px
@@ -226,6 +254,7 @@ Based on 4px grid:
 - **Border Radius**: 8px per cell
 
 #### Leaderboard Entry
+
 - **Height**: 64px
 - **Avatar**: 40px circle
 - **Padding**: 12px
@@ -235,16 +264,19 @@ Based on 4px grid:
 ### Animation Specifications
 
 #### Micro-interactions
+
 - **Hover**: 150ms ease-out scale(1.02)
 - **Press**: 100ms ease-in scale(0.98)
 - **Focus**: 200ms ease ring appearance
 
 #### Progress Animations
+
 - **XP Bar Fill**: 500ms ease-out
 - **Level Up**: 1000ms bounce + sparkle burst
 - **Achievement Unlock**: 800ms scale + fade in
 
 #### Celebration Animations
+
 - **Sparkle Float**: 2-4s linear infinite
 - **Badge Bounce**: 2s ease-in-out infinite
 - **Confetti**: 3s ease-out (one-time)
@@ -252,17 +284,20 @@ Based on 4px grid:
 ### Responsive Behavior
 
 **Mobile (< 640px)**:
+
 - Single column layout
 - Full-width components
 - Compact badges in header
 - Bottom navigation
 
 **Tablet (640px - 1024px)**:
+
 - Two-column grid for stats
 - Larger touch targets
 - Side navigation option
 
 **Desktop (> 1024px)**:
+
 - Max width: 512px (centered)
 - Hover states enabled
 - Keyboard navigation
@@ -271,6 +306,7 @@ Based on 4px grid:
 ## User Experience Flow
 
 ### First-Time User
+
 1. Welcome screen explains gamification
 2. Start at Level 1, 0 XP
 3. First lesson completion triggers tutorial
@@ -279,6 +315,7 @@ Based on 4px grid:
 6. Encourage daily return for streak
 
 ### Daily Return User
+
 1. See greeting with current streak
 2. Daily challenge highlighted
 3. Progress toward next level visible
@@ -286,6 +323,7 @@ Based on 4px grid:
 5. Leaderboard position shown
 
 ### Achievement Unlock Flow
+
 1. Complete qualifying action
 2. Reward animation appears (full screen)
 3. Show achievement details
@@ -294,6 +332,7 @@ Based on 4px grid:
 6. Option to share (future)
 
 ### Level Up Flow
+
 1. XP bar fills to 100%
 2. Dramatic animation (sparkles, sound)
 3. New level number revealed
@@ -303,24 +342,28 @@ Based on 4px grid:
 ## Accessibility Considerations
 
 ### Visual
+
 - Color contrast ratio ≥ 4.5:1 for text
 - Icons paired with text labels
 - Progress bars have text alternatives
 - Animations respect `prefers-reduced-motion`
 
 ### Keyboard Navigation
+
 - All interactive elements focusable
 - Logical tab order
 - Escape key closes modals
 - Enter/Space activates buttons
 
 ### Screen Readers
+
 - ARIA labels on all icons
 - Progress announcements
 - Achievement unlock announcements
 - Leaderboard rank announcements
 
 ### Cognitive
+
 - Clear visual hierarchy
 - Consistent patterns
 - Simple language (French, A2-B1 level)
@@ -337,7 +380,9 @@ Based on 4px grid:
 ## Localization
 
 ### French Language
+
 All text in French (Ivorian context):
+
 - "Niveau" (Level)
 - "Points d'expérience" (Experience Points)
 - "Série" (Streak)
@@ -346,6 +391,7 @@ All text in French (Ivorian context):
 - "Défi du jour" (Daily Challenge)
 
 ### Cultural Considerations
+
 - Use local time zone (Africa/Abidjan)
 - School calendar awareness (vacation periods)
 - Exam preparation focus (BEPC/BAC)
@@ -356,12 +402,14 @@ All text in French (Ivorian context):
 ### Key Performance Indicators (KPIs)
 
 **Engagement**:
+
 - Daily Active Users (DAU)
 - Weekly Active Users (WAU)
 - Average session duration
 - Sessions per user per day
 
 **Gamification Specific**:
+
 - Achievement unlock rate
 - Average streak length
 - Streak retention (7-day, 30-day)
@@ -369,12 +417,14 @@ All text in French (Ivorian context):
 - Leaderboard participation rate
 
 **Learning Outcomes**:
+
 - Correlation: XP vs. quiz scores
 - Retention: Gamified vs. non-gamified users
 - Completion rates by level
 - Subject engagement by gamification element
 
 ### A/B Testing Opportunities
+
 1. XP reward amounts
 2. Achievement difficulty
 3. Leaderboard visibility
@@ -384,6 +434,7 @@ All text in French (Ivorian context):
 ## Implementation Phases
 
 ### Phase 1: Core Mechanics (Completed)
+
 - ✅ Level & XP system
 - ✅ Achievement badges
 - ✅ Streak calendar
@@ -392,6 +443,7 @@ All text in French (Ivorian context):
 - ✅ Dashboard integration
 
 ### Phase 2: Backend Integration (Next)
+
 - [ ] User level API
 - [ ] Achievement tracking
 - [ ] Streak persistence
@@ -399,6 +451,7 @@ All text in French (Ivorian context):
 - [ ] XP calculation engine
 
 ### Phase 3: Advanced Features
+
 - [ ] Daily challenges system
 - [ ] Streak freeze items
 - [ ] Social sharing
@@ -406,6 +459,7 @@ All text in French (Ivorian context):
 - [ ] Seasonal events
 
 ### Phase 4: Optimization
+
 - [ ] Performance tuning
 - [ ] A/B testing framework
 - [ ] Analytics dashboard
@@ -414,12 +468,14 @@ All text in French (Ivorian context):
 ## Success Criteria
 
 **Quantitative**:
+
 - 40% increase in DAU within 3 months
 - 60% of users maintain 7+ day streak
 - 80% achievement unlock rate for common badges
 - 25% increase in average session duration
 
 **Qualitative**:
+
 - Positive user feedback (> 4.0/5.0 rating)
 - Reduced churn rate
 - Increased word-of-mouth referrals
@@ -428,17 +484,20 @@ All text in French (Ivorian context):
 ## Maintenance & Updates
 
 ### Weekly
+
 - Monitor leaderboard integrity
 - Check achievement unlock rates
 - Review user feedback
 
 ### Monthly
+
 - Add new achievements
 - Adjust XP rewards based on data
 - Update daily challenges
 - Seasonal theme updates
 
 ### Quarterly
+
 - Major feature additions
 - A/B test results analysis
 - User research sessions

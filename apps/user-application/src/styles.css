@@ -1,6 +1,6 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-@import "tw-animate-css";
+@import 'tw-animate-css';
 
 :root {
   --background: oklch(1 0 0);
@@ -44,11 +44,11 @@
 
   /* Gamification Colors - Level/Achievement System */
   --level-from: oklch(0.75 0.15 65);
-  --level-to: oklch(0.65 0.20 45);
+  --level-to: oklch(0.65 0.2 45);
   --level-bg: oklch(0.97 0.03 65);
 
   /* Gamification Colors - Streak System */
-  --streak-from: oklch(0.70 0.19 45);
+  --streak-from: oklch(0.7 0.19 45);
   --streak-to: oklch(0.55 0.24 25);
   --streak-bg: oklch(0.97 0.03 45);
 
@@ -64,27 +64,27 @@
 
   /* Gamification Colors - Legendary Achievement */
   --legendary-from: oklch(0.75 0.15 65);
-  --legendary-to: oklch(0.65 0.20 45);
+  --legendary-to: oklch(0.65 0.2 45);
   --legendary-bg: oklch(0.97 0.03 65);
 
   /* Status Colors */
   --success-from: oklch(0.65 0.17 145);
-  --success-to: oklch(0.55 0.20 155);
+  --success-to: oklch(0.55 0.2 155);
   --success-bg: oklch(0.95 0.03 145);
 
   /* Warning Colors */
   --warning-from: oklch(0.75 0.15 85);
-  --warning-to: oklch(0.65 0.20 75);
+  --warning-to: oklch(0.65 0.2 75);
   --warning-bg: oklch(0.97 0.03 85);
 
   /* Error Colors */
-  --error-from: oklch(0.60 0.22 25);
-  --error-to: oklch(0.50 0.24 15);
+  --error-from: oklch(0.6 0.22 25);
+  --error-to: oklch(0.5 0.24 15);
   --error-bg: oklch(0.97 0.03 25);
 
   /* Info Colors */
   --info-from: oklch(0.65 0.18 230);
-  --info-to: oklch(0.55 0.20 240);
+  --info-to: oklch(0.55 0.2 240);
   --info-bg: oklch(0.95 0.02 230);
 }
 
@@ -124,42 +124,42 @@
 
   /* Gamification Colors - XP System (Dark) */
   --xp-from: oklch(0.65 0.22 252);
-  --xp-to: oklch(0.50 0.24 264);
-  --xp-bg: oklch(0.20 0.03 252);
+  --xp-to: oklch(0.5 0.24 264);
+  --xp-bg: oklch(0.2 0.03 252);
 
   /* Gamification Colors - Level/Achievement System (Dark) */
-  --level-from: oklch(0.70 0.18 65);
-  --level-to: oklch(0.60 0.22 45);
+  --level-from: oklch(0.7 0.18 65);
+  --level-to: oklch(0.6 0.22 45);
   --level-bg: oklch(0.22 0.04 65);
 
   /* Gamification Colors - Streak System (Dark) */
   --streak-from: oklch(0.65 0.22 45);
-  --streak-to: oklch(0.50 0.26 25);
+  --streak-to: oklch(0.5 0.26 25);
   --streak-bg: oklch(0.22 0.04 45);
 
   /* Gamification Colors - Rare Achievement (Dark) */
   --rare-from: oklch(0.65 0.22 252);
-  --rare-to: oklch(0.50 0.24 264);
-  --rare-bg: oklch(0.20 0.03 252);
+  --rare-to: oklch(0.5 0.24 264);
+  --rare-bg: oklch(0.2 0.03 252);
 
   /* Gamification Colors - Epic Achievement (Dark) */
-  --epic-from: oklch(0.60 0.26 295);
-  --epic-to: oklch(0.50 0.28 285);
-  --epic-bg: oklch(0.20 0.04 295);
+  --epic-from: oklch(0.6 0.26 295);
+  --epic-to: oklch(0.5 0.28 285);
+  --epic-bg: oklch(0.2 0.04 295);
 
   /* Gamification Colors - Legendary Achievement (Dark) */
-  --legendary-from: oklch(0.70 0.18 65);
-  --legendary-to: oklch(0.60 0.22 45);
+  --legendary-from: oklch(0.7 0.18 65);
+  --legendary-to: oklch(0.6 0.22 45);
   --legendary-bg: oklch(0.22 0.04 65);
 
   /* Status Colors (Dark) */
-  --success-from: oklch(0.60 0.20 145);
-  --success-to: oklch(0.50 0.22 155);
-  --success-bg: oklch(0.20 0.04 145);
+  --success-from: oklch(0.6 0.2 145);
+  --success-to: oklch(0.5 0.22 155);
+  --success-bg: oklch(0.2 0.04 145);
 
   /* Warning Colors (Dark) */
-  --warning-from: oklch(0.70 0.18 85);
-  --warning-to: oklch(0.60 0.22 75);
+  --warning-from: oklch(0.7 0.18 85);
+  --warning-to: oklch(0.6 0.22 75);
   --warning-bg: oklch(0.22 0.04 85);
 
   /* Error Colors (Dark) */
@@ -168,9 +168,9 @@
   --error-bg: oklch(0.22 0.04 25);
 
   /* Info Colors (Dark) */
-  --info-from: oklch(0.60 0.20 230);
-  --info-to: oklch(0.50 0.22 240);
-  --info-bg: oklch(0.20 0.03 230);
+  --info-from: oklch(0.6 0.2 230);
+  --info-to: oklch(0.5 0.22 240);
+  --info-bg: oklch(0.2 0.03 230);
 }
 
 @theme inline {
@@ -255,7 +255,6 @@
 }
 
 @layer utilities {
-
   /* XP System Gradients */
   .bg-gradient-xp {
     background: linear-gradient(to bottom right, var(--xp-from), var(--xp-to));
@@ -477,7 +476,7 @@
   }
 
   .text-subject-philosophy {
-    color: oklch(0.60 0.24 330);
+    color: oklch(0.6 0.24 330);
   }
 
   .bg-subject-philosophy {

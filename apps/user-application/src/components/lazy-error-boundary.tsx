@@ -1,6 +1,7 @@
-import { Component, ReactNode } from 'react'
-import { Button } from '@/components/ui/button'
+import type { ReactNode } from 'react'
+import { Component } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 
 interface Props {
   children: ReactNode
@@ -43,7 +44,7 @@ export class LazyErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="flex items-center justify-center min-h-[200px] p-6">
+        <div className="flex min-h-[200px] items-center justify-center p-6">
           <Alert variant="destructive" className="max-w-md">
             <AlertDescription className="space-y-4">
               <p className="font-medium">Failed to load component</p>

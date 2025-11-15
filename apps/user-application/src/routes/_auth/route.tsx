@@ -1,33 +1,33 @@
-import { createFileRoute, Outlet, Navigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useSetAtom } from "jotai";
-import { GoogleLogin } from "@/components/auth/google-login";
-import { authClient } from "@/lib/auth-client";
-import { getProfileStatus, getUserProfile } from "@/core/functions/profile";
-import { userProfileAtom } from "@/lib/atoms";
-import { useEffect } from "react";
+import { useQuery } from '@tanstack/react-query'
+import { createFileRoute, Navigate, Outlet } from '@tanstack/react-router'
+import { useSetAtom } from 'jotai'
+import { useEffect } from 'react'
+import { GoogleLogin } from '@/components/auth/google-login'
+import { getProfileStatus, getUserProfile } from '@/core/functions/profile'
+import { userProfileAtom } from '@/lib/atoms'
+import { authClient } from '@/lib/auth-client'
 
-export const Route = createFileRoute("/_auth")({
+export const Route = createFileRoute('/_auth')({
   component: RouteComponent,
-});
+})
 
 function RouteComponent() {
-  const session = authClient.useSession();
-  const setUserProfile = useSetAtom(userProfileAtom);
+  const session = authClient.useSession()
+  const setUserProfile = useSetAtom(userProfileAtom)
 
   // Check profile completion status when user is authenticated
   const { data: profileStatus, isLoading: isLoadingProfile } = useQuery({
-    queryKey: ["profile-status"],
+    queryKey: ['profile-status'],
     queryFn: () => getProfileStatus(),
     enabled: !!session.data, // Only run when user is authenticated
-  });
+  })
 
   // Fetch and cache user profile if completed
   const { data: userProfile } = useQuery({
-    queryKey: ["user-profile"],
+    queryKey: ['user-profile'],
     queryFn: () => getUserProfile(),
     enabled: !!session.data && profileStatus?.isCompleted === true,
-  });
+  })
 
   // Cache profile data in localStorage when fetched
   useEffect(() => {
@@ -50,29 +50,36 @@ function RouteComponent() {
         learningGoals: userProfile.learningGoals ?? undefined,
         studyTime: userProfile.studyTime ?? undefined,
         childrenMatricules: userProfile.childrenMatricules as number[] | undefined,
-      });
+      })
     }
-  }, [userProfile, session.data, setUserProfile]);
+  }, [userProfile, session.data, setUserProfile])
 
   // Show loading spinner while checking auth or profile
   if (session.isPending || (session.data && isLoadingProfile)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className={`
+        flex min-h-screen items-center justify-center bg-background
+      `}
+      >
+        <div className={`
+          h-8 w-8 animate-spin rounded-full border-b-2 border-primary
+        `}
+        >
+        </div>
       </div>
-    );
+    )
   }
 
   // Not authenticated - show login
   if (!session.data) {
-    return <GoogleLogin />;
+    return <GoogleLogin />
   }
 
   // Authenticated but profile not completed - redirect to onboarding
   if (profileStatus && !profileStatus.isCompleted) {
-    return <Navigate to="/onboarding" />;
+    return <Navigate to="/onboarding" />
   }
 
   // Authenticated and profile completed - show app
-  return <Outlet />;
+  return <Outlet />
 }

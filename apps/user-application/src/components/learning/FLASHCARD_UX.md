@@ -7,12 +7,14 @@ The flashcard session screen has been redesigned with a zen, Quizlet-inspired UX
 ## Key Features
 
 ### 1. Sticky Header with Progress
+
 - **Close button** (X icon) - Exit session
 - **Card counter** - Shows current position (e.g., "2 / 43")
 - **Settings button** - Opens options modal
 - **Progress bar** - Visual indicator of session completion (1px height, no rounded corners)
 
 ### 2. Counter Badges
+
 - **Left badge** (Warning color) - Incorrect answers count
 - **Right badge** (Success color) - Correct answers count
 - Rounded pill design with semantic colors
@@ -21,6 +23,7 @@ The flashcard session screen has been redesigned with a zen, Quizlet-inspired UX
 ### 3. Interactive Flashcard
 
 #### Card Design
+
 - **Minimum height**: 500px for comfortable reading
 - **Shadow**: xl shadow for depth
 - **Border**: 2px border that changes color based on state
@@ -29,20 +32,23 @@ The flashcard session screen has been redesigned with a zen, Quizlet-inspired UX
 - **Rounded corners**: Following design system radius
 
 #### Card Actions (Top Corners)
+
 - **Volume icon** (left) - Text-to-speech (future feature)
 - **Star icon** (right) - Bookmark card (future feature)
 - Semi-transparent background with backdrop blur
 
 #### Flip Animation
+
 - **Tap to flip**: Click anywhere on card
 - **Smooth rotation**: 3D rotateY animation (90° → 0° → -90°)
 - **Duration**: 200ms for snappy feel
 - **Hint text**: "Appuyez pour retourner" appears after 500ms delay
 
 #### Content Display
+
 - **Front side**: Shows term with label "TERME"
 - **Back side**: Shows definition with label "DÉFINITION" in success color
-- **Typography**: 
+- **Typography**:
   - Term: 2xl font, medium weight
   - Definition: xl font, regular weight
   - Labels: xs font, semibold, uppercase, tracked
@@ -50,6 +56,7 @@ The flashcard session screen has been redesigned with a zen, Quizlet-inspired UX
 ### 4. Swipe Gestures
 
 #### Drag Behavior
+
 - **Only when flipped**: Drag is disabled on front side
 - **Horizontal drag**: Left/right swipe with elastic constraints
 - **Visual feedback**:
@@ -57,6 +64,7 @@ The flashcard session screen has been redesigned with a zen, Quizlet-inspired UX
   - Opacity changes (0.5 → 1 → 0.5) for depth effect
 
 #### Swipe Indicators
+
 - **Right swipe** (Correct):
   - Green overlay with check icon appears
   - Opacity increases as you swipe right
@@ -67,6 +75,7 @@ The flashcard session screen has been redesigned with a zen, Quizlet-inspired UX
   - Threshold: -100px
 
 #### Swipe Actions
+
 - **Swipe right**: Mark as correct, move to next card
 - **Swipe left**: Mark as incorrect (needs review), move to next card
 - **Release before threshold**: Card returns to center
@@ -74,11 +83,13 @@ The flashcard session screen has been redesigned with a zen, Quizlet-inspired UX
 ### 5. Action Buttons (When Flipped)
 
 #### Button Design
+
 - **Circular buttons**: 64px (h-16 w-16)
 - **Positioned**: Center bottom of screen
 - **Animation**: Fade in from bottom (opacity + y-axis)
 
 #### Buttons
+
 1. **Incorrect** (Left)
    - Orange/warning color
    - Rotate icon
@@ -92,11 +103,13 @@ The flashcard session screen has been redesigned with a zen, Quizlet-inspired UX
 ### 6. Navigation Arrows
 
 #### Design
+
 - **Circular ghost buttons**: 48px (h-12 w-12)
 - **Positioned**: Below action buttons, centered
 - **Icons**: Arrow left/right
 
 #### Behavior
+
 - **Previous**: Disabled on first card
 - **Next**: Disabled on last card
 - Resets flip state when navigating
@@ -105,18 +118,21 @@ The flashcard session screen has been redesigned with a zen, Quizlet-inspired UX
 ### 7. Settings Modal
 
 #### Trigger
+
 - Settings icon in header
 - Opens full-screen modal on mobile
 
 #### Options
 
 **Card Orientation**
+
 - Toggle between "Terme" and "Définition" as front side
 - Two-button toggle group
 - Active button uses primary color
 - Allows users to study in reverse (definition → term)
 
 **Reset Progress**
+
 - "Parcourir à nouveau les cartes" button
 - Resets to first card
 - Clears all statistics
@@ -125,27 +141,32 @@ The flashcard session screen has been redesigned with a zen, Quizlet-inspired UX
 ### 8. Micro-Interactions
 
 #### Card Entrance
+
 - Scale animation: 0.8 → 1
 - Opacity fade: 0 → 1
 - Duration: 200ms
 - Smooth spring physics
 
 #### Card Exit
+
 - Scale animation: 1 → 0.8
 - Opacity fade: 1 → 0
 - Duration: 200ms
 
 #### Flip Animation
+
 - 3D rotation on Y-axis
 - Smooth easing
 - Content crossfade
 
 #### Button Hover States
+
 - Scale slightly on hover
 - Color transitions
 - Shadow changes
 
 #### Swipe Feedback
+
 - Real-time rotation based on drag
 - Opacity changes for depth
 - Overlay indicators with icons
@@ -179,13 +200,13 @@ All colors use semantic utilities from the design system:
 
 1. **Audio support**: Text-to-speech for cards
 2. **Bookmarks**: Save favorite cards with star icon
-3. **Keyboard shortcuts**: 
+3. **Keyboard shortcuts**:
    - Space: Flip card
    - Arrow keys: Navigate
    - 1: Mark incorrect
    - 2: Mark correct
 4. **Shuffle mode**: Randomize card order
-5. **Study modes**: 
+5. **Study modes**:
    - Learn mode (adaptive)
    - Test mode (no peeking)
    - Match mode (game)
@@ -196,38 +217,43 @@ All colors use semantic utilities from the design system:
 ## Technical Implementation
 
 ### State Management
+
 ```typescript
-const [currentCardIndex, setCurrentCardIndex] = useState(0);
-const [isFlipped, setIsFlipped] = useState(false);
+const [currentCardIndex, setCurrentCardIndex] = useState(0)
+const [isFlipped, setIsFlipped] = useState(false)
 const [sessionStats, setSessionStats] = useState({
   correct: 0,
   incorrect: 0,
   skipped: 0,
-});
-const [showSettings, setShowSettings] = useState(false);
-const [cardOrientation, setCardOrientation] = useState<"term" | "definition">("term");
+})
+const [showSettings, setShowSettings] = useState(false)
+const [cardOrientation, setCardOrientation] = useState<'term' | 'definition'>('term')
 ```
 
 ### Motion Values
+
 ```typescript
-const x = useMotionValue(0);
-const rotate = useTransform(x, [-200, 0, 200], [-15, 0, 15]);
-const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0.5, 1, 1, 1, 0.5]);
+const x = useMotionValue(0)
+const rotate = useTransform(x, [-200, 0, 200], [-15, 0, 15])
+const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0.5, 1, 1, 1, 0.5])
 ```
 
 ### Drag Handler
+
 ```typescript
-const handleDragEnd = (_event, info: PanInfo) => {
-  const threshold = 100;
-  
+function handleDragEnd(_event, info: PanInfo) {
+  const threshold = 100
+
   if (info.offset.x > threshold) {
-    handleResponse("correct");
-  } else if (info.offset.x < -threshold) {
-    handleResponse("incorrect");
-  } else {
-    x.set(0);
+    handleResponse('correct')
   }
-};
+  else if (info.offset.x < -threshold) {
+    handleResponse('incorrect')
+  }
+  else {
+    x.set(0)
+  }
+}
 ```
 
 ## Design Inspiration

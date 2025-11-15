@@ -4,8 +4,9 @@
  * Runs comprehensive checks to verify optimization implementation
  */
 
-import { existsSync, readdirSync, readFileSync } from 'fs'
-import { join } from 'path'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import process from 'node:process'
 
 interface ValidationResult {
   name: string
@@ -23,7 +24,7 @@ function addResult(
   name: string,
   passed: boolean,
   message: string,
-  details?: string[]
+  details?: string[],
 ) {
   results.push({ name, passed, message, details })
 }
@@ -39,13 +40,13 @@ function validateRouteChunks(): void {
       'Route Chunks',
       false,
       'Distribution directory not found. Run build first.',
-      ['Expected: dist/client/assets', 'Run: pnpm run build']
+      ['Expected: dist/client/assets', 'Run: pnpm run build'],
     )
     return
   }
 
   const files = readdirSync(distPath)
-  const jsFiles = files.filter((f) => f.endsWith('.js'))
+  const jsFiles = files.filter(f => f.endsWith('.js'))
 
   // Expected route chunks
   const expectedChunks = [
@@ -62,12 +63,13 @@ function validateRouteChunks(): void {
   const missingChunks: string[] = []
 
   expectedChunks.forEach((chunk) => {
-    const found = jsFiles.some((file) =>
-      file.toLowerCase().includes(chunk.toLowerCase())
+    const found = jsFiles.some(file =>
+      file.toLowerCase().includes(chunk.toLowerCase()),
     )
     if (found) {
       foundChunks.push(chunk)
-    } else {
+    }
+    else {
       missingChunks.push(chunk)
     }
   })
@@ -81,11 +83,11 @@ function validateRouteChunks(): void {
       ? `All ${expectedChunks.length} route chunks found`
       : `Missing ${missingChunks.length} route chunks`,
     passed
-      ? foundChunks.map((c) => `✓ ${c}`)
+      ? foundChunks.map(c => `✓ ${c}`)
       : [
-        ...foundChunks.map((c) => `✓ ${c}`),
-        ...missingChunks.map((c) => `✗ ${c}`),
-      ]
+        ...foundChunks.map(c => `✓ ${c}`),
+        ...missingChunks.map(c => `✗ ${c}`),
+      ],
   )
 }
 
@@ -101,17 +103,18 @@ function validateVendorChunks(): void {
   }
 
   const files = readdirSync(distPath)
-  const vendorChunks = files.filter((f) => f.includes('vendor-'))
+  const vendorChunks = files.filter(f => f.includes('vendor-'))
 
   const expectedVendors = ['vendor-react', 'vendor-tanstack', 'vendor-radix', 'vendor-ui']
   const foundVendors: string[] = []
   const missingVendors: string[] = []
 
   expectedVendors.forEach((vendor) => {
-    const found = vendorChunks.some((file) => file.includes(vendor))
+    const found = vendorChunks.some(file => file.includes(vendor))
     if (found) {
       foundVendors.push(vendor)
-    } else {
+    }
+    else {
       missingVendors.push(vendor)
     }
   })
@@ -125,11 +128,11 @@ function validateVendorChunks(): void {
       ? `All ${expectedVendors.length} vendor chunks found`
       : `Missing ${missingVendors.length} vendor chunks`,
     passed
-      ? foundVendors.map((v) => `✓ ${v}`)
+      ? foundVendors.map(v => `✓ ${v}`)
       : [
-        ...foundVendors.map((v) => `✓ ${v}`),
-        ...missingVendors.map((v) => `✗ ${v}`),
-      ]
+        ...foundVendors.map(v => `✓ ${v}`),
+        ...missingVendors.map(v => `✗ ${v}`),
+      ],
   )
 }
 
@@ -145,7 +148,7 @@ function validateDevtoolsExclusion(): void {
   }
 
   const files = readdirSync(distPath)
-  const jsFiles = files.filter((f) => f.endsWith('.js'))
+  const jsFiles = files.filter(f => f.endsWith('.js'))
 
   let devtoolsFound = false
   const filesWithDevtools: string[] = []
@@ -153,10 +156,10 @@ function validateDevtoolsExclusion(): void {
   for (const file of jsFiles) {
     const content = readFileSync(join(distPath, file), 'utf-8')
     if (
-      content.includes('react-router-devtools') ||
-      content.includes('react-query-devtools') ||
-      content.includes('TanStackRouterDevtools') ||
-      content.includes('ReactQueryDevtools')
+      content.includes('react-router-devtools')
+      || content.includes('react-query-devtools')
+      || content.includes('TanStackRouterDevtools')
+      || content.includes('ReactQueryDevtools')
     ) {
       devtoolsFound = true
       filesWithDevtools.push(file)
@@ -169,7 +172,7 @@ function validateDevtoolsExclusion(): void {
     devtoolsFound
       ? 'Devtools found in production build'
       : 'Devtools successfully excluded from production',
-    devtoolsFound ? filesWithDevtools.map((f) => `Found in: ${f}`) : undefined
+    devtoolsFound ? filesWithDevtools.map(f => `Found in: ${f}`) : undefined,
   )
 }
 
@@ -189,7 +192,8 @@ function validateLazyLoadingUtilities(): void {
   files.forEach((file) => {
     if (existsSync(file)) {
       existingFiles.push(file)
-    } else {
+    }
+    else {
       missingFiles.push(file)
     }
   })
@@ -203,11 +207,11 @@ function validateLazyLoadingUtilities(): void {
       ? 'All lazy loading utilities found'
       : `Missing ${missingFiles.length} utilities`,
     passed
-      ? existingFiles.map((f) => `✓ ${f}`)
+      ? existingFiles.map(f => `✓ ${f}`)
       : [
-        ...existingFiles.map((f) => `✓ ${f}`),
-        ...missingFiles.map((f) => `✗ ${f}`),
-      ]
+        ...existingFiles.map(f => `✓ ${f}`),
+        ...missingFiles.map(f => `✗ ${f}`),
+      ],
   )
 }
 
@@ -227,7 +231,8 @@ function validatePerformanceMonitoring(): void {
   files.forEach((file) => {
     if (existsSync(file)) {
       existingFiles.push(file)
-    } else {
+    }
+    else {
       missingFiles.push(file)
     }
   })
@@ -241,11 +246,11 @@ function validatePerformanceMonitoring(): void {
       ? 'Performance monitoring implemented'
       : `Missing ${missingFiles.length} files`,
     passed
-      ? existingFiles.map((f) => `✓ ${f}`)
+      ? existingFiles.map(f => `✓ ${f}`)
       : [
-        ...existingFiles.map((f) => `✓ ${f}`),
-        ...missingFiles.map((f) => `✗ ${f}`),
-      ]
+        ...existingFiles.map(f => `✓ ${f}`),
+        ...missingFiles.map(f => `✗ ${f}`),
+      ],
   )
 }
 
@@ -276,7 +281,8 @@ function validatePreloadingStrategy(): void {
   requiredFunctions.forEach((fn) => {
     if (content.includes(`function ${fn}`) || content.includes(`const ${fn}`)) {
       foundFunctions.push(fn)
-    } else {
+    }
+    else {
       missingFunctions.push(fn)
     }
   })
@@ -290,11 +296,11 @@ function validatePreloadingStrategy(): void {
       ? 'All preloading functions implemented'
       : `Missing ${missingFunctions.length} functions`,
     passed
-      ? foundFunctions.map((f) => `✓ ${f}`)
+      ? foundFunctions.map(f => `✓ ${f}`)
       : [
-        ...foundFunctions.map((f) => `✓ ${f}`),
-        ...missingFunctions.map((f) => `✗ ${f}`),
-      ]
+        ...foundFunctions.map(f => `✓ ${f}`),
+        ...missingFunctions.map(f => `✗ ${f}`),
+      ],
   )
 }
 
@@ -312,7 +318,7 @@ function validateSkeletonComponents(): void {
   }
 
   const files = readdirSync(skeletonsDir)
-  const skeletonFiles = files.filter((f) => f.endsWith('.tsx'))
+  const skeletonFiles = files.filter(f => f.endsWith('.tsx'))
 
   const passed = skeletonFiles.length >= 5 // Expect at least 5 skeleton components
 
@@ -322,7 +328,7 @@ function validateSkeletonComponents(): void {
     passed
       ? `${skeletonFiles.length} skeleton components found`
       : 'Insufficient skeleton components',
-    skeletonFiles.map((f) => `✓ ${f}`)
+    skeletonFiles.map(f => `✓ ${f}`),
   )
 }
 
@@ -351,19 +357,21 @@ function printResults(): void {
 
     if (result.passed) {
       passedCount++
-    } else {
+    }
+    else {
       failedCount++
     }
   })
 
-  console.log('\n' + '═'.repeat(80))
+  console.log(`\n${'═'.repeat(80)}`)
   console.log(
-    `\n📊 Summary: ${passedCount} passed, ${failedCount} failed (${results.length} total)\n`
+    `\n📊 Summary: ${passedCount} passed, ${failedCount} failed (${results.length} total)\n`,
   )
 
   if (failedCount === 0) {
     console.log('✨ All validations passed! Bundle optimization is complete.\n')
-  } else {
+  }
+  else {
     console.log('⚠️  Some validations failed. Please review and fix the issues.\n')
     console.log('💡 Tips:')
     console.log('   - Run: pnpm run build (if dist directory is missing)')
@@ -391,7 +399,7 @@ function main() {
   printResults()
 
   // Exit with appropriate code
-  const failed = results.some((r) => !r.passed)
+  const failed = results.some(r => !r.passed)
   process.exit(failed ? 1 : 0)
 }
 

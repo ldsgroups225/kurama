@@ -1,6 +1,6 @@
 # Serverless Database Setup
 
-*Setup Guide*
+_Setup Guide_
 
 Configure your database for edge connections
 
@@ -81,57 +81,60 @@ After configuring Drizzle Kit, you can run `pnpm run drizzle:pull` to pull in ex
 
 ```typescript
 // packages/data-ops/drizzle.config.ts
-import type { Config } from "drizzle-kit";
+import type { Config } from 'drizzle-kit'
+
 const config: Config = {
-  out: "./src/drizzle",
-  schema: ["./src/drizzle/auth-schema.ts"],
-  dialect: "postgresql",
+  out: './src/drizzle',
+  schema: ['./src/drizzle/auth-schema.ts'],
+  dialect: 'postgresql',
   dbCredentials: {
     url: `postgresql://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_HOST}`,
   },
-  tablesFilter: ["!_cf_KV", "!auth_*"],
-};
+  tablesFilter: ['!_cf_KV', '!auth_*'],
+}
 
-export default config satisfies Config;
+export default config satisfies Config
 ```
 
 ### MySQL Drizzle Configuration
 
 ```typescript
 // packages/data-ops/drizzle.config.ts
-import type { Config } from "drizzle-kit";
+import type { Config } from 'drizzle-kit'
+
 const config: Config = {
-  out: "./src/drizzle",
-  schema: ["./src/drizzle/auth-schema.ts"],
-  dialect: "mysql",
+  out: './src/drizzle',
+  schema: ['./src/drizzle/auth-schema.ts'],
+  dialect: 'mysql',
   dbCredentials: {
     url: `mysql://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_HOST}`,
   },
-  tablesFilter: ["!_cf_KV", "!auth_*"],
-};
+  tablesFilter: ['!_cf_KV', '!auth_*'],
+}
 
-export default config satisfies Config;
+export default config satisfies Config
 ```
 
 ### Cloudflare D1 Drizzle Configuration
 
 ```typescript
 // packages/data-ops/drizzle.config.ts
-import type { Config } from "drizzle-kit";
+import type { Config } from 'drizzle-kit'
+
 const config: Config = {
-  out: "./src/drizzle",
-  schema: ["./src/drizzle/auth-schema.ts"],
-  dialect: "sqlite",
-  driver: "d1-http",
+  out: './src/drizzle',
+  schema: ['./src/drizzle/auth-schema.ts'],
+  dialect: 'sqlite',
+  driver: 'd1-http',
   dbCredentials: {
     accountId: process.env.CLOUDFLARE_ACCOUNT_ID!,
     databaseId: process.env.CLOUDFLARE_DATABASE_ID!,
     token: process.env.CLOUDFLARE_D1_TOKEN!,
   },
-  tablesFilter: ["!_cf_KV", "!auth_*"],
-};
+  tablesFilter: ['!_cf_KV', '!auth_*'],
+}
 
-export default config satisfies Config;
+export default config satisfies Config
 ```
 
 ## Step 4: Database Runtime Client
@@ -147,39 +150,41 @@ In TanStack Start applications, database initialization occurs in the `src/serve
 ### PostgreSQL (Neon) Runtime Setup
 
 **Database Setup Function:**
+
 ```typescript
 // packages/data-ops/database/setup.ts
-import { drizzle } from "drizzle-orm/neon-http";
+import { drizzle } from 'drizzle-orm/neon-http'
 
-let db: ReturnType<typeof drizzle>;
+let db: ReturnType<typeof drizzle>
 
 export function initDatabase(connection: {
-  host: string;
-  username: string;
-  password: string;
+  host: string
+  username: string
+  password: string
 }) {
   if (db) {
-    return db;
+    return db
   }
-  const connectionString = `postgres://${connection.username}:${connection.password}@${connection.host}`;
-  db = drizzle(connectionString);
-  return db;
+  const connectionString = `postgres://${connection.username}:${connection.password}@${connection.host}`
+  db = drizzle(connectionString)
+  return db
 }
 
 export function getDb() {
   if (!db) {
-    throw new Error("Database not initialized");
+    throw new Error('Database not initialized')
   }
-  return db;
+  return db
 }
 ```
 
 **Server Entry Point:**
+
 ```typescript
 // src/server.ts - TanStack Start Server Entry
-import { initDatabase } from "@kurama/data-ops/database/setup";
-import handler from "@tanstack/react-start/server-entry";
-import { env } from "cloudflare:workers";
+import { initDatabase } from '@kurama/data-ops/database/setup'
+import handler from '@tanstack/react-start/server-entry'
+import { env } from 'cloudflare:workers'
 
 export default {
   fetch(request: Request) {
@@ -188,52 +193,54 @@ export default {
       host: env.DATABASE_HOST,
       username: env.DATABASE_USERNAME,
       password: env.DATABASE_PASSWORD,
-    });
+    })
 
     return handler.fetch(request, {
       context: {
         fromFetch: true,
       },
-    });
+    })
   },
-};
+}
 ```
 
 ### MySQL (PlanetScale) Runtime Setup
 
 **Database Setup Function:**
+
 ```typescript
 // packages/data-ops/database/setup.ts
-import { drizzle } from "drizzle-orm/planetscale-serverless";
+import { drizzle } from 'drizzle-orm/planetscale-serverless'
 
-let db: ReturnType<typeof drizzle>;
+let db: ReturnType<typeof drizzle>
 
 export function initDatabase(connection: {
-  host: string;
-  username: string;
-  password: string;
+  host: string
+  username: string
+  password: string
 }) {
   if (db) {
     return db
   }
-  db = drizzle({ connection });
-  return db;
+  db = drizzle({ connection })
+  return db
 }
 
 export function getDb() {
   if (!db) {
-    throw new Error("Database not initialized");
+    throw new Error('Database not initialized')
   }
-  return db;
+  return db
 }
 ```
 
 **Server Entry Point:**
+
 ```typescript
 // src/server.ts - TanStack Start Server Entry
-import { initDatabase } from "@kurama/data-ops/database/setup";
-import handler from "@tanstack/react-start/server-entry";
-import { env } from "cloudflare:workers";
+import { initDatabase } from '@kurama/data-ops/database/setup'
+import handler from '@tanstack/react-start/server-entry'
+import { env } from 'cloudflare:workers'
 
 export default {
   fetch(request: Request) {
@@ -242,68 +249,70 @@ export default {
       host: env.DATABASE_HOST,
       username: env.DATABASE_USERNAME,
       password: env.DATABASE_PASSWORD,
-    });
+    })
 
     return handler.fetch(request, {
       context: {
         fromFetch: true,
       },
-    });
+    })
   },
-};
+}
 ```
 
 ### Cloudflare D1 Runtime Setup
 
 **Database Setup Function:**
+
 ```typescript
 // packages/data-ops/database/setup.ts
-import { drizzle } from "drizzle-orm/d1";
+import { drizzle } from 'drizzle-orm/d1'
 
-let db: ReturnType<typeof drizzle>;
+let db: ReturnType<typeof drizzle>
 
 export function initDatabase(d1Db: D1Database) {
   if (db) {
     return db
   }
-  db = drizzle(d1Db);
-  return db;
+  db = drizzle(d1Db)
+  return db
 }
 
 export function getDb() {
   if (!db) {
-    throw new Error("Database not initialized");
+    throw new Error('Database not initialized')
   }
-  return db;
+  return db
 }
 ```
 
 **Server Entry Point:**
+
 ```typescript
 // src/server.ts - TanStack Start Server Entry
-import { initDatabase } from "@kurama/data-ops/database/setup";
-import handler from "@tanstack/react-start/server-entry";
-import { env } from "cloudflare:workers";
+import { initDatabase } from '@kurama/data-ops/database/setup'
+import handler from '@tanstack/react-start/server-entry'
+import { env } from 'cloudflare:workers'
 
 export default {
   fetch(request: Request) {
     // Initialize database on each request
-    const db = initDatabase(env.DB); // D1 binding
+    const db = initDatabase(env.DB) // D1 binding
 
     return handler.fetch(request, {
       context: {
         fromFetch: true,
       },
-    });
+    })
   },
-};
+}
 ```
 
 ---
 
 # Database Queries
 
-*Development Guide*
+_Development Guide_
 
 Create reusable, type-safe database queries for your serverless application
 
@@ -322,22 +331,22 @@ Database queries are organized in the `packages/data-ops/src/queries/` directory
 All queries use the `getDb()` function to access the database instance, ensuring consistent connection management across your serverless functions.
 
 ```typescript
+import { eq } from 'drizzle-orm'
 // packages/data-ops/src/queries/polar.ts
-import { getDb } from "@/database/setup";
-import { subscriptions } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
+import { getDb } from '@/database/setup'
+import { subscriptions } from '@/drizzle/schema'
 
 export async function updateSubscription(data: {
-  userId: string;
-  status: string;
-  subscriptionId: string;
-  currentPeriodStart?: string;
-  currentPeriodEnd?: string;
-  cancelAtPeriodEnd: boolean;
-  startedAt?: string;
-  productId: string;
+  userId: string
+  status: string
+  subscriptionId: string
+  currentPeriodStart?: string
+  currentPeriodEnd?: string
+  cancelAtPeriodEnd: boolean
+  startedAt?: string
+  productId: string
 }) {
-  const db = getDb();
+  const db = getDb()
   await db
     .insert(subscriptions)
     .values({
@@ -361,16 +370,16 @@ export async function updateSubscription(data: {
         startedAt: data.startedAt,
         productId: data.productId,
       },
-    });
+    })
 }
 
 export async function getSubscription(userId: string) {
-  const db = getDb();
+  const db = getDb()
   const subscription = await db
     .select()
     .from(subscriptions)
-    .where(eq(subscriptions.userId, userId));
-  return subscription;
+    .where(eq(subscriptions.userId, userId))
+  return subscription
 }
 ```
 
@@ -425,28 +434,28 @@ Once your queries are built and exported, you can import and use them anywhere i
 Import your queries directly into server functions for handling API requests and data operations.
 
 ```typescript
-// apps/user-application/src/server/functions/payments.ts
-import { createServerFn } from "@tanstack/react-start";
 import {
-  updateSubscription,
   getSubscription,
-} from "@kurama/data-ops/queries/polar";
-import { protectedFunctionMiddleware } from "@/server/middleware/auth";
+  updateSubscription,
+} from '@kurama/data-ops/queries/polar'
+// apps/user-application/src/server/functions/payments.ts
+import { createServerFn } from '@tanstack/react-start'
+import { protectedFunctionMiddleware } from '@/server/middleware/auth'
 
 export const baseFunction = createServerFn().middleware([
   protectedFunctionMiddleware,
-]);
+])
 
 export const collectSubscription = baseFunction.handler(async (ctx) => {
   const subscription = await ctx.context.polar.subscriptions.list({
     externalCustomerId: ctx.context.userId,
-  });
+  })
 
   if (subscription.result.items.length === 0) {
-    return null;
+    return null
   }
 
-  const subscriptionItem = subscription.result.items[0];
+  const subscriptionItem = subscription.result.items[0]
 
   // Use the imported query function
   await updateSubscription({
@@ -458,19 +467,19 @@ export const collectSubscription = baseFunction.handler(async (ctx) => {
     currentPeriodStart: subscriptionItem.currentPeriodStart?.toISOString(),
     currentPeriodEnd: subscriptionItem.currentPeriodEnd?.toISOString(),
     cancelAtPeriodEnd: subscriptionItem.cancelAtPeriodEnd,
-  });
+  })
 
-  return subscriptionItem;
-});
+  return subscriptionItem
+})
 
 export const getUserSubscription = baseFunction.handler(async (ctx) => {
   // Use the imported query function
-  const subscription = await getSubscription(ctx.context.userId);
+  const subscription = await getSubscription(ctx.context.userId)
   if (subscription.length === 0) {
-    return null;
+    return null
   }
-  return subscription[0];
-});
+  return subscription[0]
+})
 ```
 
 ### Using in Server Middleware
@@ -478,18 +487,18 @@ export const getUserSubscription = baseFunction.handler(async (ctx) => {
 Queries can also be used in middleware for authentication, authorization, and request preprocessing.
 
 ```typescript
+import { getUserByEmail } from '@kurama/data-ops/queries/users'
 // apps/user-application/src/server/middleware/user.ts
-import { createMiddleware } from "@tanstack/react-start";
-import { getUserByEmail } from "@kurama/data-ops/queries/users";
+import { createMiddleware } from '@tanstack/react-start'
 
 export const userLookupMiddleware = createMiddleware({
-  type: "function",
+  type: 'function',
 }).server(async ({ next, context }) => {
   // Use imported query function in middleware
-  const user = await getUserByEmail(context.email);
+  const user = await getUserByEmail(context.email)
 
   if (!user) {
-    throw new Error("User not found");
+    throw new Error('User not found')
   }
 
   return next({
@@ -497,8 +506,8 @@ export const userLookupMiddleware = createMiddleware({
       ...context,
       user,
     },
-  });
-});
+  })
+})
 ```
 
 ### Using in REST API Routes & Webhooks
@@ -506,18 +515,18 @@ export const userLookupMiddleware = createMiddleware({
 Import and use queries in API routes for handling webhooks, REST endpoints, and other server-side API operations.
 
 ```typescript
+import { updateSubscription } from '@kurama/data-ops/queries/polar'
 // apps/user-application/src/routes/api/webhook/polar.ts
-import { Subscription } from "@polar-sh/sdk/models/components/subscription.js";
-import { Webhooks } from "@polar-sh/tanstack-start";
-import { updateSubscription } from "@kurama/data-ops/queries/polar";
-import { createServerFileRoute } from "@tanstack/react-start/server";
-import { env } from "cloudflare:workers";
+import { Subscription } from '@polar-sh/sdk/models/components/subscription.js'
+import { Webhooks } from '@polar-sh/tanstack-start'
+import { createServerFileRoute } from '@tanstack/react-start/server'
+import { env } from 'cloudflare:workers'
 
 async function handleSubscription(payload: { data: Subscription }) {
-  const { data } = payload;
+  const { data } = payload
   if (!data.customer.externalId) {
-    console.error("Missing customer external ID");
-    return;
+    console.error('Missing customer external ID')
+    return
   }
 
   // Use the imported query function in webhook handler
@@ -530,10 +539,10 @@ async function handleSubscription(payload: { data: Subscription }) {
     currentPeriodEnd: data.currentPeriodStart?.toISOString(),
     currentPeriodStart: data.currentPeriodEnd?.toISOString(),
     cancelAtPeriodEnd: data.cancelAtPeriodEnd,
-  });
+  })
 }
 
-export const ServerRoute = createServerFileRoute("/api/webhook/polar").methods({
+export const ServerRoute = createServerFileRoute('/api/webhook/polar').methods({
   POST: Webhooks({
     webhookSecret: env.POLAR_WEBHOOK_SECRET,
     onSubscriptionActive: handleSubscription,
@@ -543,21 +552,25 @@ export const ServerRoute = createServerFileRoute("/api/webhook/polar").methods({
     onSubscriptionRevoked: handleSubscription,
     onSubscriptionUncanceled: handleSubscription,
   }),
-});
+})
 ```
 
 ## Benefits of Centralized Queries
 
 ### 🔄 Code Reuse
+
 Write database queries once and use them across multiple applications and services in your monorepo.
 
 ### 🛡️ Type Safety
+
 Drizzle ORM provides full TypeScript support with compile-time type checking and excellent autocompletion.
 
 ### 🧪 Easier Testing
+
 Centralized queries can be easily unit tested, ensuring your database logic is reliable and well-tested.
 
 ### 📦 Maintainability
+
 Keep all database logic in one place, making it easier to update schemas and optimize queries as your application grows.
 
 ---

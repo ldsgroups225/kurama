@@ -1,6 +1,6 @@
 # Polar Integration Setup
 
-*Payment & Subscription Guide*
+_Payment & Subscription Guide_
 
 Integrate Polar for subscription management and payment processing with TanStack Start
 
@@ -47,24 +47,24 @@ Create Polar middleware to initialize the Polar SDK instance and make it availab
 
 ```typescript
 // src/core/middleware/polar.ts
-import { Polar } from "@polar-sh/sdk";
-import { createMiddleware } from "@tanstack/react-start";
-import { env } from "cloudflare:workers";
+import { Polar } from '@polar-sh/sdk'
+import { createMiddleware } from '@tanstack/react-start'
+import { env } from 'cloudflare:workers'
 
 export const polarMiddleware = createMiddleware({
-  type: "function",
+  type: 'function',
 }).server(async ({ next }) => {
   const polar = new Polar({
     accessToken: env.POLAR_SECRET,
-    server: "sandbox", // Change to "production" for live environment
-  });
+    server: 'sandbox', // Change to "production" for live environment
+  })
 
   return next({
     context: {
       polar,
     },
-  });
-});
+  })
+})
 ```
 
 ### Middleware Benefits
@@ -82,93 +82,97 @@ Create server functions to handle product management, checkout creation, and sub
 
 ```typescript
 // src/core/functions/payments.ts
-import { createServerFn } from "@tanstack/react-start";
-import { protectedFunctionMiddleware } from "@/core/middleware/auth";
-import { polarMiddleware } from "@/core/middleware/polar";
-import z from "zod";
-import { getRequestIP } from "@tanstack/react-start/server";
+import { createServerFn } from '@tanstack/react-start'
+import { getRequestIP } from '@tanstack/react-start/server'
+import z from 'zod'
+import { protectedFunctionMiddleware } from '@/core/middleware/auth'
+import { polarMiddleware } from '@/core/middleware/polar'
 
 export const baseFunction = createServerFn().middleware([
   protectedFunctionMiddleware,
   polarMiddleware,
-]);
+])
 
 export const getProducts = baseFunction.handler(async (ctx) => {
   const products = await ctx.context.polar.products.list({
     isArchived: false,
-  });
+  })
 
-  return products.result.items;
-});
+  return products.result.items
+})
 
 const PaymentLink = z.object({
   productId: z.string(),
-});
+})
 
 export const createPaymentLink = baseFunction
   .inputValidator((data: z.infer<typeof PaymentLink>) => {
-    return PaymentLink.parse(data);
+    return PaymentLink.parse(data)
   })
   .handler(async (ctx) => {
-    const ip = getRequestIP();
+    const ip = getRequestIP()
     const checkout = await ctx.context.polar.checkouts.create({
       products: [ctx.data.productId],
       externalCustomerId: ctx.context.userId,
       successUrl: `http://localhost:3000/app/polar/checkout/success?checkout_id={CHECKOUT_ID}`,
       customerIpAddress: ip,
       customerEmail: ctx.context.email,
-    });
-    return checkout;
-  });
+    })
+    return checkout
+  })
 
 export const validPayment = baseFunction
   .inputValidator((data: string) => {
-    if (typeof data !== "string") {
-      throw new Error("Invalid data type");
+    if (typeof data !== 'string') {
+      throw new TypeError('Invalid data type')
     }
-    return data;
+    return data
   })
   .handler(async (ctx) => {
     const payment = await ctx.context.polar.checkouts.get({
       id: ctx.data,
-    });
+    })
 
-    if (payment.status === "succeeded") {
-      return true;
+    if (payment.status === 'succeeded') {
+      return true
     }
-    return false;
-  });
+    return false
+  })
 
 export const collectSubscription = baseFunction.handler(async (ctx) => {
   const subscriptions = await ctx.context.polar.subscriptions.list({
     externalCustomerId: ctx.context.userId,
-  });
+  })
 
   if (subscriptions.result.items.length === 0) {
-    return null;
+    return null
   }
 
-  const subscription = subscriptions.result.items[0];
-  return subscription;
-});
+  const subscription = subscriptions.result.items[0]
+  return subscription
+})
 ```
 
 ### Function Breakdown
 
 **`getProducts`**
+
 - Fetches all active (non-archived) products from Polar
 - Used to display available subscription plans
 
 **`createPaymentLink`**
+
 - Creates a secure checkout session for a specific product
 - Links checkout to authenticated user via `externalCustomerId`
 - Includes customer IP for automatic country selection
 
 **`validPayment`**
+
 - Validates a completed checkout by checking its status
 - Returns boolean indicating if payment was successful
 
 **`collectSubscription`**
+
 - Retrieves active subscription for current user
 - Returns null if no subscription exists
 
@@ -289,32 +293,32 @@ export function SubscribeButton({ productId }: SubscribeButtonProps) {
 ### Feature Access Hook
 
 ```typescript
+import { useMemo } from 'react'
 // src/hooks/use-subscription-features.ts
-import { collectSubscription } from "@/core/functions/payments";
-import { useMemo } from "react";
+import { collectSubscription } from '@/core/functions/payments'
 
 export function useSubscriptionFeatures() {
-  const subscription = await collectSubscription();
+  const subscription = await collectSubscription()
 
   const features = useMemo(() => {
     if (!subscription || !subscription.product.metadata) {
-      return {};
+      return {}
     }
 
-    const metadata = JSON.parse(subscription.product.metadata);
-    return metadata.features || {};
-  }, [subscription]);
+    const metadata = JSON.parse(subscription.product.metadata)
+    return metadata.features || {}
+  }, [subscription])
 
   const hasFeature = (featureName: string) => {
-    return features[featureName] === true;
-  };
+    return features[featureName] === true
+  }
 
   return {
     subscription,
     features,
     hasFeature,
     isSubscribed: !!subscription,
-  };
+  }
 }
 ```
 

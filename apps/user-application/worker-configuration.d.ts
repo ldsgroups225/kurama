@@ -17,6 +17,7 @@ declare namespace Cloudflare {
 		POLAR_WEBHOOK_SECRET: string;
 	}
 }
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface Env extends Cloudflare.Env {}
 type StringifyValues<EnvType extends Record<string, unknown>> = {
 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
@@ -6197,7 +6198,7 @@ type AIGatewayHeaders = {
     [key: string]: string | number | boolean | object;
 };
 type AIGatewayUniversalRequest = {
-    provider: AIGatewayProviders | string; // eslint-disable-line
+    provider: AIGatewayProviders | string;  
     endpoint: string;
     headers: Partial<AIGatewayHeaders>;
     query: unknown;
@@ -6213,7 +6214,7 @@ declare abstract class AiGateway {
         gateway?: UniversalGatewayOptions;
         extraHeaders?: object;
     }): Promise<Response>;
-    getUrl(provider?: AIGatewayProviders | string): Promise<string>; // eslint-disable-line
+    getUrl(provider?: AIGatewayProviders | string): Promise<string>;  
 }
 interface AutoRAGInternalError extends Error {
 }

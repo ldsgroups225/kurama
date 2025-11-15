@@ -37,7 +37,7 @@ export const createBetterAuth = (config: {
             await config.sendVerificationOTP({ email, otp, type });
           } else {
             // Default: log to console (for development)
-            console.log(`[Email OTP] Type: ${type}, Email: ${email}, OTP: ${otp}`);
+            console.warn(`[Email OTP] Type: ${type}, Email: ${email}, OTP: ${otp}`);
           }
         },
         otpLength: 6,

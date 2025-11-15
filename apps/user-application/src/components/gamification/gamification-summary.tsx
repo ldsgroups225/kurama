@@ -1,15 +1,16 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, Flame, Star, TrendingUp } from "@/lib/icons";
-import { cn } from "@/lib/utils";
+import { Card, CardContent } from '@/components/ui/card'
+import { Flame, Star, TrendingUp, Trophy } from '@/lib/icons'
+import { cn } from '@/lib/utils'
+import { generateUUID } from '@/utils/generateUUID'
 
 interface GamificationSummaryProps {
-  level: number;
-  totalXP: number;
-  achievementsUnlocked: number;
-  totalAchievements: number;
-  currentStreak: number;
-  weeklyRank?: number;
-  className?: string;
+  level: number
+  totalXP: number
+  achievementsUnlocked: number
+  totalAchievements: number
+  currentStreak: number
+  weeklyRank?: number
+  className?: string
 }
 
 export function GamificationSummary({
@@ -19,74 +20,80 @@ export function GamificationSummary({
   totalAchievements,
   currentStreak,
   weeklyRank,
-  className
+  className,
 }: GamificationSummaryProps) {
   const stats = [
     {
       icon: Star,
-      label: "Niveau",
+      label: 'Niveau',
       value: level.toString(),
-      color: "text-level",
-      bgColor: "bg-level",
+      color: 'text-level',
+      bgColor: 'bg-level',
     },
     {
       icon: Trophy,
-      label: "Badges",
+      label: 'Badges',
       value: `${achievementsUnlocked}/${totalAchievements}`,
-      color: "text-xp",
-      bgColor: "bg-xp",
+      color: 'text-xp',
+      bgColor: 'bg-xp',
     },
     {
       icon: Flame,
-      label: "Série",
+      label: 'Série',
       value: `${currentStreak}j`,
-      color: "text-streak",
-      bgColor: "bg-streak",
+      color: 'text-streak',
+      bgColor: 'bg-streak',
     },
     ...(weeklyRank
       ? [
-        {
-          icon: TrendingUp,
-          label: "Rang",
-          value: `#${weeklyRank}`,
-          color: "text-success",
-          bgColor: "bg-success",
-        },
-      ]
+          {
+            icon: TrendingUp,
+            label: 'Rang',
+            value: `#${weeklyRank}`,
+            color: 'text-success',
+            bgColor: 'bg-success',
+          },
+        ]
       : []),
-  ];
+  ]
 
   return (
-    <Card className={cn("overflow-hidden", className)}>
+    <Card className={cn('overflow-hidden', className)}>
       <CardContent className="p-4">
         <div className="grid grid-cols-3 gap-4">
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
+          {stats.map((stat) => {
+            const Icon = stat.icon
             return (
-              <div key={index} className="flex flex-col items-center text-center">
+              <div
+                key={generateUUID()}
+                className="flex flex-col items-center text-center"
+              >
                 <div
                   className={cn(
-                    "h-10 w-10 rounded-full flex items-center justify-center mb-2",
-                    stat.bgColor
+                    `
+                      mb-2 flex h-10 w-10 items-center justify-center
+                      rounded-full
+                    `,
+                    stat.bgColor,
                   )}
                 >
-                  <Icon className={cn("h-5 w-5", stat.color)} />
+                  <Icon className={cn('h-5 w-5', stat.color)} />
                 </div>
                 <p className="text-lg font-bold text-foreground">{stat.value}</p>
                 <p className="text-xs text-muted-foreground">{stat.label}</p>
               </div>
-            );
+            )
           })}
         </div>
 
         {/* Total XP Display */}
-        <div className="mt-4 pt-4 border-t border-border text-center">
-          <p className="text-xs text-muted-foreground mb-1">Total XP</p>
+        <div className="mt-4 border-t border-border pt-4 text-center">
+          <p className="mb-1 text-xs text-muted-foreground">Total XP</p>
           <p className="text-2xl font-bold text-primary">
             {totalXP.toLocaleString()}
           </p>
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

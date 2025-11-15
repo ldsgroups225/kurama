@@ -162,7 +162,8 @@ export class PerformanceMonitor {
    * Calculate percentile value from sorted array
    */
   private percentile(sortedValues: number[], p: number): number {
-    if (sortedValues.length === 0) return 0
+    if (sortedValues.length === 0)
+      return 0
     const index = Math.floor(sortedValues.length * p)
     return sortedValues[Math.min(index, sortedValues.length - 1)] ?? 0
   }
@@ -176,7 +177,8 @@ export const perfMonitor = new PerformanceMonitor()
  * This uses the Performance Observer API to track real user metrics
  */
 export function trackCoreWebVitals(): void {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined')
+    return
 
   // Track LCP (Largest Contentful Paint)
   try {
@@ -190,8 +192,9 @@ export function trackCoreWebVitals(): void {
       perfMonitor.recordWebVital('LCP', lcp)
     })
     lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true })
-  } catch (e) {
-    console.warn('LCP tracking not supported', e)
+  }
+  catch {
+    // LCP tracking not supported
   }
 
   // Track CLS (Cumulative Layout Shift)
@@ -199,7 +202,7 @@ export function trackCoreWebVitals(): void {
     let clsValue = 0
     const clsObserver = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
-        const layoutShift = entry as PerformanceEntry & { value?: number; hadRecentInput?: boolean }
+        const layoutShift = entry as PerformanceEntry & { value?: number, hadRecentInput?: boolean }
         if (!layoutShift.hadRecentInput) {
           clsValue += layoutShift.value || 0
           perfMonitor.recordWebVital('CLS', clsValue)
@@ -207,8 +210,9 @@ export function trackCoreWebVitals(): void {
       }
     })
     clsObserver.observe({ type: 'layout-shift', buffered: true })
-  } catch (e) {
-    console.warn('CLS tracking not supported', e)
+  }
+  catch {
+    // CLS tracking not supported
   }
 
   // Track INP (Interaction to Next Paint) - replaces FID
@@ -224,19 +228,21 @@ export function trackCoreWebVitals(): void {
       }
     })
     inpObserver.observe({ type: 'event', buffered: true, durationThreshold: 16 } as PerformanceObserverInit)
-  } catch (e) {
+  }
+  catch {
     // Fallback to first-input for older browsers
     try {
       const fidObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries()
-        const firstInput = entries[0] as PerformanceEntry & { processingStart?: number; startTime?: number }
+        const firstInput = entries[0] as PerformanceEntry & { processingStart?: number, startTime?: number }
         const fid = firstInput.processingStart ? firstInput.processingStart - firstInput.startTime : 0
         perfMonitor.recordWebVital('FID', fid)
         perfMonitor.recordWebVital('INP', fid)
       })
       fidObserver.observe({ type: 'first-input', buffered: true })
-    } catch (e2) {
-      console.warn('INP/FID tracking not supported', e2)
+    }
+    catch {
+      // INP/FID tracking not supported
     }
   }
 
@@ -247,8 +253,9 @@ export function trackCoreWebVitals(): void {
       const ttfb = navigationEntry.responseStart - navigationEntry.requestStart
       perfMonitor.recordWebVital('TTFB', ttfb)
     }
-  } catch (e) {
-    console.warn('TTFB tracking not supported', e)
+  }
+  catch {
+    // TTFB tracking not supported
   }
 }
 
@@ -262,8 +269,10 @@ export function trackRouteLoad(routeName: string): () => void {
     const loadTime = performance.now() - startTime
     perfMonitor.recordRouteLoad(routeName, loadTime)
 
+    // Performance tracking in development
+
     if (import.meta.env.DEV) {
-      console.log(`[Performance] Route "${routeName}" loaded in ${loadTime.toFixed(2)}ms`)
+      console.error(`[Performance] Route "${routeName}" loaded in ${loadTime.toFixed(2)}ms`)
     }
   }
 }
@@ -288,8 +297,10 @@ export function trackBundleLoad(routeName: string, chunkSize?: number): () => vo
 
     perfMonitor.recordBundleMetrics(metrics)
 
+    // Performance tracking in development
+
     if (import.meta.env.DEV) {
-      console.log(`[Performance] Bundle "${routeName}" loaded in ${loadTime.toFixed(2)}ms`)
+      console.error(`[Performance] Bundle "${routeName}" loaded in ${loadTime.toFixed(2)}ms`)
     }
   }
 }
@@ -300,11 +311,13 @@ export function trackBundleLoad(routeName: string, chunkSize?: number): () => vo
 export function logPerformanceMetrics(): void {
   if (import.meta.env.DEV) {
     const metrics = perfMonitor.getAllMetrics()
+    // eslint-disable-next-line no-console
     console.group('📊 Performance Metrics')
-    console.log('Core Web Vitals:', metrics.webVitals)
-    console.log('Route Metrics:', metrics.routeMetrics)
-    console.log('Bundle Metrics:', metrics.bundleMetrics)
-    console.log('Statistics:', metrics.stats)
+    console.error('Core Web Vitals:', metrics.webVitals)
+    console.error('Route Metrics:', metrics.routeMetrics)
+    console.error('Bundle Metrics:', metrics.bundleMetrics)
+    console.error('Statistics:', metrics.stats)
+    // eslint-disable-next-line no-console
     console.groupEnd()
   }
 }
@@ -313,7 +326,8 @@ export function logPerformanceMetrics(): void {
  * Initialize performance monitoring
  */
 export function initPerformanceMonitoring(): void {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined')
+    return
 
   // Track Core Web Vitals
   trackCoreWebVitals()

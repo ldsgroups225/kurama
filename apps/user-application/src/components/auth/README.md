@@ -5,21 +5,26 @@ Beautiful, accessible authentication screens for Kurama with email OTP and socia
 ## Components
 
 ### AuthScreen
+
 Main authentication container with logo, title, and auth flow management.
 
 ### EmailStep
+
 Email input form that sends a 6-digit OTP to the user's email.
 
 **Features:**
+
 - Email validation
 - Loading states
 - Error handling
 - Auto-focus on mount
 
 ### OtpStep
+
 6-digit OTP verification with auto-submit and resend functionality.
 
 **Features:**
+
 - 6 individual input fields for better UX
 - Auto-focus next input on digit entry
 - Auto-submit when all digits entered
@@ -30,9 +35,11 @@ Email input form that sends a 6-digit OTP to the user's email.
 - Loading and error states
 
 ### SocialAuth
+
 Social authentication buttons for Google and TikTok.
 
 **Features:**
+
 - Google OAuth integration
 - TikTok OAuth integration (requires setup)
 - Loading states per provider
@@ -53,10 +60,10 @@ The email OTP plugin is configured in `packages/data-ops/src/auth/setup.ts`:
 
 ```typescript
 emailOTP({
-  otpLength: 6,           // 6-digit code
-  expiresIn: 300,         // 5 minutes
-  allowedAttempts: 3,     // 3 attempts before invalidation
-  disableSignUp: false,   // Allow auto-registration
+  otpLength: 6, // 6-digit code
+  expiresIn: 300, // 5 minutes
+  allowedAttempts: 3, // 3 attempts before invalidation
+  disableSignUp: false, // Allow auto-registration
 })
 ```
 
@@ -73,9 +80,9 @@ setAuth({
       to: email,
       subject: type === 'sign-in' ? 'Code de connexion Kurama' : 'Vérification email',
       body: `Votre code: ${otp}`,
-    });
+    })
   },
-});
+})
 ```
 
 ## Styling

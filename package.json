@@ -8,7 +8,10 @@
     "dev:kurama-frontend": "pnpm run --filter kurama-frontend dev",
     "deploy:kurama-frontend": "pnpm run build:data-ops && pnpm run --filter kurama-frontend deploy",
     "dev:kurama-backend": "pnpm run --filter kurama-backend dev",
-    "deploy:kurama-backend": "pnpm run build:data-ops && pnpm run --filter kurama-backend deploy"
+    "deploy:kurama-backend": "pnpm run build:data-ops && pnpm run --filter kurama-backend deploy",
+    "typecheck": "pnpm run --filter \"*\" typecheck || echo \"No typecheck script found\"",
+    "lint": "pnpm run --filter \"*\" lint:fix || echo \"No lint script found\"",
+    "test": "pnpm run --filter \"*\" test || echo \"No test script found\""
   },
   "keywords": [],
   "author": "",

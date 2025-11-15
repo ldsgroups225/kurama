@@ -6,11 +6,12 @@
 export async function retryChunkLoad<T>(
   fn: () => Promise<T>,
   retriesLeft = 3,
-  interval = 1000
+  interval = 1000,
 ): Promise<T> {
   try {
     return await fn()
-  } catch (error) {
+  }
+  catch (error) {
     if (retriesLeft === 0) {
       console.error('Failed to load chunk after retries:', error)
       throw error

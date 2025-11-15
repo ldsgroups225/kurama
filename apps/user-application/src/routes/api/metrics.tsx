@@ -4,16 +4,16 @@
  * Implements requirement 6.5 from bundle-optimization spec
  */
 
-import { createFileRoute } from "@tanstack/react-router";
-import { perfMonitor } from "@/lib/performance-monitor";
+import { createFileRoute } from '@tanstack/react-router'
+import { perfMonitor } from '@/lib/performance-monitor'
 
-export const Route = createFileRoute("/api/metrics")({
+export const Route = createFileRoute('/api/metrics')({
   server: {
     handlers: {
       GET: () => {
         try {
           // Get all performance metrics
-          const metrics = perfMonitor.getAllMetrics();
+          const metrics = perfMonitor.getAllMetrics()
 
           // Calculate additional statistics
           const summary = {
@@ -35,45 +35,47 @@ export const Route = createFileRoute("/api/metrics")({
               totalRoutes: metrics.routeMetrics.length,
               totalBundles: metrics.bundleMetrics.length,
               averageRouteLoadTime: calculateAverage(
-                metrics.routeMetrics.map((m) => m.loadTime)
+                metrics.routeMetrics.map(m => m.loadTime),
               ),
               averageBundleLoadTime: calculateAverage(
-                metrics.bundleMetrics.map((m) => m.loadTime)
+                metrics.bundleMetrics.map(m => m.loadTime),
               ),
             },
-          };
+          }
 
           return new Response(JSON.stringify(summary), {
             status: 200,
             headers: {
-              "Content-Type": "application/json",
-              "Cache-Control": "no-cache, no-store, must-revalidate",
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
             },
-          });
-        } catch (error) {
-          console.error("Error fetching performance metrics:", error);
+          })
+        }
+        catch (error) {
+          console.error('Error fetching performance metrics:', error)
           return new Response(
             JSON.stringify({
-              error: "Failed to fetch performance metrics",
-              message: error instanceof Error ? error.message : "Unknown error",
+              error: 'Failed to fetch performance metrics',
+              message: error instanceof Error ? error.message : 'Unknown error',
             }),
             {
               status: 500,
               headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
               },
-            }
-          );
+            },
+          )
         }
       },
     },
   },
-});
+})
 
 /**
  * Calculate average of an array of numbers
  */
 function calculateAverage(values: number[]): number {
-  if (values.length === 0) return 0;
-  return values.reduce((sum, val) => sum + val, 0) / values.length;
+  if (values.length === 0)
+    return 0
+  return values.reduce((sum, val) => sum + val, 0) / values.length
 }

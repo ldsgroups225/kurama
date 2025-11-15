@@ -1,84 +1,96 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  Calculator,
   Atom,
-  Globe,
   BookText,
-  Languages,
-  Landmark,
+  Brain,
+  Calculator,
   FlaskConical,
-  Brain
-} from "@/lib/icons";
+  Globe,
+  Landmark,
+  Languages,
+} from '@/lib/icons'
 
 const subjects = [
   {
     icon: Calculator,
-    name: "Mathématiques",
-    description: "Algèbre, géométrie, statistiques",
-    cards: "5,200+",
-    color: "text-xp"
+    name: 'Mathématiques',
+    description: 'Algèbre, géométrie, statistiques',
+    cards: '5,200+',
+    color: 'text-xp',
   },
   {
     icon: Atom,
-    name: "Physique-Chimie",
-    description: "Mécanique, électricité, réactions",
-    cards: "4,800+",
-    color: "text-epic"
+    name: 'Physique-Chimie',
+    description: 'Mécanique, électricité, réactions',
+    cards: '4,800+',
+    color: 'text-epic',
   },
   {
     icon: FlaskConical,
-    name: "SVT",
-    description: "Biologie, géologie, écologie",
-    cards: "4,500+",
-    color: "text-success"
+    name: 'SVT',
+    description: 'Biologie, géologie, écologie',
+    cards: '4,500+',
+    color: 'text-success',
   },
   {
     icon: Languages,
-    name: "Français",
-    description: "Grammaire, littérature, expression",
-    cards: "3,900+",
-    color: "text-error"
+    name: 'Français',
+    description: 'Grammaire, littérature, expression',
+    cards: '3,900+',
+    color: 'text-error',
   },
   {
     icon: Globe,
-    name: "Anglais",
-    description: "Vocabulaire, grammaire, compréhension",
-    cards: "3,600+",
-    color: "text-rare"
+    name: 'Anglais',
+    description: 'Vocabulaire, grammaire, compréhension',
+    cards: '3,600+',
+    color: 'text-rare',
   },
   {
     icon: Landmark,
-    name: "Histoire-Géo",
-    description: "Événements, cartes, civilisations",
-    cards: "4,200+",
-    color: "text-level"
+    name: 'Histoire-Géo',
+    description: 'Événements, cartes, civilisations',
+    cards: '4,200+',
+    color: 'text-level',
   },
   {
     icon: BookText,
-    name: "Philosophie",
-    description: "Concepts, auteurs, dissertations",
-    cards: "2,800+",
-    color: "text-warning"
+    name: 'Philosophie',
+    description: 'Concepts, auteurs, dissertations',
+    cards: '2,800+',
+    color: 'text-warning',
   },
   {
     icon: Brain,
-    name: "Autres Matières",
-    description: "Économie, arts, langues vivantes",
-    cards: "3,100+",
-    color: "text-info"
-  }
-];
+    name: 'Autres Matières',
+    description: 'Économie, arts, langues vivantes',
+    cards: '3,100+',
+    color: 'text-info',
+  },
+]
 
 export function SubjectsSection() {
   return (
-    <section className="py-24 sm:py-32 bg-background">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <section className={`
+      bg-background py-24
+      sm:py-32
+    `}
+    >
+      <div className={`
+        mx-auto max-w-7xl px-6
+        lg:px-8
+      `}
+      >
         <div className="mx-auto max-w-2xl text-center">
           <Badge variant="secondary" className="mb-4">
             Programme Complet
           </Badge>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          <h2 className={`
+            text-3xl font-bold tracking-tight text-foreground
+            sm:text-4xl
+          `}
+          >
             Toutes les Matières du BEPC & BAC
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
@@ -86,17 +98,30 @@ export function SubjectsSection() {
           </p>
         </div>
 
-        <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-4">
+        <div className={`
+          mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-6
+          sm:grid-cols-2
+          lg:mx-0 lg:max-w-none lg:grid-cols-4
+        `}
+        >
           {subjects.map((subject) => {
-            const IconComponent = subject.icon;
+            const IconComponent = subject.icon
             return (
               <Card
                 key={subject.name}
-                className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/50"
+                className={`
+                  group transition-all duration-300
+                  hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg
+                `}
               >
                 <CardHeader>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-lg bg-muted ${subject.color}`}>
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className={`
+                      flex h-12 w-12 items-center justify-center rounded-lg
+                      bg-muted
+                      ${subject.color}
+                    `}
+                    >
                       <IconComponent className="h-6 w-6" />
                     </div>
                     <Badge variant="outline" className="text-xs">
@@ -111,12 +136,12 @@ export function SubjectsSection() {
                   </CardDescription>
                 </CardContent>
               </Card>
-            );
+            )
           })}
         </div>
       </div>
     </section>
-  );
+  )
 }
 
-export default SubjectsSection;
+export default SubjectsSection

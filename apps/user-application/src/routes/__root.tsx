@@ -1,78 +1,79 @@
+/* eslint-disable react-dom/no-dangerously-set-innerhtml */
+import type { QueryClient } from '@tanstack/react-query'
 /// <reference types="vite/client" />
 import {
+  createRootRouteWithContext,
   HeadContent,
   Outlet,
   Scripts,
-  createRootRouteWithContext,
-} from "@tanstack/react-router";
-import * as React from "react";
-import type { QueryClient } from "@tanstack/react-query";
-import { DefaultCatchBoundary } from "@/components/default-catch-boundary";
-import { NotFound } from "@/components/not-found";
-import { ThemeProvider } from "@/components/theme";
-import appCss from "@/styles.css?url";
-import { seo } from "@/utils/seo";
-import { initPerformanceMonitoring } from "@/lib/performance-monitor";
-import { initPreloading } from "@/lib/preload";
-import { useLocation } from "@tanstack/react-router";
+  useLocation,
+} from '@tanstack/react-router'
+import * as React from 'react'
+import { DefaultCatchBoundary } from '@/components/default-catch-boundary'
+import { NotFound } from '@/components/not-found'
+import { ThemeProvider } from '@/components/theme'
+import { initPerformanceMonitoring } from '@/lib/performance-monitor'
+import { initPreloading } from '@/lib/preload'
+import appCss from '@/styles.css?url'
+import { seo } from '@/utils/seo'
 
 export const Route = createRootRouteWithContext<{
-  queryClient: QueryClient;
+  queryClient: QueryClient
 }>()({
   head: () => ({
     meta: [
       {
-        charSet: "utf-8",
+        charSet: 'utf-8',
       },
       {
-        name: "viewport",
+        name: 'viewport',
         content:
-          "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
+          'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover',
       },
       {
-        name: "apple-mobile-web-app-capable",
-        content: "yes",
+        name: 'apple-mobile-web-app-capable',
+        content: 'yes',
       },
       {
-        name: "apple-mobile-web-app-status-bar-style",
-        content: "black-translucent",
+        name: 'apple-mobile-web-app-status-bar-style',
+        content: 'black-translucent',
       },
       {
-        name: "theme-color",
-        content: "#f97316",
+        name: 'theme-color',
+        content: '#f97316',
       },
       ...seo({
-        title: "Kurama - Votre compagnon d'apprentissage intelligent",
+        title: 'Kurama - Votre compagnon d\'apprentissage intelligent',
         description:
-          "Réussissez le BEPC et le BAC en Côte d'Ivoire avec Kurama. Apprentissage personnalisé, révision intelligente et disponible hors ligne.",
+          'Réussissez le BEPC et le BAC en Côte d\'Ivoire avec Kurama. Apprentissage personnalisé, révision intelligente et disponible hors ligne.',
       }),
     ],
     links: [
-      { rel: "stylesheet", href: appCss },
+      { rel: 'stylesheet', href: appCss },
       // Resource hints for performance optimization
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "dns-prefetch", href: "https://accounts.google.com" },
-      { rel: "dns-prefetch", href: "https://api.polar.sh" },
+      { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+      { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
+      { rel: 'dns-prefetch', href: 'https://accounts.google.com' },
+      { rel: 'dns-prefetch', href: 'https://api.polar.sh' },
       {
-        rel: "apple-touch-icon",
-        sizes: "180x180",
-        href: "/apple-touch-icon.png",
+        rel: 'apple-touch-icon',
+        sizes: '180x180',
+        href: '/apple-touch-icon.png',
       },
       {
-        rel: "icon",
-        type: "image/png",
-        sizes: "32x32",
-        href: "/favicon-32x32.png",
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '32x32',
+        href: '/favicon-32x32.png',
       },
       {
-        rel: "icon",
-        type: "image/png",
-        sizes: "16x16",
-        href: "/favicon-16x16.png",
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '16x16',
+        href: '/favicon-16x16.png',
       },
-      { rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
-      { rel: "icon", href: "/favicon.ico" },
+      { rel: 'manifest', href: '/site.webmanifest', color: '#fffff' },
+      { rel: 'icon', href: '/favicon.ico' },
     ],
   }),
   errorComponent: (props) => {
@@ -80,25 +81,25 @@ export const Route = createRootRouteWithContext<{
       <RootDocument>
         <DefaultCatchBoundary {...props} />
       </RootDocument>
-    );
+    )
   },
   notFoundComponent: () => <NotFound />,
   component: RootComponent,
-});
+})
 
 function RootComponent() {
-  const location = useLocation();
+  const location = useLocation()
 
   // Initialize performance monitoring on mount
   React.useEffect(() => {
-    initPerformanceMonitoring();
-  }, []);
+    initPerformanceMonitoring()
+  }, [])
 
   // Initialize intelligent preloading based on current route
   React.useEffect(() => {
-    const cleanup = initPreloading(location.pathname);
-    return cleanup;
-  }, [location.pathname]);
+    const cleanup = initPreloading(location.pathname)
+    return cleanup
+  }, [location.pathname])
 
   return (
     <RootDocument>
@@ -111,33 +112,45 @@ function RootComponent() {
         <Outlet />
       </ThemeProvider>
     </RootDocument>
-  );
+  )
+}
+
+/**
+ * Critical inline script to prevent FOUC (Flash of Unstyled Content).
+ * This must run before page render to apply the correct theme.
+ * Content is static and controlled - no user input or external data.
+ */
+function ThemeScript() {
+  return (
+
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `
+          (function() {
+            try {
+              var theme = localStorage.getItem('ui-theme') || 'system';
+              var systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+              var resolvedTheme = theme === 'system' ? systemTheme : theme;
+              
+              if (resolvedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+              } else {
+                document.documentElement.classList.remove('dark');
+              }
+            } catch (e) {}
+          })();
+        `,
+      }}
+    />
+  )
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning>
       <head>
         <HeadContent />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var theme = localStorage.getItem('ui-theme') || 'system';
-                  var systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                  var resolvedTheme = theme === 'system' ? systemTheme : theme;
-                  
-                  if (resolvedTheme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
-                } catch (e) {}
-              })();
-            `,
-          }}
-        />
+        <ThemeScript />
       </head>
       <body>
         {children}
@@ -145,27 +158,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
-  );
-}
-
-/**
- * Lazy-loaded devtools component
- * Only loaded in development mode
- */
-function DevTools() {
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
-  return (
-    <React.Suspense fallback={null}>
-      <LazyDevTools />
-    </React.Suspense>
-  );
+  )
 }
 
 /**
@@ -173,10 +166,10 @@ function DevTools() {
  */
 const LazyDevTools = React.lazy(() =>
   Promise.all([
-    import("@tanstack/react-router-devtools").then((m) => ({
+    import('@tanstack/react-router-devtools').then(m => ({
       RouterDevtools: m.TanStackRouterDevtools,
     })),
-    import("@tanstack/react-query-devtools").then((m) => ({
+    import('@tanstack/react-query-devtools').then(m => ({
       QueryDevtools: m.ReactQueryDevtools,
     })),
   ]).then(([router, query]) => ({
@@ -186,5 +179,29 @@ const LazyDevTools = React.lazy(() =>
         <query.QueryDevtools buttonPosition="bottom-left" />
       </>
     ),
-  }))
-);
+  })),
+)
+
+/**
+ * Lazy-loaded devtools component
+ * Only loaded in development mode
+ */
+function DevTools() {
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    // Use a microtask to defer the state update
+    queueMicrotask(() => {
+      setMounted(true)
+    })
+  }, [])
+
+  if (!mounted)
+    return null
+
+  return (
+    <React.Suspense fallback={null}>
+      <LazyDevTools />
+    </React.Suspense>
+  )
+}

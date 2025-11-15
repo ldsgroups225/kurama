@@ -1,130 +1,132 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { AppHeader, BottomNav, ChallengeCard, StatsGrid, QuickActions } from "@/components/main";
-import {
-  LevelBadge,
-  AchievementShowcase,
-  StreakCalendar,
-  LeaderboardWidget,
-  type Achievement,
-  type LeaderboardEntry
-} from "@/components/gamification";
+import type { Achievement, LeaderboardEntry } from '@/components/gamification'
+import { createLazyFileRoute } from '@tanstack/react-router'
 import {
   BookOpen,
   Brain,
-  Trophy,
-  Zap,
-  Target,
   Clock,
-  Flame,
-  Users,
+  Crown,
   FileText,
+  Flame,
   Gamepad2,
-  Timer,
   GraduationCap,
-  Star,
   Rocket,
-  Crown
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { trackRouteLoad } from "@/lib/performance-monitor";
+  Star,
+  Target,
+  Timer,
+  Trophy,
+  Users,
+  Zap,
+} from 'lucide-react'
+import { useEffect } from 'react'
+import {
 
-export const Route = createLazyFileRoute("/_auth/app/")({
+  AchievementShowcase,
+
+  LeaderboardWidget,
+  LevelBadge,
+  StreakCalendar,
+} from '@/components/gamification'
+import { AppHeader, BottomNav, ChallengeCard, QuickActions, StatsGrid } from '@/components/main'
+import { Badge } from '@/components/ui/badge'
+import { trackRouteLoad } from '@/lib/performance-monitor'
+import { generateUUID } from '@/utils/generateUUID'
+
+export const Route = createLazyFileRoute('/_auth/app/')({
   component: AppHome,
-});
+})
 
 function AppHome() {
   // Track route load performance
   useEffect(() => {
-    const endTracking = trackRouteLoad('app-dashboard');
-    return endTracking;
-  }, []);
+    const endTracking = trackRouteLoad('app-dashboard')
+    return endTracking
+  }, [])
 
   // Mock data - Replace with real data from your backend
   const userLevel = {
     level: 12,
     currentXP: 2450,
     nextLevelXP: 3000,
-  };
+  }
 
   const achievements: Achievement[] = [
     {
-      id: "1",
-      name: "Premier Pas",
-      description: "Complétez votre première leçon",
+      id: '1',
+      name: 'Premier Pas',
+      description: 'Complétez votre première leçon',
       icon: Star,
-      color: "bg-gradient-xp",
+      color: 'bg-gradient-xp',
       unlocked: true,
-      unlockedAt: new Date("2024-01-15"),
-      rarity: "common",
+      unlockedAt: new Date('2024-01-15'),
+      rarity: 'common',
     },
     {
-      id: "2",
-      name: "Série de Feu",
-      description: "Maintenez une série de 7 jours",
+      id: '2',
+      name: 'Série de Feu',
+      description: 'Maintenez une série de 7 jours',
       icon: Flame,
-      color: "bg-gradient-streak",
+      color: 'bg-gradient-streak',
       unlocked: true,
-      unlockedAt: new Date("2024-02-01"),
-      rarity: "rare",
+      unlockedAt: new Date('2024-02-01'),
+      rarity: 'rare',
     },
     {
-      id: "3",
-      name: "Maître du Quiz",
-      description: "Obtenez 100% à 10 quiz",
+      id: '3',
+      name: 'Maître du Quiz',
+      description: 'Obtenez 100% à 10 quiz',
       icon: Trophy,
-      color: "bg-gradient-level",
+      color: 'bg-gradient-level',
       unlocked: true,
-      unlockedAt: new Date("2024-02-10"),
-      rarity: "epic",
+      unlockedAt: new Date('2024-02-10'),
+      rarity: 'epic',
     },
     {
-      id: "4",
-      name: "Étudiant Légendaire",
-      description: "Atteignez le niveau 50",
+      id: '4',
+      name: 'Étudiant Légendaire',
+      description: 'Atteignez le niveau 50',
       icon: Crown,
-      color: "bg-gradient-legendary",
+      color: 'bg-gradient-legendary',
       unlocked: false,
       progress: 12,
       maxProgress: 50,
-      rarity: "legendary",
+      rarity: 'legendary',
     },
     {
-      id: "5",
-      name: "Mathématicien",
-      description: "Complétez tous les chapitres de maths",
+      id: '5',
+      name: 'Mathématicien',
+      description: 'Complétez tous les chapitres de maths',
       icon: Target,
-      color: "bg-gradient-epic",
+      color: 'bg-gradient-epic',
       unlocked: false,
       progress: 8,
       maxProgress: 12,
-      rarity: "epic",
+      rarity: 'epic',
     },
     {
-      id: "6",
-      name: "Fusée",
-      description: "Étudiez 30 jours d'affilée",
+      id: '6',
+      name: 'Fusée',
+      description: 'Étudiez 30 jours d\'affilée',
       icon: Rocket,
-      color: "bg-gradient-rare",
+      color: 'bg-gradient-rare',
       unlocked: false,
       progress: 12,
       maxProgress: 30,
-      rarity: "rare",
+      rarity: 'rare',
     },
-  ];
+  ]
 
   const leaderboardData: LeaderboardEntry[] = [
     {
-      id: "1",
-      name: "Aminata Koné",
+      id: '1',
+      name: 'Aminata Koné',
       avatar: undefined,
       points: 3450,
       rank: 1,
       previousRank: 2,
     },
     {
-      id: "2",
-      name: "Darius Kassi",
+      id: '2',
+      name: 'Darius Kassi',
       avatar: undefined,
       points: 3240,
       rank: 2,
@@ -132,108 +134,108 @@ function AppHome() {
       isCurrentUser: true,
     },
     {
-      id: "3",
-      name: "Fatou Traoré",
+      id: '3',
+      name: 'Fatou Traoré',
       avatar: undefined,
       points: 2980,
       rank: 3,
       previousRank: 3,
     },
     {
-      id: "4",
-      name: "Kouassi Yao",
+      id: '4',
+      name: 'Kouassi Yao',
       avatar: undefined,
       points: 2750,
       rank: 4,
       previousRank: 5,
     },
     {
-      id: "5",
-      name: "Mariam Diallo",
+      id: '5',
+      name: 'Mariam Diallo',
       avatar: undefined,
       points: 2650,
       rank: 5,
       previousRank: 4,
     },
-  ];
+  ]
 
   const streakData = {
     currentStreak: 12,
     longestStreak: 28,
     streakHistory: Array.from({ length: 14 }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - (13 - i));
+      const date = new Date()
+      date.setDate(date.getDate() - (13 - i))
       return {
         date,
         completed: i >= 2, // Last 12 days completed
         count: i >= 2 ? 1 : 0,
-      };
+      }
     }),
-  };
+  }
 
   const stats = [
     {
       icon: BookOpen,
-      label: "Cartes Étudiées",
-      value: "247",
-      subValue: "24 aujourd'hui",
-      color: "text-xp",
+      label: 'Cartes Étudiées',
+      value: '247',
+      subValue: '24 aujourd\'hui',
+      color: 'text-xp',
       progress: 65,
     },
     {
       icon: Trophy,
-      label: "Points Gagnés",
-      value: "1,240",
-      subValue: "+120 cette semaine",
-      color: "text-level",
+      label: 'Points Gagnés',
+      value: '1,240',
+      subValue: '+120 cette semaine',
+      color: 'text-level',
       progress: 80,
     },
     {
       icon: Target,
-      label: "Objectif Quotidien",
-      value: "18/25",
-      subValue: "7 cartes restantes",
-      color: "text-success",
+      label: 'Objectif Quotidien',
+      value: '18/25',
+      subValue: '7 cartes restantes',
+      color: 'text-success',
       progress: 72,
     },
     {
       icon: Flame,
-      label: "Série Actuelle",
-      value: "12 jours",
-      subValue: "Record: 28 jours",
-      color: "text-streak",
+      label: 'Série Actuelle',
+      value: '12 jours',
+      subValue: 'Record: 28 jours',
+      color: 'text-streak',
       progress: 43,
     },
-  ];
+  ]
 
   const quickActions = [
     {
       icon: Brain,
-      label: "Révision Rapide",
-      color: "bg-epic text-epic",
+      label: 'Révision Rapide',
+      color: 'bg-epic text-epic',
     },
     {
       icon: Gamepad2,
-      label: "Quiz",
-      color: "bg-xp text-xp",
+      label: 'Quiz',
+      color: 'bg-xp text-xp',
     },
     {
       icon: Timer,
-      label: "Chrono",
-      color: "bg-success text-success",
+      label: 'Chrono',
+      color: 'bg-success text-success',
     },
     {
       icon: FileText,
-      label: "Examen Blanc",
-      color: "bg-error text-error",
+      label: 'Examen Blanc',
+      color: 'bg-error text-error',
     },
-  ];
+  ]
 
   return (
     <div className="min-h-screen bg-background pb-24">
       <AppHeader />
 
-      <main className="mx-auto max-w-lg px-4 py-6 space-y-6">
+      <main className="mx-auto max-w-lg space-y-6 px-4 py-6">
         {/* Level Progress */}
         <section>
           <LevelBadge
@@ -245,7 +247,7 @@ function AppHome() {
 
         {/* Daily Challenge */}
         <section>
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-bold text-foreground">Défi du Jour</h2>
             <Badge variant="secondary" className="gap-1">
               <Clock className="h-3 w-3" />
@@ -262,7 +264,7 @@ function AppHome() {
 
         {/* Quick Actions */}
         <section>
-          <h2 className="text-lg font-bold text-foreground mb-4">Actions Rapides</h2>
+          <h2 className="mb-4 text-lg font-bold text-foreground">Actions Rapides</h2>
           <QuickActions actions={quickActions} />
         </section>
 
@@ -277,7 +279,7 @@ function AppHome() {
 
         {/* Stats */}
         <section>
-          <h2 className="text-lg font-bold text-foreground mb-4">Vos Statistiques</h2>
+          <h2 className="mb-4 text-lg font-bold text-foreground">Vos Statistiques</h2>
           <StatsGrid stats={stats} />
         </section>
 
@@ -297,9 +299,15 @@ function AppHome() {
 
         {/* Recent Activity */}
         <section>
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-bold text-foreground">Activité Récente</h2>
-            <button className="text-sm text-primary hover:underline">
+            <button
+              type="button"
+              className={`
+                text-sm text-primary
+                hover:underline
+              `}
+            >
               Voir tout
             </button>
           </div>
@@ -307,49 +315,61 @@ function AppHome() {
           <div className="space-y-3">
             {[
               {
-                subject: "Physique-Chimie",
-                action: "20 cartes révisées",
-                time: "Il y a 2h",
+                subject: 'Physique-Chimie',
+                action: '20 cartes révisées',
+                time: 'Il y a 2h',
                 icon: Zap,
-                color: "text-epic",
+                color: 'text-epic',
               },
               {
-                subject: "Histoire-Géo",
-                action: "Quiz complété (85%)",
-                time: "Il y a 5h",
+                subject: 'Histoire-Géo',
+                action: 'Quiz complété (85%)',
+                time: 'Il y a 5h',
                 icon: Trophy,
-                color: "text-level",
+                color: 'text-level',
               },
               {
-                subject: "Groupe d'étude",
-                action: "Nouveau message",
-                time: "Il y a 1j",
+                subject: 'Groupe d\'étude',
+                action: 'Nouveau message',
+                time: 'Il y a 1j',
                 icon: Users,
-                color: "text-xp",
+                color: 'text-xp',
               },
-            ].map((activity, index) => {
-              const Icon = activity.icon;
+            ].map((activity) => {
+              const Icon = activity.icon
               return (
                 <div
-                  key={index}
-                  className="flex items-center gap-3 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                  key={generateUUID()}
+                  className={`
+                    flex items-center gap-3 rounded-xl bg-muted/50 p-4
+                    transition-colors
+                    hover:bg-muted
+                  `}
                 >
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-background ${activity.color}`}>
+                  <div className={`
+                    flex h-10 w-10 items-center justify-center rounded-full
+                    bg-background
+                    ${activity.color}
+                  `}
+                  >
                     <Icon className="h-5 w-5" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">
                       {activity.subject}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {activity.action}
                     </p>
                   </div>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  <span className={`
+                    text-xs whitespace-nowrap text-muted-foreground
+                  `}
+                  >
                     {activity.time}
                   </span>
                 </div>
-              );
+              )
             })}
           </div>
         </section>
@@ -357,5 +377,5 @@ function AppHome() {
 
       <BottomNav />
     </div>
-  );
+  )
 }

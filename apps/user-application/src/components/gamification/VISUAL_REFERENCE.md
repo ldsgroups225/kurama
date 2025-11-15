@@ -215,31 +215,37 @@
 ### Gradients
 
 **Level/XP (Amber/Orange)**
+
 ```
 from-amber-400 (#FBBF24) → to-orange-500 (#F97316)
 ```
 
 **Common (Gray)**
+
 ```
 from-gray-400 (#9CA3AF) → to-gray-500 (#6B7280)
 ```
 
 **Rare (Blue)**
+
 ```
 from-blue-400 (#60A5FA) → to-blue-600 (#2563EB)
 ```
 
 **Epic (Purple)**
+
 ```
 from-purple-400 (#C084FC) → to-purple-600 (#7C3AED)
 ```
 
 **Legendary (Gold)**
+
 ```
 from-amber-400 (#FBBF24) → to-orange-500 (#F97316)
 ```
 
 **Streak (Orange/Red)**
+
 ```
 from-orange-400 (#FB923C) → to-red-500 (#EF4444)
 ```
@@ -247,6 +253,7 @@ from-orange-400 (#FB923C) → to-red-500 (#EF4444)
 ## Icon Reference
 
 ### Achievement Icons
+
 - ⭐ Star - First steps, basics
 - 🔥 Flame - Streaks, consistency
 - 🏆 Trophy - Mastery, excellence
@@ -259,6 +266,7 @@ from-orange-400 (#FB923C) → to-red-500 (#EF4444)
 - ⚡ Lightning - Quick actions
 
 ### Status Icons
+
 - 🔒 Lock - Locked achievements
 - ✅ Check - Completed
 - 📈 Trending Up - Rank increase
@@ -270,6 +278,7 @@ from-orange-400 (#FB923C) → to-red-500 (#EF4444)
 ## Spacing & Sizing
 
 ### Component Heights
+
 - Level Badge (Full): 80px
 - Level Badge (Compact): 40px
 - Achievement Badge (Small): 120px
@@ -279,6 +288,7 @@ from-orange-400 (#FB923C) → to-red-500 (#EF4444)
 - Streak Calendar: ~280px
 
 ### Icon Sizes
+
 - Small: 16px
 - Medium: 20px
 - Large: 24px
@@ -288,6 +298,7 @@ from-orange-400 (#FB923C) → to-red-500 (#EF4444)
 - Reward Icon: 48px
 
 ### Border Radius
+
 - Cards: 12px
 - Badges: Full circle (50%)
 - Buttons: 8px
@@ -295,6 +306,7 @@ from-orange-400 (#FB923C) → to-red-500 (#EF4444)
 - Progress bars: 9999px (pill)
 
 ### Shadows
+
 - Card: 0 1px 3px rgba(0,0,0,0.1)
 - Card Hover: 0 10px 15px rgba(0,0,0,0.1)
 - Badge: 0 4px 6px rgba(0,0,0,0.1)
@@ -303,16 +315,19 @@ from-orange-400 (#FB923C) → to-red-500 (#EF4444)
 ## Animation Timings
 
 ### Micro-interactions
+
 - Hover: 150ms ease-out
 - Press: 100ms ease-in
 - Focus: 200ms ease
 
 ### Progress
+
 - XP Bar Fill: 500ms ease-out
 - Level Up: 1000ms bounce
 - Achievement Unlock: 800ms scale
 
 ### Celebrations
+
 - Sparkle Float: 2-4s linear infinite
 - Badge Bounce: 2s ease-in-out infinite
 - Modal Enter: 300ms ease-out
@@ -321,17 +336,20 @@ from-orange-400 (#FB923C) → to-red-500 (#EF4444)
 ## Responsive Breakpoints
 
 ### Mobile (< 640px)
+
 - Single column layout
 - Full-width components
 - Compact badges
 - Touch targets: 44px minimum
 
 ### Tablet (640px - 1024px)
+
 - Two-column grid for stats
 - Larger touch targets
 - Side navigation option
 
 ### Desktop (> 1024px)
+
 - Max width: 512px (centered)
 - Hover states enabled
 - Keyboard navigation
@@ -340,16 +358,19 @@ from-orange-400 (#FB923C) → to-red-500 (#EF4444)
 ## State Variations
 
 ### Achievement States
+
 1. **Locked**: Gray, lock icon, progress bar
 2. **Unlocked**: Color gradient, achievement icon, date
 3. **In Progress**: Color gradient, progress bar, count
 
 ### Leaderboard States
+
 1. **Current User**: Primary background, highlighted
 2. **Top 3**: Special icons (Trophy, Medal, Award)
 3. **Others**: Standard display with rank number
 
 ### Streak States
+
 1. **Active Day**: Flame icon, gradient background
 2. **Missed Day**: Empty circle, muted background
 3. **Today**: Ring highlight, special indicator
@@ -357,18 +378,21 @@ from-orange-400 (#FB923C) → to-red-500 (#EF4444)
 ## Accessibility Features
 
 ### Visual
+
 - Color contrast: 4.5:1 minimum
 - Icons paired with text
 - Progress bars with labels
 - Focus indicators: 2px ring
 
 ### Keyboard
+
 - Tab navigation
 - Enter/Space activation
 - Escape to close modals
 - Arrow keys for lists
 
 ### Screen Readers
+
 - ARIA labels on icons
 - Progress announcements
 - Achievement unlocks announced
@@ -377,6 +401,7 @@ from-orange-400 (#FB923C) → to-red-500 (#EF4444)
 ## Print Styles
 
 Components are optimized for screen display. For print:
+
 - Hide animations
 - Use solid colors
 - Increase contrast
@@ -385,6 +410,7 @@ Components are optimized for screen display. For print:
 ## Dark Mode Support
 
 All components support dark mode via CSS variables:
+
 - Background colors adapt
 - Text colors adjust
 - Gradients remain vibrant
