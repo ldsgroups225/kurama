@@ -1,4 +1,4 @@
-import { Bell } from "@/lib/icons";
+import { Bell, ArrowLeft } from "@/lib/icons";
 import { useAtom } from "jotai";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,6 +11,8 @@ interface AppHeaderProps {
   showAvatar?: boolean;
   showNotifications?: boolean;
   showLevel?: boolean;
+  showBackButton?: boolean;
+  onBackClick?: () => void;
   userLevel?: {
     level: number;
     currentXP: number;
@@ -23,6 +25,8 @@ export function AppHeader({
   showAvatar = true,
   showNotifications = true,
   showLevel = false,
+  showBackButton = false,
+  onBackClick,
   userLevel
 }: AppHeaderProps) {
   // Use cached profile data from localStorage for instant access
@@ -68,6 +72,16 @@ export function AppHeader({
       <div className="mx-auto max-w-lg px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            {showBackButton && onBackClick && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onBackClick}
+                className="shrink-0"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            )}
             {showAvatar && (
               <Avatar className="h-10 w-10 border-2 border-primary/20">
                 <AvatarImage src={session?.user?.image || undefined} />

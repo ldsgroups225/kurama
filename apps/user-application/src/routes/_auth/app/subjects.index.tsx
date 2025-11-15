@@ -56,51 +56,62 @@ function SubjectsPage() {
     <div className="min-h-screen bg-background pb-24">
       <AppHeader title="Matières" showAvatar={false} />
 
-      <main className="mx-auto max-w-lg px-4 py-6 space-y-3">
+      <main className="mx-auto max-w-lg px-4 py-6 space-y-4">
+        {/* Motivational Header */}
+        <div className="text-center py-4">
+          <h2 className="text-2xl font-bold mb-2">Quelle matière aujourd'hui ? 🎯</h2>
+          <p className="text-muted-foreground">Choisis ta matière préférée et commence à apprendre !</p>
+        </div>
+
         {isLoading && (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         )}
 
-        {subjects?.map((subject) => {
-          const Icon = subjectIcons[subject.name] || BookText;
-          const colors = subjectColors[subject.name] || {
-            text: "text-primary",
-            bg: "bg-primary",
-          };
+        <div className="grid grid-cols-1 gap-4">
+          {subjects?.map((subject) => {
+            const Icon = subjectIcons[subject.name] || BookText;
+            const colors = subjectColors[subject.name] || {
+              text: "text-primary",
+              bg: "bg-primary",
+            };
 
-          return (
-            <Link
-              key={subject.id}
-              to="/app/subjects/$subjectId"
-              params={{ subjectId: String(subject.id) }}
-            >
-              <Card className="hover:bg-accent transition-colors cursor-pointer">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={`flex h-12 w-12 items-center justify-center rounded-xl ${colors.bg} ${colors.text}`}
-                      >
-                        <Icon className="h-6 w-6" />
+            return (
+              <Link
+                key={subject.id}
+                to="/app/subjects/$subjectId"
+                params={{ subjectId: String(subject.id) }}
+              >
+                <Card className="group hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer border-2 hover:border-primary/50 overflow-hidden">
+                  <div className="absolute inset-0 bg-linear-to-br from-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                  <CardHeader className="relative">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div
+                          className={`flex h-16 w-16 items-center justify-center rounded-2xl ${colors.bg} ${colors.text} shadow-lg group-hover:scale-110 transition-transform duration-200`}
+                        >
+                          <Icon className="h-8 w-8" />
+                        </div>
+                        <div className="flex-1">
+                          <CardTitle className="text-lg mb-1 group-hover:text-primary transition-colors">
+                            {subject.name}
+                          </CardTitle>
+                          {subject.description && (
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {subject.description}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        <CardTitle className="text-base">{subject.name}</CardTitle>
-                        {subject.description && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {subject.description}
-                          </p>
-                        )}
-                      </div>
+                      <ChevronRight className="h-6 w-6 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
                     </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                </CardHeader>
-              </Card>
-            </Link>
-          );
-        })}
+                  </CardHeader>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
       </main>
 
       <BottomNav />

@@ -31,10 +31,15 @@ export const getLessonsBySubject = createServerFn({ method: "GET" })
   .handler(async ({ data: subjectId }) => {
     const db = getDb();
 
-    return db.query.lessons.findMany({
+    const lessonsData = await db.query.lessons.findMany({
       where: eq(lessons.subjectId, subjectId),
       orderBy: [asc(lessons.id)],
+      with: {
+        subject: true,
+      },
     });
+
+    return lessonsData;
   });
 
 /**
