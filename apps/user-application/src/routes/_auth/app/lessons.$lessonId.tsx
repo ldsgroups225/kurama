@@ -160,7 +160,7 @@ function LessonModePage() {
                 key={mode.id}
                 onClick={() =>
                   navigate({
-                    to: "/app/lessons/$lessonId/session",
+                    to: "/app/lesson-session/$lessonId",
                     params: { lessonId },
                     search: { mode: mode.id },
                   })

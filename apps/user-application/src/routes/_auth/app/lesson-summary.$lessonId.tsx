@@ -24,7 +24,7 @@ type SearchParams = {
   mode?: string;
 };
 
-export const Route = createFileRoute("/_auth/app/lessons/$lessonId/summary")({
+export const Route = createFileRoute("/_auth/app/lesson-summary/$lessonId")({
   component: SummaryPage,
   validateSearch: (search: Record<string, unknown>): SearchParams => {
     return {
@@ -38,9 +38,9 @@ export const Route = createFileRoute("/_auth/app/lessons/$lessonId/summary")({
 });
 
 function SummaryPage() {
-  const { lessonId } = useParams({ from: "/_auth/app/lessons/$lessonId/summary" });
+  const { lessonId } = useParams({ from: "/_auth/app/lesson-summary/$lessonId" });
   const { correct, incorrect, total, duration, mode } = useSearch({
-    from: "/_auth/app/lessons/$lessonId/summary",
+    from: "/_auth/app/lesson-summary/$lessonId",
   });
   const navigate = useNavigate();
 
@@ -188,7 +188,7 @@ function SummaryPage() {
             className="w-full"
             onClick={() =>
               navigate({
-                to: "/app/lessons/$lessonId/session",
+                to: "/app/lesson-session/$lessonId",
                 params: { lessonId },
                 search: { mode: mode as "flashcards" | "quiz" | "exam" },
               })

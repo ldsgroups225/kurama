@@ -13,8 +13,8 @@ The learning flow is a 5-screen journey that guides students through their study
 1. **Subject Selection** (`/app/subjects`)
 2. **Lesson Selection** (`/app/subjects/$subjectId`)
 3. **Mode Selection** (`/app/lessons/$lessonId`)
-4. **Learning Session** (`/app/lessons/$lessonId/session`)
-5. **Session Summary** (`/app/lessons/$lessonId/summary`)
+4. **Learning Session** (`/app/lesson-session/$lessonId`)
+5. **Session Summary** (`/app/lesson-summary/$lessonId`)
 
 ## Architecture
 
@@ -57,8 +57,8 @@ routes/_auth/app/
 ├── subjects.index.tsx          # Subject selection (parent route)
 ├── subjects.$subjectId.tsx     # Lesson selection (child route)
 ├── lessons.$lessonId.tsx       # Mode selection
-├── lessons.$lessonId.session.tsx   # Active session
-└── lessons.$lessonId.summary.tsx   # Results
+├── lesson-session.$lessonId.tsx   # Active session
+└── lesson-summary.$lessonId.tsx   # Results
 ```
 
 **Critical**: Use `.index.tsx` for parent routes that have children to prevent them from becoming layout routes.
@@ -118,9 +118,9 @@ routes/_auth/app/
 
 **Navigation**: 
 - Back to lesson list
-- Forward to `/app/lessons/$lessonId/session?mode=flashcards`
+- Forward to `/app/lesson-session/$lessonId?mode=flashcards`
 
-### 4. Learning Session (`lessons.$lessonId.session.tsx`)
+### 4. Learning Session (`lesson-session.$lessonId.tsx`)
 
 **Purpose**: Active study session with flashcards
 
@@ -149,7 +149,7 @@ routes/_auth/app/
 - Flip animation (rotateY)
 - Button fade-in after flip
 
-### 5. Session Summary (`lessons.$lessonId.summary.tsx`)
+### 5. Session Summary (`lesson-summary.$lessonId.tsx`)
 
 **Purpose**: Show session results and performance feedback
 
@@ -239,7 +239,7 @@ Display lesson overview →
 User clicks "Commencer" → 
 Show mode selection modal → 
 User selects mode → 
-Navigate to /app/lessons/$lessonId/session?mode=flashcards
+Navigate to /app/lesson-session/$lessonId?mode=flashcards
 ```
 
 ### Learning Session
@@ -390,8 +390,8 @@ useEffect(() => {
 - `apps/user-application/src/routes/_auth/app/subjects.index.tsx`
 - `apps/user-application/src/routes/_auth/app/subjects.$subjectId.tsx`
 - `apps/user-application/src/routes/_auth/app/lessons.$lessonId.tsx`
-- `apps/user-application/src/routes/_auth/app/lessons.$lessonId.session.tsx`
-- `apps/user-application/src/routes/_auth/app/lessons.$lessonId.summary.tsx`
+- `apps/user-application/src/routes/_auth/app/lesson-session.$lessonId.tsx`
+- `apps/user-application/src/routes/_auth/app/lesson-summary.$lessonId.tsx`
 
 ### Server Functions
 - `apps/user-application/src/core/functions/learning.ts`
