@@ -46,14 +46,14 @@ export default antfu({
   },
 }, {
   // Better Tailwind CSS plugin configuration
+  // Only apply to projects that have Tailwind CSS installed
+  files: ['apps/user-application/**/*.{ts,tsx,js,jsx}'],
   plugins: {
     'better-tailwindcss': betterTailwindcss,
   },
   settings: {
     'better-tailwindcss': {
       // Tailwind CSS v4: path to the CSS entry file (relative to where ESLint runs)
-      // For apps/user-application, this will be src/styles.css
-      // For workspace root, this would be apps/user-application/src/styles.css
       entryPoint: 'src/styles.css',
       // Allow custom classes defined in @layer utilities
       allowUnknownClasses: true,

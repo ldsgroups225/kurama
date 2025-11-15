@@ -95,10 +95,9 @@ export function RewardAnimation({ reward, onClose, show }: RewardAnimationProps)
 
   return (
     <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="reward-title"
-      aria-describedby="reward-description"
+      role="button"
+      tabIndex={0}
+      aria-label="Close reward dialog"
       className={cn(
         `
           fixed inset-0 z-50 flex items-center justify-center bg-background/80
@@ -110,6 +109,10 @@ export function RewardAnimation({ reward, onClose, show }: RewardAnimationProps)
       onKeyDown={handleKeyDown}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="reward-title"
+        aria-describedby="reward-description"
         className={cn(
           `
             w-full max-w-sm overflow-hidden rounded-lg border bg-card
@@ -117,7 +120,7 @@ export function RewardAnimation({ reward, onClose, show }: RewardAnimationProps)
           `,
           animation.isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0',
         )}
-        onClick={e => e.stopPropagation()}
+        onClickCapture={e => e.stopPropagation()}
       >
         <div className="p-0">
           {/* Animated Background */}
