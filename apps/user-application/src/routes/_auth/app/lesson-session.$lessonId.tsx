@@ -1,8 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { Loader2 } from 'lucide-react'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Flashcard } from '@/components/learning/flashcard'
+import { Quiz } from '@/components/learning/quiz'
+import { Exam } from '@/components/learning/exam'
+import { QuizSettingsSheet } from '@/components/learning/quiz-settings-sheet'
 import { SessionControls } from '@/components/learning/session-controls'
 import { SessionCounterBadge } from '@/components/learning/session-counter-badge'
 import { SessionHeader } from '@/components/learning/session-header'
@@ -21,6 +24,8 @@ interface SearchParams {
   mode?: 'flashcards' | 'quiz' | 'exam'
 }
 
+type QuizMode = 'memorize-all' | 'review-starred' | 'quick-review'
+
 export const Route = createFileRoute('/_auth/app/lesson-session/$lessonId')({
   component: SessionPage,
   validateSearch: (search: Record<string, unknown>): SearchParams => {
@@ -34,6 +39,11 @@ function SessionPage() {
   const { lessonId } = useParams({ from: '/_auth/app/lesson-session/$lessonId' })
   const { mode } = useSearch({ from: '/_auth/app/lesson-session/$lessonId' })
   const navigate = useNavigate()
+
+  // Quiz mode state
+  const [showQuizSettings, setShowQuizSettings] = useState(mode === 'quiz')
+  // const [quizMode, setQuizMode] = useState<QuizMode | null>(null) // Reserved for spaced repetition
+  const [hasStartedQuiz, setHasStartedQuiz] = useState(false)
 
   // Session state management
   const {
@@ -87,20 +97,23 @@ function SessionPage() {
     })
   }, [navigate, lessonId])
 
-  const navigateToSummary = useCallback(() => {
-    const duration = Math.floor((Date.now() - startTime) / 1000)
-    navigate({
-      to: '/app/lesson-summary/$lessonId',
-      params: { lessonId },
-      search: {
-        correct: sessionStats.correct,
-        incorrect: sessionStats.incorrect,
-        total: cards.length,
-        duration,
-        mode,
-      },
-    })
-  }, [navigate, lessonId, startTime, sessionStats, cards.length, mode])
+  const navigateToSummary = useCallback(
+    (finalCorrect?: number, finalIncorrect?: number) => {
+      const duration = Math.floor((Date.now() - startTime) / 1000)
+      navigate({
+        to: '/app/lesson-summary/$lessonId',
+        params: { lessonId },
+        search: {
+          correct: finalCorrect ?? sessionStats.correct,
+          incorrect: finalIncorrect ?? sessionStats.incorrect,
+          total: cards.length,
+          duration,
+          mode,
+        },
+      })
+    },
+    [navigate, lessonId, startTime, sessionStats, cards.length, mode],
+  )
 
   // Card interaction handlers
   const handleFlip = useCallback(() => {
@@ -114,7 +127,10 @@ function SessionPage() {
       incrementStat(response)
 
       if (isLastCard) {
-        navigateToSummary()
+        // Calculate final stats to pass to summary (state update is async)
+        const finalCorrect = response === 'correct' ? sessionStats.correct + 1 : sessionStats.correct
+        const finalIncorrect = response === 'incorrect' ? sessionStats.incorrect + 1 : sessionStats.incorrect
+        navigateToSummary(finalCorrect, finalIncorrect)
       }
       else {
         setCurrentCardIndex(prev => prev + 1)
@@ -129,6 +145,7 @@ function SessionPage() {
       setCurrentCardIndex,
       setIsFlipped,
       swipeAnimations.x,
+      sessionStats,
     ],
   )
 
@@ -186,6 +203,20 @@ function SessionPage() {
     onDragEnd: () => setIsDragging(false),
   })
 
+  // Handle quiz mode start - MUST be before any conditional returns
+  const handleStartQuiz = useCallback((_selectedMode: QuizMode) => {
+    // setQuizMode(selectedMode) // Reserved for spaced repetition algorithm
+    setHasStartedQuiz(true)
+    setShowQuizSettings(false)
+  }, [])
+
+  // Show quiz settings sheet on mount if mode is quiz and not started
+  useEffect(() => {
+    if (mode === 'quiz' && !hasStartedQuiz) {
+      setShowQuizSettings(true)
+    }
+  }, [mode, hasStartedQuiz])
+
   // Autoplay functionality
   useAutoplay({
     isAutoPlaying,
@@ -221,6 +252,59 @@ function SessionPage() {
     )
   }
 
+  // Render different components based on mode
+  const renderLearningMode = () => {
+    switch (mode) {
+      case 'quiz':
+        return (
+          <Quiz
+            card={currentCard}
+            cardIndex={currentCardIndex}
+            totalCards={cards.length}
+            questionType="multiple-choice"
+            onAnswer={(isCorrect) => handleResponse(isCorrect ? 'correct' : 'incorrect')}
+          />
+        )
+      case 'exam':
+        return (
+          <Exam
+            card={currentCard}
+            cardIndex={currentCardIndex}
+            totalCards={cards.length}
+            onAnswer={(isCorrect) => handleResponse(isCorrect ? 'correct' : 'incorrect')}
+          />
+        )
+      case 'flashcards':
+      default:
+        return (
+          <>
+            <Flashcard
+              card={currentCard}
+              cardIndex={currentCardIndex}
+              isFlipped={isFlipped}
+              cardOrientation={cardOrientation}
+              cardHeight={cardHeight}
+              x={swipeAnimations.x}
+              rotate={swipeAnimations.rotate}
+              opacity={swipeAnimations.opacity}
+              backgroundColor={swipeAnimations.cardBackgroundColor}
+              borderColor={swipeAnimations.cardBorderColor}
+              onFlip={handleFlip}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+            />
+
+            <SessionControls
+              isAutoPlaying={isAutoPlaying}
+              canGoBack={sessionStats.correct + sessionStats.incorrect > 0}
+              onToggleAutoPlay={() => setIsAutoPlaying(prev => !prev)}
+              onPrevCard={handlePrevCard}
+            />
+          </>
+        )
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <SessionHeader
@@ -231,49 +315,30 @@ function SessionPage() {
         onSettings={() => setShowSettings(true)}
       />
 
-      <main className="mx-auto max-w-lg py-6">
-        <div className="mb-6 flex items-center justify-between">
-          <SessionCounterBadge
-            count={sessionStats.incorrect}
-            type="incorrect"
-            backgroundColor={swipeAnimations.incorrectBadge.backgroundColor}
-            scale={swipeAnimations.incorrectBadge.scale}
-            showPreview={swipeAnimations.incorrectBadge.showPreview}
-            hideCount={swipeAnimations.incorrectBadge.hideCount}
-          />
+      <main className="mx-auto max-w-lg py-6 px-4">
+        {mode !== 'quiz' && (
+          <div className="mb-6 flex items-center justify-between">
+            <SessionCounterBadge
+              count={sessionStats.incorrect}
+              type="incorrect"
+              backgroundColor={swipeAnimations.incorrectBadge.backgroundColor}
+              scale={swipeAnimations.incorrectBadge.scale}
+              showPreview={swipeAnimations.incorrectBadge.showPreview}
+              hideCount={swipeAnimations.incorrectBadge.hideCount}
+            />
 
-          <SessionCounterBadge
-            count={sessionStats.correct}
-            type="correct"
-            backgroundColor={swipeAnimations.correctBadge.backgroundColor}
-            scale={swipeAnimations.correctBadge.scale}
-            showPreview={swipeAnimations.correctBadge.showPreview}
-            hideCount={swipeAnimations.correctBadge.hideCount}
-          />
-        </div>
+            <SessionCounterBadge
+              count={sessionStats.correct}
+              type="correct"
+              backgroundColor={swipeAnimations.correctBadge.backgroundColor}
+              scale={swipeAnimations.correctBadge.scale}
+              showPreview={swipeAnimations.correctBadge.showPreview}
+              hideCount={swipeAnimations.correctBadge.hideCount}
+            />
+          </div>
+        )}
 
-        <Flashcard
-          card={currentCard}
-          cardIndex={currentCardIndex}
-          isFlipped={isFlipped}
-          cardOrientation={cardOrientation}
-          cardHeight={cardHeight}
-          x={swipeAnimations.x}
-          rotate={swipeAnimations.rotate}
-          opacity={swipeAnimations.opacity}
-          backgroundColor={swipeAnimations.cardBackgroundColor}
-          borderColor={swipeAnimations.cardBorderColor}
-          onFlip={handleFlip}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        />
-
-        <SessionControls
-          isAutoPlaying={isAutoPlaying}
-          canGoBack={sessionStats.correct + sessionStats.incorrect > 0}
-          onToggleAutoPlay={() => setIsAutoPlaying(prev => !prev)}
-          onPrevCard={handlePrevCard}
-        />
+        {renderLearningMode()}
       </main>
 
       <SessionSettingsDialog
@@ -283,6 +348,16 @@ function SessionPage() {
         onOrientationChange={setCardOrientation}
         onReset={handleResetSession}
       />
+
+      {mode === 'quiz' && (
+        <QuizSettingsSheet
+          open={showQuizSettings}
+          lessonTitle={(lesson as any)?.title || 'Leçon'}
+          totalCards={cards.length}
+          onOpenChange={setShowQuizSettings}
+          onStartQuiz={handleStartQuiz}
+        />
+      )}
     </div>
   )
 }

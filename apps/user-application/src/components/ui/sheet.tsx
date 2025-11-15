@@ -97,14 +97,26 @@ function SheetContent({
         {...props}
       >
         {children}
-        <SheetPrimitive.Close className={`
-          absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background
-          transition-opacity
-          hover:opacity-100
-          focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden
-          disabled:pointer-events-none
-          data-[state=open]:bg-secondary
-        `}
+        <SheetPrimitive.Close
+          className={cn(
+            `
+              absolute top-4 right-4 rounded-full ring-offset-background
+              transition-all duration-200
+              hover:scale-110
+              focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden
+              disabled:pointer-events-none
+            `,
+            side === 'bottom'
+              ? `
+                  bg-background/80 p-2 shadow-lg backdrop-blur-md
+                  hover:bg-background/90
+                `
+              : `
+                  opacity-70
+                  hover:opacity-100
+                  data-[state=open]:bg-secondary
+                `,
+          )}
         >
           <XIcon className="size-4" />
           <span className="sr-only">Close</span>

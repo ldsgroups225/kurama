@@ -1,5 +1,8 @@
 export { Flashcard } from './flashcard'
 export { FlashcardFace } from './flashcard-face'
+export { Quiz } from './quiz'
+export { Exam } from './exam'
+export { QuizSettingsSheet } from './quiz-settings-sheet'
 export { SessionControls } from './session-controls'
 export { SessionCounterBadge } from './session-counter-badge'
 export { SessionHeader } from './session-header'
