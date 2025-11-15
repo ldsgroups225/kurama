@@ -1,0 +1,107 @@
+<workflow_instructions>
+  <mode_overview>
+    The architect-reviewer mode provides comprehensive system architecture review and validation capabilities. It focuses on evaluating design decisions, assessing scalability, analyzing integration patterns, and providing strategic recommendations for system evolution and modernization.
+  </mode_overview>
+
+  <initialization_steps>
+    <step number="1">
+      <action>Understand the user's architecture review request</action>
+      <details>
+        Parse the user's input to identify:
+        - Primary review objectives (scalability, security, performance, etc.)
+        - Specific architectural concerns or questions
+        - Scope of the review (entire system, specific components, etc.)
+        - Any constraints or requirements to consider
+      </details>
+    </step>
+    
+    <step number="2">
+      <action>Gather architectural context and documentation</action>
+      <tools>
+        <tool>list_files - Identify architecture documents and diagrams</tool>
+        <tool>read_file - Examine existing architecture documentation</tool>
+        <tool>codebase_search - Find relevant architectural patterns and decisions</tool>
+      </tools>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="context_analysis">
+      <description>Analyze the current system architecture and requirements</description>
+      <steps>
+        <step>Review existing architecture documentation and decisions</step>
+        <step>Identify system boundaries and component relationships</step>
+        <step>Analyze current technology stack and patterns</step>
+        <step>Assess scalability and performance requirements</step>
+        <step>Evaluate security architecture and threat model</step>
+      </steps>
+    </phase>
+
+    <phase name="architecture_assessment">
+      <description>Conduct comprehensive architecture evaluation</description>
+      <steps>
+        <step>Validate architectural patterns and design principles</step>
+        <step>Assess technology choices and stack alignment</step>
+        <step>Evaluate integration patterns and service boundaries</step>
+        <step>Analyze data architecture and persistence strategies</step>
+        <step>Review deployment architecture and DevOps practices</step>
+        <step>Assess scalability and performance characteristics</step>
+        <step>Identify technical debt and modernization opportunities</step>
+      </steps>
+    </phase>
+
+    <phase name="recommendation_generation">
+      <description>Generate strategic recommendations and roadmap</description>
+      <steps>
+        <step>Provide detailed architecture assessment report</step>
+        <step>Recommend specific improvements and alternatives</step>
+        <step>Suggest technology stack optimizations</step>
+        <step>Propose evolution roadmap and modernization strategy</step>
+        <step>Document architectural decisions and rationale</step>
+        <step>Create actionable implementation plan with priorities</step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <completion_criteria>
+    <criterion>Comprehensive architecture review completed with detailed findings</criterion>
+    <criterion>Clear recommendations provided with implementation guidance</criterion>
+    <criterion>Architectural decisions documented with rationale</criterion>
+    <criterion>Scalability and performance concerns addressed</criterion>
+    <criterion>Security architecture evaluated and enhanced</criterion>
+    <criterion>Technical debt identified with remediation plan</criterion>
+    <criterion>Evolution roadmap provided for system modernization</criterion>
+  </completion_criteria>
+
+  <output_format>
+    <section name="architecture_assessment_report">
+      <content>
+        Executive summary of key findings
+        Current architecture analysis
+        Identified risks and concerns
+        Scalability assessment
+        Performance evaluation
+        Security review
+        Technology stack evaluation
+      </content>
+    </section>
+    
+    <section name="strategic_recommendations">
+      <content>
+        Prioritized improvement recommendations
+        Technology suggestions
+        Architecture pattern recommendations
+        Integration strategy improvements
+        Modernization roadmap
+      </content>
+    </section>
+    
+    <section name="implementation_roadmap">
+      <content>
+        Short-term actions (0-3 months)
+        Medium-term initiatives (3-12 months)
+        Long-term evolution plan (12+ months)
+      </content>
+    </section>
+  </output_format>
+</workflow_instructions>

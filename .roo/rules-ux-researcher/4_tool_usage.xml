@@ -1,0 +1,352 @@
+<tool_usage_guide>
+  <tool_priorities>
+    <priority level="1">
+      <tool>search_files</tool>
+      <when>Always use first to find existing research and relevant data</when>
+      <why>Semantic search finds research patterns and user data better than keywords</why>
+    </priority>
+    
+    <priority level="2">
+      <tool>read_file</tool>
+      <when>After identifying relevant files with search_files</when>
+      <why>Get full context of existing research, analytics, and user feedback</why>
+    </priority>
+    
+    <priority level="3">
+      <tool>ask_followup_question</tool>
+      <when>When research requirements need clarification or stakeholder input</when>
+      <why>Ensures research aligns with business needs and user requirements</why>
+    </priority>
+    
+    <priority level="4">
+      <tool>write_to_file</tool>
+      <when>Creating research reports, plans, and documentation</when>
+      <why>Creates comprehensive research deliverables and documentation</why>
+    </priority>
+  </tool_priorities>
+
+  <tool_specific_guidance>
+    <tool name="search_files">
+      <research_use_cases>
+        <use_case name="finding_existing_research">
+          <description>Locate previous research studies and reports</description>
+          <search_patterns>
+            <pattern>research.*report</pattern>
+            <pattern>user.*interview</pattern>
+            <pattern>usability.*test</pattern>
+            <pattern>persona.*development</pattern>
+            <pattern>journey.*map</pattern>
+          </search_patterns>
+          <directories>
+            <directory>research/</directory>
+            <directory>docs/research/</directory>
+            <directory>reports/</directory>
+            <directory>.ux-research/</directory>
+          </directories>
+        </use_case>
+        
+        <use_case name="analyzing_user_feedback">
+          <description>Find user feedback and support tickets</description>
+          <search_patterns>
+            <pattern>user.*feedback</pattern>
+            <pattern>support.*ticket</pattern>
+            <pattern>customer.*review</pattern>
+            <pattern>app.*store.*review</pattern>
+            <pattern>survey.*response</pattern>
+          </search_patterns>
+        </use_case>
+        
+        <use_case name="understanding_product_context">
+          <description>Locate product documentation and specifications</description>
+          <search_patterns>
+            <pattern>product.*requirement</pattern>
+            <pattern>feature.*specification</pattern>
+            <pattern>user.*story</pattern>
+            <pattern>design.*system</pattern>
+            <pattern>api.*documentation</pattern>
+          </search_patterns>
+        </use_case>
+      </research_use_cases>
+      
+      <best_practices>
+        <practice>Use broad search terms first, then refine with specific patterns</practice>
+        <practice>Search in multiple relevant directories for comprehensive coverage</practice>
+        <practice>Look for both current and historical research data</practice>
+        <practice>Include variations in terminology (e.g., customer vs user)</practice>
+      </best_practices>
+    </tool>
+
+    <tool name="read_file">
+      <research_analysis_approach>
+        <step name="context_gathering">
+          <purpose>Understand existing research and product context</purpose>
+          <file_types>
+            <type>Research reports - Read executive summary first, then methodology</type>
+            <type>Analytics data - Focus on trends and patterns over time</type>
+            <type>User feedback - Look for recurring themes and pain points</type>
+            <type>Product specs - Identify user goals and success criteria</type>
+          </file_types>
+        </step>
+        
+        <step name="data_extraction">
+          <purpose>Extract relevant insights for current research</purpose>
+          <extraction_focus>
+            <focus>User demographics and segments</focus>
+            <focus>Previous findings and recommendations</focus>
+            <focus>Methodology approaches that worked well</focus>
+            <focus>Stakeholder questions and concerns</focus>
+            <focus>Business metrics and success criteria</focus>
+          </extraction_focus>
+        </step>
+      </research_analysis_approach>
+      
+      <documentation_patterns>
+        <pattern name="research_synthesis">
+          <description>Combine findings from multiple sources</description>
+          <approach>Read related files together to identify patterns and contradictions</approach>
+        </pattern>
+        
+        <pattern name="trend_analysis">
+          <description>Identify changes over time</description>
+          <approach>Compare current data with historical research to spot trends</approach>
+        </pattern>
+      </documentation_patterns>
+    </tool>
+
+    <tool name="ask_followup_question">
+      <research_scenarios>
+        <scenario name="research_planning">
+          <question>What are the primary business objectives this research should support?</question>
+          <suggestions>
+            <suggest>Increase conversion rates by 15% in the next quarter</suggest>
+            <suggest>Reduce customer support tickets by 25% through improved UX</suggest>
+            <suggest>Validate new feature concepts before development investment</suggest>
+            <suggest>Understand why users are churning after the first week</suggest>
+          </suggestions>
+        </scenario>
+        
+        <scenario name="participant_recruitment">
+          <question>Which user segments should we prioritize for this research?</question>
+          <suggestions>
+            <suggest>New users who signed up in the last 30 days</suggest>
+            <suggest>Power users who use the product daily</suggest>
+            <suggest>Users who recently canceled their subscriptions</suggest>
+            <suggest>Enterprise users with specific workflow needs</suggest>
+          </suggestions>
+        </scenario>
+        
+        <scenario name="methodology_selection">
+          <question>What type of research approach would be most valuable?</question>
+          <suggestions>
+            <suggest>Qualitative interviews to understand user motivations</suggest>
+            <suggest>Usability testing to evaluate specific design solutions</suggest>
+            <suggest>Surveys to validate findings with larger sample</suggest>
+            <suggest>Analytics analysis to identify behavioral patterns</suggest>
+          </suggestions>
+        </scenario>
+        
+        <scenario name="finding_validation">
+          <question>Which of these insights should we prioritize for action?</question>
+          <suggestions>
+            <suggest>High-impact, low-effort improvements for quick wins</suggest>
+            <suggest>Strategic insights that align with business goals</suggest>
+            <suggest>User-identified pain points affecting retention</suggest>
+            <suggest>Competitive differentiation opportunities</suggest>
+          </suggestions>
+        </scenario>
+      </research_scenarios>
+      
+      <question_design_principles>
+        <principle>Provide specific, actionable options rather than open-ended suggestions</principle>
+        <principle>Include business impact and user benefit in suggestions</principle>
+        <principle>Offer different levels of research depth and investment</principle>
+        <principle>Consider resource constraints and timeline requirements</principle>
+      </question_design_principles>
+    </tool>
+
+    <tool name="write_to_file">
+      <research_deliverables>
+        <deliverable name="research_plan">
+          <description>Comprehensive plan for research study</description>
+          <structure>
+            <section>Executive Summary</section>
+            <section>Research Objectives</section>
+            <section>Methodology</section>
+            <section>Participant Recruitment</section>
+            <section>Timeline and Resources</section>
+            <section>Success Criteria</section>
+          </structure>
+          <naming_convention>research-plan-[project]-[date].md</naming_convention>
+        </deliverable>
+        
+        <deliverable name="interview_guide">
+          <description>Structured guide for conducting user interviews</description>
+          <structure>
+            <section>Introduction and Consent</section>
+            <section>Warm-up Questions</section>
+            <section>Core Research Questions</section>
+            <section>Scenario-based Questions</section>
+            <section>Wrap-up and Next Steps</section>
+          </structure>
+          <naming_convention>interview-guide-[study]-[date].md</naming_convention>
+        </deliverable>
+        
+        <deliverable name="research_report">
+          <description>Comprehensive report of research findings</description>
+          <structure>
+            <section>Executive Summary</section>
+            <section>Research Objectives</section>
+            <section>Methodology</section>
+            <section>Key Findings</section>
+            <section>Themes and Patterns</section>
+            <section>Quantitative Analysis</section>
+            <section>Recommendations</section>
+            <section>Appendices</section>
+          </structure>
+          <naming_convention>research-report-[study]-[date].md</naming_convention>
+        </deliverable>
+        
+        <deliverable name="persona_document">
+          <description>Detailed user persona with research backing</description>
+          <structure>
+            <section>Overview and Photo</section>
+            <section>Demographics</section>
+            <section>Goals and Motivations</section>
+            <section>Pain Points and Frustrations</section>
+            <section>Behaviors and Preferences</section>
+            <section>Scenarios and Quotes</section>
+            <section>Research Basis</section>
+          </structure>
+          <naming_convention>persona-[name]-[date].md</naming_convention>
+        </deliverable>
+        
+        <deliverable name="journey_map">
+          <description>Visual mapping of user experience across touchpoints</description>
+          <structure>
+            <section>User Persona</section>
+            <section>Journey Phases</section>
+            <section>Actions and Thoughts</section>
+            <section>Emotional Journey</section>
+            <section>Pain Points</section>
+            <section>Opportunities</section>
+            <section>Recommendations</section>
+          </structure>
+          <naming_convention>journey-map-[experience]-[date].md</naming_convention>
+        </deliverable>
+      </research_deliverables>
+      
+      <documentation_standards>
+        <standard name="markdown_formatting">
+          <description>Use consistent markdown for all research documents</description>
+          <guidelines>
+            <guideline>Use H1 for main title, H2 for sections, H3 for subsections</guideline>
+            <guideline>Use bullet points for lists, numbered lists for steps</guideline>
+            <guideline>Include tables for structured data where appropriate</guideline>
+            <guideline>Use code blocks for quotes and examples</guideline>
+          </guidelines>
+        </standard>
+        
+        <standard name="evidence_citation">
+          <description>Always cite evidence for research claims</description>
+          <format>"[Finding] - [Source: Interview #3, Analytics Q3 2024]"</format>
+        </standard>
+        
+        <standard name="confidence_levels">
+          <description>Indicate confidence in research findings</description>
+          <levels>
+            <level>High - Multiple data sources, large sample, clear patterns</level>
+            <level>Medium - Limited data, small sample, emerging patterns</level>
+            <level>Low - Single source, anecdotal, requires validation</level>
+          </levels>
+        </standard>
+      </documentation_standards>
+    </tool>
+
+    <tool name="list_files">
+      <research_discovery>
+        <use_case name="understanding_project_structure">
+          <description>Identify research-relevant directories and files</description>
+          <focus_areas>
+            <area>Research repositories and documentation</area>
+            <area>User feedback collection systems</area>
+            <area>Analytics and data storage</area>
+            <area>Design and development files</area>
+          </focus_areas>
+        </use_case>
+        
+        <use_case name="finding_research_assets">
+          <description>Locate existing research materials and templates</description>
+          <file_types>
+            <type>Research reports and summaries</type>
+            <type>Interview transcripts and notes</type>
+            <type>Survey data and responses</type>
+            <type>Analytics exports and dashboards</type>
+            <type>Design mockups and prototypes</type>
+          </file_types>
+        </use_case>
+      </research_discovery>
+    </tool>
+  </tool_specific_guidance>
+
+  <workflow_integration>
+    <workflow_phase name="discovery">
+      <primary_tools>
+        <tool>search_files - Find existing research and context</tool>
+        <tool>list_files - Understand project structure</tool>
+        <tool>read_file - Review relevant findings</tool>
+      </primary_tools>
+    </workflow_phase>
+    
+    <workflow_phase name="planning">
+      <primary_tools>
+        <tool>ask_followup_question - Clarify objectives and constraints</tool>
+        <tool>write_to_file - Create research plan and materials</tool>
+      </primary_tools>
+    </workflow_phase>
+    
+    <workflow_phase name="execution">
+      <primary_tools>
+        <tool>write_to_file - Document findings and observations</tool>
+        <tool>read_file - Reference existing patterns and data</tool>
+      </primary_tools>
+    </workflow_phase>
+    
+    <workflow_phase name="analysis">
+      <primary_tools>
+        <tool>read_file - Review collected data and findings</tool>
+        <tool>write_to_file - Create analysis and synthesis documents</tool>
+      </primary_tools>
+    </workflow_phase>
+    
+    <workflow_phase name="reporting">
+      <primary_tools>
+        <tool>write_to_file - Create final reports and deliverables</tool>
+        <tool>ask_followup_question - Validate recommendations with stakeholders</tool>
+      </primary_tools>
+    </workflow_phase>
+  </workflow_integration>
+
+  <quality_assurance>
+    <tool_usage_checks>
+      <check name="search_completeness">
+        <question>Have I searched across all relevant directories and file types?</question>
+        <verification>Review search results against expected file locations</verification>
+      </check>
+      
+      <check name="context_understanding">
+        <question>Do I understand the full context from existing research?</question>
+        <verification>Summarize key findings and identify gaps</verification>
+      </check>
+      
+      <check name="stakeholder_alignment">
+        <question>Are research objectives aligned with stakeholder needs?</question>
+        <verification>Review questions and suggestions for business relevance</verification>
+      </check>
+      
+      <check name="documentation_quality">
+        <question>Are research deliverables complete and well-structured?</question>
+        <verification>Check against template requirements and standards</verification>
+      </check>
+    </tool_usage_checks>
+  </quality_assurance>
+</tool_usage_guide>

@@ -1,0 +1,467 @@
+<![CDATA[<common_patterns>
+  <security_patterns>
+    <pattern name="input_validation">
+      <description>Common input validation vulnerabilities and their fixes</description>
+      <examples>
+        <example name="sql_injection_prevention">
+          <language>javascript</language>
+          <vulnerable_code><![CDATA[
+const query = `SELECT * FROM users WHERE id = ${userId}`;
+]]></vulnerable_code>
+          <secure_code><![CDATA[
+const query = 'SELECT * FROM users WHERE id = ?';
+db.query(query, [userId]);
+]]></secure_code>
+          <explanation>Use parameterized queries or prepared statements to prevent SQL injection attacks</explanation>
+        </example>
+        
+        <example name="xss_prevention">
+          <language>javascript</language>
+          <vulnerable_code><![CDATA[
+element.innerHTML = userInput;
+]]></vulnerable_code>
+          <secure_code><![CDATA[
+element.textContent = userInput;
+// or for HTML content:
+element.innerHTML = sanitizeHtml(userInput);
+]]></secure_code>
+          <explanation>Always sanitize user input before rendering as HTML to prevent XSS attacks</explanation>
+        </example>
+      </examples>
+    </pattern>
+    
+    <pattern name="authentication_flaws">
+      <description>Common authentication vulnerabilities and secure implementations</description>
+      <examples>
+        <example name="password_storage">
+          <language>javascript</language>
+          <insecure_code><![CDATA[
+const password = 'plainTextPassword123';
+]]></insecure_code>
+          <secure_code><![CDATA[
+const bcrypt = require('bcrypt');
+const hashedPassword = await bcrypt.hash(password, 12);
+]]></secure_code>
+          <explanation>Always use strong hashing algorithms like bcrypt for password storage</explanation>
+        </example>
+        
+        <example name="session_management">
+          <language>javascript</language>
+          <insecure_code><![CDATA[
+// No session timeout
+app.use(session({ secret: 'weak-secret' }));
+]]></insecure_code>
+          <secure_code><![CDATA[
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  cookie: { 
+    secure: true, // HTTPS only
+    httpOnly: true, // Prevent XSS
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+]]></secure_code>
+          <explanation>Implement proper session security with secure flags and timeouts</explanation>
+        </example>
+      </examples>
+    </pattern>
+  </security_patterns>
+
+  <performance_patterns>
+    <pattern name="database_optimization">
+      <description>Common database performance issues and optimizations</description>
+      <examples>
+        <example name="n_plus_one_query">
+          <language>javascript</language>
+          <inefficient_code><![CDATA[
+// N+1 query problem
+const users = await User.findAll();
+for (const user of users) {
+  user.posts = await Post.findAll({ where: { userId: user.id } });
+}
+]]></inefficient_code>
+          <optimized_code><![CDATA[
+// Single query with eager loading
+const users = await User.findAll({
+  include: [{ model: Post, as: 'posts' }]
+});
+]]></optimized_code>
+          <explanation>Use eager loading or JOIN queries to avoid N+1 query problems</explanation>
+        </example>
+        
+        <example name="missing_indexes">
+          <language>sql</language>
+          <inefficient_code><![CDATA[
+-- Query without index on user_id
+SELECT * FROM orders WHERE user_id = 12345;
+]]></inefficient_code>
+          <optimized_code><![CDATA[
+-- Add index for better performance
+CREATE INDEX idx_orders_user_id ON orders(user_id);
+]]></optimized_code>
+          <explanation>Add appropriate database indexes for frequently queried columns</explanation>
+        </example>
+      </examples>
+    </pattern>
+    
+    <pattern name="algorithm_optimization">
+      <description>Common algorithm inefficiencies and improvements</description>
+      <examples>
+        <example name="nested_loops">
+          <language>javascript</language>
+          <inefficient_code><![CDATA[
+// O(n²) complexity
+for (let i = 0; i < array1.length; i++) {
+  for (let j = 0; j < array2.length; j++) {
+    if (array1[i] === array2[j]) {
+      // Found match
+    }
+  }
+}
+]]></inefficient_code>
+          <optimized_code><![CDATA[
+// O(n + m) complexity using Set
+const set2 = new Set(array2);
+for (const item of array1) {
+  if (set2.has(item)) {
+    // Found match
+  }
+}
+]]></optimized_code>
+          <explanation>Use appropriate data structures to reduce algorithmic complexity</explanation>
+        </example>
+        
+        <example name="unnecessary_computations">
+          <language>javascript</language>
+          <inefficient_code><![CDATA[
+// Recomputing expensive operation in loop
+for (let i = 0; i < 1000; i++) {
+  const result = expensiveCalculation(data);
+  processResult(result);
+}
+]]></inefficient_code>
+          <optimized_code><![CDATA[
+// Cache expensive computation
+const cachedResult = expensiveCalculation(data);
+for (let i = 0; i < 1000; i++) {
+  processResult(cachedResult);
+}
+]]></optimized_code>
+          <explanation>Cache expensive operations that are used repeatedly</explanation>
+        </example>
+      </examples>
+    </pattern>
+  </performance_patterns>
+
+  <maintainability_patterns>
+    <pattern name="code_organization">
+      <description>Common code organization issues and improvements</description>
+      <examples>
+        <example name="large_functions">
+          <language>javascript</language>
+          <poor_code><![CDATA[
+function processUserData(userData) {
+  // Validate input
+  if (!userData || typeof userData !== 'object') {
+    throw new Error('Invalid user data');
+  }
+  
+  // Sanitize data
+  const cleanData = {
+    name: userData.name.trim(),
+    email: userData.email.toLowerCase().trim(),
+    age: parseInt(userData.age)
+  };
+  
+  // Save to database
+  const connection = require('./db').getConnection();
+  connection.query('INSERT INTO users SET ?', cleanData);
+  
+  // Send welcome email
+  const emailService = require('./email');
+  emailService.send(cleanData.email, 'Welcome!');
+  
+  // Log activity
+  const logger = require('./logger');
+  logger.info(`User ${cleanData.name} registered`);
+  
+  // Return result
+  return { success: true, userId: connection.insertId };
+}
+]]></poor_code>
+          <improved_code><![CDATA[
+function validateUserData(userData) {
+  if (!userData || typeof userData !== 'object') {
+    throw new Error('Invalid user data');
+  }
+  
+  return {
+    name: userData.name.trim(),
+    email: userData.email.toLowerCase().trim(),
+    age: parseInt(userData.age)
+  };
+}
+
+function sanitizeUserData(userData) {
+  return {
+    name: userData.name.trim(),
+    email: userData.email.toLowerCase().trim(),
+    age: parseInt(userData.age)
+  };
+}
+
+async function saveUserToDatabase(userData) {
+  const connection = require('./db').getConnection();
+  const result = await connection.query('INSERT INTO users SET ?', userData);
+  return result.insertId;
+}
+
+async function sendWelcomeEmail(email, name) {
+  const emailService = require('./email');
+  await emailService.send(email, 'Welcome!');
+}
+
+function logUserActivity(name) {
+  const logger = require('./logger');
+  logger.info(`User ${name} registered`);
+}
+
+async function processUserData(userData) {
+  const cleanData = sanitizeUserData(validateUserData(userData));
+  const userId = await saveUserToDatabase(cleanData);
+  await sendWelcomeEmail(cleanData.email, cleanData.name);
+  logUserActivity(cleanData.name);
+  
+  return { success: true, userId };
+}
+]]></improved_code>
+          <explanation>Break large functions into smaller, single-responsibility functions for better maintainability</explanation>
+        </example>
+        
+        <example name="magic_numbers">
+          <language>javascript</language>
+          <poor_code><![CDATA[
+if (user.age < 13) {
+  return 'Too young';
+} else if (user.age > 65) {
+  return 'Too old';
+}
+setTimeout(() => {
+  checkStatus();
+}, 5000);
+]]></poor_code>
+          <improved_code><![CDATA[
+const MIN_AGE = 13;
+const MAX_AGE = 65;
+const STATUS_CHECK_INTERVAL = 5000; // 5 seconds
+
+if (user.age < MIN_AGE) {
+  return 'Too young';
+} else if (user.age > MAX_AGE) {
+  return 'Too old';
+}
+
+setTimeout(() => {
+  checkStatus();
+}, STATUS_CHECK_INTERVAL);
+]]></improved_code>
+          <explanation>Replace magic numbers with named constants for better readability and maintenance</explanation>
+        </example>
+      </examples>
+    </pattern>
+    
+    <pattern name="error_handling">
+      <description>Common error handling patterns and improvements</description>
+      <examples>
+        <example name="missing_error_handling">
+          <language>javascript</language>
+          <poor_code><![CDATA[
+function getUserById(id) {
+  const user = database.query(`SELECT * FROM users WHERE id = ${id}`);
+  return user[0];
+}
+]]></poor_code>
+          <improved_code><![CDATA[
+async function getUserById(id) {
+  try {
+    if (!id || typeof id !== 'number') {
+      throw new Error('Invalid user ID provided');
+    }
+    
+    const users = await database.query('SELECT * FROM users WHERE id = ?', [id]);
+    
+    if (!users || users.length === 0) {
+      throw new Error('User not found');
+    }
+    
+    return users[0];
+  } catch (error) {
+    logger.error('Error fetching user:', error);
+    throw error; // Re-throw for caller to handle
+  }
+}
+]]></improved_code>
+          <explanation>Implement comprehensive error handling with input validation and proper error propagation</explanation>
+        </example>
+      </examples>
+    </pattern>
+  </maintainability_patterns>
+
+  <testing_patterns>
+    <pattern name="test_structure">
+      <description>Common testing patterns and best practices</description>
+      <examples>
+        <example name="arrange_act_assert">
+          <language>javascript</language>
+          <poor_test><![CDATA[
+test('user registration', () => {
+  // Everything mixed together
+  const user = createUser();
+  const result = registerUser(user);
+  expect(result.success).toBe(true);
+});
+]]></poor_test>
+          <good_test><![CDATA[
+describe('User Registration', () => {
+  let userData;
+  
+  beforeEach(() => {
+    userData = {
+      name: 'John Doe',
+      email: 'john@example.com',
+      password: 'securePassword123'
+    };
+  });
+  
+  test('should register user successfully with valid data', async () => {
+    const result = await registerUser(userData);
+    
+    expect(result.success).toBe(true);
+    expect(result.userId).toBeDefined();
+    expect(typeof result.userId).toBe('number');
+  });
+  
+  test('should reject registration with invalid email', async () => {
+    userData.email = 'invalid-email';
+    
+    const result = await registerUser(userData);
+    
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('Invalid email');
+  });
+});
+]]></good_test>
+          <explanation>Use Arrange-Act-Assert pattern with descriptive test names and proper setup</explanation>
+        </example>
+        
+        <example name="mock_usage">
+          <language>javascript</language>
+          <poor_test><![CDATA[
+test('user service', async () => {
+  // Real database call - not unit test
+  const result = await userService.getUser(123);
+  expect(result.name).toBe('John');
+});
+]]></poor_test>
+          <good_test><![CDATA[
+describe('UserService', () => {
+  let mockDatabase;
+  let userService;
+  
+  beforeEach(() => {
+    mockDatabase = {
+      query: jest.fn()
+    };
+    userService = new UserService(mockDatabase);
+  });
+  
+  test('should return user when found', async () => {
+    const expectedUser = { id: 123, name: 'John' };
+    mockDatabase.query.mockResolvedValue([expectedUser]);
+    
+    const result = await userService.getUser(123);
+    
+    expect(mockDatabase.query).toHaveBeenCalledWith(
+      'SELECT * FROM users WHERE id = ?',
+      [123]
+    );
+    expect(result).toEqual(expectedUser);
+  });
+  
+  test('should throw error when user not found', async () => {
+    mockDatabase.query.mockResolvedValue([]);
+    
+    await expect(userService.getUser(999))
+      .rejects.toThrow('User not found');
+  });
+});
+]]></good_test>
+          <explanation>Use mocks to isolate units and test behavior, not implementation</explanation>
+        </example>
+      </examples>
+    </pattern>
+  </testing_patterns>
+
+  <code_review_templates>
+    <template name="security_review_template">
+      <description>Template for conducting security-focused code reviews</description>
+      <sections>
+        <section name="authentication_and_authorization">
+          <check_items>
+            <item>Review authentication mechanisms for strength and proper implementation</item>
+            <item>Verify authorization checks are in place for protected resources</item>
+            <item>Check for proper session management and token handling</item>
+            <item>Ensure password policies and secure storage practices</item>
+          </check_items>
+        </section>
+        <section name="input_validation">
+          <check_items>
+            <item>Verify all user inputs are validated and sanitized</item>
+            <item>Check for protection against injection attacks</item>
+            <item>Review file upload security and validation</item>
+            <item>Ensure proper handling of special characters and encoding</item>
+          </check_items>
+        </section>
+        <section name="data_protection">
+          <check_items>
+            <item>Check for encryption of sensitive data at rest</item>
+            <item>Verify HTTPS usage for data in transit</item>
+            <item>Review logging practices to avoid sensitive data exposure</item>
+            <item>Ensure proper data retention and deletion policies</item>
+          </check_items>
+        </section>
+      </sections>
+    </template>
+    
+    <template name="performance_review_template">
+      <description>Template for conducting performance-focused code reviews</description>
+      <sections>
+        <section name="algorithm_efficiency">
+          <check_items>
+            <item>Analyze time and space complexity of algorithms</item>
+            <item>Check for unnecessary nested loops or recursive calls</item>
+            <item>Review use of appropriate data structures</item>
+            <item>Identify opportunities for caching or memoization</item>
+          </check_items>
+        </section>
+        <section name="database_operations">
+          <check_items>
+            <item>Review database query efficiency and indexing</item>
+            <item>Check for N+1 query problems</item>
+            <item>Verify proper connection pooling and resource management</item>
+            <item>Assess transaction usage and optimization</item>
+          </check_items>
+        </section>
+        <section name="resource_management">
+          <check_items>
+            <item>Check for memory leaks and proper cleanup</item>
+            <item>Review file handle and network resource management</item>
+            <item>Verify efficient use of async operations</item>
+            <item>Assess caching strategies and implementation</item>
+          </check_items>
+        </section>
+      </sections>
+    </template>
+  </code_review_templates>
+</common_patterns>
+]]>

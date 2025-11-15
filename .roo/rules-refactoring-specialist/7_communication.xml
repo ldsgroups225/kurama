@@ -1,0 +1,177 @@
+<communication_protocols>
+  <protocol name="progress_reporting">
+    <description>How to report refactoring progress and results</description>
+    <template>
+      <subject_format>[REFACTORING] {issue_type}: {description}</subject_format>
+      <body>
+## Refactoring Progress Summary
+**Status**: {status}
+**Methods Refactored**: {methods_count}
+**Complexity Reduction**: {complexity_reduction}
+**Code Duplication Eliminated**: {duplication_reduction}
+**Test Coverage**: {test_coverage}
+**Performance Impact**: {performance_impact}
+
+**Files Modified**: {files_modified}
+
+**Next Steps**: {next_steps}
+
+**Notes**: {notes}
+      </body>
+    </template>
+    </protocol>
+    
+    <protocol name="completion_notification">
+      <description>How to communicate refactoring completion</description>
+      <template>
+        <subject_format>[REFACTORING COMPLETE] {scope}</subject_format>
+        <body>
+## Refactoring Complete ✅
+
+**Scope**: {scope}
+**Summary of Changes**:
+{changes_summary}
+
+**Metrics Achieved**:
+- **Complexity Reduction**: {complexity_reduction}
+- **Code Duplication Eliminated**: {duplication_reduction}
+- **Test Coverage Maintained**: {test_coverage}
+- **Performance**: {performance_impact}
+
+**Files Modified**: {files_count} files
+
+**Quality Improvements**:
+{quality_improvements}
+
+Refactoring completed successfully. All tests are passing and code quality has been significantly improved.
+      </body>
+    </template>
+    </protocol>
+    
+    <protocol name="user_guidance">
+      <description>How to guide users through the refactoring process</description>
+      <best_practices>
+        <practice>Explain refactoring rationale clearly</practice>
+        <practice>Provide context for each change</practice>
+        <practice>Offer choices when multiple approaches are possible</practice>
+        <practice>Use visual aids to explain complex changes</practice>
+        <practice>Be transparent about risks and trade-offs</practice>
+        <practice>Document decisions and their reasoning</practice>
+      </best_practices>
+      <anti_patterns>
+        <anti_pattern>Don't make changes without explanation</anti_pattern>
+        <anti_pattern>Don't hide the impact of changes from users</anti_pattern>
+        <anti_pattern>Don't proceed without user confirmation on major changes</anti_pattern>
+      </anti_patterns>
+    </user_guidance>
+    
+    <interaction_patterns>
+    <pattern name="refactoring_decisions">
+      <description>When to ask for user input on refactoring approach</description>
+      <template>
+        <ask_followup_question>
+          <question>Found multiple refactoring opportunities. Which approach would you like to prioritize?</question>
+          <follow_up>
+            <suggest>Start with extract method refactoring for immediate complexity reduction</suggest>
+            <suggest>Focus on breaking down large classes first for biggest impact</suggest>
+            <suggest>Address code smells that affect maintainability most</suggest>
+            <suggest>Consider performance optimizations after structural improvements</suggest>
+          </follow_up>
+        </ask_followup_question>
+      </template>
+    </pattern>
+    
+    <pattern name="explanation_communication">
+      <description>How to explain complex refactoring concepts to users</description>
+      <template>
+        <technique name="before_after_explanation">
+          <title>Code Before Refactoring</title>
+          <code language="typescript">
+            <![CDATA[
+// Complex, hard-to-understand code
+function processOrder(order: Order): OrderResult {
+  if (!order.customerId) return null;
+  if (!order.items || order.items.length === 0) return null;
+  
+  // Complex nested logic with multiple responsibilities
+  let subtotal = 0;
+  let tax = 0;
+  let shipping = 0;
+  let discount = 0;
+  
+  for (const item of order.items) {
+    subtotal += item.price * item.quantity;
+    if (item.category === 'food') {
+      tax += item.price * item.quantity * 0.08;
+    }
+    if (item.weight > 10) {
+      shipping += item.weight * 0.5;
+    }
+  }
+  
+  const total = subtotal + tax + shipping;
+  
+  if (order.customerType === 'premium' && total > 100) {
+    discount = total * 0.1;
+  }
+  
+  return {
+    orderId: order.id,
+    subtotal,
+    tax,
+    shipping,
+    discount,
+    total: total - discount,
+    timestamp: new Date().toISOString()
+  };
+}
+            ]]>
+          </code>
+          <explanation>This code has multiple issues: long method, mixed responsibilities, complex nested logic, and poor naming.</explanation>
+        </technique>
+        
+        <technique name="after_explanation">
+          <title>Code After Refactoring</title>
+          <code language="typescript">
+            <![CDATA[
+// Clean, focused code with extracted methods
+function calculateOrderTotals(items: OrderItem[]): OrderTotals {
+  let subtotal = 0;
+  let tax = 0;
+  let shipping = 0;
+  
+  for (const item of items) {
+    subtotal += item.price * item.quantity;
+    tax += calculateTax(item);
+    shipping += calculateShipping(item);
+  }
+  
+  return { subtotal, tax, shipping };
+}
+
+function calculateDiscount(customerType: string, subtotal: number): number {
+  return customerType === 'premium' && subtotal > 100 ? subtotal * 0.1 : 0;
+}
+
+function processOrder(order: Order): OrderResult | null {
+  if (!isValidOrder(order)) return null;
+  
+  const totals = calculateOrderTotals(order.items);
+  const discount = calculateDiscount(order.customerType, totals.subtotal);
+  
+  return {
+    orderId: order.id,
+    ...totals,
+    discount,
+    finalTotal: totals.subtotal + totals.tax + totals.shipping - discount,
+    timestamp: new Date().toISOString()
+  };
+}
+            ]]>
+          </code>
+          <explanation>The refactoring extracted three focused methods (calculateOrderTotals, calculateDiscount, calculateTax, calculateShipping) and eliminated the complex nested logic. Each method now has a single responsibility, making the code much more testable and maintainable.</explanation>
+        </technique>
+      </template>
+    </pattern>
+  </interaction_patterns>
+</communication_protocols>

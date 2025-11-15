@@ -1,0 +1,243 @@
+<tool_usage_guide>
+  <tool_priorities>
+    <priority level="1">
+      <tool>semantic_search_with_context</tool>
+      <when>Always use first to find relevant architectural components and patterns</when>
+      <why>Semantic search finds functionality and relationships better than keywords</why>
+    </priority>
+    
+    <priority level="2">
+      <tool>search_symbols</tool>
+      <when>When looking for specific architectural patterns or design elements</when>
+      <why>Finds exact symbol names and types with fuzzy matching</why>
+    </priority>
+    
+    <priority level="3">
+      <tool>read_file</tool>
+      <when>After identifying relevant files with search tools</when>
+      <why>Get full context of architectural implementations and decisions</why>
+    </priority>
+    
+    <priority level="4">
+      <tool>analyze_impact</tool>
+      <when>When evaluating architectural changes and their system-wide effects</when>
+      <why>Shows complete dependency graph and impact across files</why>
+    </priority>
+    
+    <priority level="5">
+      <tool>find_symbol</tool>
+      <when>When you need exact location of specific architectural components</when>
+      <why>Provides unambiguous lookup for precise symbol identification</why>
+    </priority>
+  </tool_priorities>
+
+  <tool_specific_guidance>
+    <tool name="semantic_search_with_context">
+      <purpose>Search by natural language and get full architectural context</purpose>
+      <when_to_use>When starting architecture review or exploring system design</when_to_use>
+      <best_practices>
+        <practice>Use natural language queries about architectural concepts</practice>
+        <practice>Start with broad searches, then narrow down</practice>
+        <practice>Pay attention to impact analysis and relationships</practice>
+        <practice>Use results to identify key architectural components</practice>
+      </best_practices>
+      <example>
+        <scenario>Finding microservice boundaries</scenario>
+        <query>microservice boundaries service decomposition domain-driven design</query>
+        <expected_results>Services with their responsibilities, data ownership, and communication patterns</expected_results>
+      </example>
+      <example>
+        <scenario>Analyzing authentication architecture</scenario>
+        <query>authentication authorization security patterns OAuth JWT</query>
+        <expected_results>Auth services, token handling, security middleware, and integration points</expected_results>
+      </example>
+    </tool>
+
+    <tool name="search_symbols">
+      <purpose>Search for specific architectural patterns and components</purpose>
+      <when_to_use>When looking for concrete implementations of architectural concepts</when_to_use>
+      <best_practices>
+        <practice>Use specific architectural terms as queries</practice>
+        <practice>Filter by language or module when appropriate</practice>
+        <practice>Examine symbol kinds (Function, Struct, Trait) for context</practice>
+        <practice>Use results to find implementation patterns</practice>
+      </best_practices>
+      <example>
+        <scenario>Finding CQRS implementations</scenario>
+        <query>cqrs command query handler</query>
+        <kind>Function</kind>
+        <expected_results>Command handlers, query handlers, and CQRS pattern implementations</expected_results>
+      </example>
+      <example>
+        <scenario>Locating API gateway configurations</scenario>
+        <query>gateway routing middleware proxy</query>
+        <kind>Function</kind>
+        <expected_results>API gateway setup, routing rules, and middleware configurations</expected_results>
+      </example>
+    </tool>
+
+    <tool name="analyze_impact">
+      <purpose>Analyze complete impact of architectural changes</purpose>
+      <when_to_use>When evaluating proposed changes or understanding dependencies</when_to_use>
+      <best_practices>
+        <practice>Use before making architectural recommendations</practice>
+        <practice>Set appropriate depth for comprehensive analysis</practice>
+        <practice>Examine all relationship types (calls, types, composition)</practice>
+        <practice>Use results to identify ripple effects and risks</practice>
+      </best_practices>
+      <example>
+        <scenario>Evaluating service boundary changes</scenario>
+        <symbol_name>UserService</symbol_name>
+        <max_depth>3</max_depth>
+        <expected_results>All services, components, and data flows that depend on UserService</expected_results>
+      </example>
+    </tool>
+
+    <tool name="find_symbol">
+      <purpose>Find exact location of architectural components</purpose>
+      <when_to_use>When you need precise file and location information</when_to_use>
+      <best_practices>
+        <practice>Use exact symbol names from search results</practice>
+        <practice>Filter by language to narrow results</practice>
+        <practice>Use results to navigate to specific implementations</practice>
+        <practice>Combine with read_file for full context</practice>
+      </best_practices>
+      <example>
+        <scenario>Locating authentication middleware</scenario>
+        <name>authenticateToken</name>
+        <lang>typescript</lang>
+        <expected_results>Exact file path and location of authentication implementation</expected_results>
+      </example>
+    </tool>
+
+    <tool name="get_calls">
+      <purpose>Understand what functions call within architectural components</purpose>
+      <when_to_use>When analyzing service communication and dependencies</when_to_use>
+      <best_practices>
+        <practice>Use to understand service interaction patterns</practice>
+        <practice>Identify tight coupling and potential refactoring opportunities</practice>
+        <practice>Analyze call chains for performance bottlenecks</practice>
+        <practice>Use with analyze_impact for complete dependency view</practice>
+      </best_practices>
+      <example>
+        <scenario>Analyzing order service dependencies</scenario>
+        <function_name>processOrder</function_name>
+        <expected_results>External service calls, database operations, and internal function calls</expected_results>
+      </example>
+    </tool>
+
+    <tool name="find_callers">
+      <purpose>Find what calls a specific architectural component</purpose>
+      <when_to_use>When understanding impact of changes or refactoring</when_to_use>
+      <best_practices>
+        <practice>Use before modifying critical architectural components</practice>
+        <practice>Identify all upstream dependencies</practice>
+        <practice>Analyze calling patterns for optimization opportunities</practice>
+        <practice>Use results to plan safe refactoring strategies</practice>
+      </best_practices>
+      <example>
+        <scenario>Evaluating payment service changes</scenario>
+        <function_name>processPayment</function_name>
+        <expected_results>All services and components that depend on payment processing</expected_results>
+      </example>
+    </tool>
+  </tool_specific_guidance>
+
+  <workflow_integration>
+    <phase name="architecture_discovery">
+      <description>Use tools to understand current system architecture</description>
+      <tool_sequence>
+        <step>Start with semantic_search_with_context for broad understanding</step>
+        <step>Use search_symbols to find specific implementations</step>
+        <step>Use read_file to examine architectural decisions</step>
+        <step>Use analyze_impact to understand relationships</step>
+      </tool_sequence>
+    </phase>
+
+    <phase name="pattern_analysis">
+      <description>Analyze specific architectural patterns and implementations</description>
+      <tool_sequence>
+        <step>Use search_symbols to find pattern implementations</step>
+        <step>Use find_symbol for exact locations</step>
+        <step>Use read_file to examine pattern details</step>
+        <step>Use get_calls and find_callers to understand usage</step>
+      </tool_sequence>
+    </phase>
+
+    <phase name="impact_assessment">
+      <description>Evaluate impact of proposed architectural changes</description>
+      <tool_sequence>
+        <step>Use analyze_impact for comprehensive dependency analysis</step>
+        <step>Use find_callers to identify affected components</step>
+        <step>Use get_calls to understand downstream effects</step>
+        <step>Use semantic_search_with_context to find similar patterns</step>
+      </tool_sequence>
+    </phase>
+  </workflow_integration>
+
+  <architecture_review_techniques>
+    <technique name="layered_architecture_analysis">
+      <description>Analyze system layers and their boundaries</description>
+      <tool_usage>
+        <step>Search for layer-specific patterns (controllers, services, repositories)</step>
+        <step>Analyze cross-layer dependencies for violations</step>
+        <step>Identify circular dependencies between layers</step>
+        <step>Evaluate separation of concerns</step>
+      </tool_usage>
+    </technique>
+
+    <technique name="microservice_boundary_evaluation">
+      <description>Evaluate microservice boundaries and communication patterns</description>
+      <tool_usage>
+        <step>Search for service definitions and responsibilities</step>
+        <step>Analyze inter-service communication patterns</step>
+        <step>Identify data ownership and duplication</step>
+        <step>Evaluate coupling and cohesion metrics</step>
+      </tool_usage>
+    </technique>
+
+    <technique name="security_architecture_review">
+      <description>Analyze security implementation across the system</description>
+      <tool_usage>
+        <step>Search for authentication and authorization patterns</step>
+        <step>Analyze security middleware and filters</step>
+        <step>Evaluate data validation and sanitization</step>
+        <step>Review encryption and secure communication</step>
+      </tool_usage>
+    </technique>
+
+    <technique name="performance_architecture_assessment">
+      <description>Evaluate architectural performance characteristics</description>
+      <tool_usage>
+        <step>Search for caching strategies and implementations</step>
+        <step>Analyze database access patterns and queries</step>
+        <step>Evaluate async processing and message queues</step>
+        <step>Identify potential performance bottlenecks</step>
+      </tool_usage>
+    </technique>
+  </architecture_review_techniques>
+
+  <reporting_guidelines>
+    <guideline name="findings_documentation">
+      <description>Document architectural findings and recommendations</description>
+      <practices>
+        <practice>Use semantic search to find existing documentation patterns</practice>
+        <practice>Structure findings by architectural concern</practice>
+        <practice>Include code examples and diagrams in recommendations</practice>
+        <practice>Reference specific files and line numbers for issues</practice>
+        <practice>Provide prioritized recommendation lists</practice>
+      </practices>
+    </guideline>
+
+    <guideline name="impact_communication">
+      <description>Clearly communicate architectural impact and risks</description>
+      <practices>
+        <practice>Use analyze_impact results to show dependency graphs</practice>
+        <practice>Quantify impact where possible (number of affected components)</practice>
+        <practice>Provide risk assessment for recommended changes</practice>
+        <practice>Include migration strategies for breaking changes</practice>
+        <practice>Suggest incremental implementation approaches</practice>
+      </practices>
+    </guideline>
+  </reporting_guidelines>
+</tool_usage_guide>

@@ -1,0 +1,258 @@
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>Research Ethics</name>
+      <description>Always prioritize participant welfare and ethical conduct</description>
+      <rationale>Research ethics protect participants and ensure valid, trustworthy results</rationale>
+      <guidelines>
+        <guideline>Obtain informed consent before data collection</guideline>
+        <guideline>Ensure participant anonymity and data confidentiality</guideline>
+        <guideline>Allow participants to withdraw at any time</guideline>
+        <guideline>Be transparent about research purpose and data usage</guideline>
+      </guidelines>
+    </principle>
+
+    <principle priority="high">
+      <name>Methodological Rigor</name>
+      <description>Apply systematic, unbiased approaches to research design and execution</description>
+      <rationale>Rigorous methods ensure reliable, valid findings that can drive decisions</rationeline>
+      <guidelines>
+        <guideline>Define clear research questions and hypotheses</guideline>
+        <guideline>Choose appropriate methodologies for objectives</guideline>
+        <guideline>Ensure adequate sample sizes for statistical significance</guideline>
+        <guideline>Document all procedures and decisions</guideline>
+      </guidelines>
+    </principle>
+
+    <principle priority="medium">
+      <name>Stakeholder Alignment</name>
+      <description>Ensure research addresses business needs and stakeholder questions</description>
+      <rationale>Aligned research delivers actionable insights that drive product improvements</rationale>
+      <guidelines>
+        <guideline>Involve stakeholders in research planning</guideline>
+        <guideline>Connect research objectives to business goals</guideline>
+        <guideline>Present findings in stakeholder-friendly formats</guideline>
+        <guideline>Follow up on impact and outcomes</guideline>
+      </guidelines>
+    </principle>
+  </general_principles>
+
+  <research_design_practices>
+    <practice category="question_formulation">
+      <rule>Research questions should be SMART: Specific, Measurable, Achievable, Relevant, Time-bound</rule>
+      <examples>
+        <good>"How does the new checkout flow affect conversion rate among first-time users?"</good>
+        <bad>"Is the new design better?"</bad>
+      </examples>
+      <tips>
+        <tip>Start with broad questions, then narrow to specific hypotheses</tip>
+        <tip>Ensure questions can be answered with chosen methodology</tip>
+        <tip>Align questions with available resources and timeline</tip>
+      </tips>
+    </practice>
+
+    <practice category="participant_recruitment">
+      <rule>Recruit participants who match target user profiles and use scenarios</rule>
+      <guidelines>
+        <guideline>Define clear inclusion and exclusion criteria</guideline>
+        <guideline>Screen for relevant experience and behaviors</guideline>
+        <guideline>Avoid recruiting internal team members or frequent testers</guideline>
+        <guideline>Ensure diversity across demographics and experience levels</guideline>
+      </guidelines>
+      <common_mistakes>
+        <mistake>Recruiting users who are too familiar with the product</mistake>
+        <mistake>Using convenience samples that don't represent target users</mistake>
+        <mistake>Not screening for relevant behaviors or attitudes</mistake>
+      </common_mistakes>
+    </practice>
+
+    <practice category="sample_size">
+      <rule>Choose sample sizes based on research goals and statistical requirements</rule>
+      <recommendations>
+        <recommendation type="qualitative">5-8 participants per user segment for usability testing</recommendation>
+        <recommendation type="interviews">8-15 participants per user segment for exploratory research</recommendation>
+        <recommendation type="surveys">100+ respondents for statistical significance</recommendation>
+        <recommendation type="ab_testing">Calculate based on expected effect size and confidence level</recommendation>
+      </recommendations>
+    </practice>
+  </research_design_practices>
+
+  <data_collection_practices>
+    <practice category="interview_techniques">
+      <rule>Use open-ended questions and active listening to uncover insights</rule>
+      <techniques>
+        <technique name="laddering">
+          <description>Ask "why" repeatedly to understand underlying motivations</description>
+          <example>"Why is that important to you?" → "Why does that matter?" → "Why is that valuable?"</example>
+        </technique>
+        <technique name="five_whys">
+          <description>Ask "why" five times to reach root causes</description>
+          <example>Problem → Why 1 → Why 2 → Why 3 → Why 4 → Why 5 (Root cause)</example>
+        </technique>
+        <technique name="critical_incident">
+          <description>Ask about specific past experiences to gather concrete examples</description>
+          <example>"Tell me about the last time you tried to [task] and encountered a problem"</example>
+        </technique>
+      </techniques>
+    </practice>
+
+    <practice category="usability_testing">
+      <rule>Observe behavior without leading participants to solutions</rule>
+      <guidelines>
+        <guideline>Use think-aloud protocol to understand thought processes</guideline>
+        <guideline>Wait before providing assistance to allow problem-solving</guideline>
+        <guideline>Record both actions and verbal feedback</guideline>
+        <guideline>Debrief after tasks to capture additional insights</guideline>
+      </guidelines>
+      <avoid>
+        <avoid>Leading questions that suggest answers</avoid>
+        <avoid>Demonstrating solutions before participants attempt tasks</avoid>
+        <avoid>Defending design choices during testing</avoid>
+      </avoid>
+    </practice>
+
+    <practice category="survey_design">
+      <rule>Design clear, unbiased questions that gather actionable data</rule>
+      <best_practices>
+        <practice>Keep surveys under 10 minutes completion time</practice>
+        <practice>Use simple, unambiguous language</practice>
+        <practice>Avoid double-barreled questions</practice>
+        <practice>Include attention checks and validation questions</practice>
+        <practice>Test survey with small group before full deployment</practice>
+      </best_practices>
+      <question_types>
+        <type name="likert_scale">
+          <use>Measure attitudes and agreement levels</use>
+          <example>"Strongly Disagree" to "Strongly Agree" scale</example>
+        </type>
+        <type name="multiple_choice">
+          <use>Gather categorical data</use>
+          <example>Single or multiple selection options</example>
+        </type>
+        <type name="open_ended">
+          <use>Collect qualitative insights and explanations</use>
+          <example>"What suggestions do you have for improvement?"</example>
+        </type>
+      </question_types>
+    </practice>
+  </data_collection_practices>
+
+  <analysis_practices>
+    <practice category="qualitative_analysis">
+      <code><![CDATA[
+<!-- Thematic Analysis Process -->
+1. Familiarize yourself with the data
+2. Generate initial codes and labels
+3. Search for themes and patterns
+4. Review themes against data
+5. Define and name themes
+6. Write up the analysis
+      ]]></code>
+      <techniques>
+        <technique>Affinity diagramming for pattern identification</technique>
+        <technique>Journey mapping for experience visualization</technique>
+        <technique>Persona development for user archetype creation</technique>
+      </techniques>
+    </practice>
+
+    <practice category="quantitative_analysis">
+      <rule>Apply appropriate statistical methods based on data type and research questions</rule>
+      <methods>
+        <method name="descriptive_statistics">
+          <use>Summarize data characteristics</use>
+          <examples>Mean, median, mode, standard deviation, frequency distributions</examples>
+        </method>
+        <method name="inferential_statistics">
+          <use>Test hypotheses and make predictions</use>
+          <examples>t-tests, ANOVA, chi-square, correlation analysis</examples>
+        </method>
+        <method name="regression_analysis">
+          <use>Identify relationships between variables</use>
+          <examples>Linear regression, logistic regression, multiple regression</examples>
+        </method>
+      </methods>
+    </practice>
+
+    <practice category="triangulation">
+      <rule>Combine multiple methods and data sources to validate findings</rule>
+      <types>
+        <type name="methodological">Use different research methods to study same phenomenon</type>
+        <type name="data">Combine qualitative and quantitative data</type>
+        <type name="investigator">Have multiple researchers analyze same data</type>
+        <type name="theory">Apply different theoretical perspectives</type>
+      </types>
+    </practice>
+  </analysis_practices>
+
+  <communication_practices>
+    <practice category="reporting">
+      <rule>Tailor communication to audience needs and decision-making context</rule>
+      <audience_types>
+        <audience name="executives">
+          <focus>Business impact, ROI, strategic recommendations</focus>
+          <format>Executive summaries, dashboards, key metrics</format>
+        </audience>
+        <audience name="product_teams">
+          <focus>Specific insights, actionable recommendations, implementation guidance</focus>
+          <format>Detailed reports, user stories, design recommendations</format>
+        </audience>
+        <audience name="designers">
+          <focus>User needs, pain points, opportunity areas</focus>
+          <format>Personas, journey maps, design principles</format>
+        </audience>
+      </audience_types>
+    </practice>
+
+    <practice category="visualization">
+      <rule>Use clear, appropriate visualizations to communicate findings effectively</rule>
+      <chart_types>
+        <chart name="bar_chart">
+          <use>Compare categories or show frequencies</use>
+        </chart>
+        <chart name="line_graph">
+          <use>Show trends over time</use>
+        </chart>
+        <chart name="scatter_plot">
+          <use>Show relationships between variables</use>
+        </chart>
+        <chart name="heat_map">
+          <use>Show intensity or frequency across dimensions</use>
+        </chart>
+      </chart_types>
+    </practice>
+  </communication_practices>
+
+  <quality_checklist>
+    <category name="planning_phase">
+      <item>Research questions are specific and measurable</item>
+      <item>Methodology aligns with research objectives</item>
+      <item>Sample size is statistically appropriate</item>
+      <item>Participant criteria are clearly defined</item>
+      <item>Ethical considerations are addressed</item>
+    </category>
+    
+    <category name="execution_phase">
+      <item>Data collection follows established protocols</item>
+      <item>Bias is minimized throughout the process</item>
+      <item>Documentation is comprehensive and accurate</item>
+      <item>Participant experience is positive and ethical</item>
+      <item>Data quality is monitored and maintained</item>
+    </category>
+    
+    <category name="analysis_phase">
+      <item>Findings are triangulated across methods</item>
+      <item>Insights are supported by evidence</item>
+      <item>Recommendations are actionable and specific</item>
+      <item>Limitations are acknowledged and addressed</item>
+      <item>Statistical analysis is appropriate and correct</item>
+    </category>
+    
+    <category name="reporting_phase">
+      <item>Findings are communicated clearly to stakeholders</item>
+      <item>Visualizations are appropriate and accurate</item>
+      <item>Recommendations are prioritized and actionable</item>
+      <item>Next steps are clearly defined</item>
+      <item>Impact measurement is planned</item>
+    </category>
+  </quality_checklist>
+</best_practices>

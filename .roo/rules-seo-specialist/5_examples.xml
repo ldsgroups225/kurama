@@ -1,0 +1,400 @@
+<![CDATA[<examples>
+  <example name="technical_seo_audit">
+    <description>Complete technical SEO audit workflow for a website</description>
+    <context>When user needs comprehensive SEO analysis and optimization plan</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Initial Research and Analysis</title>
+        <actions>
+          <action>Research current SEO landscape and competitor strategies</action>
+          <tools_used>
+            <tool>web_search - "SEO audit tools 2024 competitor analysis"</tool>
+            <tool>codebase_search - "meta tags structured data sitemap"</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Identified top 3 competitors and their SEO strategies</result>
+          <result>Found existing meta tag implementation gaps</result>
+          <result>Discovered missing structured data opportunities</result>
+        </outcomes>
+      </step>
+      
+      <step number="2">
+        <title>Technical Implementation Review</title>
+        <actions>
+          <action>Analyze current technical SEO setup</action>
+          <tools_used>
+            <tool>read_file - index.html, robots.txt, sitemap.xml</tool>
+            <tool>browser - Test Core Web Vitals and structured data</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Core Web Vitals: LCP 3.2s, FID 180ms, CLS 0.15</result>
+          <result>Structured data validation: 2 critical errors found</result>
+          <result>Mobile usability issues identified on key pages</result>
+        </outcomes>
+      </step>
+      
+      <step number="3">
+        <title>Optimization Implementation</title>
+        <actions>
+          <action>Implement technical SEO improvements</action>
+          <tools_used>
+            <tool>apply_diff - Update meta tags and add structured data</tool>
+            <tool>write_to_file - Create enhanced robots.txt and sitemap</tool>
+            <tool>execute_command - "npm run optimize-images"</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Meta tags optimized with target keywords and compelling descriptions</result>
+          <result>JSON-LD structured data implemented for articles and products</result>
+          <result>XML sitemap generated with 150+ URLs</result>
+          <result>Image optimization reduced page load time by 40%</result>
+        </outcomes>
+      </step>
+      
+      <step number="4">
+        <title>Validation and Monitoring</title>
+        <actions>
+          <action>Test implementations and set up monitoring</action>
+          <tools_used>
+            <tool>browser - Validate structured data with Google Rich Results Test</tool>
+            <tool>web_search - "Google Search Console setup tracking"</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Structured data validation passed for all schema types</result>
+          <result>Core Web Vitals improved to: LCP 1.8s, FID 85ms, CLS 0.05</result>
+          <result>Analytics tracking configured for SEO KPIs</result>
+        </outcomes>
+      </step>
+    </workflow_steps>
+    <deliverables>
+      <deliverable>Comprehensive SEO audit report with prioritized recommendations</deliverable>
+      <deliverable>Implemented technical SEO improvements (meta tags, structured data, sitemap)</deliverable>
+      <deliverable>Performance optimization results and monitoring setup</deliverable>
+      <deliverable>Documentation of all changes and best practices for maintenance</deliverable>
+    </deliverables>
+  </example>
+
+  <example name="content_optimization_strategy">
+    <description>Content SEO optimization for blog post targeting specific keywords</description>
+    <context>When user wants to optimize existing content for better search rankings</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Keyword Research and Content Analysis</title>
+        <actions>
+          <action>Research target keywords and analyze current content</action>
+          <tools_used>
+            <tool>web_search - "keyword research tools long-tail variations 2024"</tool>
+            <tool>read_file - existing blog posts and content structure</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Identified primary keyword: "SEO best practices guide"</result>
+          <result>Found 15 long-tail variations with good search volume</result>
+          <result>Current content missing semantic keyword variations</result>
+        </outcomes>
+      </step>
+      
+      <step number="2">
+        <title>Content Enhancement and Optimization</title>
+        <actions>
+          <action>Optimize content structure and incorporate keywords naturally</action>
+          <tools_used>
+            <tool>apply_diff - Update headings, add keyword variations</tool>
+            <tool>write_to_file - Create new optimized content sections</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Content restructured with H1-H3 hierarchy for better readability</result>
+          <result>Primary keyword density optimized to 2.1%</result>
+          <result>Added 8 semantic keyword variations throughout content</result>
+          <result>Internal linking strategy implemented with 12 relevant links</result>
+        </outcomes>
+      </step>
+      
+      <step number="3">
+        <title>Meta Tags and Structured Data Enhancement</title>
+        <actions>
+          <action>Update meta tags and add comprehensive structured data</action>
+          <tools_used>
+            <tool>apply_diff - Update title, description, and meta tags</tool>
+            <tool>write_to_file - Add JSON-LD structured data</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Title optimized: "Complete SEO Best Practices Guide 2024 | Expert Tips"</result>
+          <result>Meta description under 160 characters with primary keyword</result>
+          <result>Article schema implemented with author, publisher, and date information</result>
+        </outcomes>
+      </step>
+      
+      <step number="4">
+        <title>Performance Validation</title>
+        <actions>
+          <action>Test content performance and SEO implementation</action>
+          <tools_used>
+            <tool>browser - Test page load speed and user experience</tool>
+            <tool>execute_command - "npx lighthouse --performance"</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Page load time improved from 3.2s to 1.8s</result>
+          <result>Lighthouse SEO score increased from 72 to 89</result>
+          <result>Mobile usability score improved to 95/100</result>
+        </outcomes>
+      </step>
+    </workflow_steps>
+    <deliverables>
+      <deliverable>Keyword-optimized content with natural keyword integration</deliverable>
+      <deliverable>Enhanced meta tags and structured data implementation</deliverable>
+      <deliverable>Improved page performance and user experience metrics</deliverable>
+      <deliverable>Content optimization report with before/after comparisons</deliverable>
+    </deliverables>
+  </example>
+
+  <example name="local_seo_implementation">
+    <description>Local SEO implementation for multi-location business</description>
+    <context>When user wants to improve local search visibility for business with multiple locations</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Local SEO Research and Strategy</title>
+        <actions>
+          <action>Research local SEO best practices and competitor strategies</action>
+          <tools_used>
+            <tool>web_search - "local SEO multi-location business strategy 2024"</tool>
+            <tool>codebase_search - "location pages contact information schema"</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Identified 5 key local search ranking factors</result>
+          <result>Analyzed top 3 local competitors' citation strategies</result>
+          <result>Found opportunity for location-specific landing pages</result>
+        </outcomes>
+      </step>
+      
+      <step number="2">
+        <title>Location Page Creation and Optimization</title>
+        <actions>
+          <action>Create dedicated landing pages for each business location</action>
+          <tools_used>
+            <tool>write_to_file - Create location-specific pages</tool>
+            <tool>apply_diff - Add local business schema to existing pages</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Created 5 location-specific landing pages with unique content</result>
+          <result>Implemented LocalBusiness schema for each location</result>
+          <result>Added location-specific keywords and content optimization</result>
+        </outcomes>
+      </step>
+      
+      <step number="3">
+        <title>Citation Building and Management</title>
+        <actions>
+          <action>Build consistent business citations across directories</action>
+          <tools_used>
+            <tool>web_search - "business citation building services best practices"</tool>
+            <tool>execute_command - "npm run build-citations"</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Identified 20 high-authority citation opportunities</result>
+          <result>Submitted business information to 15 key directories</result>
+          <result>Ensured NAP consistency across all platforms</result>
+        </outcomes>
+      </step>
+      
+      <step number="4">
+        <title>Local Search Monitoring and Analytics</title>
+        <actions>
+          <action>Set up local search tracking and monitoring</action>
+          <tools_used>
+            <tool>write_to_file - Create location-specific analytics setup</tool>
+            <tool>browser - Test Google Business Profile integration</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Google Business Profile optimized with photos and services</result>
+          <result>Local search rank tracking implemented for 3 target keywords</result>
+          <result>Monthly reporting dashboard created for local SEO performance</result>
+        </outcomes>
+      </step>
+    </workflow_steps>
+    <deliverables>
+      <deliverable>Multi-location landing pages with LocalBusiness schema</deliverable>
+      <deliverable>Consistent business citations across 20+ directories</deliverable>
+      <deliverable>Optimized Google Business Profile with complete information</deliverable>
+      <deliverable>Local search monitoring and reporting system</deliverable>
+    </deliverables>
+  </example>
+
+  <example name="ecommerce_seo_overhaul">
+    <description>Comprehensive SEO overhaul for e-commerce website</description>
+    <context>When user needs complete SEO optimization for online store with product catalog</context>
+    <workflow_steps>
+      <step number="1">
+        <title>E-commerce SEO Audit and Research</title>
+        <actions>
+          <action>Analyze current e-commerce SEO setup and research competitors</action>
+          <tools_used>
+            <tool>web_search - "e-commerce SEO best practices product pages 2024"</tool>
+            <tool>codebase_search - "product schema category pages pagination"</tool>
+            <tool>read_file - Current product page implementations</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Found missing Product schema implementation</result>
+          <result>Identified pagination and faceted navigation SEO issues</result>
+          <result>Discovered opportunity for category page optimization</result>
+          <result>Top 3 competitors analyzed for product page strategies</result>
+        </outcomes>
+      </step>
+      
+      <step number="2">
+        <title>Product Page Optimization</title>
+        <actions>
+          <action>Implement comprehensive product page SEO improvements</action>
+          <tools_used>
+            <tool>apply_diff - Add Product schema and optimize content</tool>
+            <tool>write_to_file - Create category page templates</tool>
+            <tool>execute_command - "npm run optimize-product-images"</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Product schema implemented with reviews, ratings, and offers</result>
+          <result>Category page hierarchy optimized for better crawling</result>
+          <result>Product images optimized with alt text and structured data</result>
+          <result>Internal linking strategy implemented for related products</result>
+        </outcomes>
+      </step>
+      
+      <step number="3">
+        <title>Technical SEO Implementation</title>
+        <actions>
+          <action>Implement technical SEO improvements for e-commerce</action>
+          <tools_used>
+            <tool>write_to_file - Create e-commerce sitemap with product URLs</tool>
+            <tool>apply_diff - Add breadcrumb navigation and faceted search</tool>
+            <tool>execute_command - "npm run implement-lazy-loading"</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>XML sitemap generated with 500+ product URLs</result>
+          <result>Breadcrumb navigation implemented for better user experience</result>
+          <result>Faceted search optimized with SEO-friendly URLs</result>
+          <result>Lazy loading implemented for product images and reviews</result>
+        </outcomes>
+      </step>
+      
+      <step number="4">
+        <title>Performance and Monitoring Setup</title>
+        <actions>
+          <action>Optimize performance and set up comprehensive monitoring</action>
+          <tools_used>
+            <tool>browser - Test Core Web Vitals and user experience</tool>
+            <tool>execute_command - "npx lighthouse --ecommerce"</tool>
+            <tool>write_to_file - Create performance monitoring dashboard</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Core Web Vitals optimized for e-commerce conversion funnel</result>
+          <result>Lighthouse e-commerce score improved from 68 to 92</result>
+          <result>Conversion tracking implemented for product pages</result>
+          <result>Performance monitoring dashboard with SEO KPIs created</result>
+        </outcomes>
+      </step>
+    </workflow_steps>
+    <deliverables>
+      <deliverable>Product pages with comprehensive Product schema implementation</deliverable>
+      <deliverable>SEO-optimized category pages and faceted navigation</deliverable>
+      <deliverable>E-commerce sitemap with all product and category URLs</deliverable>
+      <deliverable>Performance optimization and conversion tracking setup</deliverable>
+      <deliverable>Complete e-commerce SEO audit report and implementation guide</deliverable>
+    </deliverables>
+  </example>
+
+  <example name="content_strategy_development">
+    <description>Content strategy development for SEO-focused content marketing</description>
+    <context>When user needs comprehensive content strategy to drive organic traffic</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Audience and Keyword Research</title>
+        <actions>
+          <action>Research target audience and develop keyword strategy</action>
+          <tools_used>
+            <tool>web_search - "content strategy SEO keyword research 2024"</tool>
+            <tool>web_search - "user intent search query analysis content marketing"</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Identified 4 primary audience segments with search behaviors</result>
+          <result>Developed keyword strategy with 50+ target keywords</result>
+          <result>Mapped user intent to content types (informational, commercial, navigational)</result>
+          <result>Content gap analysis revealed 12 topic opportunities</result>
+        </outcomes>
+      </step>
+      
+      <step number="2">
+        <title>Content Calendar and Topic Planning</title>
+        <actions>
+          <action>Create comprehensive content calendar and topic hierarchy</action>
+          <tools_used>
+            <tool>write_to_file - Create content calendar and topic planning documents</tool>
+            <tool>web_search - "SEO content calendar templates best practices"</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>6-month content calendar with SEO-focused topics</result>
+          <result>Topic cluster strategy developed for pillar pages and supporting content</result>
+          <result>Content production schedule aligned with seasonal search trends</result>
+          <result>Internal linking strategy mapped to content calendar</result>
+        </outcomes>
+      </step>
+      
+      <step number="3">
+        <title>Content Creation Guidelines and Templates</title>
+        <actions>
+          <action>Develop SEO-focused content creation guidelines and templates</action>
+          <tools_used>
+            <tool>write_to_file - Create content templates and style guides</tool>
+            <tool>apply_diff - Update existing content with SEO best practices</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Content creation templates with SEO optimization built-in</result>
+          <result>Style guide for keyword integration and content structure</result>
+          <result>Templates for blog posts, product pages, and category content</result>
+          <result>Guidelines for E-E-A-T content development</result>
+        </outcomes>
+      </step>
+      
+      <step number="4">
+        <title>Performance Tracking and Optimization</title>
+        <actions>
+          <action>Set up content performance tracking and optimization loop</action>
+          <tools_used>
+            <tool>write_to_file - Create content performance dashboard</tool>
+            <tool>execute_command - "npm run content-analytics-setup"</tool>
+            <tool>web_search - "content performance metrics SEO tracking 2024"</tool>
+          </tools_used>
+        </actions>
+        <outcomes>
+          <result>Content performance tracking implemented for key SEO metrics</result>
+          <result>A/B testing framework set up for content optimization</result>
+          <result>Monthly content performance reports automated</result>
+          <result>Content optimization workflow based on performance data</result>
+        </outcomes>
+      </step>
+    </workflow_steps>
+    <deliverables>
+      <deliverable>Comprehensive content strategy with audience research and keyword planning</deliverable>
+      <deliverable>6-month SEO-focused content calendar with topic clusters</deliverable>
+      <deliverable>Content creation templates and SEO guidelines</deliverable>
+      <deliverable>Content performance tracking and optimization system</deliverable>
+      <deliverable>Content strategy documentation with implementation roadmap</deliverable>
+    </deliverables>
+  </example>
+</examples>
+]]>

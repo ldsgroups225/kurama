@@ -1,0 +1,217 @@
+<tool_usage_guide>
+  <tool_priorities>
+    <priority level="1">
+      <tool>codebase_search</tool>
+      <when>Always use first to identify code smells and refactoring opportunities</when>
+      <why>Semantic search finds code patterns and complexity issues better than keyword search</why>
+    </priority>
+    <priority level="2">
+      <tool>read_file</tool>
+      <when>After identifying target files, read to understand current implementation</when>
+      <why>Get full context of code structure and complexity</why>
+    </priority>
+    <priority level="3">
+      <tool>search_files</tool>
+      <when>Use regex patterns to find specific code smells and patterns</when>
+      <why>Efficient for finding anti-patterns and duplicated code</why>
+    </priority>
+  </tool_priorities>
+
+  <tool_specific_guidance>
+    <tool name="apply_diff">
+      <purpose>Make precise, targeted refactoring changes</purpose>
+      <when_to_use>For small, incremental refactoring modifications</when_to_use>
+      <best_practices>
+        <practice>Always read file first to ensure exact content match</practice>
+        <practice>Make multiple related changes in one diff when possible</practice>
+        <practice>Include line numbers for accuracy</practice>
+        <practice>Test changes immediately after applying</practice>
+      </best_practices>
+      <example>
+        <scenario>Extract method from long function</scenario>
+        <code language="typescript">
+          <![CDATA[
+<apply_diff>
+<path>src/order-processing.ts</path>
+<diff>
+<<<<<<< SEARCH
+:start_line:15
+-------
+  // Apply discount
+  let discount = 0;
+  if (order.customerType === 'premium' && total > 100) {
+    discount = total * 0.1;
+  }
+  
+  const finalTotal = total - discount;
+=======
+  // Apply discount
+  const discount = calculateDiscount(order.customerType, total);
+  const finalTotal = total - discount;
+>>>>>>> REPLACE
+</diff>
+</apply_diff>
+          ]]>
+        </code>
+      </example>
+    </tool>
+    
+    <tool name="execute_command">
+      <purpose>Run refactoring tools and analysis scripts</purpose>
+      <when_to_use>For automated refactoring, code analysis, and testing</when_to_use>
+      <best_practices>
+        <practice>Use for running complexity analysis tools</practice>
+        <practice>Run test suites before and after refactoring</practice>
+        <practice>Use for automated formatting and linting</practice>
+        <practice>Execute refactoring scripts when available</practice>
+      </best_practices>
+      <example>
+        <scenario>Run complexity analysis</scenario>
+        <code language="bash">
+          <![CDATA[
+npm run complexity-analyze --src src/ --format json --output complexity-report.json
+          ]]>
+        </code>
+      </example>
+    </tool>
+    
+    <tool name="ask_followup_question">
+      <purpose>Gather user input for refactoring decisions</purpose>
+      <when_to_use>When refactoring scope or approach needs clarification</when_to_use>
+      <best_practices>
+        <practice>Provide 2-4 specific, actionable suggestions</practice>
+        <practice>Order suggestions by impact or priority</practice>
+        <practice>Make suggestions complete (no placeholders)</practice>
+        <practice>Include rationale for each suggestion</practice>
+      </best_practices>
+      <example>
+        <scenario>Choosing refactoring approach</scenario>
+        <code language="xml">
+          <![CDATA[
+<ask_followup_question>
+  <question>Found multiple code smells including long methods and high complexity. Which refactoring approach would you prefer?</question>
+  <follow_up>
+    <suggest>Start with extract method refactoring to reduce method length</suggest>
+    <suggest>Focus on breaking down large classes first for biggest impact</suggest>
+    <suggest>Apply parameter object refactoring to reduce parameter count</suggest>
+    <suggest>Use strategy pattern to eliminate conditional complexity</suggest>
+  </follow_up>
+</ask_followup_question>
+          ]]>
+        </code>
+      </example>
+    </tool>
+    
+    <tool name="list_code_definition_names">
+      <purpose>Understand codebase structure and identify refactoring targets</purpose>
+      <when_to_use>When analyzing project structure and identifying large components</when_to_use>
+      <best_practices>
+        <practice>Use to get overview of codebase organization</practice>
+        <practice>Identify files with high complexity or many definitions</practice>
+        <practice>Find classes or modules that need refactoring</practice>
+      </best_practices>
+      <example>
+        <scenario>Analyzing codebase structure</scenario>
+        <code language="bash">
+          <![CDATA[
+<list_code_definition_names>
+<path>src</path>
+</list_code_definition_names>
+          ]]>
+        </code>
+      </example>
+    </tool>
+    
+    <tool name="list_files">
+      <purpose>Explore project structure and find refactoring candidates</purpose>
+      <when_to_use>When understanding project layout and identifying files to refactor</when_to_use>
+      <best_practices>
+        <practice>Use recursive listing to understand full structure</practice>
+        <practice>Look for files with high line counts or complexity</practice>
+        <practice>Identify test files that may need updating</practice>
+      </best_practices>
+      <example>
+        <scenario>Finding large files to refactor</scenario>
+        <code language="bash">
+          <![CDATA[
+<list_files>
+<path>src</path>
+<recursive>true</recursive>
+</list_files>
+          ]]>
+        </code>
+      </example>
+    </tool>
+  </tool_specific_guidance>
+
+  <refactoring_workflow_integration>
+    <description>How tools work together in the refactoring process</description>
+    <workflow_steps>
+      <step number="1">
+        <title>Identify Refactoring Targets</title>
+        <tools_used>
+          <tool>codebase_search - Find code smells and complexity hotspots</tool>
+          <tool>list_code_definition_names - Identify large classes and methods</tool>
+          <tool>search_files - Find specific anti-patterns</tool>
+        </tools_used>
+        <purpose>Create comprehensive list of refactoring opportunities</purpose>
+      </step>
+      
+      <step number="2">
+        <title>Analyze and Plan</title>
+        <tools_used>
+          <tool>read_file - Examine target code in detail</tool>
+          <tool>execute_command - Run complexity analysis tools</tool>
+        </tools_used>
+        <purpose>Understand current implementation and plan refactoring approach</purpose>
+      </step>
+      
+      <step number="3">
+        <title>Execute Refactoring</title>
+        <tools_used>
+          <tool>apply_diff - Make incremental code changes</tool>
+          <tool>execute_command - Run tests and analysis</tool>
+        </tools_used>
+        <purpose>Implement refactoring changes with safety checks</purpose>
+      </step>
+      
+      <step number="4">
+        <title>Validate and Measure</title>
+        <tools_used>
+          <tool>execute_command - Run full test suite</tool>
+          <tool>execute_command - Generate complexity metrics</tool>
+        </tools_used>
+        <purpose>Verify refactoring success and quantify improvements</purpose>
+      </step>
+    </workflow_steps>
+  </refactoring_workflow_integration>
+
+  <automated_refactoring_tools>
+    <tool name="complexity_analyzers">
+      <description>Tools for measuring code complexity and identifying hotspots</description>
+      <examples>
+        <example>npm run complexity-analyze --format json</example>
+        <example>sonar-scanner -Dsonar.projectKey=myproject</example>
+        <example>jscpd --format json --output complexity.json</example>
+      </examples>
+    </tool>
+    
+    <tool name="automated_refactoring">
+      <description>Tools that can automatically apply refactoring patterns</description>
+      <examples>
+        <example>js-refactor --mode extract-method</example>
+        <example>ts-refactor --extract-class --name NewClassName</example>
+        <example>prettier --write src/ --single-quote</example>
+      </examples>
+    </tool>
+    
+    <tool name="testing_frameworks">
+      <description>Testing tools for ensuring refactoring safety</description>
+      <examples>
+        <example>jest --coverage --watchAll</example>
+        <example>vitest --run --reporter=verbose</example>
+        <example>npm run test:regression</example>
+      </examples>
+    </tool>
+  </automated_refactoring_tools>
+</tool_usage_guide>

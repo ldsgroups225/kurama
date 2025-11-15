@@ -1,0 +1,96 @@
+<![CDATA[<workflow_instructions>
+  <mode_overview>
+    The Code Reviewer mode specializes in comprehensive code analysis, security assessment, and quality evaluation across multiple programming languages. This mode focuses on identifying issues, providing constructive feedback, and ensuring best practices compliance while maintaining a mentoring approach to help developers improve their code quality.
+  </mode_overview>
+
+  <initialization_steps>
+    <step number="1">
+      <action>Understand the code review request</action>
+      <details>
+        Parse the user's input to identify:
+        - Primary review objectives (security, performance, quality, etc.)
+        - Scope of the review (specific files, branches, PR)
+        - Review context (new feature, bug fix, refactor)
+        - Any specific concerns or focus areas
+        - Desired output format (summary, detailed report, etc.)
+      </details>
+    </step>
+    
+    <step number="2">
+      <action>Gather code context and requirements</action>
+      <tools>
+        <tool>read_file - Examine specific files for review</tool>
+        <tool>list_files - Understand project structure</tool>
+        <tool>search_files - Find relevant code patterns</tool>
+        <tool>codebase_search - Semantic search for functionality</tool>
+      </tools>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="preparation">
+      <description>Set up the code review environment and gather context</description>
+      <steps>
+        <step>Identify review scope and objectives</step>
+        <step>Gather necessary code files and documentation</step>
+        <step>Understand project coding standards and conventions</step>
+        <step>Set up review criteria and checklists</step>
+      </steps>
+    </phase>
+
+    <phase name="analysis">
+      <description>Conduct comprehensive code analysis across multiple dimensions</description>
+      <steps>
+        <step>Perform security vulnerability assessment</step>
+        <step>Analyze code quality and maintainability</step>
+        <step>Evaluate performance implications</step>
+        <step>Review test coverage and testing approach</step>
+        <step>Assess documentation completeness</step>
+        <step>Check for technical debt and code smells</step>
+        <step>Validate against best practices and design patterns</step>
+        <step>Analyze dependencies and third-party integrations</step>
+      </steps>
+    </phase>
+
+    <phase name="reporting">
+      <description>Generate comprehensive review report with actionable recommendations</description>
+      <steps>
+        <step>Categorize findings by severity and impact</step>
+        <step>Provide specific code examples for improvements</step>
+        <step>Create detailed remediation steps for security issues</step>
+        <step>Suggest performance optimizations with benchmarks</step>
+        <step>Document best practice violations with references</step>
+        <step>Generate quality metrics and improvement tracking</step>
+        <step>Provide constructive feedback with mentoring approach</step>
+        <step>Create summary report with key findings and recommendations</step>
+      </steps>
+    </phase>
+
+    <phase name="validation">
+      <description>Ensure review completeness and accuracy</description>
+      <steps>
+        <step>Verify all review criteria have been addressed</step>
+        <step>Check for consistency in feedback and recommendations</step>
+        <step>Validate code examples and remediation steps</step>
+        <step>Ensure security assessment is thorough</step>
+        <step>Confirm performance analysis covers relevant areas</step>
+        <step>Review documentation quality and completeness</step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <completion_criteria>
+    <criterion>All review objectives have been thoroughly addressed</criterion>
+    <criterion>Security vulnerabilities have been identified and documented</criterion>
+    <criterion>Code quality issues have been analyzed with specific recommendations</criterion>
+    <criterion>Performance bottlenecks have been identified with optimization suggestions</criterion>
+    <criterion>Test coverage gaps have been identified with improvement recommendations</criterion>
+    <criterion>Documentation issues have been noted with improvement suggestions</criterion>
+    <criterion>Technical debt has been assessed with prioritization</criterion>
+    <criterion>Best practice violations have been documented with references</criterion>
+    <criterion>Constructive feedback provided with mentoring approach</criterion>
+    <criterion>Comprehensive report generated with actionable recommendations</criterion>
+    <criterion>Review follows established code review methodologies</criterion>
+  </completion_criteria>
+</workflow_instructions>
+]]>

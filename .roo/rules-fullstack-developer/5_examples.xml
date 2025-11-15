@@ -1,0 +1,632 @@
+<examples>
+  <example name="user_authentication_system">
+    <description>Complete user authentication system with JWT tokens and role-based access</description>
+    <context>When implementing authentication for a new application or refactoring existing auth system</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Architecture Planning</title>
+        <actions>
+          <action>Use semantic_search_with_context to find existing authentication patterns</action>
+          <action>Analyze database schema for user tables</action>
+          <action>Design JWT token structure and refresh mechanism</action>
+        </actions>
+      </step>
+      
+      <step number="2">
+        <title>Backend Implementation</title>
+        <actions>
+          <action>Create user model with proper relationships</action>
+          <action>Implement authentication middleware with role checking</action>
+          <action>Create login/logout endpoints with proper validation</action>
+          <action>Implement token refresh mechanism</action>
+        </actions>
+      </step>
+      
+      <step number="3">
+        <title>Frontend Integration</title>
+        <actions>
+          <action>Create authentication context with React hooks</action>
+          <action>Implement login/logout components with form validation</action>
+          <action>Add route protection for authenticated pages</action>
+          <action>Implement automatic token refresh</action>
+        </actions>
+      </step>
+      
+      <step number="4">
+        <title>Testing & Validation</title>
+        <actions>
+          <action>Write unit tests for authentication functions</action>
+          <action>Create integration tests for API endpoints</action>
+          <action>Implement E2E tests for complete login flow</action>
+        </actions>
+      </step>
+    </workflow_steps>
+    
+    <code_examples>
+      <example title="JWT Middleware Implementation">
+        <code language="typescript">
+          <![CDATA[
+// Middleware for JWT authentication with role-based access
+import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from 'express';
+import { User } from '../types/user';
+
+interface AuthenticatedRequest extends Request {
+  user?: User;
+}
+
+export const authenticateToken = (requiredRole?: string) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        error: {
+          code: 'MISSING_TOKEN',
+          message: 'Access token is required'
+        }
+      });
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+      req.user = decoded.user;
+
+      // Check role if required
+      if (requiredRole && req.user.role !== requiredRole) {
+        return res.status(403).json({
+          success: false,
+          error: {
+            code: 'INSUFFICIENT_PERMISSIONS',
+            message: 'Insufficient permissions for this resource'
+          }
+        });
+      }
+
+      next();
+    } catch (error) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'INVALID_TOKEN',
+          message: 'Invalid or expired token'
+        }
+      });
+    }
+  };
+};
+          ]]>
+        </code>
+      </example>
+      
+      <example title="Frontend Auth Context">
+        <code language="typescript">
+          <![CDATA[
+import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import { User } from '../types/user';
+
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+}
+
+interface AuthContextType extends AuthState {
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+  refreshToken: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// ... (full implementation from common patterns)
+          ]]>
+        </code>
+      </example>
+    </code_examples>
+    
+    <key_takeaways>
+      <takeaway>Always implement proper token validation and refresh mechanisms</takeaway>
+      <takeaway>Use role-based access control for granular permissions</takeaway>
+      <takeaway>Implement proper error handling and user feedback</takeaway>
+      <takeaway>Test authentication flows thoroughly across all layers</takeaway>
+    </key_takeaways>
+  </example>
+
+  <example name="real_time_collaboration_feature">
+    <description>Real-time collaborative document editing with WebSocket connections</description>
+    <context>When adding real-time features like collaborative editing, notifications, or live updates</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Real-time Architecture Design</title>
+        <actions>
+          <action>Design WebSocket event structure and message types</action>
+          <action>Plan conflict resolution strategy for concurrent edits</action>
+          <action>Design presence system for user awareness</action>
+        </actions>
+      </step>
+      
+      <step number="2">
+        <title>WebSocket Implementation</title>
+        <actions>
+          <action>Implement WebSocket server with connection management</action>
+          <action>Create event handlers for document operations</action>
+          <action>Implement operational transformation for conflict resolution</action>
+        </actions>
+      </step>
+      
+      <step number="3">
+        <title>Frontend Integration</title>
+        <actions>
+          <action>Create WebSocket client with reconnection logic</action>
+          <action>Implement optimistic updates with conflict detection</action>
+          <action>Add user presence indicators and cursors</action>
+        </actions>
+      </step>
+      
+      <step number="4">
+        <title>Testing & Scaling</title>
+        <actions>
+          <action>Test concurrent editing scenarios</action>
+          <action>Implement connection pooling and load balancing</action>
+          <action>Add monitoring for WebSocket performance</action>
+        </actions>
+      </step>
+    </workflow_steps>
+    
+    <code_examples>
+      <example title="WebSocket Event Structure">
+        <code language="typescript">
+          <![CDATA[
+// Real-time collaboration event types
+interface CollaborationEvent {
+  type: 'join' | 'leave' | 'operation' | 'cursor' | 'selection' | 'presence';
+  documentId: string;
+  userId: string;
+  timestamp: number;
+  data?: any;
+}
+
+interface DocumentOperation {
+  type: 'insert' | 'delete' | 'retain';
+  position: number;
+  length?: number;
+  content?: string;
+  attributes?: Record<string, any>;
+}
+
+// Server-side event handler
+const handleDocumentOperation = (ws: WebSocket, event: CollaborationEvent) => {
+  const { documentId, userId, data } = event;
+  
+  // Apply operational transformation
+  const result = applyOperation(documentId, data.operation);
+  
+  // Broadcast to all connected clients except sender
+  broadcastToDocument(documentId, {
+    type: 'operation',
+    documentId,
+    userId,
+    data: result
+  }, ws);
+};
+          ]]>
+        </code>
+      </example>
+      
+      <example title="Frontend Optimistic Updates">
+        <code language="typescript">
+          <![CDATA[
+// React component for collaborative editing
+import { useState, useEffect, useRef } from 'react';
+import { useWebSocket } from '../hooks/useWebSocket';
+
+const CollaborativeEditor = ({ documentId }: { documentId: string }) => {
+  const [document, setDocument] = useState<DocumentState>();
+  const [operations, setOperations] = useState<Operation[]>([]);
+  const ws = useWebSocket();
+
+  // Apply optimistic updates
+  const handleLocalChange = (operation: Operation) => {
+    setOperations(prev => [...prev, operation]);
+    setDocument(prev => applyOperation(prev, operation));
+    
+    // Send to server
+    ws.send('operation', {
+      documentId,
+      operation,
+      timestamp: Date.now()
+    });
+  };
+
+  // Handle remote operations
+  useEffect(() => {
+    const handleRemoteOperation = (event: CollaborationEvent) => {
+      if (event.userId !== ws.userId) {
+        setOperations(prev => {
+          const filtered = prev.filter(op => 
+            op.timestamp !== event.timestamp
+          );
+          return [...filtered, event.data.operation];
+        });
+        
+        setDocument(prev => applyOperation(prev, event.data.operation));
+      }
+    };
+
+    ws.subscribe('operation', handleRemoteOperation);
+    return () => ws.unsubscribe('operation', handleRemoteOperation);
+  }, [ws]);
+
+  return (
+    <Editor
+      document={document}
+      onChange={handleLocalChange}
+      collaborators={getCollaborators(documentId)}
+    />
+  );
+};
+          ]]>
+        </code>
+      </example>
+    </code_examples>
+    
+    <key_takeaways>
+      <takeaway>Implement proper conflict resolution for concurrent edits</takeaway>
+      <takeaway>Use operational transformation for consistent state</takeaway>
+      <takeaway>Handle connection failures gracefully with reconnection</takeaway>
+      <takeaway>Optimize for scalability with connection pooling</takeaway>
+    </key_takeaways>
+  </example>
+
+  <example name="full_stack_crud_application">
+    <description>Complete CRUD application with React frontend and Node.js backend</description>
+    <context>When building a new application from scratch or adding CRUD functionality to existing project</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Database Design</title>
+        <actions>
+          <action>Create database schema with proper relationships</action>
+          <action>Define validation rules and constraints</action>
+          <action>Set up indexes for performance optimization</action>
+        </actions>
+      </step>
+      
+      <step number="2">
+        <title>Backend API Development</title>
+        <actions>
+          <action>Create data models and ORM configurations</action>
+          <action>Implement CRUD controllers with validation</action>
+          <action>Add authentication and authorization middleware</action>
+          <title>Create API documentation with OpenAPI</title>
+        </actions>
+      </step>
+      
+      <step number="3">
+        <title>Frontend Implementation</title>
+        <actions>
+          <action>Create reusable UI components for CRUD operations</action>
+          <action>Implement state management with React Query</action>
+          <action>Add form validation and error handling</action>
+          <action>Create responsive layouts and navigation</action>
+        </actions>
+      </step>
+      
+      <step number="4">
+        <title>Testing & Deployment</title>
+        <actions>
+          <action>Write unit and integration tests for all layers</action>
+          <action>Implement E2E tests for user workflows</action>
+          <action>Set up CI/CD pipeline with automated testing</action>
+          <action>Configure monitoring and logging</action>
+        </actions>
+      </step>
+    </workflow_steps>
+    
+    <code_examples>
+      <example title="Backend CRUD Controller">
+        <code language="typescript">
+          <![CDATA[
+// Complete CRUD controller with validation and error handling
+import { Request, Response } from 'express';
+import { Task } from '../models/Task';
+import { createApiResponse } from '../utils/apiResponse';
+import { validateTask } from '../validation/taskValidator';
+
+export class TaskController {
+  async getAllTasks(req: Request, res: Response) {
+    try {
+      const { page = 1, limit = 10, status } = req.query;
+      
+      const tasks = await Task.findMany({
+        where: status ? { status } : undefined,
+        skip: (page - 1) * limit,
+        take: parseInt(limit as string),
+        orderBy: { createdAt: 'desc' }
+      });
+
+      const total = await Task.count({
+        where: status ? { status } : undefined
+      });
+
+      res.json(createApiResponse(true, tasks, undefined, {
+        pagination: {
+          page: parseInt(page as string),
+          limit: parseInt(limit as string),
+          total,
+          totalPages: Math.ceil(total / parseInt(limit as string))
+        }
+      }));
+    } catch (error) {
+      res.status(500).json(createApiResponse(false, undefined, {
+        code: 'DATABASE_ERROR',
+        message: 'Failed to fetch tasks'
+      }));
+    }
+  }
+
+  async createTask(req: Request, res: Response) {
+    try {
+      const validation = validateTask(req.body);
+      if (!validation.isValid) {
+        return res.status(400).json(createApiResponse(false, undefined, {
+          code: 'VALIDATION_ERROR',
+          message: validation.errors.join(', ')
+        }));
+      }
+
+      const task = await Task.create({
+        data: {
+          ...req.body,
+          userId: req.user.id,
+          status: 'pending'
+        }
+      });
+
+      res.status(201).json(createApiResponse(true, task));
+    } catch (error) {
+      res.status(500).json(createApiResponse(false, undefined, {
+        code: 'CREATION_FAILED',
+        message: 'Failed to create task'
+      }));
+    }
+  }
+
+  // ... updateTask, deleteTask methods with similar patterns
+}
+          ]]>
+        </code>
+      </example>
+      
+      <example title="Frontend CRUD Components">
+        <code language="typescript">
+          <![CDATA[
+// React components for CRUD operations with state management
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Task } from '../types/task';
+
+const TaskList = () => {
+  const queryClient = useQueryClient();
+  
+  const { data: tasks, isLoading, error } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: () => fetchTasks(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (newTask: Omit<Task, 'id'>) => createTask(newTask),
+    onMutate: async (newTask) => {
+      // Optimistic update
+      queryClient.cancelQueries({ queryKey: ['tasks'] });
+      const previousTasks = queryClient.getQueryData(['tasks']);
+      
+      queryClient.setQueryData(['tasks'], (old: Task[] = []) => 
+        [newTask, ...old]
+      );
+      
+      return { previousTasks };
+    },
+    onError: (error, newTask, context) => {
+      // Rollback on error
+      queryClient.setQueryData(['tasks'], context?.previousTasks);
+    },
+    onSettled: () => {
+      // Refetch to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    }
+  });
+
+  if (isLoading) return <TaskListSkeleton />;
+  if (error) return <ErrorMessage error={error} />;
+
+  return (
+    <div>
+      <TaskForm onSubmit={createMutation.mutate} />
+      <div>
+        {tasks?.map(task => (
+          <TaskItem 
+            key={task.id} 
+            task={task}
+            onUpdate={(updates) => updateTask(task.id, updates)}
+            onDelete={() => deleteTask(task.id)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+          ]]>
+        </code>
+      </example>
+    </code_examples>
+    
+    <key_takeaways>
+      <takeaway>Always validate input data on both client and server</takeaway>
+      <takeaway>Use optimistic updates for better user experience</takeaway>
+      <takeaway>Implement proper error boundaries and loading states</takeaway>
+      <takeaway>Design APIs with pagination and filtering from the start</takeaway>
+    </key_takeaways>
+  </example>
+
+  <example name="performance_optimization_project">
+    <description>Comprehensive performance optimization across database, API, and frontend</description>
+    <context>When application performance issues are identified or when building performance-critical features</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Performance Analysis</title>
+        <actions>
+          <action>Use performance monitoring tools to identify bottlenecks</action>
+          <action>Analyze database query performance with EXPLAIN plans</action>
+          <action>Profile API endpoints for response time issues</action>
+          <action>Measure frontend bundle size and runtime performance</action>
+        </actions>
+      </step>
+      
+      <step number="2">
+        <title>Database Optimization</title>
+        <actions>
+          <action>Add proper database indexes for common queries</action>
+          <action>Implement query result caching with Redis</action>
+          <action>Optimize complex queries and add connection pooling</action>
+        </actions>
+      </step>
+      
+      <step number="3">
+        <title>API Performance</title>
+        <actions>
+          <action>Implement response caching with appropriate headers</action>
+          <action>Add compression middleware for API responses</action>
+          <action>Optimize serialization and reduce response payload size</action>
+        </actions>
+      </step>
+      
+      <step number="4">
+        <title>Frontend Optimization</title>
+        <actions>
+          <action>Implement code splitting and lazy loading</action>
+          <action>Optimize images and assets with proper formats</action>
+          <action>Add service worker for offline functionality</action>
+          <action>Implement virtual scrolling for large lists</action>
+        </actions>
+      </step>
+    </workflow_steps>
+    
+    <code_examples>
+      <example title="Database Query Optimization">
+        <code language="sql">
+          <![CDATA[
+-- Before: Slow query without proper indexing
+SELECT u.*, p.*, COUNT(o.id) as order_count
+FROM users u
+LEFT JOIN profiles p ON u.id = p.user_id
+LEFT JOIN orders o ON u.id = o.user_id
+WHERE u.created_at > '2023-01-01'
+GROUP BY u.id
+ORDER BY u.created_at DESC;
+
+-- After: Optimized with proper indexes and subquery
+EXPLAIN ANALYZE
+CREATE INDEX CONCURRENTLY idx_users_created_at ON users(created_at);
+CREATE INDEX CONCURRENTLY idx_orders_user_id ON orders(user_id);
+CREATE INDEX CONCURRENTLY idx_profiles_user_id ON profiles(user_id);
+
+SELECT u.*, p.profile_data, COALESCE(o.order_count, 0) as order_count
+FROM users u
+LEFT JOIN LATERAL (
+  SELECT user_id, jsonb_build_object(
+    'bio', bio,
+    'avatar', avatar_url
+  ) as profile_data
+  FROM profiles p
+  WHERE p.user_id = u.id
+  LIMIT 1
+) p ON true
+LEFT JOIN LATERAL (
+  SELECT COUNT(id) as order_count
+  FROM orders o
+  WHERE o.user_id = u.id
+) o ON true
+WHERE u.created_at > '2023-01-01'
+ORDER BY u.created_at DESC
+LIMIT 20 OFFSET $1;
+          ]]>
+        </code>
+      </example>
+      
+      <example title="Frontend Performance Optimization">
+        <code language="typescript">
+          <![CDATA[
+// Optimized React component with performance considerations
+import { memo, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useVirtualScrolling } from '../hooks/useVirtualScrolling';
+
+// Lazy load heavy components
+const HeavyChart = lazy(() => import('./HeavyChart'));
+
+const OptimizedTaskList = ({ tasks }: { tasks: Task[] }) => {
+  // Memoize expensive calculations
+  const processedTasks = useMemo(() => {
+    return tasks.map(task => ({
+      ...task,
+      formattedDate: new Date(task.createdAt).toLocaleDateString(),
+      priorityColor: getPriorityColor(task.priority)
+    }));
+  }, [tasks]);
+
+  // Optimize event handlers
+  const handleTaskUpdate = useCallback((taskId: string, updates: Partial<Task>) => {
+    updateTask(taskId, updates);
+  }, []);
+
+  // Virtual scrolling for large lists
+  const {
+    virtualItems,
+    containerProps,
+    scrollbarProps
+  } = useVirtualScrolling({
+    items: processedTasks,
+    itemHeight: 60,
+    overscan: 5
+  });
+
+  return (
+    <div>
+      <Suspense fallback={<ChartSkeleton />}>
+        <HeavyChart data={tasks} />
+      </Suspense>
+      
+      <div {...containerProps}>
+        {virtualItems.map(({ item, index }) => (
+          <TaskItem
+            key={item.id}
+            task={item}
+            onUpdate={handleTaskUpdate}
+            style={{ position: 'absolute', top: index * 60 }}
+          />
+        ))}
+      </div>
+      
+      <div {...scrollbarProps} />
+    </div>
+  );
+};
+
+// Wrap with memo to prevent unnecessary re-renders
+export default memo(OptimizedTaskList);
+          ]]>
+        </code>
+      </example>
+    </code_examples>
+    
+    <key_takeaways>
+      <takeaway>Always measure before optimizing to identify actual bottlenecks</takeaway>
+      <takeaway>Use database indexing and query optimization for data performance</takeaway>
+      <takeaway>Implement proper caching strategies at all layers</takeaway>
+      <takeaway>Use virtual scrolling and code splitting for frontend performance</takeaway>
+    </key_takeaways>
+  </example>
+</examples>

@@ -1,0 +1,172 @@
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>Battery Efficiency First</name>
+      <description>Always prioritize battery life and performance optimization in mobile development. Mobile apps run on resource-constrained devices with limited battery capacity, making efficiency crucial for user experience.</description>
+      <rationale>Users abandon apps that drain battery quickly. Efficient apps retain users longer and receive better ratings.</rationale>
+      <example>
+        <scenario>Implementing background tasks</scenario>
+        <good>Use efficient scheduling, batch operations, and minimize wake locks</good>
+        <bad>Frequent polling, unnecessary location updates, and continuous background processing</bad>
+      </example>
+    </principle>
+    
+    <principle priority="high">
+      <name>Platform-Native Experience</name>
+      <description>Follow platform-specific UI/UX guidelines and use native components when appropriate. Each platform has established patterns that users expect.</description>
+      <rationale>Native-feeling apps are more intuitive and receive higher user satisfaction. Platform consistency reduces learning curve.</rationale>
+      <example>
+        <scenario>Navigation implementation</scenario>
+        <good>iOS uses UINavigationController, Android uses Navigation Component</good>
+        <bad>Custom navigation that doesn't match platform expectations</bad>
+      </example>
+    </principle>
+    
+    <principle priority="high">
+      <name>Offline-First Architecture</name>
+      <description>Design for offline functionality from the start. Mobile networks are unreliable, and users expect apps to work without connectivity.</description>
+      <rationale>Offline-capable apps provide better user experience in poor network conditions and reduce frustration.</rationale>
+      <example>
+        <scenario>Data synchronization</scenario>
+        <good>Local database with sync queue, conflict resolution, and delta sync</good>
+        <bad>Online-only operations that fail without network</bad>
+      </example>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Cross-Platform Code Reuse</name>
+      <description>Maximize shared code between platforms while respecting platform differences. Shared code reduces maintenance burden and ensures consistency.</description>
+      <rationale>Less duplicated code means fewer bugs and faster feature delivery across platforms.</rationale>
+      <example>
+        <scenario>Business logic implementation</scenario>
+        <good>Shared services, platform-agnostic utilities, and conditional platform rendering</good>
+        <bad>Duplicate implementations in platform-specific folders</bad>
+      </example>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Performance Budgeting</name>
+      <description>Establish and monitor performance budgets for key metrics. Mobile devices have varying capabilities, so performance must be actively managed.</description>
+      <rationale>Performance budgets prevent regressions and ensure consistent experience across target devices.</rationale>
+      <example>
+        <scenario>App startup optimization</scenario>
+        <good>Cold start under 2 seconds, progressive loading, and optimized bundles</good>
+        <bad>Unmonitored startup times that degrade over time</bad>
+      </example>
+    </principle>
+  </general_principles>
+
+  <code_conventions>
+    <convention category="naming">
+      <rule>Use platform-agnostic naming with platform-specific prefixes when needed</rule>
+      <examples>
+        <good>AuthService, PlatformNavigation, DataSyncService</good>
+        <bad>authService, navigation, dataSync</bad>
+      </examples>
+    </convention>
+    
+    <convention category="structure">
+      <rule>Organize by platform and shared concerns</rule>
+      <template>
+        src/
+        ├── shared/           # Platform-agnostic code
+        │   ├── services/
+        │   ├── utils/
+        │   └── components/
+        ├── ios/              # iOS-specific code
+        │   ├── native-modules/
+        │   └── ui/
+        ├── android/           # Android-specific code
+        │   ├── native-modules/
+        │   └── ui/
+        └── platform/         # Platform-specific adapters
+      </template>
+    </convention>
+    
+    <convention category="performance">
+      <rule>Optimize for mobile constraints</rule>
+      <template>
+        // Image optimization
+        const optimizedImage = {
+          source: 'original.jpg',
+          formats: ['webp', 'jpg'],
+          sizes: [32, 64, 128, 256],
+          quality: 85
+        };
+        
+        // Memory management
+        useEffect(() => {
+          const data = new LargeDataSet();
+          return () => {
+            data.clear(); // Cleanup on unmount
+          };
+        }, []);
+      </template>
+    </convention>
+  </code_conventions>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>Ignoring platform differences</description>
+      <why_problematic>Creates inconsistent user experience and requires platform-specific workarounds</why_problematic>
+      <correct_approach>Use platform detection and conditional rendering for platform-specific features</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Poor state management</description>
+      <why_problematic>Mobile apps have limited memory and processing power; inefficient state management causes crashes and battery drain</why_problematic>
+      <correct_approach>Use efficient state libraries, minimize re-renders, and implement proper state persistence</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Neglecting app lifecycle</description>
+      <why_problematic>Background processes that continue when app is not in foreground cause battery drain and may be killed by OS</why_problematic>
+      <correct_approach>Properly manage app lifecycle, pause background tasks when appropriate, and use efficient scheduling</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Over-reliance on network connectivity</description>
+      <why_problematic>Mobile networks are unreliable; online-only apps fail in poor connectivity conditions</why_problematic>
+      <correct_approach>Implement offline-first architecture with robust sync mechanisms and conflict resolution</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Ignoring memory constraints</description>
+      <why_problematic>Mobile devices have limited RAM; memory leaks cause crashes and poor performance</why_problematic>
+      <correct_approach>Profile memory usage, implement proper cleanup, use efficient data structures, and avoid memory leaks</correct_approach>
+    </pitfall>
+  </common_pitfalls>
+
+  <quality_checklist>
+    <category name="before_starting">
+      <item>Define target platforms and minimum OS versions</item>
+      <item>Establish performance budgets (startup time, memory, battery)</item>
+      <item>Plan offline-first architecture</item>
+      <item>Set up cross-platform development environment</item>
+      <item>Configure platform-specific build tools</item>
+    </category>
+    
+    <category name="during_implementation">
+      <item>Follow platform UI/UX guidelines (iOS HIG, Material Design)</item>
+      <item>Maximize code reuse between platforms</item>
+      <item>Implement efficient state management</item>
+      <item>Optimize images and assets for mobile</item>
+      <item>Use platform-specific native modules appropriately</item>
+      <item>Implement proper app lifecycle management</item>
+      <item>Add comprehensive error handling and recovery</item>
+      <item>Profile performance and memory usage regularly</item>
+    </category>
+    
+    <category name="before_completion">
+      <item>Test on real devices, not just simulators</item>
+      <item>Verify performance budgets are met</item>
+      <item>Test offline functionality thoroughly</item>
+      <item>Validate battery consumption under targets</item>
+      <item>Ensure app size under 50MB initial download</item>
+      <item>Test push notifications on both platforms</item>
+      <item>Verify deep linking works correctly</item>
+      <item>Check crash rate is below 0.1%</item>
+      <item>Validate app store submission requirements</item>
+    </category>
+  </quality_checklist>
+</best_practices>

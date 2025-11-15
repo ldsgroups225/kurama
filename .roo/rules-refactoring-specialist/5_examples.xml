@@ -1,0 +1,327 @@
+<examples>
+  <example name="extract_method_from_long_function">
+    <description>Refactoring a long method by extracting smaller, focused methods</description>
+    <context>When a single method is doing multiple things and has high complexity</context>
+    <scenario>User has a long order processing function with validation, calculation, and discount logic all mixed together</scenario>
+    <code language="typescript">
+      <![CDATA[
+// BEFORE: Long method with multiple responsibilities
+function processOrder(order: Order): OrderResult {
+  // Validate order
+  if (!order.customerId) return null;
+  if (!order.items || order.items.length === 0) return null;
+  
+  // Calculate totals
+  let subtotal = 0;
+  let tax = 0;
+  let shipping = 0;
+  
+  for (const item of order.items) {
+    subtotal += item.price * item.quantity;
+    if (item.category === 'food') {
+      tax += item.price * item.quantity * 0.08;
+    }
+    if (item.weight > 10) {
+      shipping += item.weight * 0.5;
+    }
+  }
+  
+  const total = subtotal + tax + shipping;  
+  // Apply discount
+  let discount = 0;
+  if (order.customerType === 'premium' && total > 100) {
+    discount = total * 0.1;
+  }
+  
+  const finalTotal = total - discount;  
+  // Create order result
+  return {
+    orderId: order.id,
+    subtotal,
+    tax,
+    shipping,
+    discount,
+    total: finalTotal,
+    timestamp: new Date().toISOString()
+  };
+}
+
+// AFTER: Refactored with extracted methods
+interface OrderTotals {
+  subtotal: number;
+  tax: number;
+  shipping: number;
+}
+
+function calculateOrderTotals(items: OrderItem[]): OrderTotals {
+  let subtotal = 0;
+  let tax = 0;
+  let shipping = 0;
+  
+  for (const item of items) {
+    subtotal += item.price * item.quantity;
+    tax += calculateTax(item);
+    shipping += calculateShipping(item);
+  }
+  
+  return { subtotal, tax, shipping };
+}
+
+function calculateDiscount(customerType: string, subtotal: number): number {
+  return customerType === 'premium' && subtotal > 100 ? subtotal * 0.1 : 0;
+}
+
+function processOrder(order: Order): OrderResult | null {
+  if (!isValidOrder(order)) return null;
+  
+  const totals = calculateOrderTotals(order.items);
+  const discount = calculateDiscount(order.customerType, totals.subtotal);
+  
+  return {
+    orderId: order.id,
+    ...totals,
+    discount,
+    finalTotal: totals.subtotal + totals.tax + totals.shipping - discount,
+    timestamp: new Date().toISOString()
+  };
+}
+      ]]>
+    </code>
+    <explanation>
+      This refactoring extracts three focused methods (calculateOrderTotals, calculateDiscount, calculateTax, calculateShipping) from a single large method. Each extracted method has a single responsibility, making the code more testable and maintainable. The original processOrder method now orchestrates these operations clearly.
+    </explanation>
+  </example>
+    
+  <example name="replace_conditional_with_polymorphism">
+    <description>Replacing complex conditional logic with polymorphic objects</description>
+    <context>When you have type-specific behavior scattered throughout conditional statements</context>
+    <scenario>Payment processing with different calculation methods for different customer types</scenario>
+    <code language="typescript">
+      <![CDATA[
+// BEFORE: Complex conditional logic
+function calculateShipping(items: OrderItem[], customerType: string): number {
+  if (customerType === 'premium') {
+    return items.reduce((total, item) => {
+      if (item.weight > 10) {
+        return total + item.weight * 0.2; // Premium: expedited shipping
+      } else {
+        return total + items.reduce((sum, i) => sum + i.weight, 0) * 0.5; // Premium: standard shipping
+      }
+    }, 0);
+  } else {
+    return items.reduce((total, item) => {
+      if (item.weight > 5) {
+        return total + item.weight * 0.8; // Standard: overweight items
+      } else {
+        return total + items.reduce((sum, i) => sum + i.weight, 0) * 0.5; // Standard: regular shipping
+      }
+    }, 0);
+  }
+}
+
+// AFTER: Polymorphic strategy pattern
+interface ShippingStrategy {
+  calculate(items: OrderItem[]): number;
+}
+
+class PremiumShippingStrategy implements ShippingStrategy {
+  calculate(items: OrderItem[]): number {
+    return items.reduce((total, item) => {
+      if (item.weight > 10) {
+        return total + item.weight * 0.2; // Expedited
+      } else {
+        return total + item.weight * 0.5; // Standard
+      }
+    }, 0);
+  }
+}
+
+class StandardShippingStrategy implements ShippingStrategy {
+  calculate(items: OrderItem[]): number {
+    return items.reduce((total, item) => {
+      if (item.weight > 5) {
+        return total + item.weight * 0.8; // Overweight
+      } else {
+        return total + items.reduce((sum, i) => sum + i.weight, 0) * 0.5; // Regular
+      }
+    }, 0);
+  }
+}
+
+function calculateShipping(items: OrderItem[], customerType: string, strategy: ShippingStrategy): number {
+  return strategy.calculate(items);
+}
+
+// Usage
+const premiumStrategy = new PremiumShippingStrategy();
+const standardStrategy = new StandardShippingStrategy();
+
+const shippingCost = calculateShipping(order.items, order.customerType, 
+  order.customerType === 'premium' ? premiumStrategy : standardStrategy
+);
+      ]]>
+    </code>
+    <explanation>
+      This refactoring replaces complex conditional logic with the Strategy pattern. Each shipping calculation method is encapsulated in its own class, making the code more extensible and easier to test. The calculateShipping function now delegates to the appropriate strategy based on customer type.
+    </explanation>
+  </example>
+    
+  <example name="break_down_large_class">
+    <description>Systematically breaking down a large class into smaller, focused classes</description>
+    <context>When you have a monolithic class that handles multiple concerns and has grown too large</context>
+    <scenario>A UserService class that handles user management, validation, and database operations all in one place</scenario>
+    <code language="typescript">
+      <![CDATA[
+// Characterization tests first
+describe('UserService', () => {
+  it('should create user with valid data', async () => {
+    const userService = new UserService();
+    const user = await userService.createUser({
+      email: 'test@example.com',
+      name: 'Test User',
+      age: 25
+    });
+    
+    expect(user.email).toBe('test@example.com');
+    expect(user.name).toBe('Test User');
+    expect(user.age).toBe(25);
+    expect(user.isActive).toBe(true);
+  });
+  
+  it('should validate user data', async () => {
+    const userService = new UserService();
+    
+    await expect(userService.createUser({
+      email: '', // Invalid email
+      name: 'Test User',
+      age: 25
+    })).rejects.toThrow('Email and name required');
+  });
+});
+
+// STEP 1: Extract validation logic
+class UserValidator {
+  static validateEmail(email: string): boolean {
+    return email.includes('@');
+  }
+  
+  static validateName(name: string): boolean {
+    return name.length > 0;
+  }
+  
+  static validateAge(age: number): boolean {
+    return age >= 18 && age <= 120;
+  }
+}
+
+// STEP 2: Extract database operations
+class UserDatabase {
+  async fetchUsers(): Promise<User[]> {
+    // Database fetching logic
+    return [];
+  }
+  
+  async saveUser(user: User): Promise<void> {
+    // Database save logic
+  }
+  
+  async updateUser(id: string, updates: Partial<User>): Promise<User> {
+    // Database update logic
+  }
+  
+  async deleteUser(id: string): Promise<void> {
+    // Database delete logic
+  }
+}
+
+// STEP 3: Refactor UserService to use extracted components
+class UserService {
+  private users: User[] = [];
+  private database: UserDatabase;
+  private validator: typeof UserValidator;
+  
+  constructor(database: UserDatabase) {
+    this.database = database;
+    this.validator = UserValidator;
+  }
+  
+  async loadUsers(): Promise<void> {
+    this.users = await this.database.fetchUsers();
+  }
+  
+  async createUser(userData: CreateUserRequest): Promise<User> {
+    this.validator.validateEmail(userData.email);
+    this.validator.validateName(userData.name);
+    this.validator.validateAge(userData.age);
+    
+    const user = this.createUserObject(userData);
+    await this.database.saveUser(user);
+    return user;
+  }
+  
+  // ... other methods using validator and database
+}
+      ]]>
+    </code>
+    <explanation>
+      This example shows systematic refactoring of a large class. First, characterization tests are written to ensure behavior is preserved. Then the class is broken down step by step: validation logic is extracted, database operations are extracted, and finally the main class is refactored to use these components. Each step maintains test coverage and functionality.
+    </explanation>
+  </example>
+    
+  <example name="legacy_code_modernization">
+    <description>Modernizing old code patterns while preserving functionality</description>
+    <context>When working with legacy code that uses outdated patterns</context>
+    <scenario>Modernizing callback-based code to use Promises and async/await</scenario>
+    <code language="typescript">
+      <![CDATA[
+// BEFORE: Legacy callback-based code
+class LegacyDataService {
+  getUser(id: string, callback: (user: User | null) => void): void {
+    setTimeout(() => {
+      const user = this.findUserById(id);
+      callback(user);
+    }, 100);
+  }
+  
+  private findUserById(id: string): User | null {
+    // Database lookup logic
+    return { id, name: 'User ' + id };
+  }
+}
+
+// AFTER: Modernized with Promises
+class ModernDataService {
+  async getUser(id: string): Promise<User | null> {
+    const user = await this.findUserById(id);
+    return user;
+  }
+  
+  private async findUserById(id: string): Promise<User | null> {
+    // Database lookup logic
+    return { id, name: 'User ' + id };
+  }
+}
+
+// Usage comparison
+// Legacy usage
+const legacyService = new LegacyDataService();
+legacyService.getUser('123', (user) => {
+  if (user) {
+    console.log('Found user:', user.name);
+  }
+});
+
+// Modern usage
+const modernService = new ModernDataService();
+modernService.getUser('123').then(user => {
+  if (user) {
+    console.log('Found user:', user.name);
+  }
+});
+      ]]>
+    </code>
+    <explanation>
+      This refactoring modernizes callback-based code to use modern Promises and async/await patterns. The behavior is preserved, but the implementation is cleaner and more maintainable. The refactoring maintains the same external interface while improving internal structure.
+    </explanation>
+  </example>
+  </examples>

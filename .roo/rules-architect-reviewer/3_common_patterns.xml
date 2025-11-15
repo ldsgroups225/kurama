@@ -1,0 +1,725 @@
+<common_patterns>
+  <architectural_patterns>
+    <pattern name="microservices_boundary_definition">
+      <description>Define clear boundaries between microservices based on business capabilities</description>
+      <when_to_use>When decomposing monolith or designing new microservices</when_to_use>
+      <implementation_steps>
+        <step>Identify business capabilities and bounded contexts</step>
+        <step>Define service boundaries based on domain-driven design</step>
+        <step>Establish clear contracts between services</step>
+        <step>Implement proper communication patterns</step>
+        <step>Design for failure isolation</step>
+      </implementation_steps>
+      <example>
+        <scenario>E-commerce platform decomposition</scenario>
+        <code language="yaml">
+<![CDATA[
+# Service boundaries based on business capabilities
+services:
+  - name: user-service
+    responsibilities: [user_management, authentication, authorization]
+    data_ownership: [users, profiles, permissions]
+    
+  - name: order-service
+    responsibilities: [order_processing, order_validation, order_history]
+    data_ownership: [orders, order_items]
+    
+  - name: inventory-service
+    responsibilities: [stock_management, product_catalog, pricing]
+    data_ownership: [products, inventory, prices]
+    
+  - name: payment-service
+    responsibilities: [payment_processing, refunds, billing]
+    data_ownership: [payments, transactions, invoices]
+]]>
+        </code>
+      </example>
+    </pattern>
+
+    <pattern name="event_driven_communication">
+      <description>Implement asynchronous communication using events to decouple services</description>
+      <when_to_use>When services need to communicate without tight coupling</when_to_use>
+      <implementation_steps>
+        <step>Define event schemas and naming conventions</step>
+        <step>Implement event publishers and subscribers</step>
+        <step>Design for idempotency and replay</step>
+        <step>Establish event ordering guarantees</step>
+        <step>Implement error handling and dead letter queues</step>
+      </implementation_steps>
+      <example>
+        <scenario>Order processing with events</scenario>
+        <code language="typescript">
+<![CDATA[
+// Event definitions
+interface OrderEvent {
+  eventId: string;
+  timestamp: Date;
+  orderId: string;
+  version: number;
+}
+
+interface OrderCreatedEvent extends OrderEvent {
+  type: 'OrderCreated';
+  customerId: string;
+  items: OrderItem[];
+  totalAmount: number;
+}
+
+interface OrderValidatedEvent extends OrderEvent {
+  type: 'OrderValidated';
+  validationStatus: 'valid' | 'invalid';
+  validationErrors?: string[];
+}
+
+// Event publisher
+class OrderService {
+  async createOrder(orderData: CreateOrderRequest): Promise<Order> {
+    const order = await this.repository.save(orderData);
+    
+    // Publish event
+    await this.eventPublisher.publish<OrderCreatedEvent>({
+      type: 'OrderCreated',
+      eventId: generateId(),
+      timestamp: new Date(),
+      orderId: order.id,
+      version: 1,
+      customerId: order.customerId,
+      items: order.items,
+      totalAmount: order.totalAmount
+    });
+    
+    return order;
+  }
+}
+
+// Event subscriber
+class InventoryService {
+  @EventHandler('OrderCreated')
+  async handleOrderCreated(event: OrderCreatedEvent): Promise<void> {
+    // Reserve inventory for order items
+    await this.reserveInventory(event.items);
+  }
+}
+]]>
+        </code>
+      </example>
+    </pattern>
+
+    <pattern name="cqrs_implementation">
+      <description>Separate command and query responsibilities for optimized performance</description>
+      <when_to_use>When read and write patterns differ significantly</when_to_use>
+      <implementation_steps>
+        <step>Identify command and query operations</step>
+        <step>Design separate models for commands and queries</step>
+        <step>Implement command handlers with validation</step>
+        <step>Create optimized query handlers</step>
+        <step>Establish data synchronization between models</step>
+      </implementation_steps>
+      <example>
+        <scenario>Product catalog with CQRS</scenario>
+        <code language="typescript">
+<![CDATA[
+// Command model
+interface ProductCommand {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  lastModified: Date;
+}
+
+// Query model
+interface ProductQuery {
+  id: string;
+  name: string;
+  price: number;
+  available: boolean;
+  category: string;
+  averageRating: number;
+}
+
+// Command handler
+class ProductCommandHandler {
+  async updatePrice(command: UpdateProductPriceCommand): Promise<void> {
+    const product = await this.productRepository.findById(command.productId);
+    if (!product) {
+      throw new ProductNotFoundError(command.productId);
+    }
+    
+    product.price = command.newPrice;
+    product.lastModified = new Date();
+    await this.productRepository.save(product);
+    
+    // Publish event to update read model
+    await this.eventPublisher.publish(new ProductPriceUpdatedEvent(
+      product.id, 
+      command.newPrice
+    ));
+  }
+}
+
+// Query handler
+class ProductQueryHandler {
+  async getProductDetails(query: GetProductQuery): Promise<ProductQuery> {
+    return await this.productReadModel.findById(query.productId);
+  }
+  
+  async searchProducts(criteria: SearchProductsQuery): Promise<ProductQuery[]> {
+    return await this.productReadModel.search(criteria);
+  }
+}
+]]>
+        </code>
+      </example>
+    </pattern>
+
+    <pattern name="api_gateway_pattern">
+      <description>Centralize API management and cross-cutting concerns</description>
+      <when_to_use>When managing multiple microservices or complex API ecosystem</when_to_use>
+      <implementation_steps>
+        <step>Design gateway routing and configuration</step>
+        <step>Implement authentication and authorization</step>
+        <step>Add rate limiting and throttling</step>
+        <step>Implement request/response transformation</step>
+        <step>Set up monitoring and logging</step>
+      </implementation_steps>
+      <example>
+        <scenario>API gateway with Express.js</scenario>
+        <code language="typescript">
+<![CDATA[
+import express from 'express';
+import { createProxyMiddleware } from 'http-proxy-middleware';
+
+const app = express();
+
+// Authentication middleware
+app.use('/api', authenticateToken);
+
+// Rate limiting
+app.use('/api', rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+}));
+
+// Service routing
+app.use('/api/users', createProxyMiddleware({
+  target: 'http://user-service:3001',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/users': ''
+  }
+}));
+
+app.use('/api/orders', createProxyMiddleware({
+  target: 'http://order-service:3002',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/orders': ''
+  }
+}));
+
+app.use('/api/products', createProxyMiddleware({
+  target: 'http://product-service:3003',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/products': ''
+  }
+}));
+
+// Request/response transformation
+app.use('/api', (req, res, next) => {
+  // Add correlation ID
+  req.headers['x-correlation-id'] = req.headers['x-correlation-id'] || generateId();
+  
+  // Log request
+  console.log(`[${req.headers['x-correlation-id']}] ${req.method} ${req.path}`);
+  
+  next();
+});
+]]>
+        </code>
+      </example>
+    </pattern>
+
+    <pattern name="database_scaling_strategy">
+      <description>Design database architecture for horizontal scaling</description>
+      <when_to_use>When anticipating high data volume or traffic growth</when_to_use>
+      <implementation_steps>
+        <step>Analyze data access patterns and hot spots</step>
+        <step>Choose appropriate scaling strategy (sharding, replication, partitioning)</step>
+        <step>Design data distribution logic</step>
+        <step>Implement connection pooling and load balancing</step>
+        <step>Set up monitoring and failover mechanisms</step>
+      </implementation_steps>
+      <example>
+        <scenario>Database sharding for user data</scenario>
+        <code language="typescript">
+<![CDATA[
+class ShardedUserRepository {
+  private shards: Map<string, DatabaseConnection>;
+  private shardCount: number;
+
+  constructor(shardCount: number) {
+    this.shardCount = shardCount;
+    this.initializeShards();
+  }
+
+  private getShardKey(userId: string): string {
+    const hash = this.hashUserId(userId);
+    return `shard_${hash % this.shardCount}`;
+  }
+
+  async findById(userId: string): Promise<User | null> {
+    const shardKey = this.getShardKey(userId);
+    const shard = this.shards.get(shardKey);
+    
+    return await shard.collection('users').findOne({ userId });
+  }
+
+  async save(user: User): Promise<void> {
+    const shardKey = this.getShardKey(user.userId);
+    const shard = this.shards.get(shardKey);
+    
+    await shard.collection('users').updateOne(
+      { userId: user.userId },
+      { $set: user },
+      { upsert: true }
+    );
+  }
+
+  // Read operations can use replica shards
+  async findByEmail(email: string): Promise<User | null> {
+    // Query all shards in parallel for read operations
+    const queries = Array.from(this.shards.values()).map(shard =>
+      shard.collection('users').findOne({ email })
+    );
+    
+    const results = await Promise.all(queries);
+    return results.find(result => result !== null) || null;
+  }
+}
+]]>
+        </code>
+      </example>
+    </pattern>
+  </architectural_patterns>
+
+  <integration_patterns>
+    <pattern name="service_mesh_implementation">
+      <description>Implement service mesh for microservice communication and management</description>
+      <when_to_use>When managing complex microservice ecosystem</when_to_use>
+      <implementation_steps>
+        <step>Choose service mesh technology (Istio, Linkerd, Consul)</step>
+        <step>Configure sidecar proxies</step>
+        <step>Implement traffic management rules</step>
+        <step>Set up security policies</step>
+        <step>Configure observability and monitoring</step>
+      </implementation_steps>
+      <example>
+        <scenario>Istio service mesh configuration</scenario>
+        <code language="yaml">
+<![CDATA[
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: user-service
+spec:
+  hosts:
+  - user-service
+  http:
+  - match:
+    - uri:
+        prefix: "/api/users"
+    route:
+    - destination:
+        host: user-service
+        subset: v1
+      weight: 90
+    - destination:
+        host: user-service
+        subset: v2
+      weight: 10
+    fault:
+      delay:
+        percentage:
+          value: 0.1
+        fixedDelay: 5s
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: user-service
+spec:
+  host: user-service
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_CONN
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 50
+        maxRequestsPerConnection: 10
+    circuitBreaker:
+      consecutiveErrors: 3
+      interval: 30s
+      baseEjectionTime: 30s
+]]>
+        </code>
+      </example>
+    </pattern>
+
+    <pattern name="message_queue_pattern">
+      <description>Implement asynchronous message processing for decoupled communication</description>
+      <when_to_use>When services need reliable, asynchronous communication</when_to_use>
+      <implementation_steps>
+        <step>Choose message broker (RabbitMQ, Kafka, AWS SQS)</step>
+        <step>Define message schemas and formats</step>
+        <step>Implement producers and consumers</step>
+        <step>Configure message routing and filtering</step>
+        <step>Set up monitoring and dead letter handling</step>
+      </implementation_steps>
+      <example>
+        <scenario>Order processing with RabbitMQ</scenario>
+        <code language="typescript">
+<![CDATA[
+import amqp from 'amqplib';
+
+class OrderMessageQueue {
+  private connection: Connection;
+  private channel: Channel;
+
+  async initialize(): Promise<void> {
+    this.connection = await amqp.connect(process.env.RABBITMQ_URL);
+    this.channel = await this.connection.createChannel();
+    
+    // Declare queues
+    await this.channel.assertQueue('order.created', { durable: true });
+    await this.channel.assertQueue('order.processed', { durable: true });
+    await this.channel.assertQueue('order.failed', { durable: true });
+  }
+
+  async publishOrderCreated(order: Order): Promise<void> {
+    const message = {
+      eventId: generateId(),
+      timestamp: new Date().toISOString(),
+      type: 'OrderCreated',
+      data: order
+    };
+
+    await this.channel.sendToQueue(
+      'order.created',
+      Buffer.from(JSON.stringify(message)),
+      { persistent: true }
+    );
+  }
+
+  async consumeOrderProcessed(): Promise<void> {
+    await this.channel.consume('order.processed', async (msg) => {
+      if (!msg) return;
+
+      const event = JSON.parse(msg.content.toString());
+      
+      try {
+        await this.handleOrderProcessed(event);
+        this.channel.ack(msg);
+      } catch (error) {
+        console.error('Error processing order:', error);
+        this.channel.nack(msg, false, false); // Reject and don't requeue
+      }
+    });
+  }
+
+  private async handleOrderProcessed(event: OrderProcessedEvent): Promise<void> {
+    // Update order status in database
+    await this.orderRepository.updateStatus(
+      event.orderId, 
+      'processed'
+    );
+    
+    // Send notification to customer
+    await this.notificationService.sendOrderProcessedNotification(
+      event.customerId,
+      event.orderId
+    );
+  }
+}
+]]>
+        </code>
+      </example>
+    </pattern>
+  </integration_patterns>
+
+  <security_patterns>
+    <pattern name="oauth2_implementation">
+      <description>Implement OAuth2 for secure API authentication</description>
+      <when_to_use>When securing APIs that need user authentication</when_to_use>
+      <implementation_steps>
+        <step>Choose OAuth2 flow (Authorization Code, Client Credentials, etc.)</step>
+        <step>Implement token generation and validation</step>
+        <step>Set up token refresh mechanisms</step>
+        <step>Configure scope-based access control</step>
+        <step>Implement token revocation and cleanup</step>
+      </implementation_steps>
+      <example>
+        <scenario>OAuth2 with JWT tokens</scenario>
+        <code language="typescript">
+<![CDATA[
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+
+class OAuth2Service {
+  async generateTokens(user: User): Promise<TokenPair> {
+    const accessToken = jwt.sign(
+      { 
+        sub: user.id,
+        email: user.email,
+        scopes: user.scopes 
+      },
+      process.env.JWT_ACCESS_SECRET,
+      { expiresIn: '15m' }
+    );
+
+    const refreshToken = jwt.sign(
+      { 
+        sub: user.id,
+        type: 'refresh'
+      },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    return { accessToken, refreshToken };
+  }
+
+  async validateAccessToken(token: string): Promise<TokenPayload> {
+    try {
+      const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET) as TokenPayload;
+      return payload;
+    } catch (error) {
+      throw new InvalidTokenError('Invalid access token');
+    }
+  }
+
+  async refreshAccessToken(refreshToken: string): Promise<string> {
+    try {
+      const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET) as RefreshTokenPayload;
+      
+      if (payload.type !== 'refresh') {
+        throw new InvalidTokenError('Invalid refresh token');
+      }
+
+      const user = await this.userRepository.findById(payload.sub);
+      if (!user) {
+        throw new UserNotFoundError('User not found');
+      }
+
+      const newAccessToken = jwt.sign(
+        { 
+          sub: user.id,
+          email: user.email,
+          scopes: user.scopes 
+        },
+        process.env.JWT_ACCESS_SECRET,
+        { expiresIn: '15m' }
+      );
+
+      return newAccessToken;
+    } catch (error) {
+      throw new TokenRefreshError('Token refresh failed');
+    }
+  }
+}
+]]>
+        </code>
+      </example>
+    </pattern>
+
+    <pattern name="api_rate_limiting">
+      <description>Implement rate limiting to protect APIs from abuse</description>
+      <when_to_use>When exposing public APIs or managing resource usage</when_to_use>
+      <implementation_steps>
+        <step>Choose rate limiting algorithm (token bucket, sliding window)</step>
+        <step>Configure rate limits per user/IP/API key</step>
+        <step>Implement distributed rate limiting for scalability</step>
+        <step>Add proper headers and error responses</step>
+        <step>Set up monitoring and alerting</step>
+      </implementation_steps>
+      <example>
+        <scenario>Redis-based rate limiting</scenario>
+        <code language="typescript">
+<![CDATA[
+import Redis from 'ioredis';
+
+class RateLimiter {
+  private redis: Redis;
+
+  constructor(redis: Redis) {
+    this.redis = redis;
+  }
+
+  async isAllowed(
+    key: string, 
+    limit: number, 
+    windowMs: number
+  ): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
+    const now = Date.now();
+    const window = Math.floor(now / windowMs);
+    const redisKey = `rate_limit:${key}:${window}`;
+
+    const pipeline = this.redis.pipeline();
+    pipeline.incr(redisKey);
+    pipeline.expire(redisKey, Math.ceil(windowMs / 1000));
+    
+    const results = await pipeline.exec();
+    const current = results[0][1] as number;
+
+    const allowed = current <= limit;
+    const remaining = Math.max(0, limit - current);
+    const resetTime = (window + 1) * windowMs;
+
+    return { allowed, remaining, resetTime };
+  }
+
+  middleware() {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      const key = req.ip; // Or user ID, API key, etc.
+      const limit = 100; // requests
+      const windowMs = 15 * 60 * 1000; // 15 minutes
+
+      const result = await this.isAllowed(key, limit, windowMs);
+
+      res.set({
+        'X-RateLimit-Limit': limit.toString(),
+        'X-RateLimit-Remaining': result.remaining.toString(),
+        'X-RateLimit-Reset': new Date(result.resetTime).toISOString()
+      });
+
+      if (!result.allowed) {
+        return res.status(429).json({
+          error: 'Too Many Requests',
+          message: 'Rate limit exceeded',
+          retryAfter: Math.ceil((result.resetTime - Date.now()) / 1000)
+        });
+      }
+
+      next();
+    };
+  }
+}
+]]>
+        </code>
+      </example>
+    </pattern>
+  </security_patterns>
+
+  <performance_patterns>
+    <pattern name="caching_strategy">
+      <description>Implement multi-layer caching for optimal performance</description>
+      <when_to_use>When dealing with high read loads or expensive computations</when_to_use>
+      <implementation_steps>
+        <step>Identify cacheable data and operations</step>
+        <step>Choose appropriate caching levels (memory, Redis, CDN)</step>
+        <step>Implement cache invalidation strategies</step>
+        <step>Set up cache warming and preloading</step>
+        <step>Monitor cache hit rates and performance</step>
+      </implementation_steps>
+      <example>
+        <scenario>Multi-layer caching with Redis and memory</scenario>
+        <code language="typescript">
+<![CDATA[
+class CacheManager {
+  private memoryCache: Map<string, CacheItem>;
+  private redis: Redis;
+  private memorySize: number;
+
+  constructor(redis: Redis, memorySize: number = 1000) {
+    this.redis = redis;
+    this.memoryCache = new Map();
+    this.memorySize = memorySize;
+  }
+
+  async get<T>(key: string): Promise<T | null> {
+    // Check memory cache first
+    const memoryItem = this.memoryCache.get(key);
+    if (memoryItem && !this.isExpired(memoryItem)) {
+      return memoryItem.value as T;
+    }
+
+    // Check Redis cache
+    const redisValue = await this.redis.get(key);
+    if (redisValue) {
+      const item = JSON.parse(redisValue) as CacheItem<T>;
+      
+      // Update memory cache
+      this.setMemoryCache(key, item);
+      
+      return item.value;
+    }
+
+    return null;
+  }
+
+  async set<T>(
+    key: string, 
+    value: T, 
+    ttl: number = 3600
+  ): Promise<void> {
+    const item: CacheItem<T> = {
+      value,
+      timestamp: Date.now(),
+      ttl
+    };
+
+    // Set in memory cache
+    this.setMemoryCache(key, item);
+
+    // Set in Redis cache
+    await this.redis.setex(
+      key, 
+      ttl, 
+      JSON.stringify(item)
+    );
+  }
+
+  async invalidate(pattern: string): Promise<void> {
+    // Invalidate from memory cache
+    for (const [key] of this.memoryCache.entries()) {
+      if (key.includes(pattern)) {
+        this.memoryCache.delete(key);
+      }
+    }
+
+    // Invalidate from Redis cache
+    const keys = await this.redis.keys(`*${pattern}*`);
+    if (keys.length > 0) {
+      await this.redis.del(...keys);
+    }
+  }
+
+  private setMemoryCache<T>(key: string, item: CacheItem<T>): void {
+    // Evict oldest items if cache is full
+    if (this.memoryCache.size >= this.memorySize) {
+      const oldestKey = this.memoryCache.keys().next().value;
+      this.memoryCache.delete(oldestKey);
+    }
+
+    this.memoryCache.set(key, item);
+  }
+
+  private isExpired(item: CacheItem): boolean {
+    return Date.now() - item.timestamp > item.ttl * 1000;
+  }
+}
+
+interface CacheItem<T = any> {
+  value: T;
+  timestamp: number;
+  ttl: number;
+}
+]]>
+        </code>
+      </example>
+    </pattern>
+  </performance_patterns>
+</common_patterns>

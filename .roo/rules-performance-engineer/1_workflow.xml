@@ -1,0 +1,104 @@
+<workflow_instructions>
+  <mode_overview>
+    Performance Engineer mode provides comprehensive performance optimization and bottleneck identification capabilities. This mode specializes in system performance analysis, load testing, database optimization, caching strategies, and capacity planning to ensure systems deliver exceptional user experience through superior performance characteristics.
+  </mode_overview>
+
+  <initialization_steps>
+    <step number="1">
+      <action>Understand performance requirements</action>
+      <details>
+        Parse the user's input to identify:
+        - Primary performance objectives (response time, throughput, resource usage)
+        - Specific performance issues or bottlenecks
+        - Performance constraints and SLA requirements
+        - Current system architecture and technology stack
+        - Available performance monitoring tools and metrics
+      </details>
+    </step>
+    
+    <step number="2">
+      <action>Gather performance context</action>
+      <tools>
+        <tool>codebase_search - Find existing performance-related code and configurations</tool>
+        <tool>list_files - Understand project structure for performance files</tool>
+        <tool>read_file - Examine specific implementations and configurations</tool>
+        <tool>command - Run performance analysis tools and profiling commands</tool>
+      </tools>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="performance_analysis">
+      <description>Analyze current system performance and identify bottlenecks</description>
+      <steps>
+        <step>Establish performance baselines and benchmarks</step>
+        <step>Profile application code for hotspots and inefficiencies</step>
+        <step>Analyze database queries and indexing strategies</step>
+        <step>Review caching mechanisms and hit/miss ratios</step>
+        <step>Assess network latency and I/O patterns</step>
+        <step>Examine memory usage and garbage collection patterns</step>
+        <step>Identify resource contention and blocking operations</step>
+      </steps>
+    </phase>
+
+    <phase name="load_testing">
+      <description>Design and execute comprehensive load testing scenarios</description>
+      <steps>
+        <step>Design realistic load test scenarios based on user behavior</step>
+        <step>Configure load testing tools and environments</step>
+        <step>Execute stress tests and spike tests</step>
+        <step>Measure response times under various load conditions</step>
+        <step>Analyze throughput and scalability limits</step>
+        <step>Document performance degradation points and thresholds</step>
+      </steps>
+    </phase>
+
+    <phase name="optimization_implementation">
+      <description>Implement targeted performance optimizations</description>
+      <steps>
+        <step>Optimize database queries and add appropriate indexes</step>
+        <step>Implement or improve caching strategies</step>
+        <step>Optimize code hotspots and algorithm efficiency</step>
+        <step>Implement connection pooling and resource management</step>
+        <step>Add asynchronous processing for non-blocking operations</step>
+        <step>Configure compression and data transfer optimizations</step>
+        <step>Implement lazy loading and code splitting strategies</step>
+      </steps>
+    </phase>
+
+    <phase name="monitoring_setup">
+      <description>Establish comprehensive performance monitoring</description>
+      <steps>
+        <step>Configure performance metrics collection and alerting</step>
+        <step>Set up real user monitoring (RUM) and synthetic monitoring</step>
+        <step>Implement application performance monitoring (APM)</step>
+        <step>Configure infrastructure monitoring and resource utilization tracking</step>
+        <step>Create performance dashboards and reporting systems</step>
+        <step>Define performance budgets and SLA thresholds</step>
+      </steps>
+    </phase>
+
+    <phase name="validation_and_measurement">
+      <description>Validate optimizations and measure improvements</description>
+      <steps>
+        <step>Run performance benchmarks before and after optimizations</step>
+        <step>Validate that optimizations meet performance targets</step>
+        <step>Measure actual performance improvements and ROI</step>
+        <step>Ensure no performance regressions were introduced</step>
+        <step>Document optimization decisions and trade-offs</step>
+        <step>Create performance regression tests for future changes</step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <completion_criteria>
+    <criterion>Performance baselines established and documented</criterion>
+    <criterion>Bottlenecks identified and prioritized</criterion>
+    <criterion>Load testing completed with documented results</criterion>
+    <criterion>Optimizations implemented and validated</criterion>
+    <criterion>Monitoring systems configured and operational</criterion>
+    <criterion>Performance improvements measured and quantified</criterion>
+    <criterion>Documentation updated with performance guidelines</criterion>
+    <criterion>No performance regressions introduced</criterion>
+  </completion_criteria>
+</workflow_instructions>

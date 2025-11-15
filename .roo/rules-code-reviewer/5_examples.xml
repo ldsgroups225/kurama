@@ -1,0 +1,347 @@
+<![CDATA[<examples>
+  <example name="security_vulnerability_review">
+    <description>Complete security-focused code review of authentication module</description>
+    <context>When reviewing authentication and authorization code for security vulnerabilities</context>
+    <scenario>
+      <input>User requests security review of authentication system</input>
+      <files_reviewed>
+        <file>src/auth/auth.controller.js</file>
+        <file>src/auth/auth.service.js</file>
+        <file>src/auth/auth.middleware.js</file>
+        <file>src/auth/password.utils.js</file>
+      </files_reviewed>
+      <tools_used>
+        <tool>read_file - Examine authentication implementation</tool>
+        <tool>search_files - Look for vulnerability patterns</tool>
+        <tool>execute_command - Run security scanner</tool>
+      </tools_used>
+    </scenario>
+    <workflow>
+      <phase name="preparation">
+        <step>Used list_files to understand authentication module structure</step>
+        <step>Used read_file to examine key authentication files</step>
+        <step>Identified security-critical areas requiring focused review</step>
+      </phase>
+      <phase name="analysis">
+        <step>Used search_files with patterns like "password.*\+" and "token.*=" to find potential issues</step>
+        <step>Used read_file to analyze password hashing and token generation</step>
+        <step>Used execute_command to run "npm audit" for dependency vulnerabilities</step>
+        <step>Identified hardcoded secrets and weak authentication mechanisms</step>
+      </phase>
+      <phase name="reporting">
+        <step>Documented critical security vulnerabilities with specific line numbers</step>
+        <step>Provided remediation steps for each vulnerability found</step>
+        <step>Created security report with severity ratings and priority</step>
+      </phase>
+    </workflow>
+    <findings>
+      <category name="critical_security_issues">
+        <finding>
+          <issue>Hardcoded JWT secret in auth.controller.js:45</issue>
+          <severity>Critical</severity>
+          <recommendation>Move to environment variables with proper validation</recommendation>
+          <code_example><![CDATA[
+const JWT_SECRET = process.env.JWT_SECRET || generateSecureSecret();
+]]></code_example>
+        </finding>
+        <finding>
+          <issue>Weak password hashing (MD5) in password.utils.js:23</issue>
+          <severity>High</severity>
+          <recommendation>Implement bcrypt with minimum 12 rounds</recommendation>
+          <code_example><![CDATA[
+const bcrypt = require('bcrypt');
+const hashedPassword = await bcrypt.hash(password, 12);
+]]></code_example>
+        </finding>
+      </category>
+      <category name="performance_issues">
+        <finding>
+          <issue>Synchronous password hashing in auth.service.js:67 blocks event loop</issue>
+          <severity>Medium</severity>
+          <recommendation>Use async/await pattern for password operations</recommendation>
+          <code_example><![CDATA[
+const hashedPassword = await bcrypt.hash(password, 12);
+]]></code_example>
+        </finding>
+      </category>
+    </findings>
+    <output>
+      <summary>Security review completed: 2 critical and 1 medium severity issues identified</summary>
+      <metrics>
+        <metric name="files_reviewed" value="4"/>
+        <metric name="vulnerabilities_found" value="3"/>
+        <metric name="critical_issues" value="2"/>
+        <metric name="recommendations_provided" value="3"/>
+      </metrics>
+      <next_steps>Immediate remediation required for critical issues before production deployment</next_steps>
+    </output>
+  </example>
+
+  <example name="performance_optimization_review">
+    <description>Performance-focused code review of data processing module</description>
+    <context>When analyzing database queries and algorithmic efficiency in data processing</context>
+    <scenario>
+      <input>User requests performance review of data export functionality</input>
+      <files_reviewed>
+        <file>src/services/data.export.service.js</file>
+        <file>src/reports/report.generator.js</file>
+        <file>src/utils/data.processor.js</file>
+      </files_reviewed>
+      <tools_used>
+        <tool>read_file - Analyze algorithm implementations</tool>
+        <tool>search_files - Find performance anti-patterns</tool>
+        <tool>execute_command - Run complexity analysis</tool>
+      </tools_used>
+    </scenario>
+    <workflow>
+      <phase name="preparation">
+        <step>Used read_file to understand data processing flow</step>
+        <step>Identified performance bottlenecks in export functionality</step>
+        <step>Planned systematic analysis of algorithms and database queries</step>
+      </phase>
+      <phase name="analysis">
+        <step>Used search_files to find nested loops and O(n²) patterns</step>
+        <step>Analyzed database queries for N+1 problems using read_file</step>
+        <step>Identified missing caching opportunities in data processor</step>
+        <step>Used execute_command to run complexity analysis tools</step>
+      </phase>
+      <phase name="reporting">
+        <step>Documented specific performance issues with impact assessment</step>
+        <step>Provided optimization strategies with code examples</step>
+        <step>Created performance improvement roadmap with priorities</step>
+      </phase>
+    </workflow>
+    <findings>
+      <category name="algorithm_efficiency">
+        <finding>
+          <issue>O(n²) nested loop in data.processor.js:145-152</issue>
+          <severity>High</severity>
+          <recommendation>Replace with Set-based lookup for O(n) complexity</recommendation>
+          <code_example><![CDATA[
+// Current O(n²) approach
+for (let i = 0; i < items.length; i++) {
+  for (let j = 0; j < filters.length; j++) {
+    if (items[i].category === filters[j]) {
+      results.push(items[i]);
+    }
+  }
+}
+
+// Optimized O(n) approach
+const filterSet = new Set(filters);
+const results = items.filter(item => filterSet.has(item.category));
+]]></code_example>
+        </finding>
+      </category>
+      <category name="database_optimization">
+        <finding>
+          <issue>N+1 query problem in data.export.service.js:78-85</issue>
+          <severity>Medium</severity>
+          <recommendation>Implement eager loading or batch queries</recommendation>
+          <code_example><![CDATA[
+// Current N+1 approach
+const users = await User.findAll();
+for (const user of users) {
+  user.reports = await Report.findAll({ where: { userId: user.id } });
+}
+
+// Optimized single query approach
+const users = await User.findAll({
+  include: [{ model: Report, as: 'reports' }]
+});
+]]></code_example>
+        </finding>
+      </category>
+    </findings>
+    <output>
+      <summary>Performance review completed: 2 high and 1 medium severity issues identified</summary>
+      <metrics>
+        <metric name="files_reviewed" value="3"/>
+        <metric name="performance_issues" value="3"/>
+        <metric name="optimization_potential" value="60% estimated improvement"/>
+      </metrics>
+      <next_steps>Implement high-priority optimizations before next release cycle</next_steps>
+    </output>
+  </example>
+
+  <example name="code_quality_maintainability_review">
+    <description>Comprehensive code quality and maintainability assessment</description>
+    <context>When reviewing overall code quality, maintainability, and adherence to best practices</context>
+    <scenario>
+      <input>User requests general code quality review of user management module</input>
+      <files_reviewed>
+        <file>src/controllers/user.controller.js</file>
+        <file>src/services/user.service.js</file>
+        <file>src/models/user.model.js</file>
+        <file>src/utils/validation.js</file>
+        <file>__tests__/user.test.js</file>
+      </files_reviewed>
+      <tools_used>
+        <tool>read_file - Examine code structure and organization</tool>
+        <tool>search_files - Find code duplication and inconsistencies</tool>
+        <tool>execute_command - Run linters and quality metrics</tool>
+      </tools_used>
+    </scenario>
+    <workflow>
+      <phase name="preparation">
+        <step>Used list_files to understand module structure</step>
+        <step>Used read_file to examine code organization and patterns</step>
+        <step>Identified areas for quality assessment: naming, structure, documentation</step>
+      </phase>
+      <phase name="analysis">
+        <step>Used search_files to find code duplication and inconsistencies</step>
+        <step>Analyzed function complexity and single responsibility principle</step>
+        <step>Reviewed error handling and input validation patterns</step>
+        <step>Assessed test coverage and quality using execute_command</step>
+      </phase>
+      <phase name="reporting">
+        <step>Documented maintainability issues with specific examples</step>
+        <step>Provided refactoring suggestions with code improvements</step>
+        <step>Created quality metrics report with actionable recommendations</step>
+      </phase>
+    </workflow>
+    <findings>
+      <category name="code_organization">
+        <finding>
+          <issue>Large function with multiple responsibilities in user.service.js:89-156</issue>
+          <severity>Medium</severity>
+          <recommendation>Extract separate functions for validation, persistence, and notification</recommendation>
+          <code_example><![CDATA[
+// Current monolithic function
+async function createUser(userData) {
+  // Validation
+  if (!userData.email || !userData.name) {
+    throw new Error('Invalid data');
+  }
+  
+  // Persistence
+  const user = await User.create(userData);
+  
+  // Notification
+  await emailService.sendWelcome(user.email);
+  
+  return user;
+}
+
+// Refactored single-responsibility functions
+function validateUserData(userData) {
+  if (!userData.email || !userData.name) {
+    throw new Error('Invalid data');
+  }
+  return userData;
+}
+
+async function persistUser(userData) {
+  return await User.create(userData);
+}
+
+async function sendWelcomeNotification(user) {
+  await emailService.sendWelcome(user.email);
+}
+
+async function createUser(userData) {
+  const validData = validateUserData(userData);
+  const user = await persistUser(validData);
+  await sendWelcomeNotification(user);
+  return user;
+}
+]]></code_example>
+        </finding>
+      </category>
+      <category name="naming_conventions">
+        <finding>
+          <issue>Inconsistent naming in validation.js:23-45</issue>
+          <severity>Low</severity>
+          <recommendation>Standardize naming conventions across the module</recommendation>
+          <code_example><![CDATA[
+// Current inconsistent naming
+function validateEmail(email) { }
+function validate_password(pwd) { }
+function validateUserName(name) { }
+
+// Improved consistent naming
+function validateEmail(email) { }
+function validatePassword(password) { }
+function validateUserName(name) { }
+]]></code_example>
+        </finding>
+      </category>
+    </findings>
+    <output>
+      <summary>Code quality review completed: 1 medium and 2 low severity issues identified</summary>
+      <metrics>
+        <metric name="files_reviewed" value="5"/>
+        <metric name="quality_issues" value="3"/>
+        <metric name="test_coverage" value="75%"/>
+        <metric name="maintainability_score" value="6/10"/>
+      </metrics>
+      <next_steps>Address medium severity issues and establish coding standards for team</next_steps>
+    </output>
+  </example>
+
+  <example name="comprehensive_security_audit">
+    <description>Full security audit including dependencies, configuration, and deployment</description>
+    <context>When conducting thorough security assessment of entire application</context>
+    <scenario>
+      <input>User requests comprehensive security audit of web application</input>
+      <scope>Entire application with focus on security</scope>
+      <tools_used>
+        <tool>list_files - Map application structure</tool>
+        <tool>read_file - Examine security-critical files</tool>
+        <tool>search_files - Find vulnerability patterns</tool>
+        <tool>execute_command - Run multiple security analysis tools</tool>
+      </tools_used>
+    </scenario>
+    <workflow>
+      <phase name="scoping">
+        <step>Used list_files to identify all security-relevant files</step>
+        <step>Prioritized review based on security criticality</step>
+        <step>Identified external dependencies and third-party integrations</step>
+      </phase>
+      <phase name="analysis">
+        <step>Executed "npm audit" for dependency vulnerabilities</step>
+        <step>Used search_files to find hardcoded secrets and credentials</step>
+        <step>Analyzed authentication, authorization, and session management</step>
+        <step>Reviewed input validation and output encoding</step>
+        <step>Checked configuration files for security misconfigurations</step>
+      </phase>
+      <phase name="reporting">
+        <step>Created comprehensive security report with CVSS scores</step>
+        <step>Prioritized findings by exploitability and impact</step>
+        <step>Provided detailed remediation roadmap</step>
+      </phase>
+    </workflow>
+    <findings>
+      <category name="dependency_vulnerabilities">
+        <finding>
+          <issue>Outdated lodash package with known XSS vulnerability</issue>
+          <severity>High</severity>
+          <recommendation>Update to latest version or replace with secure alternative</recommendation>
+        </finding>
+      </category>
+      <category name="implementation_vulnerabilities">
+        <finding>
+          <issue>SQL injection in user search functionality</issue>
+          <severity>Critical</severity>
+          <recommendation>Implement parameterized queries with input validation</recommendation>
+        </finding>
+        <finding>
+          <issue>CORS misconfiguration allowing all origins</issue>
+          <severity>Medium</severity>
+          <recommendation>Configure specific allowed origins in production</recommendation>
+        </finding>
+      </category>
+    </findings>
+    <output>
+      <summary>Security audit completed: 1 critical, 1 high, and 1 medium severity findings</summary>
+      <metrics>
+        <metric name="dependencies_scanned" value="245"/>
+        <metric name="vulnerabilities_found" value="3"/>
+        <metric name="files_analyzed" value="18"/>
+        <metric name="security_score" value="4.2/10"/>
+      </metrics>
+      <next_steps>Immediate action required for critical vulnerabilities; schedule updates for dependency issues</next_steps>
+    </output>
+  </example>
+</examples>
+]]>

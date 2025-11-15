@@ -1,0 +1,338 @@
+<![CDATA[
+<common_patterns>
+  <test_patterns>
+    <pattern name="unit_test_structure">
+      <description>Standard unit test file organization and structure</description>
+      <template language="typescript">
+        <![CDATA[
+import { describe, it, expect, beforeEach, afterEach } from '@testing-framework';
+import { UserFactory } from './test-utils/user-factory';
+
+describe('User authentication service', () => {
+  let userService: UserService;
+  let mockUserRepository: MockUserRepository;
+
+  beforeEach(() => {
+    userService = new UserService(mockUserRepository);
+    mockUserRepository.clear();
+  });
+
+  afterEach(() => {
+    userService = null;
+    mockUserRepository = null;
+  });
+
+  it('should authenticate user with valid credentials', async () => {
+    // Arrange
+    const validUser = { email: 'test@example.com', password: 'password123' };
+    mockUserRepository.findByEmail.mockResolvedValue(validUser);
+
+    // Act
+    const result = await userService.authenticate(validUser.email, validUser.password);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.success).toBe(true);
+    expect(result.user).toEqual(validUser);
+  });
+
+  it('should reject authentication with invalid credentials', async () => {
+    // Arrange
+    const invalidUser = { email: 'test@example.com', password: 'wrongpassword' };
+    mockUserRepository.findByEmail.mockResolvedValue(null);
+
+    // Act
+    const result = await userService.authenticate(invalidUser.email, invalidUser.password);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.success).toBe(false);
+    expect(result.error).toEqual('Invalid credentials');
+  });
+});
+        ]]></template>
+      <usage>Use for organizing unit tests with clear structure, setup, and teardown</usage>
+    </pattern>
+    
+    <pattern name="integration_test_template">
+      <description>Template for API integration tests with realistic scenarios</description>
+      <template language="typescript">
+        <![CDATA[
+import { request, app } from 'express';
+import { setupTestDatabase, cleanupTestDatabase } from './test-utils/database';
+
+describe('User API integration tests', () => {
+  let app: Express;
+  let testDb: TestDatabase;
+
+  beforeAll(async () => {
+    testDb = await setupTestDatabase();
+    app = request(app);
+  });
+
+  afterAll(async () => {
+    await cleanupTestDatabase(testDb);
+  });
+
+  it('should create user via API', async () => {
+    const userData = {
+      name: 'Test User',
+      email: 'test@example.com'
+    };
+
+    const response = await request(app)
+      .post('/api/users')
+      .send(userData)
+      .expect(201);
+
+    const createdUser = await testDb.users.findOne({ where: { email: userData.email } });
+    expect(createdUser).toBeTruthy();
+    expect(createdUser.name).toBe(userData.name);
+  });
+});
+        ]]></template>
+      <usage>Use for testing API endpoints with proper setup, database mocking, and cleanup</usage>
+    </pattern>
+    
+    <pattern name="e2e_test_structure">
+      <description>End-to-end test structure for user workflows</description>
+      <template language="typescript">
+        <![CDATA[
+import { Builder, By } from 'selenium-webdriver';
+import { testConfig } from './config/test-config';
+
+describe('User registration E2E tests', () => {
+  let driver: Builder;
+  const baseUrl = testConfig.baseUrl;
+
+  beforeAll(async () => {
+    driver = await new Builder().forBrowser('chrome').build();
+  });
+
+  it('should complete user registration flow', async () => {
+    await driver.get(baseUrl);
+    
+    // Fill registration form
+    await driver.findElement(By.name('name')).sendKeys('Test User');
+    await driver.findElement(By.name('email')).sendKeys('test@example.com');
+    await driver.findElement(By.name('password')).sendKeys('password123');
+    await driver.findElement(By.name('confirmPassword')).sendKeys('password123');
+    await driver.findElement(By.cssSelector('button[type="submit"]')).click();
+    
+    // Verify successful registration
+    await driver.wait(until.elementLocated(By.cssSelector('.success-message')), 10000);
+    const successMessage = await driver.findElement(By.cssSelector('.success-message'));
+    expect(await successMessage.getText()).toContain('Registration successful');
+  });
+});
+        ]]></template>
+      <usage>Use for testing complete user workflows from UI to backend</usage>
+    </pattern>
+    
+    <pattern name="performance_test_template">
+      <description>Load testing template for measuring system performance</description>
+      <template language="javascript">
+        <![CDATA[
+import { performance } from 'perf_hooks';
+import { testConfig } from './config/performance';
+
+describe('Application performance tests', () => {
+  it('should handle expected load within response time limits', async () => {
+    const metrics = await performance.sample({
+      duration: 30000,
+      thresholds: { fcp: 1000, lcp: 500 }
+    });
+
+    expect(metrics.fcp).toBeLessThan(1000);
+    expect(metrics.lcp).toBeLessThan(500);
+  });
+
+  it('should maintain performance under sustained load', async () => {
+    const metrics = await performance.sample({
+      duration: 60000,
+      thresholds: { fcp: 1500, lcp: 800 }
+    });
+
+    expect(metrics.fcp).toBeLessThan(1500);
+    expect(metrics.lcp).toBeLessThan(800);
+  });
+});
+        ]]></template>
+      <usage>Use for establishing performance baselines and ensuring system meets performance requirements</usage>
+    </pattern>
+    
+    <pattern name="security_test_template">
+      <description>Security testing template for common vulnerability scenarios</description>
+      <template language="typescript">
+        <![CDATA[
+import { request } from 'supertest';
+import app from '../src/app';
+
+describe('Security tests', () => {
+  it('should prevent SQL injection in login endpoint', async () => {
+    const maliciousPayload = {
+      email: "admin'--'; DROP TABLE users; --",
+      password: 'anything'
+    };
+
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send(maliciousPayload)
+      .expect(400);
+
+    const users = await request(app)
+      .get('/api/users')
+      .expect(200);
+    
+    // Verify no users were deleted
+    expect(users.body).toHaveLength(0);
+  });
+
+  it('should implement proper input validation', async () => {
+    const invalidEmailPayload = {
+      email: 'not-an-email',
+      password: 'password123'
+    };
+
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send(invalidEmailPayload)
+      .expect(400);
+    expect(response.body.error).toContain('Invalid email format');
+  });
+});
+        ]]></template>
+      <usage>Use for testing authentication, authorization, and input validation security</usage>
+    </pattern>
+  </test_patterns>
+
+  <automation_patterns>
+    <pattern name="ci_cd_integration">
+      <description>Continuous integration setup for automated testing</description>
+      <template language="yaml">
+        <![CDATA[
+name: CI/CD Pipeline
+on:
+  push:
+    branches: [main, develop]
+  paths:
+      - 'src/**'
+      - 'tests/**'
+  jobs:
+    test:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+        - uses: actions/setup-node@v3
+        - name: Install dependencies
+          run: npm ci
+        - name: Run unit tests
+          run: npm run test:unit
+        - name: Run integration tests
+          run: npm run test:integration
+        - name: Run E2E tests
+          run: npm run test:e2e
+        - name: Upload coverage reports
+          uses: actions/upload-artifact@v3
+          with:
+            name: coverage-report
+            path: coverage/
+        ]]></template>
+      <usage>Configure automated testing pipeline with multiple test types and coverage reporting</usage>
+    </pattern>
+  </automation_patterns>
+
+  <data_management>
+    <pattern name="test_data_factory">
+      <description>Factory pattern for creating test data with realistic relationships</description>
+      <template language="typescript">
+        <![CDATA[
+export class UserFactory {
+  static create(overrides: Partial<User> = {}): User {
+    const defaultUser: User = {
+      id: '1',
+      name: 'Test User',
+      email: 'test@example.com',
+      password: 'password123',
+      role: 'user',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    return { ...defaultUser, ...overrides };
+  }
+
+  static createAdminUser(overrides: Partial<User> = {}): User {
+    return this.create({ ...overrides, role: 'admin' });
+  }
+
+  static createTestUsers(count: number): User[] {
+    const users: User[] = [];
+    for (let i = 0; i < count; i++) {
+      users.push(this.create({
+        id: `${i + 1}`,
+        name: `Test User ${i + 1}`,
+        email: `testuser${i + 1}@example.com`,
+        password: 'password123'
+      }));
+    }
+    return users;
+  }
+}
+        ]]></template>
+      <usage>Use for creating consistent, realistic test data for various test scenarios</usage>
+    </pattern>
+  </data_management>
+
+  <documentation_patterns>
+    <pattern name="test_documentation_template">
+      <description>Comprehensive test documentation template</description>
+      <template language="markdown">
+        <![CDATA[
+# Test Documentation
+
+## Overview
+This document outlines the testing strategy, methodologies, and standards for the application.
+
+## Test Strategy
+- **Risk-Based Testing**: Prioritize testing efforts based on risk assessment and impact analysis
+- **Comprehensive Coverage**: Target >90% coverage across all quality dimensions
+- **Early and Continuous Testing**: Integrate testing throughout development lifecycle
+- **Data-Driven Decisions**: Base testing priorities on objective metrics and evidence
+
+## Test Types
+- **Unit Tests**: Individual component and function testing
+- **Integration Tests**: API endpoint and service integration testing
+- **E2E Tests**: End-to-end user workflow testing
+- **Performance Tests**: Load, stress, and scalability testing
+- **Security Tests**: Vulnerability assessment and penetration testing
+- **Accessibility Tests**: WCAG compliance and usability testing
+
+## Quality Metrics
+- **Test Coverage**: >90% target
+- **Defect Density**: <2.0 for high-quality code
+- **Test Effectiveness**: >20 defects/hour
+- **Quality Gates**: No critical defects, performance benchmarks met
+
+## Test Environment
+- **Consistent**: Stable, isolated, and reproducible
+- **Realistic**: Production-like data and configurations
+- **Version Controlled**: Test data and environment versions managed
+
+## Tools and Frameworks
+- **Unit Testing**: Jest, Testing Library
+- **E2E Testing**: Selenium WebDriver, Playwright
+- **Performance Testing**: Artillery, k6, Lighthouse
+- **Security Testing**: OWASP ZAP, Burp Suite
+- **CI/CD**: GitHub Actions, Jenkins
+
+## Standards
+- **Coding Standards**: ESLint, Prettier, TypeScript strict mode
+- **Testing Standards**: AAA testing pattern, given-when-then-when
+- **Documentation Standards**: Comprehensive test case documentation
+        ]]></template>
+      <usage>Use as a template for documenting testing approach, standards, and results</usage>
+    </pattern>
+  </documentation_patterns>
+</common_patterns>
+]]>

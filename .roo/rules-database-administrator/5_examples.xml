@@ -1,0 +1,425 @@
+<![CDATA[
+<examples>
+  <example name="postgresql_ha_setup">
+    <description>Setting up PostgreSQL high availability with streaming replication</description>
+    <context>When you need to configure PostgreSQL for high availability with automatic failover</context>
+    <workflow>
+      <phase name="analysis">
+        <step>Assess current PostgreSQL setup and requirements</step>
+        <step>Identify replication topology needs</step>
+        <step>Plan network configuration for replication</step>
+      </phase>
+      <phase name="implementation">
+        <step>Configure primary server for replication</step>
+        <step>Setup standby servers with proper connection settings</step>
+        <step>Configure automatic failover mechanisms</step>
+        <step>Implement monitoring and alerting</step>
+      </phase>
+      <phase name="validation">
+        <step>Test replication lag and failover scenarios</step>
+        <step>Verify data consistency across replicas</step>
+        <step>Validate automatic failover functionality</step>
+      </phase>
+    </workflow>
+    <code language="sql">
+-- Primary Server Configuration
+-- postgresql.conf
+wal_level = replica
+max_wal_senders = 3
+max_replication_slots = 3
+synchronous_commit = 'on'
+synchronous_standby_names = 'standby1,standby2'
+
+-- Create replication user
+CREATE USER replicator WITH REPLICATION ENCRYPTED PASSWORD 'secure_replication_password';
+
+-- pg_hba.conf additions
+host replication replicator 10.0.0.0/8 md5
+
+-- Standby Server Configuration
+-- recovery.conf
+standby_mode = 'on'
+primary_conninfo = 'host=primary.db port=5432 user=replicator password=secure_replication_password sslmode=require'
+trigger_file = '/tmp/postgresql.trigger'
+    </code>
+    <explanation>
+      This configuration sets up PostgreSQL streaming replication with synchronous commit for high availability. The primary server is configured to send WAL data to two standby servers, and automatic failover is enabled through the trigger file mechanism.
+    </explanation>
+  </example>
+
+  <example name="mysql_performance_optimization">
+    <description>Optimizing MySQL performance for OLTP workloads</description>
+    <context>When MySQL queries are slow and you need to improve performance</context>
+    <workflow>
+      <phase name="analysis">
+        <step>Analyze slow query log to identify bottlenecks</step>
+        <step>Review current MySQL configuration</step>
+        <step>Assess hardware resources and workload patterns</step>
+      </phase>
+      <phase name="implementation">
+        <step>Optimize InnoDB buffer pool settings</step>
+        <step>Configure query cache appropriately</step>
+        <step>Tune connection and thread settings</step>
+        <step>Add strategic indexes for common queries</step>
+      </phase>
+      <phase name="validation">
+        <step>Monitor query performance improvements</step>
+        <step>Check system resource utilization</step>
+        <step>Validate that no functionality is broken</step>
+      </phase>
+    </workflow>
+    <code language="sql">
+-- MySQL Performance Optimization
+-- my.cnf configuration
+[mysqld]
+# InnoDB Settings
+innodb_buffer_pool_size = 2G
+innodb_log_file_size = 256M
+innodb_log_buffer_size = 8M
+innodb_flush_log_at_trx_commit = 1
+innodb_flush_method = O_DIRECT
+
+# Query Cache
+query_cache_size = 128M
+query_cache_type = 1
+query_cache_limit = 2M
+
+# Connection Settings
+max_connections = 500
+thread_cache_size = 50
+table_open_cache = 2000
+
+-- Performance Analysis Queries
+-- Find slow queries
+SELECT query_time, lock_time, rows_sent, rows_examined, sql_text
+FROM mysql.slow_log
+ORDER BY query_time DESC
+LIMIT 10;
+
+-- Analyze table statistics
+SELECT table_name, rows, data_length, index_length
+FROM information_schema.tables
+WHERE table_schema = 'your_database'
+ORDER BY data_length DESC;
+
+-- Check index usage
+SELECT object_schema, object_name, index_name, count_read, count_fetch
+FROM performance_schema.table_io_waits_summary_by_index_usage
+WHERE index_name IS NOT NULL
+ORDER BY count_read + count_fetch DESC;
+    </code>
+    <explanation>
+      This optimization focuses on OLTP workloads by configuring InnoDB for high concurrency, enabling query caching for repeated queries, and tuning connection handling. The analysis queries help identify specific performance bottlenecks.
+    </explanation>
+  </example>
+
+  <example name="mongodb_replica_set_setup">
+    <description>Setting up MongoDB replica set for high availability</description>
+    <context>When you need to configure MongoDB for automatic failover and data redundancy</context>
+    <workflow>
+      <phase name="analysis">
+        <step>Determine replica set topology requirements</step>
+        <step>Plan network configuration between nodes</step>
+        <step>Assess data volume and growth patterns</step>
+      </phase>
+      <phase name="implementation">
+        <step>Initialize replica set on primary node</step>
+        <step>Add secondary nodes to replica set</step>
+        <step>Configure arbiter for election tie-breaking</step>
+        <step>Setup monitoring and alerting</step>
+      </phase>
+      <phase name="validation">
+        <step>Test automatic failover scenarios</step>
+        <step>Verify data replication consistency</step>
+        <step>Validate election process works correctly</step>
+      </phase>
+    </workflow>
+    <code language="javascript">
+// MongoDB Replica Set Configuration
+// Initialize replica set
+rs.initiate({
+  _id: "rs0",
+  members: [
+    { _id: 0, host: "mongo1.example.com:27017", priority: 1 },
+    { _id: 1, host: "mongo2.example.com:27017", priority: 1 },
+    { _id: 2, host: "mongo3.example.com:27017", priority: 1 }
+  ]
+});
+
+// Add secondary nodes
+rs.add("mongo2.example.com:27017");
+rs.add("mongo3.example.com:27017");
+
+// Configure replica set settings
+cfg = rs.conf();
+cfg.settings = {
+  heartbeatIntervalMillis: 2000,
+  heartbeatTimeoutMillis: 10000,
+  electionTimeoutMillis: 10000,
+  getLastErrorModes: ["majority", "writable", "lastVote"]
+};
+rs.reconfig(cfg);
+
+// Monitor replica set status
+rs.status();
+rs.printSlaveReplicationInfo();
+
+// Check replication lag
+db.adminCommand({
+  replSetGetStatus: 1
+}).members.forEach(function(member) {
+  if (member.stateStr === "SECONDARY") {
+    print("Secondary " + member.name + " lag: " + member.optimeDate);
+  }
+});
+    </code>
+    <explanation>
+      This configuration sets up a three-node MongoDB replica set with automatic failover. The replica set provides high availability through automatic primary election and data redundancy across multiple nodes.
+    </explanation>
+  </example>
+
+  <example name="redis_clustering_setup">
+    <description>Setting up Redis cluster for horizontal scaling</description>
+    <context>When you need to scale Redis horizontally for high throughput</context>
+    <workflow>
+      <phase name="analysis">
+        <step>Determine cluster topology requirements</step>
+        <step>Calculate memory and storage needs</step>
+        <step>Plan network configuration for cluster nodes</step>
+      </phase>
+      <phase name="implementation">
+        <step>Configure Redis instances for clustering</step>
+        <step>Initialize cluster with master nodes</step>
+        <step>Add replica nodes for high availability</step>
+        <step>Setup cluster monitoring</step>
+      </phase>
+      <phase name="validation">
+        <step>Test cluster failover scenarios</step>
+        <step>Verify data distribution across nodes</step>
+        <step>Validate cluster scaling performance</step>
+      </phase>
+    </workflow>
+    <code language="conf">
+# Redis Cluster Configuration
+# redis.conf for each node
+port 7000
+cluster-enabled yes
+cluster-config-file nodes.conf
+cluster-node-timeout 5000
+appendonly yes
+appendfilename "appendonly.aof"
+
+# Cluster initialization command
+redis-cli --cluster create 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005 --cluster-replicas 1
+
+# Cluster monitoring
+redis-cli --cluster check 127.0.0.1:7000
+redis-cli --cluster info 127.0.0.1:7000
+
+# Add new node to cluster
+redis-cli --cluster add-node 127.0.0.1:7006 127.0.0.1:7000
+
+# Reshard cluster
+redis-cli --cluster reshard 127.0.0.1:7000 --cluster-from <node-id> --cluster-to <node-id> --cluster-slots <number> --yes
+    </code>
+    <explanation>
+      This Redis cluster setup provides horizontal scaling by distributing data across multiple nodes. The cluster uses hash slots to distribute data evenly and provides automatic failover through replica nodes.
+    </explanation>
+  </example>
+
+  <example name="database_backup_strategy">
+    <description>Implementing comprehensive backup strategy with point-in-time recovery</description>
+    <context>When you need to establish reliable backup and recovery procedures</context>
+    <workflow>
+      <phase name="analysis">
+        <step>Assess RTO and RPO requirements</step>
+        <step>Analyze data volume and change patterns</step>
+        <step>Identify critical data and systems</step>
+      </phase>
+      <phase name="implementation">
+        <step>Setup automated daily backups</step>
+        <step>Configure continuous WAL archiving</step>
+        <step>Implement backup verification procedures</step>
+        <step>Establish offsite backup replication</step>
+      </phase>
+      <phase name="validation">
+        <step>Test backup restoration procedures</step>
+        <step>Verify point-in-time recovery capability</step>
+        <step>Validate backup integrity and completeness</step>
+      </phase>
+    </workflow>
+    <code language="bash">
+#!/bin/bash
+# Comprehensive Database Backup Strategy
+
+# PostgreSQL Backup Script
+BACKUP_DIR="/backups/postgresql"
+DATE=$(date +%Y%m%d_%H%M%S)
+DB_NAME="appdb"
+
+# Create backup directory
+mkdir -p $BACKUP_DIR
+
+# Full database backup
+pg_dump -h localhost -U postgres -d $DB_NAME -f $BACKUP_DIR/full_backup_$DATE.sql
+
+# Compress backup
+gzip $BACKUP_DIR/full_backup_$DATE.sql
+
+# Continuous WAL backup
+pg_receivewal -h localhost -U postgres -D $BACKUP_DIR/wal_$DATE/ --compress
+
+# Backup verification
+pg_restore --list $BACKUP_DIR/full_backup_$DATE.sql.gz > $BACKUP_DIR/backup_contents_$DATE.txt
+
+# Cleanup old backups (keep 7 days)
+find $BACKUP_DIR -name "*.sql.gz" -mtime +7 -delete
+find $BACKUP_DIR -name "wal_*" -mtime +7 -exec rm -rf {} \;
+
+# Offsite backup sync
+rsync -avz --delete $BACKUP_DIR/ backup-server:/backups/postgresql/
+
+# Backup monitoring
+echo "Backup completed at $(date)" >> $BACKUP_DIR/backup.log
+du -sh $BACKUP_DIR >> $BACKUP_DIR/backup.log
+
+# Point-in-time recovery test
+echo "Testing point-in-time recovery..."
+createdb test_recovery_db
+pg_restore -h localhost -U postgres -d test_recovery_db --clean --if-exists $BACKUP_DIR/full_backup_$DATE.sql.gz
+echo "Point-in-time recovery test completed"
+    </code>
+    <explanation>
+      This comprehensive backup strategy includes full daily backups, continuous WAL archiving for point-in-time recovery, automated cleanup, offsite replication, and regular testing of recovery procedures to ensure RTO < 1 hour and RPO < 5 minutes.
+    </explanation>
+  </example>
+
+  <example name="database_security_hardening">
+    <description>Implementing comprehensive database security measures</description>
+    <context>When you need to secure database access and protect sensitive data</context>
+    <workflow>
+      <phase name="analysis">
+        <step>Identify sensitive data and access requirements</step>
+        <step>Review current security configurations</step>
+        <step>Assess compliance requirements</step>
+      </phase>
+      <phase name="implementation">
+        <step>Configure SSL/TLS encryption</step>
+        <step>Implement role-based access control</step>
+        <step>Enable audit logging</step>
+        <step>Setup network security measures</step>
+      </phase>
+      <phase name="validation">
+        <step>Test encryption configurations</step>
+        <step>Verify access control effectiveness</step>
+        <step>Validate audit logging completeness</step>
+      </phase>
+    </workflow>
+    <code language="sql">
+-- PostgreSQL Security Hardening
+-- Enable SSL/TLS
+ALTER SYSTEM SET ssl = 'on';
+ALTER SYSTEM SET ssl_cert_file = '/etc/ssl/certs/server.crt';
+ALTER SYSTEM SET ssl_key_file = '/etc/ssl/private/server.key';
+ALTER SYSTEM SET ssl_ca_file = '/etc/ssl/certs/ca.crt';
+
+-- Configure authentication
+-- pg_hba.conf
+# Require SSL for all connections
+hostssl all all 0.0.0.0/0 md5
+# Local connections without password
+local all all peer
+
+-- Create secure roles
+CREATE ROLE read_only_role;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO read_only_role;
+
+CREATE ROLE app_user_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user_role;
+
+-- Enable row-level security
+ALTER TABLE sensitive_data ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY user_data_policy ON sensitive_data
+    FOR ALL TO app_user_role
+    USING (user_id = current_user_id());
+
+-- Enable audit logging
+ALTER SYSTEM SET log_destination = 'csvlog';
+ALTER SYSTEM SET log_directory = '/var/log/postgresql/audit';
+ALTER SYSTEM SET log_filename = 'postgresql-%Y-%m-%d.log';
+ALTER SYSTEM SET log_statement = 'all';
+ALTER SYSTEM SET log_connections = 'on';
+ALTER SYSTEM SET log_disconnections = 'on';
+
+-- Reload configuration
+SELECT pg_reload_conf();
+    </code>
+    <explanation>
+      This security hardening implements comprehensive protection including SSL/TLS encryption, role-based access control, row-level security for sensitive data, and comprehensive audit logging for compliance and monitoring.
+    </explanation>
+  </example>
+
+  <example name="database_migration_zero_downtime">
+    <description>Performing zero-downtime database migration</description>
+    <context>When you need to upgrade database schema without service interruption</context>
+    <workflow>
+      <phase name="analysis">
+        <step>Review current schema and data volume</step>
+        <step>Plan migration steps and rollback strategy</step>
+        <step>Prepare testing environment</step>
+      </phase>
+      <phase name="implementation">
+        <step>Setup logical replication from production to staging</step>
+        <step>Apply schema changes to staging environment</step>
+        <step>Validate application compatibility</step>
+        <step>Perform controlled cutover to new schema</step>
+      </phase>
+      <phase name="validation">
+        <step>Monitor application performance after migration</step>
+        <step>Verify data integrity and consistency</step>
+        <step>Test rollback procedures if needed</step>
+      </phase>
+    </workflow>
+    <code language="sql">
+-- Zero-Downtime Migration Strategy
+-- Step 1: Setup logical replication
+-- On production database
+CREATE PUBLICATION migration_pub FOR TABLE users, orders, products;
+
+-- On staging database
+CREATE SUBSCRIPTION migration_sub 
+CONNECTION 'host=prod-db port=5432 dbname=appdb user=replicator password=secure_password' 
+PUBLICATION migration_pub
+WITH (slot_name = migration_slot, create_slot = false);
+
+-- Step 2: Apply schema changes to staging
+-- Wait for replication to catch up
+SELECT pg_subscription_is_active('migration_sub');
+
+-- Apply migrations
+ALTER TABLE users ADD COLUMN new_field VARCHAR(255);
+CREATE INDEX idx_users_new_field ON users(new_field);
+
+-- Step 3: Validate application compatibility
+-- Test application with staging database
+-- Run smoke tests and performance tests
+
+-- Step 4: Controlled cutover
+-- Stop application writes
+SELECT pg_replication_origin_advance('migration_origin', pg_current_wal_lsn());
+
+-- Switch application to staging database
+-- Update connection string to point to staging
+
+-- Step 5: Cleanup
+-- After successful cutover
+DROP SUBSCRIPTION migration_sub;
+DROP PUBLICATION migration_pub;
+    </code>
+    <explanation>
+      This zero-downtime migration uses logical replication to create a staging copy of production, applies schema changes safely, validates compatibility, then performs a controlled cutover to minimize service interruption.
+    </explanation>
+  </example>
+</examples>
+]]>

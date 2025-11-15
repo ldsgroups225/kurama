@@ -1,0 +1,161 @@
+<error_handling>
+  <common_scenarios>
+    <scenario name="test_failures_after_refactoring">
+      <description>When tests fail after refactoring changes</description>
+      <symptoms>
+        <symptom>Unit tests that were passing before refactoring now fail</symptom>
+        <symptom>Integration tests break due to changed interfaces</symptom>
+        <symptom>Test suite shows decreased coverage</symptom>
+      </symptoms>
+      <recovery_strategy>
+        <step>Rollback the refactoring changes</step>
+        <step>Fix the failing tests to work with new code structure</step>
+        <step>Re-run test suite to verify fixes</step>
+        <step>Investigate root cause of test failures</step>
+      </recovery_strategy>
+    </scenario>
+    
+    <scenario name="performance_regression">
+      <description>When refactoring causes performance degradation</description>
+      <symptoms>
+        <symptom>Response times increase after refactoring</symptom>
+        <symptom>Memory usage increases</symptom>
+        <symptom>CPU usage spikes</symptom>
+        <symptom>Database queries become slower</symptom>
+      </symptoms>
+      <recovery_strategy>
+        <step>Profile performance before and after refactoring</step>
+        <step>Identify performance bottlenecks in refactored code</step>
+        <step>Revert problematic refactoring changes</step>
+        <step>Apply performance optimizations while maintaining code quality</step>
+        <step>Monitor performance metrics continuously</step>
+      </recovery_strategy>
+    </scenario>
+    
+    <scenario name="breaking_changes_detected">
+      <description>When refactoring unintentionally changes external behavior</description>
+      <symptoms>
+        <symptom>API responses change format</symptom>
+        <symptom>Database schema conflicts arise</symptom>
+        <symptom>Client applications break due to interface changes</symptom>
+        <symptom>Configuration files become incompatible</symptom>
+      </symptoms>
+      <recovery_strategy>
+        <step>Immediately identify the scope of behavioral changes</step>
+        <step>Assess impact on external systems and clients</step>
+        <step>Create compatibility layer or adapter if needed</step>
+        <step>Document breaking changes and migration path</step>
+        <step>Coordinate with other teams for smooth transition</step>
+        <step>Consider rollback strategy if changes cannot be deployed</step>
+      </recovery_strategy>
+    </scenario>
+    
+    <scenario name="complexity_increases">
+      <description>When refactoring inadvertently makes code more complex</description>
+      <symptoms>
+        <symptom>Cyclomatic complexity metrics increase</symptom>
+        <symptom>Cognitive complexity metrics rise</symptom>
+        <symptom>Code becomes harder to understand and maintain</symptom>
+        <symptom>New developers struggle with the codebase</symptom>
+      </symptoms>
+      <recovery_strategy>
+        <step>Analyze which refactoring changes increased complexity</step>
+        <step>Consider alternative approaches that achieve same goals with less complexity</step>
+        <step>Partially or fully revert complex refactoring</step>
+        <step>Add documentation explaining the complexity</step>
+        <step>Provide training on the new code structure</step>
+      </recovery_strategy>
+    </scenario>
+  </common_scenarios>
+
+  <prevention_strategies>
+    <strategy name="comprehensive_testing">
+      <description>Prevent issues through thorough testing</description>
+      <tactics>
+        <tactic>Write characterization tests before any refactoring</tactic>
+        <tactic>Run full test suite after each refactoring change</tactic>
+        <tactic>Use integration tests to catch interface changes</tactic>
+        <tactic>Perform regression testing on critical paths</tactic>
+        <tactic>Maintain high test coverage throughout refactoring process</tactic>
+        <tactic>Use property-based testing for complex objects</tactic>
+      </tactics>
+    </strategy>
+    
+    <strategy name="incremental_refactoring">
+      <description>Minimize risk through small, testable changes</description>
+      <tactics>
+        <tactic>Break large refactoring into multiple small steps</tactic>
+        <tactic>Test each increment before proceeding to next</tactic>
+        <tactic>Use feature flags to enable/disable new code paths</tactic>
+        <tactic>Maintain rollback capability at each step</tactic>
+        <tactic>Document intermediate states and decisions</tactic>
+      </tactics>
+    </strategy>
+    
+    <strategy name="behavior_preservation">
+      <description>Ensure refactoring doesn't change external behavior</description>
+      <tactics>
+        <tactic>Write comprehensive characterization tests for existing behavior</tactic>
+        <tactic>Use contract testing to verify interface compliance</tactic>
+        <tactic>Compare before/after behavior using golden master testing</tactic>
+        <tactic>Use property-based testing for state changes</tactic>
+        <tactic>Verify all edge cases are handled identically</tactic>
+        <tactic>Monitor behavior in staging environment before production deployment</tactic>
+      </tactics>
+    </strategy>
+  </prevention_strategies>
+
+  <rollback_procedures>
+    <procedure name="git_rollback">
+      <description>Using version control to revert problematic changes</description>
+      <steps>
+        <step>Identify the commit that introduced the issue</step>
+        <step>Create a new branch from the stable commit</step>
+        <step>Revert the problematic commits</step>
+        <step>Test the reverted code to ensure it works correctly</step>
+        <step>Merge the fix back to main branch if needed</step>
+        <step>Document the rollback and reasoning</step>
+      </steps>
+    </procedure>
+    
+    <procedure name="feature_flag_rollback">
+      <description>Using feature flags to disable problematic refactoring</description>
+      <steps>
+        <step>Implement feature flag to control new code path</step>
+        <step>Set flag to false to disable new behavior</step>
+        <step>Test that old behavior is restored</step>
+        <step>Document the flag and rollback procedure</step>
+        <step>Monitor system stability after rollback</step>
+      </steps>
+    </procedure>
+  </rollback_procedures>
+
+  <communication_protocols>
+    <protocol name="issue_reporting">
+      <description>How to communicate refactoring issues to the team</description>
+      <template>
+        <subject_format>[REFACTORING] {issue_type}: {description}</subject_format>
+        <body>
+## Issue Summary
+**Type**: {issue_type}
+**Impact**: {impact_level}
+**Files Affected**: {files_affected}
+**Root Cause**: {root_cause}
+**Steps Taken**: {steps_taken}
+**Rollback Plan**: {rollback_plan}
+**Prevention**: {prevention_measures}
+        </body>
+      </template>
+      <fields>
+        <field name="issue_type">BUG, PERFORMANCE, BREAKING_CHANGE</field>
+        <field name="impact_level">LOW, MEDIUM, HIGH, CRITICAL</field>
+        <field name="files_affected">Comma-separated list of file paths</field>
+        <field name="root_cause">Brief description of the underlying cause</field>
+        <field name="steps_taken">Numbered list of actions taken</field>
+        <field name="rollback_plan">Description of rollback strategy</field>
+        <field name="prevention_measures">Steps to prevent recurrence</field>
+      </fields>
+    </template>
+    </protocol>
+  </communication_protocols>
+</error_handling>

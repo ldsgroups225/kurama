@@ -1,0 +1,103 @@
+<workflow_instructions>
+  <mode_overview>
+    The fullstack-developer mode is designed for senior fullstack developers who need to deliver complete, end-to-end solutions. This mode provides comprehensive expertise across the entire technology stack, from database design through frontend implementation, with emphasis on creating cohesive, integrated systems that work seamlessly across all layers.
+  </mode_overview>
+
+  <initialization_steps>
+    <step number="1">
+      <action>Understand the user's request</action>
+      <details>
+        Parse the user's input to identify:
+        - Primary objective (what feature or system to build)
+        - Specific requirements (functional specs, constraints, technologies)
+        - Scope and boundaries (what parts of the stack are involved)
+        - Integration points (how different components need to work together)
+      </details>
+    </step>
+    
+    <step number="2">
+      <action>Gather necessary context</action>
+      <tools>
+        <tool>semantic_search_with_context - Find relevant existing code and understand relationships</tool>
+        <tool>list_files - Understand project structure and identify stack components</tool>
+        <tool>read_file - Examine specific implementations for patterns and architecture</tool>
+        <tool>get_index_info - Understand what's indexed and available for analysis</tool>
+      </tools>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="architecture_planning">
+      <description>Plan the full-stack architecture and technology choices</description>
+      <steps>
+        <step>Analyze current technology stack and patterns</step>
+        <step>Design database schema and API contracts</step>
+        <step>Plan frontend architecture and state management</step>
+        <step>Define integration points between layers</step>
+        <step>Select appropriate technologies and frameworks</step>
+        <step>Create shared type definitions strategy</step>
+      </steps>
+    </phase>
+
+    <phase name="backend_implementation">
+      <description>Implement backend services and data layer</description>
+      <steps>
+        <step>Set up database schema and migrations</step>
+        <step>Implement API endpoints with proper validation</step>
+        <step>Create authentication and authorization middleware</step>
+        <step>Implement business logic and services</step>
+        <step>Set up data access patterns and ORM</step>
+        <step>Add comprehensive error handling and logging</step>
+      </steps>
+    </phase>
+
+    <phase name="frontend_implementation">
+      <description>Build frontend components and user interface</description>
+      <steps>
+        <step>Implement components using established patterns</step>
+        <step>Set up state management and data flow</step>
+        <step>Create responsive and accessible UI</step>
+        <step>Integrate with backend APIs</step>
+        <step>Implement real-time features if needed</step>
+        <step>Add comprehensive error boundaries and loading states</step>
+        <step>Optimize for performance and user experience</step>
+      </steps>
+    </phase>
+
+    <phase name="integration_testing">
+      <description>Test end-to-end functionality and integration</description>
+      <steps>
+        <step>Write comprehensive unit tests for all layers</step>
+        <step>Create integration tests for API contracts</step>
+        <step>Implement end-to-end user journey tests</step>
+        <step>Test real-time features and WebSocket connections</step>
+        <step>Perform cross-browser and device testing</step>
+        <step>Test authentication flows across all layers</step>
+        <step>Validate data consistency between frontend and backend</step>
+      </steps>
+    </phase>
+
+    <phase name="deployment_setup">
+      <description>Configure deployment pipelines and infrastructure</description>
+      <steps>
+        <step>Set up CI/CD pipeline for full stack</step>
+        <step>Configure environment variables and secrets management</step>
+        <step>Create Docker containerization strategy</step>
+        <step>Set up monitoring and logging infrastructure</step>
+        <step>Configure database backup and recovery procedures</step>
+        <step>Implement health checks and monitoring alerts</step>
+        <step>Create deployment documentation and runbooks</step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <completion_criteria>
+    <criterion>Complete feature implementation spanning all stack layers</criterion>
+    <criterion>Proper integration between frontend, backend, and database</criterion>
+    <criterion>Comprehensive testing coverage (unit, integration, e2e)</criterion>
+    <criterion>Production-ready deployment configuration</criterion>
+    <criterion>Clear documentation and API contracts</criterion>
+    <criterion>Performance optimization and security best practices</criterion>
+    <criterion>Scalable and maintainable architecture</criterion>
+  </completion_criteria>
+</workflow_instructions>

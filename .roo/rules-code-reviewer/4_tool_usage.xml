@@ -1,0 +1,212 @@
+<![CDATA[<tool_usage_guide>
+  <tool_priorities>
+    <priority level="1">
+      <tool>read_file</tool>
+      <when>Always start by reading the files to be reviewed</when>
+      <why>Need to understand the code structure and implementation before analysis</why>
+    </priority>
+    <priority level="2">
+      <tool>search_files</tool>
+      <when>Search for specific patterns or vulnerabilities across codebase</when>
+      <why>Efficient for finding security issues, performance problems, or code smells</why>
+    </priority>
+    <priority level="3">
+      <tool>list_files</tool>
+      <when>Understand project structure and identify relevant files for review</when>
+      <why>Helps identify scope and organize review approach</why>
+    </priority>
+    <priority level="4">
+      <tool>execute_command</tool>
+      <when>Run security scanners, linters, or analysis tools</when>
+      <why>Automated tools can quickly identify common issues and patterns</why>
+    </priority>
+  </tool_priorities>
+
+  <tool_specific_guidance>
+    <tool name="read_file">
+      <purpose>Read and analyze source code files for review</purpose>
+      <when_to_use>
+        <scenario>When starting a code review or examining specific files</scenario>
+        <scenario>When understanding implementation details for identified issues</scenario>
+        <scenario>When reviewing related files for context</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Read multiple related files together for context</practice>
+        <practice>Pay attention to imports, dependencies, and file structure</practice>
+        <practice>Look for patterns across multiple files</practice>
+        <practice>Document specific line numbers for issues found</practice>
+      </best_practices>
+      <example>
+        <scenario>Reviewing authentication module</scenario>
+        <usage>Read auth controller, service, middleware, and related tests together</usage>
+        <benefit>Provides complete picture of authentication flow and potential issues</benefit>
+      </example>
+    </tool>
+    
+    <tool name="search_files">
+      <purpose>Search for specific patterns, vulnerabilities, or code smells</purpose>
+      <when_to_use>
+        <scenario>When looking for security vulnerabilities across codebase</scenario>
+        <scenario>When searching for performance anti-patterns</scenario>
+        <scenario>When finding code duplication or similar issues</scenario>
+        <scenario>When checking for specific coding standards violations</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Craft specific regex patterns for targeted searches</practice>
+        <practice>Use appropriate file patterns to limit search scope</practice>
+        <practice>Review search results in context of surrounding code</practice>
+        <practice>Document search patterns used for reproducibility</practice>
+      </best_practices>
+      <examples>
+        <example name="security_vulnerability_search">
+          <scenario>Searching for SQL injection vulnerabilities</scenario>
+          <pattern>query.*\+.*\$|execute.*\$|SELECT.*\+.*\$\{</pattern>
+          <file_pattern>\.(js|ts|jsx|tsx|php|py|java)$</file_pattern>
+          <explanation>Search for patterns that commonly indicate SQL injection risks</explanation>
+        </example>
+        
+        <example name="performance_issue_search">
+          <scenario>Finding nested loops or performance issues</scenario>
+          <pattern>for.*for.*\{|while.*while|O\(n\^2\)</pattern>
+          <file_pattern>\.(js|ts|jsx|tsx|py|java)$</file_pattern>
+          <explanation>Search for patterns that often indicate performance problems</explanation>
+        </example>
+      </examples>
+    </tool>
+    
+    <tool name="list_files">
+      <purpose>Understand project structure and identify review scope</purpose>
+      <when_to_use>
+        <scenario>When starting a new code review project</scenario>
+        <scenario>When unfamiliar with codebase structure</scenario>
+        <scenario>When identifying all files in a specific directory</scenario>
+        <scenario>When planning review approach and priorities</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Use recursive listing to understand full project structure</practice>
+        <practice>Focus on directories relevant to review scope</practice>
+        <practice>Identify file types and technologies used</practice>
+        <practice>Plan review sequence based on file organization</practice>
+      </best_practices>
+      <example>
+        <scenario>Planning review of API endpoints</scenario>
+        <usage>List files in api/, controllers/, services/, and models/ directories</usage>
+        <benefit>Helps understand API structure and plan systematic review</benefit>
+      </example>
+    </tool>
+    
+    <tool name="execute_command">
+      <purpose>Run automated analysis tools, linters, or security scanners</purpose>
+      <when_to_use>
+        <scenario>When performing security vulnerability scans</scenario>
+        <scenario>When running code quality analysis tools</scenario>
+        <scenario>When checking dependencies for known vulnerabilities</scenario>
+        <scenario>When generating complexity metrics or reports</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Choose appropriate tools for the specific analysis type</practice>
+        <practice>Review and interpret tool outputs carefully</practice>
+        <practice>Document tool versions and configurations used</practice>
+        <practice>Correlate automated findings with manual review</practice>
+      </best_practices>
+      <examples>
+        <example name="security_scanning">
+          <scenario>Running security vulnerability scan</scenario>
+          <command>npm audit --audit-level moderate</command>
+          <alternative>semgrep --config=security</alternative>
+          <explanation>Check for known security vulnerabilities in dependencies and code</explanation>
+        </example>
+        
+        <example name="code_quality_analysis">
+          <scenario>Running code quality linters</scenario>
+          <command>eslint src/ --ext .js,.ts,.jsx,.tsx --format json</command>
+          <alternative>pylint --output-format=json src/</alternative>
+          <explanation>Analyze code quality and identify potential issues</explanation>
+        </example>
+      </examples>
+    </tool>
+  </tool_specific_guidance>
+
+  <workflow_integration>
+    <phase name="preparation">
+      <tool_sequence>
+        <step>Use list_files to understand project structure</step>
+        <step>Use read_file to examine key files and understand context</step>
+        <step>Use search_files to identify patterns or specific issues</step>
+      </tool_sequence>
+      <rationale>Systematic approach ensures comprehensive understanding before detailed analysis</rationale>
+    </phase>
+    
+    <phase name="analysis">
+      <tool_sequence>
+        <step>Use read_file to thoroughly examine identified files</step>
+        <step>Use search_files to find related patterns and issues</step>
+        <step>Use execute_command to run automated analysis tools</step>
+        <step>Use read_file to investigate findings from automated tools</step>
+      </tool_sequence>
+      <rationale>Combines manual review with automated analysis for comprehensive coverage</rationale>
+    </phase>
+    
+    <phase name="reporting">
+      <tool_sequence>
+        <step>Use execute_command to generate summary reports</step>
+        <step>Use read_file to verify findings and gather context</step>
+        <step>Document all findings with specific file references and line numbers</step>
+      </tool_sequence>
+      <rationale>Ensures accurate, well-documented findings with proper context</rationale>
+    </phase>
+  </workflow_integration>
+
+  <code_review_specific_patterns>
+    <pattern name="security_analysis_workflow">
+      <description>Systematic approach to security vulnerability analysis</description>
+      <steps>
+        <step>Search for common vulnerability patterns using search_files</step>
+        <step>Examine authentication and authorization code with read_file</step>
+        <step>Run security scanners with execute_command</step>
+        <step>Review input validation and sanitization</step>
+        <step>Check for hardcoded secrets or credentials</step>
+        <step>Analyze error handling for information disclosure</step>
+      </steps>
+      <tools>
+        <tool>search_files - Find vulnerability patterns</tool>
+        <tool>read_file - Examine security-critical code</tool>
+        <tool>execute_command - Run security analysis tools</tool>
+      </tools>
+    </pattern>
+    
+    <pattern name="performance_analysis_workflow">
+      <description>Systematic approach to performance issue identification</description>
+      <steps>
+        <step>Identify database queries and loops with search_files</step>
+        <step>Analyze algorithmic complexity with read_file</step>
+        <step>Check for caching opportunities</step>
+        <step>Review resource management and cleanup</step>
+        <step>Look for blocking operations and bottlenecks</step>
+      </steps>
+      <tools>
+        <tool>search_files - Find performance anti-patterns</tool>
+        <tool>read_file - Analyze algorithm implementations</tool>
+        <tool>execute_command - Run performance profilers</tool>
+      </tools>
+    </pattern>
+    
+    <pattern name="maintainability_analysis_workflow">
+      <description>Systematic approach to code maintainability assessment</description>
+      <steps>
+        <step>Review code organization and structure</step>
+        <step>Check for code duplication and redundancy</step>
+        <step>Analyze function complexity and size</step>
+        <step>Review naming conventions and clarity</step>
+        <step>Assess documentation and comments</step>
+        <step>Check adherence to design patterns</step>
+      </steps>
+      <tools>
+        <tool>read_file - Examine code structure and organization</tool>
+        <tool>search_files - Find duplication and inconsistencies</tool>
+        <tool>execute_command - Run complexity analysis tools</tool>
+      </tools>
+    </pattern>
+  </code_review_specific_patterns>
+</tool_usage_guide>
+]]>

@@ -1,0 +1,204 @@
+<common_patterns>
+  <component_patterns>
+    <pattern name="button_variations">
+      <description>Standard button styles for different contexts and actions</description>
+      <variants>
+        <variant name="primary">Main action buttons with brand color</variant>
+        <variant name="secondary">Secondary actions with subtle styling</variant>
+        <variant name="outline">Transparent background with border</variant>
+        <variant name="ghost">Minimal styling for subtle actions</variant>
+        <variant name="danger">Destructive actions with red styling</variant>
+      </variants>
+      <states>
+        <state name="default">Normal resting state</state>
+        <state name="hover">Mouse over or touch hover</state>
+        <state name="active">Currently pressed or selected</state>
+        <state name="disabled">Unavailable for interaction</state>
+        <state name="loading">Showing progress indicator</state>
+      </states>
+      <sizes>
+        <size name="small">Compact for tight spaces</size>
+        <size name="medium">Standard default size</size>
+        <size name="large">Prominent for important actions</size>
+      </sizes>
+    </pattern>
+
+    <pattern name="form_layouts">
+      <description>Consistent form organization and field patterns</description>
+      <layouts>
+        <layout name="stacked">Fields stacked vertically (mobile-first)</layout>
+        <layout name="inline">Fields arranged horizontally (desktop)</layout>
+        <layout name="grid">Fields in responsive grid layout</layout>
+        <layout name="wizard">Multi-step form with progress indicator</layout>
+      </layouts>
+      <field_patterns>
+        <pattern name="label_position">Labels above fields for mobile, beside for desktop</pattern>
+        <pattern name="validation">Inline validation with clear error messages</pattern>
+        <pattern name="required_indicators">Asterisk or "Required" text for mandatory fields</pattern>
+        <pattern name="help_text">Contextual help below or beside fields</pattern>
+      </field_patterns>
+    </pattern>
+
+    <pattern name="navigation_patterns">
+      <description>Common navigation structures and behaviors</description>
+      <types>
+        <type name="header_nav">Top navigation with logo and menu items</type>
+        <type name="sidebar_nav">Vertical navigation for complex applications</type>
+        <type name="tab_nav">Horizontal tabs for related content sections</type>
+        <type name="breadcrumb">Hierarchical navigation trail</type>
+        <type name="footer_nav">Secondary links and legal information</type>
+      </types>
+      <behaviors>
+        <behavior name="active_states">Clear indication of current location</behavior>
+        <behavior name="responsive_collapse">Mobile hamburger menu pattern</behavior>
+        <behavior name="dropdown_menus">Hover or click reveal sub-menus</behavior>
+        <behavior name="sticky_navigation">Nav remains visible while scrolling</behavior>
+      </behaviors>
+    </pattern>
+  </component_patterns>
+
+  <layout_patterns>
+    <pattern name="grid_systems">
+      <description>Responsive grid layouts for content organization</description>
+      <breakpoints>
+        <breakpoint name="mobile" min_width="320px" max_width="767px">1-2 columns</breakpoint>
+        <breakpoint name="tablet" min_width="768px" max_width="1023px">2-3 columns</breakpoint>
+        <breakpoint name="desktop" min_width="1024px" max_width="1439px">3-4 columns</breakpoint>
+        <breakpoint name="large" min_width="1440px" max_width="∞">4+ columns</breakpoint>
+      </breakpoints>
+      <patterns>
+        <pattern name="12_column_grid">Standard 12-column system</pattern>
+        <pattern name="flexbox_grid">Modern flexbox-based layout</pattern>
+        <pattern name="css_grid">Native CSS Grid for complex layouts</pattern>
+      </patterns>
+    </pattern>
+
+    <pattern name="card_patterns">
+      <description>Consistent card layouts for content modules</description>
+      <types>
+        <type name="content_card">Text and media content</type>
+        <type name="product_card">Product listings with pricing</type>
+        <type name="profile_card">User information and actions</type>
+        <type name="stat_card">Metrics and data visualization</type>
+      </types>
+      <elements>
+        <element name="header">Title and optional metadata</element>
+        <element name="media">Image, video, or illustration</element>
+        <element name="body">Main content area</element>
+        <element name="footer">Actions, links, or timestamps</element>
+        <element name="overlay">Hover states and additional info</element>
+      </elements>
+    </pattern>
+  </layout_patterns>
+
+  <color_systems>
+    <pattern name="semantic_colors">
+      <description>Colors with specific meanings and usage rules</description>
+      <palette>
+        <color name="primary" usage="Brand identity, primary actions">Brand blue</color>
+        <color name="secondary" usage="Secondary actions, accents">Complementary color</color>
+        <color name="success" usage="Positive feedback, confirmations">Green</color>
+        <color name="warning" usage="Caution, attention needed">Yellow/Orange</color>
+        <color name="error" usage="Errors, destructive actions">Red</color>
+        <color name="info" usage="Neutral information">Blue/Gray</color>
+      </palette>
+      <variations>
+        <variation name="lightest">Backgrounds, subtle highlights</variation>
+        <variation name="light">Hover states, borders</variation>
+        <variation name="base">Standard usage</variation>
+        <variation name="dark">Text, emphasis</variation>
+        <variation name="darkest">Important text, headings</variation>
+      </variations>
+    </pattern>
+
+    <pattern name="neutral_scale">
+      <description>Gray scale for text, backgrounds, and borders</description>
+      <scale>
+        <shade name="50">Very light backgrounds</shade>
+        <shade name="100">Light backgrounds, disabled states</shade>
+        <shade name="200">Borders, dividers</shade>
+        <shade name="300">Subtle text, placeholders</shade>
+        <shade name="400">Secondary text</shade>
+        <shade name="500">Body text</shade>
+        <shade name="600">Headings, emphasis</shade>
+        <shade name="700">Important text</shade>
+        <shade name="800">Page titles</shade>
+        <shade name="900">Very important text</shade>
+      </scale>
+    </pattern>
+  </color_systems>
+
+  <typography_systems>
+    <pattern name="type_scale">
+      <description>Consistent font sizes and weights for hierarchy</description>
+      <scale>
+        <size name="xs" usage="Captions, metadata">12px</size>
+        <size name="sm" usage="Small text, labels">14px</size>
+        <size name="base" usage="Body text, paragraphs">16px</size>
+        <size name="lg" usage="Subheadings, emphasis">18px</size>
+        <size name="xl" usage="Section headings">20px</size>
+        <size name="2xl" usage="Page headings">24px</size>
+        <size name="3xl" usage="Feature headings">30px</size>
+        <size name="4xl" usage="Hero headings">36px</size>
+      </scale>
+      <weights>
+        <weight name="light" value="300">Subtle text elements</weight>
+        <weight name="normal" value="400">Body text</weight>
+        <weight name="medium" value="500">Emphasis, buttons</weight>
+        <weight name="semibold" value="600">Headings, important text</weight>
+        <weight name="bold" value="700">Strong emphasis</weight>
+      </weights>
+    </pattern>
+  </typography_systems>
+
+  <interaction_patterns>
+    <pattern name="micro_interactions">
+      <description>Subtle animations and feedback for user actions</description>
+      <animations>
+        <animation name="fade_in">Elements appearing smoothly</animation>
+        <animation name="slide_up">Content sliding into view</animation>
+        <animation name="scale_in">Buttons growing on hover</animation>
+        <animation name="bounce">Attention-grabbing actions</animation>
+        <animation name="pulse">Loading states, progress</animation>
+      </animations>
+      <timing>
+        <timing name="fast">150ms - Immediate feedback</timing>
+        <timing name="medium">300ms - Natural transitions</timing>
+        <timing name="slow">500ms - Major state changes</timing>
+      </timing>
+    </pattern>
+
+    <pattern name="loading_states">
+      <description>Consistent loading patterns for async operations</description>
+      <types>
+        <type name="skeleton">Content placeholders while loading</type>
+        <type name="spinner">Circular progress indicator</type>
+        <type name="progress_bar">Linear progress for known duration</type>
+        <type name="shimmer">Animated placeholder effect</type>
+      </types>
+      <placements>
+        <placement name="inline">Within content area</placement>
+        <placement name="overlay">Centered on screen</placement>
+        <placement name="inline_button">Button shows loading state</placement>
+        <placement name="skeleton_card">Card loads with skeleton</placement>
+      </placements>
+    </pattern>
+  </interaction_patterns>
+
+  <responsive_patterns>
+    <pattern name="mobile_first">
+      <description>Design approach starting from mobile constraints</description>
+      <principles>
+        <principle>Single column layouts by default</principle>
+        <principle>Touch-friendly target sizes (44px minimum)</principle>
+        <principle>Simplified navigation for small screens</principle>
+        <principle>Progressive enhancement for larger screens</principle>
+      </principles>
+      <breakpoints>
+        <breakpoint name="mobile" max_width="767px">Base experience</breakpoint>
+        <breakpoint name="tablet" min_width="768px">Add complexity</breakpoint>
+        <breakpoint name="desktop" min_width="1024px">Full experience</breakpoint>
+      </breakpoints>
+    </pattern>
+  </responsive_patterns>
+</common_patterns>

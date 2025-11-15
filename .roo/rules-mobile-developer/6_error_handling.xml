@@ -1,0 +1,344 @@
+<error_handling>
+  <overview>
+    Error handling strategies for mobile development, covering common issues, debugging approaches, and recovery methods specific to React Native and Flutter applications.
+  </overview>
+
+  <common_mobile_errors>
+    <error_category name="build_errors">
+      <description>Compilation and build-related failures</description>
+      <common_errors>
+        <error name="dependency_conflicts">
+          <symptoms>Version mismatches, peer dependency errors</symptoms>
+          <diagnosis>Check package.json, yarn.lock, and Podfile for version conflicts</diagnosis>
+          <resolution>
+            <step>Clear node_modules and package-lock.json</step>
+            <step>Update conflicting dependencies to compatible versions</step>
+            <step>Run pod install for iOS dependencies</step>
+            <step>Rebuild the application</step>
+          </resolution>
+        </error>
+        
+        <error name="native_module_linking">
+          <symptoms>Module not found, linking errors during build</symptoms>
+          <diagnosis>Native modules not properly linked or installed</diagnosis>
+          <resolution>
+            <step>Run react-native link for manual linking</step>
+            <step>Check iOS Podfile for native dependencies</step>
+            <step>Verify Android settings.gradle and build.gradle</step>
+            <step>Clean and rebuild the project</step>
+          </resolution>
+        </error>
+        
+        <error name="ios_certificate_issues">
+          <symptoms>Code signing errors, provisioning profile problems</symptoms>
+          <diagnosis>Missing or expired certificates/provisioning profiles</diagnosis>
+          <resolution>
+            <step>Check Apple Developer account for valid certificates</step>
+            <step>Download and install provisioning profiles</step>
+            <step>Update Xcode signing settings</step>
+            <step>Clean build folder and rebuild</step>
+          </resolution>
+        </error>
+      </common_errors>
+    </error_category>
+
+    <error_category name="runtime_errors">
+      <description>Errors that occur during app execution</description>
+      <common_errors>
+        <error name="network_timeout">
+          <symptoms>Requests failing, slow loading, timeout errors</symptoms>
+          <diagnosis>Poor network connectivity or server issues</diagnosis>
+          <resolution>
+            <step>Implement retry logic with exponential backoff</step>
+            <step>Add network connectivity checks</step>
+            <step>Provide offline fallback content</step>
+            <step>Show user-friendly error messages</step>
+          </resolution>
+        </error>
+        
+        <error name="memory_leaks">
+          <symptoms>App slowing down, crashes, high memory usage</symptoms>
+          <diagnosis>Improper memory management, retained references</diagnosis>
+          <resolution>
+            <step>Use memory profiling tools to identify leaks</step>
+            <step>Check for circular references in closures</step>
+            <step>Properly cleanup listeners and observers</step>
+            <step>Implement weak references where appropriate</step>
+          </resolution>
+        </error>
+        
+        <error name="state_management_issues">
+          <symptoms>UI not updating, inconsistent state, race conditions</symptoms>
+          <diagnosis>Improper state updates, async state conflicts</diagnosis>
+          <resolution>
+            <step>Review state update patterns</step>
+            <step>Implement proper async handling</step>
+            <step>Add state validation</step>
+            <step>Use state debugging tools</step>
+          </resolution>
+        </error>
+      </common_errors>
+    </error_category>
+
+    <error_category name="platform_specific">
+      <description>Errors specific to iOS or Android platforms</description>
+      <common_errors>
+        <error name="ios_permission_denied">
+          <symptoms>Camera, location, or other permissions not granted</symptoms>
+          <diagnosis>Missing Info.plist entries or permission requests</diagnosis>
+          <resolution>
+            <step>Add required keys to Info.plist</step>
+            <step>Implement proper permission request flow</step>
+            <step>Handle permission denial gracefully</step>
+            <step>Provide clear user instructions</step>
+          </resolution>
+        </error>
+        
+        <error name="android_runtime_permissions">
+          <symptoms>Permissions not working on Android 6.0+</symptoms>
+          <diagnosis>Missing runtime permission requests</diagnosis>
+          <resolution>
+            <step>Add permissions to AndroidManifest.xml</step>
+            <step>Implement runtime permission checks</step>
+            <step>Handle permission rationale display</step>
+            <step>Provide fallback for denied permissions</step>
+          </resolution>
+        </error>
+      </common_errors>
+    </error_category>
+  </common_mobile_errors>
+
+  <debugging_strategies>
+    <strategy name="react_native_debugging">
+      <tools>
+        <tool>React DevTools</tool>
+        <tool>Flipper for advanced debugging</tool>
+        <tool>React Native Debugger</tool>
+        <tool>Platform-specific debuggers (Xcode, Android Studio)</tool>
+      </tools>
+      <approach>
+        <step>Enable remote debugging in development</step>
+        <step>Use console.log and debugger statements</step>
+        <step>Leverage React DevTools for component inspection</step>
+        <step>Monitor network requests with Flipper</step>
+        <step>Check native logs for platform-specific issues</step>
+      </approach>
+    </strategy>
+
+    <strategy name="flutter_debugging">
+      <tools>
+        <tool>Dart DevTools</tool>
+        <tool>Flutter Inspector</tool>
+        <tool>Performance overlay</tool>
+        <tool>Platform-specific debuggers</tool>
+      </tools>
+      <approach>
+        <step>Enable debug mode with flutter run --debug</step>
+        <step>Use Dart DevTools for widget inspection</step>
+        <step>Monitor performance with overlay</step>
+        <step>Check console logs for errors</step>
+        <step>Use hot reload for iterative debugging</step>
+      </approach>
+    </strategy>
+  </debugging_strategies>
+
+  <performance_troubleshooting>
+    <issue name="slow_app_startup">
+      <diagnosis_tools>
+        <tool>Android: Android Studio Profiler</tool>
+        <tool>iOS: Instruments Time Profiler</tool>
+        <tool>React Native: Flipper Performance</tool>
+        <tool>Flutter: Flutter Performance overlay</tool>
+      </diagnosis_tools>
+      <optimization_steps>
+        <step>Analyze app initialization sequence</step>
+        <step>Defer non-critical operations</step>
+        <step>Optimize bundle size and loading</step>
+        <step>Implement lazy loading for components</step>
+        <step>Use code splitting for large modules</step>
+      </optimization_steps>
+    </issue>
+
+    <issue name="poor_scroll_performance">
+      <symptoms>Janky scrolling, dropped frames</symptoms>
+      <causes>
+        <cause>Complex layouts in scroll views</cause>
+        <cause>Expensive operations during scroll</cause>
+        <cause>Large images not optimized</cause>
+        <cause>Missing list virtualization</cause>
+      </causes>
+      <solutions>
+        <solution>Implement flat list virtualization</solution>
+        <solution>Use image optimization and caching</solution>
+        <solution>Debounce scroll event handlers</solution>
+        <solution>Simplify list item layouts</solution>
+        <solution>Use platform-optimized components</solution>
+      </solutions>
+    </issue>
+
+    <issue name="high_battery_drain">
+      <diagnosis>
+        <step>Monitor CPU usage with profilers</step>
+        <step>Check for background processes</step>
+        <step>Analyze network request frequency</step>
+        <step>Review location/GPS usage</step>
+      </diagnosis>
+      <optimization>
+        <step>Implement efficient background tasks</step>
+        <step>Use batch network requests</step>
+        <step>Optimize location update frequency</step>
+        <step>Reduce unnecessary wake locks</step>
+        <step>Implement proper app lifecycle management</step>
+      </optimization>
+    </issue>
+  </performance_troubleshooting>
+
+  <crash_prevention>
+    <strategy name="defensive_programming">
+      <practices>
+        <practice>Input validation and sanitization</practice>
+        <practice>Null safety and optional chaining</practice>
+        <practice>Proper error boundary implementation</practice>
+        <practice>Graceful degradation for missing features</practice>
+        <practice>Comprehensive testing of edge cases</practice>
+      </practices>
+    </strategy>
+
+    <strategy name="error_boundaries">
+      <react_native_implementation>
+        <code><![CDATA[
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.log('Error caught by boundary:', error, errorInfo);
+    // Log to crash reporting service
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <ErrorFallback onRetry={() => this.setState({ hasError: false })} />;
+    }
+    return this.props.children;
+  }
+}
+        ]]></code>
+      </react_native_implementation>
+      
+      <flutter_implementation>
+        <code><![CDATA[
+class ErrorBoundary extends StatefulWidget {
+  @override
+  _ErrorBoundaryState createState() => _ErrorBoundaryState();
+}
+
+class _ErrorBoundaryState extends State<ErrorBoundary> {
+  @override
+  void initState() {
+    super.initState();
+    FlutterError.onError = (FlutterErrorDetails details) {
+      // Log error and show user-friendly message
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+        ]]></code>
+      </flutter_implementation>
+    </strategy>
+  </crash_prevention>
+
+  <recovery_procedures>
+    <procedure name="app_crash_recovery">
+      <steps>
+        <step>Implement automatic restart mechanism</step>
+        <step>Restore user session from persisted state</step>
+        <step>Provide crash reporting and feedback</step>
+        <step>Offer alternative functionality if needed</step>
+      </steps>
+    </procedure>
+
+    <procedure name="data_sync_recovery">
+      <steps>
+        <step>Detect sync conflicts and inconsistencies</step>
+        <step>Implement conflict resolution strategies</step>
+        <step>Provide manual resolution options</step>
+        <step>Maintain audit trail of changes</step>
+      </steps>
+    </procedure>
+  </recovery_procedures>
+
+  <testing_error_scenarios>
+    <scenario name="network_conditions">
+      <test_cases>
+        <case>No internet connection</case>
+        <case>Slow network (2G/3G)</case>
+        <case>Intermittent connectivity</case>
+        <case>Network timeouts</case>
+      </test_cases>
+      <testing_approach>
+        <approach>Use network simulation tools</approach>
+        <approach>Test with airplane mode</approach>
+        <approach>Simulate poor network conditions</approach>
+        <approach>Verify offline functionality</approach>
+      </testing_approach>
+    </scenario>
+
+    <scenario name="device_constraints">
+      <test_cases>
+        <case>Low memory devices</case>
+        <case>Older OS versions</case>
+        <case>Small screen sizes</case>
+        <case>Limited storage space</case>
+      </test_cases>
+      <testing_approach>
+        <approach>Test on minimum supported devices</approach>
+        <approach>Simulate low memory conditions</approach>
+        <approach>Test with various screen sizes</approach>
+        <approach>Verify graceful degradation</approach>
+      </testing_approach>
+    </scenario>
+  </testing_error_scenarios>
+
+  <monitoring_and_alerting>
+    <crash_reporting>
+      <services>
+        <service>Crashlytics (Firebase)</service>
+        <service>Sentry</service>
+        <service>Bugsnag</service>
+        <service>Custom logging solutions</service>
+      </services>
+      <implementation>
+        <step>Integrate crash reporting SDK</step>
+        <step>Configure error grouping and prioritization</step>
+        <step>Set up alerts for critical issues</step>
+        <step>Implement custom error context</step>
+      </implementation>
+    </crash_reporting>
+
+    <performance_monitoring>
+      <metrics>
+        <metric>App startup time</metric>
+        <metric>Screen load times</metric>
+        <metric>Memory usage patterns</metric>
+        <metric>Network request performance</metric>
+        <metric>User interaction response times</metric>
+      </metrics>
+      <tools>
+        <tool>Firebase Performance Monitoring</tool>
+        <tool>New Relic Mobile</tool>
+        <tool>Custom analytics implementation</tool>
+      </tools>
+    </performance_monitoring>
+  </monitoring_and_alerting>
+</error_handling>

@@ -1,0 +1,265 @@
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>System Thinking Over Component Thinking</name>
+      <description>Always evaluate the system as a whole rather than individual components in isolation. Consider the full lifecycle, data flows, and integration points when making architectural decisions.</description>
+      <rationale>Architecture decisions have ripple effects across the entire system. Component-level optimization can lead to system-level problems.</rationale>
+      <example>
+        <scenario>When evaluating a caching strategy</scenario>
+        <good>Consider how caching affects data consistency, user experience, and system performance across all services</good>
+        <bad>Optimizing cache for a single service without considering system-wide data flow implications</bad>
+      </example>
+    </principle>
+    
+    <principle priority="high">
+      <name>Principle of Least Astonishment</name>
+      <description>Prefer the simplest architecture that meets requirements. Avoid over-engineering and unnecessary complexity.</description>
+      <rationale>Simple architectures are easier to understand, maintain, and evolve. Complex solutions often introduce more failure points and technical debt.</rationale>
+      <example>
+        <scenario>Choosing between microservices and monolith</scenario>
+        <good>Start with a simple monolith if the business requirements don't justify microservices complexity</good>
+        <bad>Implementing microservices because they're trendy without clear business need</bad>
+      </example>
+    </principle>
+    
+    <principle priority="high">
+      <name>Evolutionary Architecture</name>
+      <description>Design systems that can evolve and adapt over time. Avoid architectural decisions that lock the system into a specific technology or approach.</description>
+      <rationale>Business requirements and technology landscapes change. Systems must be able to adapt without complete rewrites.</rationale>
+      <example>
+        <scenario>Database technology selection</scenario>
+        <good>Choose database technology that allows for easy migration and supports multiple vendors if needed</good>
+        <bad>Locking into a proprietary database that limits future options</bad>
+      </example>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Domain-Driven Design</name>
+      <description>Align architecture with business domains and bounded contexts. Use clear boundaries between different business domains.</description>
+      <rationale>DDD helps manage complexity, improves communication between business and technical teams, and creates more maintainable systems.</rationale>
+      <example>
+        <scenario>Service boundary definition</scenario>
+        <good>Define clear interfaces between bounded contexts based on business capabilities</good>
+        <bad>Allowing arbitrary calls between any services without clear domain boundaries</bad>
+      </example>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Security by Design</name>
+      <description>Build security into the architecture from the beginning rather than bolting it on later.</description>
+      <rationale>Security considerations should influence architectural decisions, not be an afterthought.</rationale>
+      <example>
+        <scenario>Authentication design</scenario>
+        <good>Design authentication as part of the core architecture with proper threat modeling</good>
+        <bad>Adding authentication as an overlay without considering system-wide security implications</bad>
+      </example>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Performance-First Architecture</name>
+      <description>Consider performance implications from the start of design. Make architectural decisions that support performance requirements.</description>
+      <rationale>Performance is often harder to add later than to design for initially.</rationale>
+      <example>
+        <scenario>Data flow design</scenario>
+        <good>Design data flows to minimize latency and maximize throughput</good>
+        <bad>Creating chatty architectures with excessive round-trips</bad>
+      </example>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Documentation-Driven Architecture</name>
+      <description>Document architectural decisions and their rationale. Use Architecture Decision Records (ADRs) to capture important decisions.</description>
+      <rationale>Documentation ensures continuity, helps new team members understand decisions, and provides audit trail for architectural choices.</rationale>
+    </principle>
+  </general_principles>
+
+  <architecture_review_checklist>
+    <category name="system_thinking">
+      <item>Evaluated system as whole, not just components</item>
+      <item>Considered full lifecycle and data flows</item>
+      <item>Analyzed business domain alignment</item>
+      <item>Assessed scalability and performance requirements</item>
+      <item>Evaluated security implications</item>
+    </category>
+    
+    <category name="design_principles">
+      <item>Applied principle of least astonishment</item>
+      <item>Used evolutionary architecture approach</item>
+      <item>Implemented domain-driven design</item>
+      <item>Built security by design</item>
+      <item>Considered performance from start</item>
+      <item>Documented decisions with ADRs</item>
+    </category>
+    
+    <category name="technical_evaluation">
+      <item>Technology stack appropriate for requirements</item>
+      <item>Integration patterns well-defined</item>
+      <item>Data architecture supports scalability</item>
+      <item>Security architecture addresses threats</item>
+      <item>Performance characteristics meet requirements</item>
+      <item>Technical debt identified and planned</item>
+    </category>
+    
+    <category name="documentation">
+      <item>Architecture Decision Records created</item>
+      <item>Design rationale documented</item>
+      <item>System diagrams updated</item>
+      <item>Review report generated</item>
+    </category>
+  </architecture_review_checklist>
+
+  <common_architectural_patterns>
+    <pattern name="layered_architecture">
+      <description>Separate concerns into distinct layers</description>
+      <benefits>Clear separation of responsibilities, easier testing, independent evolution</benefits>
+      <considerations>Ensure clear interfaces between layers, avoid circular dependencies</considerations>
+      <example>
+        <scenario>Typical 3-tier architecture</scenario>
+        <good>Presentation → Business Logic → Data Access → Database</good>
+        <bad>Mixing UI logic with business logic</bad>
+      </example>
+    </pattern>
+    
+    <pattern name="microservices_architecture">
+      <description>Decompose system into small, independent services</description>
+      <benefits>Independent deployment, technology diversity, team autonomy, fault isolation</benefits>
+      <considerations>Service boundaries must be clear, communication overhead managed, data consistency addressed</considerations>
+      <example>
+        <scenario>E-commerce microservices</scenario>
+        <good>Order Service, User Service, Payment Service, Inventory Service</good>
+        <bad>Monolithic application with mixed responsibilities</bad>
+      </example>
+    </pattern>
+    
+    <pattern name="event_driven_architecture">
+      <description>Use events to decouple components and enable asynchronous communication</description>
+      <benefits>Loose coupling, better scalability, event sourcing, easier debugging</benefits>
+      <considerations>Event schema design, idempotency, error handling, monitoring requirements</considerations>
+      <example>
+        <scenario>Order processing system</scenario>
+        <good>OrderCreated → OrderValidated → OrderProcessed → OrderShipped</good>
+        <bad>Tight coupling with synchronous processing</bad>
+      </example>
+    </pattern>
+    
+    <pattern name="cqrs_architecture">
+      <description>Command Query Responsibility Segregation for read/write separation</description>
+      <benefits>Optimized for different query patterns, clear separation of concerns, better performance</benefits>
+      <considerations>Define command and query responsibilities, ensure eventual consistency</considerations>
+      <example>
+        <scenario>Blog platform</scenario>
+        <good>Posts (write), Comments (read), Users (write), Analytics (read/write)</good>
+        <bad>Mixed read/write operations in single service</bad>
+      </example>
+    </pattern>
+    
+    <pattern name="hexagonal_architecture">
+      <description>Six-sided architecture with ports and adapters</description>
+      <benefits>Plug-and-play extensibility, testability, clear interfaces</benefits>
+      <considerations>Port definitions must be stable, adapters handle complexity, avoid breaking changes</considerations>
+      <example>
+        <scenario>Plugin system</scenario>
+        <good>Core system with well-defined plugin interfaces, versioned adapters</good>
+        <bad>Direct plugin modifications without interface versioning</bad>
+      </example>
+    </pattern>
+  </common_architectural_patterns>
+
+  <technology_evaluation_criteria>
+    <criteria name="scalability">
+      <description>Assess horizontal and vertical scaling capabilities</description>
+      <factors>
+        <factor>Load balancing capabilities</factor>
+        <factor>Database scaling options</factor>
+        <factor>Cache invalidation strategies</factor>
+        <factor>Stateless design support</factor>
+        <factor>Resource pooling efficiency</factor>
+      </factors>
+    </criteria>
+    
+    <criteria name="performance">
+      <description>Evaluate performance characteristics and bottlenecks</description>
+      <factors>
+        <factor>Response time requirements</factor>
+        <factor>Throughput capabilities</factor>
+        <factor>Resource utilization efficiency</factor>
+        <factor>Latency sensitivity</factor>
+        <factor>Concurrent processing capabilities</factor>
+      </factors>
+    </criteria>
+    
+    <criteria name="security">
+      <description>Evaluate security posture and threat resistance</description>
+      <factors>
+        <factor>Authentication and authorization strength</factor>
+        <factor>Data encryption and protection</factor>
+        <factor>Input validation and sanitization</factor>
+        <factor>API security implementation</factor>
+        <factor>Network security configuration</factor>
+        <factor>Compliance and audit capabilities</factor>
+      </factors>
+    </criteria>
+    
+    <criteria name="maintainability">
+      <description>Assess long-term maintenance and evolution capabilities</description>
+      <factors>
+        <factor>Code clarity and readability</factor>
+        <factor>Documentation quality</factor>
+        <factor>Testing coverage</factor>
+        <factor>Deployment simplicity</factor>
+        <factor>Monitoring and observability</factor>
+        <factor>Team skill requirements</factor>
+      </factors>
+    </criteria>
+  </technology_evaluation_criteria>
+
+  <risk_assessment_framework>
+    <risk_categories>
+      <category name="technical_risks">
+        <risk>Technology obsolescence</risk>
+        <risk>Performance bottlenecks</risk>
+        <risk>Security vulnerabilities</risk>
+        <risk>Integration failures</risk>
+        <risk>Data consistency issues</risk>
+      </category>
+      
+      <category name="business_risks">
+        <risk>Scope creep</risk>
+        <risk>Requirements misalignment</risk>
+        <risk>Cost overruns</risk>
+        <risk>Time to market delays</risk>
+        <risk>Team skill gaps</risk>
+      </category>
+      
+      <category name="operational_risks">
+        <risk>Deployment failures</risk>
+        <risk>Monitoring gaps</risk>
+        <risk>Vendor lock-in</risk>
+        <risk>Compliance violations</risk>
+      </category>
+    </risk_assessment_framework>
+
+  <communication_guidelines>
+    <guideline name="stakeholder_communication">
+      <description>Communicate architectural decisions effectively to all stakeholders</description>
+      <practices>
+        <practice>Use Architecture Decision Records (ADRs) for important decisions</practice>
+        <practice>Provide clear rationale with trade-off analysis</practice>
+        <practice>Include diagrams and visual models</practice>
+        <practice>Address concerns and questions proactively</practice>
+        <practice>Use consistent terminology and language</practice>
+      </practices>
+    </guideline>
+    
+    <guideline name="technical_documentation">
+      <description>Document architecture for long-term maintainability</description>
+      <practices>
+        <practice>Keep documentation updated with system changes</practice>
+        <practice>Include context and decision rationale</practice>
+        <practice>Use standard architectural notation (C4, UML)</practice>
+        <practice>Document integration points and interfaces</practice>
+        <practice>Provide deployment and operational guides</practice>
+      </practices>
+    </guideline>
+  </communication_guidelines>
+</best_practices>

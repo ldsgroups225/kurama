@@ -1,0 +1,147 @@
+<![CDATA[<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>White-Hat SEO Only</name>
+      <description>Always use ethical, sustainable SEO practices that comply with search engine guidelines</description>
+      <rationale>Black-hat techniques can lead to penalties and long-term damage to search visibility</rationale>
+      <example>
+        <scenario>When implementing link building strategies</scenario>
+        <good>Focus on creating valuable content that naturally earns quality backlinks</good>
+        <bad>Avoid buying links or participating in link schemes</bad>
+      </example>
+    </principle>
+    
+    <principle priority="high">
+      <name>User Experience First</name>
+      <description>Prioritize user experience and content quality over search engine manipulation</description>
+      <rationale>Search engines increasingly reward content that provides genuine value to users</rationale>
+      <example>
+        <scenario>When optimizing page content</scenario>
+        <good>Write comprehensive, helpful content that answers user queries thoroughly</good>
+        <bad>Don't keyword stuff or create thin content designed only for rankings</bad>
+      </example>
+    </principle>
+    
+    <principle priority="high">
+      <name>Data-Driven Decisions</name>
+      <description>Base all SEO recommendations and implementations on measurable data and analytics</description>
+      <rationale>SEO success requires continuous measurement and optimization based on performance data</rationale>
+      <example>
+        <scenario>When choosing target keywords</scenario>
+        <good>Analyze search volume, competition, and conversion potential using tools</good>
+        <bad>Don't guess keywords based on assumptions without research</bad>
+      </example>
+    </principle>
+  </general_principles>
+
+  <technical_seo_conventions>
+    <convention category="structured_data">
+      <rule>Implement comprehensive structured data using Schema.org standards</rule>
+      <examples>
+        <good>Use specific schema types (Article, Product, LocalBusiness) with all required properties</good>
+        <bad>Don't implement incomplete or generic structured data</bad>
+      </examples>
+    </convention>
+    
+    <convention category="meta_tags">
+      <rule>Optimize meta tags for both search engines and users</rule>
+      <template>
+        <title>Primary Keyword - Secondary Keyword | Brand Name</title>
+        <meta name="description" content="Compelling description under 160 characters including target keywords">
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+      </template>
+    </convention>
+    
+    <convention category="url_structure">
+      <rule>Create clean, descriptive URLs that include target keywords</rule>
+      <examples>
+        <good>example.com/seo-best-practices-guide</good>
+        <bad>example.com/page.php?id=123</bad>
+      </examples>
+    </convention>
+  </technical_seo_conventions>
+
+  <content_optimization_guidelines>
+    <guideline category="keyword_usage">
+      <rule>Naturally incorporate keywords without over-optimization</rule>
+      <best_practices>
+        <practice>Include primary keyword in title, first paragraph, and at least one subheading</practice>
+        <practice>Use semantic variations and long-tail keywords throughout content</practice>
+        <practice>Maintain keyword density between 1-3% for natural reading</practice>
+      </best_practices>
+    </guideline>
+    
+    <guideline category="content_quality">
+      <rule>Follow E-E-A-T principles (Experience, Expertise, Authoritativeness, Trustworthiness)</rule>
+      <requirements>
+        <requirement>Demonstrate firsthand experience with the topic</requirement>
+        <requirement>Show expertise through accurate, comprehensive information</requirement>
+        <requirement>Build authority with citations and references</requirement>
+        <requirement>Establish trustworthiness with transparent author information</requirement>
+      </requirements>
+    </guideline>
+  </content_optimization_guidelines>
+
+  <performance_optimization>
+    <convention category="core_web_vitals">
+      <rule>Optimize for Core Web Vitals thresholds</rule>
+      <targets>
+        <target metric="LCP" value="<2.5s">Largest Contentful Paint</target>
+        <target metric="FID" value="<100ms">First Input Delay</target>
+        <target metric="CLS" value="<0.1">Cumulative Layout Shift</target>
+      </targets>
+    </convention>
+    
+    <convention category="mobile_optimization">
+      <rule>Ensure mobile-first design and performance</rule>
+      <checklist>
+        <item>Responsive design that works on all screen sizes</item>
+        <item>Touch-friendly navigation and buttons</item>
+        <item>Fast loading times on mobile networks</item>
+        <item>Readable text without zooming</item>
+      </checklist>
+    </convention>
+  </performance_optimization>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>Keyword stuffing and over-optimization</description>
+      <why_problematic>Search engines penalize content that appears manipulated rather than natural</why_problematic>
+      <correct_approach>Focus on creating valuable content that naturally incorporates relevant keywords</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Ignoring technical SEO fundamentals</description>
+      <why_problematic>Poor technical implementation can prevent content from being indexed and ranked</why_problematic>
+      <correct_approach>Conduct regular technical audits and fix crawlability, indexing, and site architecture issues</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Duplicate content across pages</description>
+      <why_problematic>Confuses search engines about which page to rank and can dilute authority</why_problematic>
+      <correct_approach>Use canonical tags and create unique, valuable content for each page</correct_approach>
+    </pitfall>
+  </common_pitfalls>
+
+  <quality_checklist>
+    <category name="before_optimization">
+      <item>Conduct comprehensive SEO audit</item>
+      <item>Research target keywords and competitors</item>
+      <item>Analyze current search performance</item>
+      <item>Set measurable SEO goals</item>
+    </category>
+    <category name="during_implementation">
+      <item>Follow white-hat SEO practices only</item>
+      <item>Implement technical SEO best practices</item>
+      <item>Create high-quality, user-focused content</item>
+      <item>Set up proper tracking and analytics</item>
+    </category>
+    <category name="after_implementation">
+      <item>Monitor Core Web Vitals and performance metrics</item>
+      <item>Track keyword rankings and organic traffic</item>
+      <item>Analyze user engagement and conversion data</item>
+      <item>Continuously optimize based on performance data</item>
+    </category>
+  </quality_checklist>
+</best_practices>
+]]>

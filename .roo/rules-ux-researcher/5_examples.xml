@@ -1,0 +1,398 @@
+<examples>
+  <example name="ecommerce_checkout_usability">
+    <description>Complete usability test for e-commerce checkout process</description>
+    <context>
+      <business_problem>High cart abandonment rate (68%) during checkout</business_problem>
+      <research_objective>Identify usability issues causing abandonment and recommend improvements</research_objective>
+      <timeline>3 weeks from planning to final report</timeline>
+      <resources>UX researcher, 8 participants, prototype, analytics data</resources>
+    </context>
+    
+    <workflow_steps>
+      <step number="1">
+        <title>Research Planning</title>
+        <actions>
+          <action>Defined success metrics: completion rate, time on task, error rate, satisfaction</action>
+          <action>Created task scenarios: guest checkout, registered user checkout, payment methods</action>
+          <action>Recruited 8 participants: 4 new users, 4 returning customers</action>
+          <action>Prepared test environment with prototype and analytics tracking</action>
+        </actions>
+        <deliverables>
+          <deliverable>Research plan with objectives and methodology</deliverable>
+          <deliverable>Participant screening questionnaire</deliverable>
+          <deliverable>Test protocol and task scenarios</deliverable>
+        </deliverables>
+      </step>
+      
+      <step number="2">
+        <title>Data Collection</title>
+        <actions>
+          <action>Conducted 8 individual usability testing sessions</action>
+          <action>Collected think-aloud protocols and screen recordings</action>
+          <action>Measured task completion times and error rates</action>
+          <action>Administered System Usability Scale (SUS) post-test</action>
+        </actions>
+        <data_collected>
+          <metric>Task completion rate: 62.5% (5/8 completed checkout)</metric>
+          <metric>Average time on task: 8 minutes 45 seconds</metric>
+          <metric>Error rate: 3.2 errors per participant</metric>
+          <metric>SUS score: 58 (below average)</metric>
+        </data_collected>
+      </step>
+      
+      <step number="3">
+        <title>Analysis and Synthesis</title>
+        <actions>
+          <action>Analyzed screen recordings for common failure points</action>
+          <action>Identified recurring themes from think-aloud protocols</action>
+          <action>Correlated findings with existing analytics data</action>
+          <action>Prioritized issues by impact and frequency</action>
+        </actions>
+        <key_findings>
+          <finding>Payment form confusion - 75% of users struggled with credit card format</finding>
+          <finding>Hidden shipping costs - 62% abandoned when costs revealed late</finding>
+          <finding>Account creation pressure - 50% of guest users frustrated by prompts</finding>
+          <finding>Mobile usability issues - 38% of mobile users had form input problems</finding>
+        </key_findings>
+      </step>
+      
+      <step number="4">
+        <title>Reporting and Recommendations</title>
+        <actions>
+          <action>Created comprehensive research report with evidence</action>
+          <action>Developed prioritized recommendation matrix</action>
+          <action>Presented findings to product and engineering teams</action>
+          <action>Created implementation roadmap with success metrics</action>
+        </actions>
+        <recommendations>
+          <recommendation priority="high">Show shipping costs earlier in checkout flow</recommendation>
+          <recommendation priority="high">Improve payment form validation and formatting</recommendation>
+          <recommendation priority="medium">Make account creation truly optional</recommendation>
+          <recommendation priority="medium">Optimize mobile form inputs and layouts</recommendation>
+        </recommendations>
+      </step>
+    </workflow_steps>
+    
+    <outcomes>
+      <outcome>Implemented 3 of 4 recommendations within 2 months</outcome>
+      <outcome>Cart abandonment rate reduced to 45% (33% improvement)</outcome>
+      <outcome>Checkout completion time reduced by 40%</outcome>
+      <outcome>Customer satisfaction increased by 25%</outcome>
+    </outcomes>
+  </example>
+
+  <example name="saas_onboarding_research">
+    <description>Mixed-methods research to improve SaaS product onboarding</description>
+    <context>
+      <business_problem>40% of new users drop off during first week</business_problem>
+      <research_objective>Understand onboarding challenges and design improved experience</research_objective>
+      <timeline>4 weeks including longitudinal follow-up</timeline>
+      <resources>UX researcher, product manager, 15 participants, analytics access</resources>
+    </context>
+    
+    <workflow_steps>
+      <step number="1">
+        <title>Discovery and Planning</title>
+        <actions>
+          <action>Analyzed existing analytics to identify drop-off points</action>
+          <action>Reviewed support tickets from new users</action>
+          <action>Defined research questions: Why do users drop off? What are key success factors?</action>
+          <action>Planned mixed-methods approach: interviews + analytics + surveys</action>
+        </actions>
+        <deliverables>
+          <deliverable>Analytics analysis report</deliverable>
+          <deliverable>Mixed-methods research plan</deliverable>
+          <deliverable>Interview and survey instruments</deliverable>
+        </deliverables>
+      </step>
+      
+      <step number="2">
+        <title>Data Collection</title>
+        <actions>
+          <action>Conducted 12 in-depth interviews with recent users (6 retained, 6 churned)</action>
+          <action>Deployed onboarding satisfaction survey to 500 new users</action>
+          <action>Set up behavioral tracking for 50 new user cohorts</action>
+          <action>Collected product documentation and support content</action>
+        </actions>
+        <data_collected>
+          <metric>Survey response rate: 42% (210 responses)</metric>
+          <metric>Onboarding satisfaction: 3.2/5.0</metric>
+          <metric>Key drop-off point: Day 3 (35% of users)</metric>
+          <metric>Support tickets from new users: 28% of total volume</metric>
+        </data_collected>
+      </step>
+      
+      <step number="3">
+        <title>Analysis and Persona Development</title>
+        <actions>
+          <action>Thematic analysis of interview transcripts</action>
+          <action>Statistical analysis of survey responses</action>
+          <action>Behavioral pattern analysis from tracking data</action>
+          <action>Developed 3 user personas based on research findings</action>
+        </actions>
+        <key_findings>
+          <finding>Value proposition unclear - 60% don't understand key benefits</finding>
+          <finding>Complex setup process - 45% overwhelmed by configuration options</finding>
+          <finding>Lack of quick wins - 70% don't achieve meaningful outcome in first session</finding>
+          <finding>Poor help resources - 55% can't find answers when stuck</finding>
+        </key_findings>
+        <personas_created>
+          <persona>"Confused Explorer" - Needs guidance and clear value</persona>
+          <persona>"Efficiency Seeker" - Wants quick setup and immediate results</persona>
+          <persona>"Power User" - Needs advanced features and customization</persona>
+        </personas_created>
+      </step>
+      
+      <step number="4">
+        <title>Journey Mapping and Recommendations</title>
+        <actions>
+          <action>Created detailed onboarding journey maps for each persona</action>
+          <action>Identified critical moments and intervention points</action>
+          <action>Developed persona-specific onboarding flows</action>
+          <action>Created implementation roadmap with A/B test plan</action>
+        </actions>
+        <recommendations>
+          <recommendation>Implement progressive disclosure based on user goals</recommendation>
+          <recommendation>Create interactive tutorials for key features</recommendation>
+          <recommendation>Design quick-win scenarios for first session</recommendation>
+          <recommendation>Improve in-context help and documentation</recommendation>
+        </recommendations>
+      </step>
+    </workflow_steps>
+    
+    <outcomes>
+      <outcome>New onboarding flow increased week-1 retention by 35%</outcome>
+      <outcome>Time-to-first-value reduced from 45 minutes to 15 minutes</outcome>
+      <outcome>Support tickets from new users decreased by 40%</outcome>
+      <outcome>User satisfaction with onboarding improved to 4.3/5.0</outcome>
+    </outcomes>
+  </example>
+
+  <example name="mobile_app_feature_validation">
+    <description>Research to validate new mobile app feature concepts</description>
+    <context>
+      <business_need>Validate feature ideas before development investment</business_need>
+      <research_objective>Assess user needs and preferences for 3 proposed features</research_objective>
+      <timeline>2 weeks for concept validation</timeline>
+      <resources>UX researcher, product designer, 20 participants, concept mockups</resources>
+    </context>
+    
+    <workflow_steps>
+      <step number="1">
+        <title>Concept Preparation</title>
+        <actions>
+          <action>Reviewed existing user research and feedback</action>
+          <action>Created low-fidelity mockups for 3 feature concepts</action>
+          <action>Developed concept description sheets</action>
+          <action>Planned concept testing methodology</action>
+        </actions>
+        <feature_concepts>
+          <feature>Smart Recommendations - AI-powered content suggestions</feature>
+          <feature>Social Sharing - Enhanced sharing and collaboration features</feature>
+          <feature>Offline Mode - Access core features without internet</feature>
+        </feature_concepts>
+      </step>
+      
+      <step number="2">
+        <title>Concept Testing</title>
+        <actions>
+          <action>Conducted 20 individual concept testing sessions</action>
+          <action>Used Kano model to assess feature satisfaction</action>
+          <action>Measured perceived value and willingness to pay</action>
+          <action>Collected feature ranking and prioritization data</action>
+        </actions>
+        <methodology>
+          <technique>Concept presentation and explanation</technique>
+          <technique>Feature ranking and prioritization exercise</technique>
+          <technique>Value perception and pricing questions</technique>
+          <technique>Usability evaluation of mockups</technique>
+        </methodology>
+      </step>
+      
+      <step number="3">
+        <title>Analysis and Prioritization</title>
+        <actions>
+          <action>Analyzed feature preferences across user segments</action>
+          <action>Calculated feature value scores and ROI estimates</action>
+          <action>Identified must-have vs nice-to-have features</action>
+          <action>Assessed technical feasibility and development effort</action>
+        </actions>
+        <results>
+          <feature name="Smart Recommendations">
+            <interest>85% of users very interested</interest>
+            <value>High perceived value, willing to pay premium</value>
+            <feasibility>Medium technical complexity</feasibility>
+            <priority>High</priority>
+          </feature>
+          <feature name="Social Sharing">
+            <interest>45% of users interested</interest>
+            <value>Medium perceived value, limited willingness to pay</value>
+            <feasibility>Low technical complexity</feasibility>
+            <priority>Medium</priority>
+          </feature>
+          <feature name="Offline Mode">
+            <interest>70% of users interested</interest>
+            <value>High perceived value for specific segments</value>
+            <feasibility>High technical complexity</feasibility>
+            <priority>Medium-High</priority>
+          </feature>
+        </results>
+      </step>
+      
+      <step number="4">
+        <title>Recommendations and Roadmap</title>
+        <actions>
+          <action>Created feature prioritization matrix</action>
+          <action>Developed phased implementation roadmap</action>
+          <action>Defined success metrics for each feature</action>
+          <action>Presented findings to product leadership</action>
+        </actions>
+        <recommendations>
+          <recommendation>Phase 1: Develop Smart Recommendations (highest ROI)</recommendation>
+          <recommendation>Phase 2: Implement basic Offline Mode for core features</recommendation>
+          <recommendation>Phase 3: Add Social Sharing features based on user feedback</recommendation>
+          <recommendation>Conduct A/B tests for feature adoption and usage</recommendation>
+        </recommendations>
+      </step>
+    </workflow_steps>
+    
+    <outcomes>
+      <outcome>Smart Recommendations feature achieved 40% adoption in first month</outcome>
+      <outcome>User engagement increased by 25% with personalized content</outcome>
+      <outcome>Development resources focused on highest-impact features</outcome>
+      <outcome>Feature validation saved 3 months of development on low-value features</outcome>
+    </outcomes>
+  </example>
+
+  <example name="accessibility_research">
+    <description>Comprehensive accessibility audit and user research</description>
+    <context>
+      <compliance_need>Ensure WCAG 2.1 AA compliance and improve accessibility</compliance_need>
+      <research_objective>Identify accessibility barriers and validate solutions with users with disabilities</research_objective>
+      <timeline>6 weeks for comprehensive audit and user testing</timeline>
+      <resources>UX researcher, accessibility expert, 12 users with disabilities, audit tools</resources>
+    </context>
+    
+    <workflow_steps>
+      <step number="1">
+        <title>Accessibility Audit</title>
+        <actions>
+          <action>Conducted automated accessibility testing with multiple tools</action>
+          <action>Performed manual keyboard navigation testing</action>
+          <action>Reviewed color contrast and visual design</action>
+          <action>Assessed screen reader compatibility</action>
+        </actions>
+        <audit_findings>
+          <finding>42 accessibility violations across the application</finding>
+          <finding>Major issues: keyboard navigation, form labels, color contrast</finding>
+          <finding>Screen reader compatibility problems with dynamic content</finding>
+          <finding>Missing ARIA labels and landmarks</finding>
+        </audit_findings>
+      </step>
+      
+      <step number="2">
+        <title>User Testing with Disabilities</title>
+        <actions>
+          <action>Recruited 12 users with diverse disabilities</action>
+          <action>Conducted usability testing with assistive technologies</action>
+          <action>Observed task completion with screen readers, keyboard-only, voice control</action>
+          <action>Collected qualitative feedback on accessibility barriers</action>
+        </actions>
+        <participant_profile>
+          <profile>4 screen reader users (JAWS, NVDA, VoiceOver)</profile>
+          <profile>3 keyboard-only users (motor disabilities)</profile>
+          <profile>2 users with low vision (magnification, high contrast)</profile>
+          <profile>2 users with cognitive disabilities</profile>
+          <profile>1 voice control user</profile>
+        </participant_profile>
+      </step>
+      
+      <step number="3">
+        <title>Analysis and Solution Design</title>
+        <actions>
+          <action>Triangulated audit findings with user testing results</action>
+          <action>Prioritized issues by impact on user experience</action>
+          <action>Collaborated with designers on accessibility solutions</action>
+          <action>Developed accessibility guidelines and standards</action>
+        </actions>
+        <key_insights>
+          <insight>Automated tools caught only 60% of real accessibility barriers</insight>
+          <insight>Screen reader users struggled most with dynamic content updates</insight>
+          <insight>Keyboard navigation issues prevented task completion for many users</insight>
+          <insight>Color contrast problems affected users with low vision significantly</insight>
+        </key_insights>
+      </step>
+      
+      <step number="4">
+        <title>Implementation and Validation</title>
+        <actions>
+          <action>Created detailed accessibility improvement roadmap</action>
+          <action>Implemented high-priority fixes first</action>
+          <action>Conducted validation testing with users with disabilities</action>
+          <action>Established ongoing accessibility testing process</action>
+        </actions>
+        <improvements_made>
+          <improvement>Fixed all keyboard navigation issues</improvement>
+          <improvement>Added comprehensive ARIA labels and landmarks</improvement>
+          <improvement>Improved color contrast to WCAG AA standards</improvement>
+          <improvement>Enhanced screen reader compatibility</improvement>
+          <improvement>Added skip links and focus management</improvement>
+        </improvements_made>
+      </step>
+    </workflow_steps>
+    
+    <outcomes>
+      <outcome>Achieved WCAG 2.1 AA compliance across the application</outcome>
+      <outcome>Task completion rate for users with disabilities increased from 35% to 85%</outcome>
+      <outcome>Reduced accessibility-related support tickets by 70%</outcome>
+      <outcome>Established accessibility testing as part of standard development process</outcome>
+    </outcomes>
+  </example>
+
+  <research_communication_examples>
+    <example name="executive_summary">
+      <title>E-commerce Checkout Usability Research - Executive Summary</title>
+      <content>
+## Key Findings
+- 68% cart abandonment due to usability issues
+- Primary barrier: Hidden shipping costs revealed too late
+- Payment form confusion affects 75% of users
+
+## Business Impact
+- Potential revenue increase: $2.3M annually
+- Implementation cost: $150K
+- Expected ROI: 1,433% within 6 months
+
+## Top Recommendations
+1. Show shipping costs early (Impact: High, Effort: Low)
+2. Improve payment form validation (Impact: High, Effort: Medium)
+3. Make account creation optional (Impact: Medium, Effort: Low)
+
+## Next Steps
+- Implement high-priority fixes within 4 weeks
+- A/B test new checkout flow
+- Measure impact on conversion rate
+      </content>
+    </example>
+
+    <example name="research_insight">
+      <title>User Insight: Payment Form Confusion</title>
+      <content>
+**Observation:** 6 out of 8 participants struggled with credit card input format
+
+**Interpretation:** Users expect automatic formatting and real-time validation
+
+**Implication:** Current form creates friction and abandonment during critical conversion moment
+
+**Recommendation:** Implement auto-formatting and inline validation for payment forms
+
+**Confidence:** High (multiple data points, clear pattern)
+
+**Evidence:** 
+- Interview #3: "I don't know if I'm entering this right"
+- Interview #7: "The format is confusing, should include spaces"
+- Analytics: 45% form abandonment at payment step
+      </content>
+    </example>
+  </research_communication_examples>
+</examples>

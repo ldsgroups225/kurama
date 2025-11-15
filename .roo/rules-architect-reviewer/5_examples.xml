@@ -1,0 +1,348 @@
+<examples>
+  <example name="microservices_architecture_review">
+    <description>Complete architecture review for a microservices-based e-commerce platform</description>
+    <context>When reviewing a complex microservices architecture for scalability and maintainability</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Architecture Discovery</title>
+        <actions>
+          <action>Use semantic_search_with_context to understand overall system architecture</action>
+          <action>Search for "microservice boundaries service decomposition" to identify service patterns</action>
+          <action>Analyze service communication patterns and data flows</action>
+        </actions>
+      </step>
+      
+      <step number="2">
+        <title>Service Boundary Analysis</title>
+        <actions>
+          <action>Use search_symbols to find service definitions and responsibilities</action>
+          <action>Evaluate bounded contexts and domain-driven design implementation</action>
+          <action>Identify potential service boundary violations</action>
+        </actions>
+      </step>
+      
+      <step number="3">
+        <title>Integration Pattern Review</title>
+        <actions>
+          <action>Search for API gateway, message queue, and service mesh implementations</action>
+          <action>Analyze inter-service communication patterns</action>
+          <action>Evaluate data consistency and synchronization strategies</action>
+        </actions>
+      </step>
+      
+      <step number="4">
+        <title>Scalability Assessment</title>
+        <actions>
+          <action>Use analyze_impact to understand scaling dependencies</action>
+          <action>Evaluate database scaling strategies</action>
+          <action>Review caching and performance optimization patterns</action>
+        </actions>
+      </step>
+      
+      <step number="5">
+        <title>Security Architecture Evaluation</title>
+        <actions>
+          <action>Search for authentication and authorization patterns</action>
+          <action>Analyze API security implementation</action>
+          <action>Evaluate data protection and encryption strategies</action>
+        </actions>
+      </step>
+      
+      <step number="6">
+        <title>Recommendations Generation</title>
+        <actions>
+          <action>Document architectural findings with specific examples</action>
+          <action>Provide prioritized recommendations for improvements</action>
+          <action>Suggest implementation roadmap with risk mitigation</action>
+        </actions>
+      </step>
+    </workflow_steps>
+    
+    <expected_output>
+      <output_format>Comprehensive architecture review report with:</output_format>
+      <sections>
+        <section>Current Architecture Assessment</section>
+        <section>Service Boundary Analysis</section>
+        <section>Integration Pattern Evaluation</section>
+        <section>Scalability Review</section>
+        <section>Security Architecture Assessment</section>
+        <section>Prioritized Recommendations</section>
+        <section>Implementation Roadmap</section>
+      </sections>
+    </expected_output>
+  </example>
+
+  <example name="api_gateway_design_review">
+    <description>Review and improve API gateway architecture for better performance and security</description>
+    <context>When evaluating API gateway implementation for a microservices ecosystem</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Gateway Architecture Analysis</title>
+        <actions>
+          <action>Search for "API gateway routing middleware proxy" implementations</action>
+          <action>Analyze current routing rules and configuration</action>
+          <action>Evaluate load balancing and service discovery patterns</action>
+        </actions>
+      </step>
+      
+      <step number="2">
+        <title>Security Middleware Review</title>
+        <actions>
+          <action>Search for authentication and authorization middleware</action>
+          <action>Analyze rate limiting and throttling implementation</action>
+          <action>Evaluate request/response transformation patterns</action>
+        </actions>
+      </step>
+      
+      <step number="3">
+        <title>Performance Optimization Assessment</title>
+        <actions>
+          <action>Analyze caching strategies in gateway layer</action>
+          <action>Evaluate connection pooling and timeout configurations</action>
+          <action>Review monitoring and observability implementation</action>
+        </actions>
+      </step>
+      
+      <step number="4">
+        <title>Integration Pattern Evaluation</title>
+        <actions>
+          <action>Use analyze_impact to understand gateway dependencies</action>
+          <action>Evaluate service mesh integration patterns</action>
+          <action>Analyze circuit breaker and retry mechanisms</action>
+        </actions>
+      </step>
+    </workflow_steps>
+    
+    <expected_output>
+      <output_format>API gateway optimization recommendations including:</output_format>
+      <recommendations>
+        <recommendation>Improved routing configuration with path-based routing</recommendation>
+        <recommendation>Enhanced security middleware with JWT validation</recommendation>
+        <recommendation>Performance optimizations with connection pooling</recommendation>
+        <recommendation>Service mesh integration for better observability</recommendation>
+        <recommendation>Monitoring and alerting improvements</recommendation>
+      </recommendations>
+    </expected_output>
+  </example>
+
+  <example name="cqrs_pattern_evaluation">
+    <description>Evaluate CQRS implementation for performance and maintainability</description>
+    <context>When reviewing Command Query Responsibility Segregation pattern implementation</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Pattern Implementation Analysis</title>
+        <actions>
+          <action>Search for "cqrs command query handler" implementations</action>
+          <action>Analyze separation of read and write models</action>
+          <action>Evaluate command handler validation patterns</action>
+        </actions>
+      </step>
+      
+      <step number="2">
+        <title>Data Consistency Review</title>
+        <actions>
+          <action>Analyze synchronization between command and query models</action>
+          <action>Evaluate eventual consistency handling</action>
+          <action>Review event sourcing implementation patterns</action>
+        </actions>
+      </step>
+      
+      <step number="3">
+        <title>Performance Assessment</title>
+        <actions>
+          <action>Analyze query optimization strategies</action>
+          <action>Evaluate command processing performance</action>
+          <action>Review database access patterns for both models</action>
+        </actions>
+      </step>
+    </workflow_steps>
+    
+    <expected_output>
+      <output_format>CQRS pattern evaluation with:</output_format>
+      <findings>
+        <finding>Command and query separation effectiveness</finding>
+        <finding>Data consistency mechanisms</finding>
+        <finding>Performance optimization opportunities</finding>
+        <finding>Scalability considerations</finding>
+      </findings>
+      <recommendations>
+        <recommendation>Optimized query models with denormalization</recommendation>
+        <recommendation>Improved command validation patterns</recommendation>
+        <recommendation>Enhanced event sourcing implementation</recommendation>
+      </recommendations>
+    </expected_output>
+  </example>
+
+  <example name="security_architecture_audit">
+    <description>Comprehensive security architecture review for authentication and authorization</description>
+    <context>When conducting security-focused architecture review</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Authentication Architecture Analysis</title>
+        <actions>
+          <action>Search for "authentication authorization security patterns OAuth JWT"</action>
+          <action>Analyze token generation and validation implementation</action>
+          <action>Evaluate multi-factor authentication patterns</action>
+        </actions>
+      </step>
+      
+      <step number="2">
+        <title>Authorization Framework Review</title>
+        <actions>
+          <action>Search for role-based access control implementations</action>
+          <action>Analyze permission management systems</action>
+          <action>Evaluate API security and scope validation</action>
+        </actions>
+      </step>
+      
+      <step number="3">
+        <title>Data Protection Assessment</title>
+        <actions>
+          <action>Analyze encryption implementation for data at rest</action>
+          <action>Evaluate secure communication patterns (TLS/HTTPS)</action>
+          <action>Review data validation and sanitization patterns</action>
+        </actions>
+      </step>
+      
+      <step number="4">
+        <title>Security Testing Integration</title>
+        <actions>
+          <action>Search for security testing frameworks and tools</action>
+          <action>Analyze vulnerability scanning integration</action>
+          <action>Evaluate security monitoring and alerting</action>
+        </actions>
+      </step>
+    </workflow_steps>
+    
+    <expected_output>
+      <output_format>Security architecture assessment with:</output_format>
+      <vulnerability_assessment>
+        <vulnerability>Authentication token security issues</vulnerability>
+        <vulnerability>Authorization bypass vulnerabilities</vulnerability>
+        <vulnerability>Data exposure risks</vulnerability>
+        <vulnerability>Injection attack vectors</vulnerability>
+      </vulnerability_assessment>
+      <security_recommendations>
+        <recommendation>Implement OAuth 2.0 with proper token management</recommendation>
+        <recommendation>Enhance authorization with attribute-based access control</recommendation>
+        <recommendation>Encrypt sensitive data with proper key management</recommendation>
+        <recommendation>Implement comprehensive input validation</recommendation>
+        <recommendation>Set up continuous security monitoring</recommendation>
+      </security_recommendations>
+    </expected_output>
+  </example>
+
+  <example name="performance_architecture_review">
+    <description>Performance-focused architecture review for scalability optimization</description>
+    <context>When evaluating system performance characteristics and bottlenecks</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Caching Strategy Analysis</title>
+        <actions>
+          <action>Search for "caching strategies memory redis distributed" implementations</action>
+          <action>Analyze cache invalidation patterns</action>
+          <action>Evaluate cache hit rates and performance metrics</action>
+        </actions>
+      </step>
+      
+      <step number="2">
+        <title>Database Performance Review</title>
+        <actions>
+          <action>Analyze query optimization patterns</action>
+          <action>Evaluate database connection pooling</action>
+          <action>Review indexing strategies and query execution plans</action>
+        </actions>
+      </step>
+      
+      <step number="3">
+        <title>Async Processing Assessment</title>
+        <actions>
+          <action>Search for message queue and event-driven implementations</action>
+          <action>Analyze asynchronous processing patterns</action>
+          <action>Evaluate batch processing and job queue strategies</action>
+        </actions>
+      </step>
+      
+      <step number="4">
+        <title>Resource Utilization Analysis</title>
+        <actions>
+          <action>Analyze memory usage patterns and optimization</action>
+          <action>Evaluate CPU utilization and processing efficiency</action>
+          <action>Review I/O operations and blocking patterns</action>
+        </actions>
+      </step>
+    </workflow_steps>
+    
+    <expected_output>
+      <output_format>Performance architecture review with:</output_format>
+      <performance_findings>
+        <finding>Caching inefficiencies and optimization opportunities</finding>
+        <finding>Database performance bottlenecks</finding>
+        <finding>Async processing improvements</finding>
+        <finding>Resource utilization optimization</finding>
+      </performance_findings>
+      <optimization_recommendations>
+        <recommendation>Implement multi-layer caching strategy</recommendation>
+        <recommendation>Optimize database queries and indexing</recommendation>
+        <recommendation>Enhance async processing with proper queuing</recommendation>
+        <recommendation>Improve resource management and pooling</recommendation>
+      </optimization_recommendations>
+    </expected_output>
+  </example>
+
+  <example name="evolutionary_architecture_assessment">
+    <description>Assess system architecture for evolution and maintainability</description>
+    <context>When evaluating long-term architectural viability and evolution path</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Technical Debt Analysis</title>
+        <actions>
+          <action>Search for outdated patterns and technologies</action>
+          <action>Analyze coupling and cohesion metrics</action>
+          <action>Identify areas requiring modernization</action>
+        </actions>
+      </step>
+      
+      <step number="2">
+        <title>Scalability Evolution Review</title>
+        <actions>
+          <action>Analyze current scaling limitations</action>
+          <action>Evaluate technology stack evolution potential</action>
+          <action>Review architectural decision records and rationale</action>
+        </actions>
+      </step>
+      
+      <step number="3">
+        <title>Maintainability Assessment</title>
+        <actions>
+          <action>Analyze code organization and modularity</action>
+          <action>Evaluate documentation and knowledge transfer</action>
+          <action>Review testing strategies and coverage</action>
+        </actions>
+      </step>
+      
+      <step number="4">
+        <title>Modernization Roadmap</title>
+        <actions>
+          <action>Identify technology upgrade opportunities</action>
+          <action>Evaluate migration strategies and risks</action>
+          <action>Plan incremental modernization approach</action>
+        </actions>
+      </step>
+    </workflow_steps>
+    
+    <expected_output>
+      <output_format>Evolutionary architecture assessment with:</output_format>
+      <evolution_analysis>
+        <analysis>Current technical debt and impact</analysis>
+        <analysis>Scalability limitations and growth potential</analysis>
+        <analysis>Maintainability challenges and improvements</analysis>
+      </evolution_analysis>
+      <modernization_plan>
+        <phase>Short-term improvements (3-6 months)</phase>
+        <phase>Medium-term modernization (6-18 months)</phase>
+        <phase>Long-term evolution (18+ months)</phase>
+      </modernization_plan>
+    </expected_output>
+  </example>
+</examples>

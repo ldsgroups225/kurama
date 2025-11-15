@@ -1,0 +1,277 @@
+<![CDATA[
+<tool_usage_guide>
+  <tool_priorities>
+    <priority level="1">
+      <tool>search_files</tool>
+      <when>Always use first to find existing test files and patterns</when>
+      <why>Helps understand current test structure and coverage</why>
+    </priority>
+    <priority level="2">
+      <tool>read_file</tool>
+      <when>After identifying relevant files to understand test implementation</when>
+      <why>Provides full context of existing test patterns and quality standards</why>
+    </priority>
+    <priority level="3">
+      <tool>list_files</tool>
+      <when>To understand project structure and identify test directories</when>
+      <why>Helps map out testing organization and identify gaps</why>
+    </priority>
+    <priority level="4">
+      <tool>execute_command</tool>
+      <when>For running tests, generating coverage reports, and test automation</when>
+      <why>Essential for executing test suites and quality checks</why>
+    </priority>
+  </tool_priorities>
+
+  <tool_specific_guidance>
+    <tool name="search_files">
+      <purpose>Find existing test files, test patterns, and quality-related code</purpose>
+      <when_to_use>
+        <scenario>Understanding current test coverage</scenario>
+        <scenario>Finding specific test implementations</scenario>
+        <scenario>Locating quality assurance documentation</scenario>
+        <scenario>Identifying test gaps and missing coverage</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Use regex patterns to find test files (e.g., \.test\., \.spec\.)</practice>
+        <practice>Search for quality-related files like README, coverage reports</practice>
+        <practice>Look for configuration files that define test standards</practice>
+      </best_practices>
+      <examples>
+        <example scenario="finding test files">
+          <command>search_files with path="src" regex="\.test\.(ts|js|jsx|tsx)$"</command>
+          <output>Finds all unit test files in the src directory</output>
+        </example>
+        <example scenario="finding test configuration">
+          <command>search_files with path="." regex="(jest|vitest|cypress|playwright)\.config"</command>
+          <output>Locates test framework configuration files</output>
+        </example>
+      </examples>
+    </tool>
+
+    <tool name="read_file">
+      <purpose>Examine test implementations, quality standards, and test data</purpose>
+      <when_to_use>
+        <scenario>Analyzing existing test patterns and structure</scenario>
+        <scenario>Reviewing test coverage reports</scenario>
+        <scenario>Understanding test data and fixtures</scenario>
+        <scenario>Examining quality assurance documentation</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Read multiple related files together for comprehensive context</practice>
+        <practice>Focus on test structure, assertions, and setup/teardown patterns</practice>
+        <practice>Examine test data factories and mock implementations</practice>
+        <practice>Review quality metrics and coverage thresholds</practice>
+      </best_practices>
+      <examples>
+        <example scenario="analyzing test structure">
+          <command>read_file with files=["src/services/user.service.test.ts", "src/services/user.service.ts"]</command>
+          <output>Provides complete context of service and its tests</output>
+        </example>
+        <example scenario="reviewing test configuration">
+          <command>read_file with files=["jest.config.js", "package.json"]</command>
+          <output>Shows test setup and dependencies</output>
+        </example>
+      </examples>
+    </tool>
+
+    <tool name="list_files">
+      <purpose>Understand project structure and identify test organization</purpose>
+      <when_to_use>
+        <scenario>Mapping out test directory structure</scenario>
+        <scenario>Identifying test coverage gaps</scenario>
+        <scenario>Finding quality assurance documentation</scenario>
+        <scenario>Understanding test data organization</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Use recursive listing to see complete test structure</practice>
+        <practice>Identify common test patterns like __tests__, __mocks__, fixtures</practice>
+        <practice>Look for quality-related directories like docs/quality, .github/workflows</practice>
+        <practice>Check for integration and e2e test directories</practice>
+      </best_practices>
+      <examples>
+        <example scenario="mapping test structure">
+          <command>list_files with path="src" recursive="true"</command>
+          <output>Shows complete source structure including test files</output>
+        </example>
+        <example scenario="finding test directories">
+          <command>list_files with path="." recursive="false"</command>
+          <output>Identifies top-level test and quality directories</output>
+        </example>
+      </examples>
+    </tool>
+
+    <tool name="execute_command">
+      <purpose>Run tests, generate coverage, and execute quality checks</purpose>
+      <when_to_use>
+        <scenario>Running test suites (unit, integration, e2e)</scenario>
+        <scenario>Generating test coverage reports</scenario>
+        <scenario>Executing performance and security tests</scenario>
+        <scenario>Running linting and code quality checks</scenario>
+        <scenario>Setting up test environments and dependencies</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Use appropriate test commands for different test types</practice>
+        <practice>Generate coverage reports with appropriate flags</practice>
+        <practice>Run tests in CI/CD environments when applicable</practice>
+        <practice>Use verbose output for debugging test failures</practice>
+        <practice>Run tests with coverage thresholds to enforce quality standards</practice>
+      </best_practices>
+      <examples>
+        <example scenario="running unit tests">
+          <command>execute_command with command="npm run test:unit -- --coverage --watchAll=false"</command>
+          <output>Executes unit tests with coverage reporting</output>
+        </example>
+        <example scenario="running e2e tests">
+          <command>execute_command with command="npm run test:e2e -- --headless"</command>
+          <output>Runs end-to-end tests in headless mode</output>
+        </example>
+        <example scenario="generating coverage report">
+          <command>execute_command with command="npm run test:coverage -- --coverageReporters=text-lcov | coveralls"</command>
+          <output>Generates and uploads coverage report</output>
+        </example>
+        <example scenario="running performance tests">
+          <command>execute_command with command="npm run test:performance -- --thresholds.budget=500000"</command>
+          <output>Executes performance tests with budget thresholds</output>
+        </example>
+      </examples>
+    </tool>
+
+    <tool name="apply_diff">
+      <purpose>Create and modify test files, test configurations, and quality documentation</purpose>
+      <when_to_use>
+        <scenario>Creating new test files for uncovered functionality</scenario>
+        <scenario>Updating test configurations and quality thresholds</scenario>
+        <scenario>Adding test data factories and fixtures</scenario>
+        <scenario>Modifying existing tests to improve coverage</scenario>
+        <scenario>Creating quality assurance documentation</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Always read file first to ensure exact content match</practice>
+        <practice>Follow established test patterns and naming conventions</practice>
+        <practice>Include proper setup, teardown, and cleanup in tests</practice>
+        <practice>Use descriptive test names and clear assertions</practice>
+        <practice>Add appropriate test tags and categories for organization</practice>
+      </best_practices>
+      <examples>
+        <example scenario="creating unit test">
+          <command>apply_diff with path="src/services/user.service.test.ts"</command>
+          <output>Creates comprehensive unit test for user service</output>
+        </example>
+        <example scenario="updating test configuration">
+          <command>apply_diff with path="jest.config.js"</command>
+          <output>Modifies test configuration to improve coverage reporting</output>
+        </example>
+      </examples>
+    </tool>
+
+    <tool name="write_to_file">
+      <purpose>Create new test files, test documentation, and quality reports</purpose>
+      <when_to_use>
+        <scenario>Creating new test suites for uncovered functionality</scenario>
+        <scenario>Writing test documentation and strategy documents</scenario>
+        <scenario>Creating test data factories and fixtures</scenario>
+        <scenario>Generating quality reports and metrics</scenario>
+        <scenario>Setting up test automation scripts</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Use appropriate file extensions for test files (.test.ts, .spec.ts)</practice>
+        <practice>Follow established directory structure for test organization</practice>
+        <practice>Include comprehensive test documentation and examples</practice>
+        <practice>Create reusable test utilities and helper functions</practice>
+        <practice>Generate clear, actionable quality reports</practice>
+      </best_practices>
+      <examples>
+        <example scenario="creating integration test">
+          <command>write_to_file with path="tests/integration/user-api.test.ts"</command>
+          <output>Creates comprehensive API integration test suite</output>
+        </example>
+        <example scenario="creating test documentation">
+          <command>write_to_file with path="docs/TESTING.md"</command>
+          <output>Creates comprehensive testing guide and standards</output>
+        </example>
+      </examples>
+    </tool>
+
+    <tool name="ask_followup_question">
+      <purpose>Gather requirements and clarify testing scope and priorities</purpose>
+      <when_to_use>
+        <scenario>Understanding testing requirements and scope</scenario>
+        <scenario>Clarifying quality standards and acceptance criteria</scenario>
+        <scenario>Determining test types and coverage priorities</scenario>
+        <scenario>Identifying testing constraints and limitations</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Provide specific, actionable testing suggestions</practice>
+        <practice>Include different testing approaches and methodologies</practice>
+        <practice>Consider project constraints and timeline requirements</practice>
+        <practice>Address both manual and automated testing needs</practice>
+      </best_practices>
+      <examples>
+        <example scenario="clarifying testing scope">
+          <question>What type of testing do you need? Should I focus on unit tests, integration tests, end-to-end tests, or a comprehensive testing strategy?</question>
+          <follow_up>
+            <suggest>Create comprehensive unit test suite with >90% coverage</suggest>
+            <suggest>Implement integration tests for API endpoints and services</suggest>
+            <suggest>Develop end-to-end tests for critical user workflows</suggest>
+            <suggest>Design complete testing strategy with all test types</suggest>
+          </follow_up>
+        </example>
+        <example scenario="understanding quality requirements">
+          <question>What are your quality standards and acceptance criteria? Do you have specific coverage thresholds, performance requirements, or security standards?</question>
+          <follow_up>
+            <suggest>Standard quality: >90% coverage, <2% defect density, performance benchmarks</suggest>
+            <suggest>High quality: >95% coverage, <1% defect density, comprehensive security testing</suggest>
+            <suggest>Critical quality: >98% coverage, zero critical defects, full accessibility compliance</suggest>
+            <suggest>Custom quality standards based on project requirements</suggest>
+          </follow_up>
+        </example>
+      </examples>
+    </tool>
+  </tool_specific_guidance>
+
+  <workflow_integration>
+    <phase name="analysis">
+      <primary_tools>
+        <tool>search_files - Find existing tests and quality documentation</tool>
+        <tool>read_file - Understand current test implementation</tool>
+        <tool>list_files - Map out test structure and organization</tool>
+      </primary_tools>
+      <workflow>
+        <step>Search for existing test files and patterns</step>
+        <step>Read key test files to understand current approach</step>
+        <step>List directory structure to identify test organization</step>
+        <step>Analyze test coverage and quality metrics</step>
+      </workflow>
+    </phase>
+
+    <phase name="implementation">
+      <primary_tools>
+        <tool>write_to_file - Create new test files and documentation</tool>
+        <tool>apply_diff - Modify existing tests and configurations</tool>
+        <tool>execute_command - Run tests and generate reports</tool>
+      </primary_tools>
+      <workflow>
+        <step>Create test files following established patterns</step>
+        <step>Update test configurations as needed</step>
+        <step>Execute tests to verify implementation</step>
+        <step>Generate coverage and quality reports</step>
+      </workflow>
+    </phase>
+
+    <phase name="validation">
+      <primary_tools>
+        <tool>execute_command - Run comprehensive test suites</tool>
+        <tool>read_file - Review test results and coverage reports</tool>
+        <tool>ask_followup_question - Validate requirements and quality standards</tool>
+      </primary_tools>
+      <workflow>
+        <step>Run complete test suite with coverage</step>
+        <step>Review test results and quality metrics</step>
+        <step>Validate against quality requirements</step>
+        <step>Confirm all acceptance criteria are met</step>
+      </workflow>
+    </phase>
+  </workflow_integration>
+</tool_usage_guide>
+]]>

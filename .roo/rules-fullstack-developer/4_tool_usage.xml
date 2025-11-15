@@ -1,0 +1,312 @@
+<tool_usage_guide>
+  <tool_priorities>
+    <priority level="1">
+      <tool>semantic_search_with_context</tool>
+      <when>Always use first to understand the codebase architecture and find relevant functionality</when>
+      <why>Provides semantic search with full context including dependencies, callers, and impact analysis</why>
+    </priority>
+    
+    <priority level="2">
+      <tool>codebase_search</tool>
+      <when>For finding specific code patterns, functions, or implementations</when>
+      <why>Faster than semantic search when you know what you're looking for</why>
+    </priority>
+    
+    <priority level="3">
+      <tool>read_file</tool>
+      <when>After identifying relevant files to get full implementation context</when>
+      <why>Essential for understanding existing patterns and ensuring consistency</why>
+    </priority>
+    
+    <priority level="4">
+      <tool>list_files</tool>
+      <when>When exploring project structure or understanding file organization</when>
+      <why>Helps understand the overall architecture and file placement patterns</why>
+    </priority>
+  </tool_priorities>
+
+  <tool_specific_guidance>
+    <tool name="semantic_search_with_context">
+      <purpose>Search codebase using natural language with complete context</purpose>
+      <when_to_use>When starting new features or understanding existing functionality</when_to_use>
+      <best_practices>
+        <practice>Use descriptive queries that capture the full functionality</practice>
+        <practice>Review the complete impact graph to understand dependencies</practice>
+        <practice>Pay attention to what calls the found symbols and what they call</practice>
+      </best_practices>
+      <example scenario="Finding authentication implementation">
+        <query>user authentication with JWT tokens and role-based access control</query>
+        <expected_output>Authentication middleware, JWT utilities, role definitions, and related components</expected_output>
+      </example>
+    </tool>
+
+    <tool name="analyze_impact">
+      <purpose>Analyze complete impact of changing a symbol across the entire stack</purpose>
+      <when_to_use>Before making changes to existing code to understand full scope</when_to_use>
+      <best_practices>
+        <practice>Always check impact before refactoring shared utilities or components</practice>
+        <practice>Review both function calls and type usage</practice>
+        <practice>Consider component rendering and composition impacts</practice>
+      </best_practices>
+      <example scenario="Before refactoring a shared utility">
+        <symbol_name>formatCurrency</symbol_name>
+        <expected_analysis>All components using this utility, API endpoints returning formatted currency, and any type definitions</expected_analysis>
+      </example>
+    </tool>
+
+    <tool name="apply_diff">
+      <purpose>Make precise, targeted changes to existing files</purpose>
+      <when_to_use>When modifying existing code with known structure</when_to_use>
+      <best_practices>
+        <practice>Always read the file first to ensure exact content match</practice>
+        <practice>Make multiple related changes in a single diff operation</practice>
+        <practice>Include line numbers for accuracy and reliability</practice>
+        <practice>Use descriptive commit messages that explain the change purpose</practice>
+      </best_practices>
+      <example scenario="Adding error handling to an API endpoint">
+        <code><![CDATA[
+<apply_diff>
+<path>src/controllers/userController.ts</path>
+<diff>
+<<<<<<< SEARCH
+:start_line:45
+-------
+export const getUserProfile = async (req: Request, res: Response) => {
+  const user = await User.findById(req.user.id);
+  res.json({ success: true, data: user });
+};
+=======
+export const getUserProfile = async (req: Request, res: Response) => {
+  try {
+    const user = await User.findById(req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'USER_NOT_FOUND', message: 'User not found' }
+      });
+    }
+    
+    res.json({ success: true, data: user });
+  } catch (error) {
+    console.error('Error in getUserProfile:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Internal server error' }
+    });
+  }
+};
+>>>>>>> REPLACE
+</diff>
+</apply_diff>
+        ]]></code>
+      </example>
+    </tool>
+
+    <tool name="write_to_file">
+      <purpose>Create new files or completely rewrite existing files</purpose>
+      <when_to_use>When creating new components, services, or complete file rewrites</when_to_use>
+      <best_practices>
+        <practice>Always provide complete file content, not placeholders</practice>
+        <practice>Include proper imports and exports</practice>
+        <practice>Add appropriate TypeScript types and interfaces</practice>
+        <practice>Include error handling and validation</practice>
+      </best_practices>
+      <example scenario="Creating a new API service">
+        <code><![CDATA[
+// New service file for managing user subscriptions
+import { Subscription } from '../types/subscription';
+import { ApiResponse } from '../utils/apiResponse';
+
+class SubscriptionService {
+  async createSubscription(userId: string, planId: string): Promise<ApiResponse<Subscription>> {
+    try {
+      // Implementation here
+      const subscription = await this.saveSubscription(userId, planId);
+      return { success: true, data: subscription };
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          code: 'SUBSCRIPTION_CREATION_FAILED',
+          message: 'Failed to create subscription'
+        }
+      };
+    }
+  }
+
+  private async saveSubscription(userId: string, planId: string): Promise<Subscription> {
+    // Database save logic
+  }
+}
+
+export const subscriptionService = new SubscriptionService();
+        ]]></code>
+      </example>
+    </tool>
+
+    <tool name="execute_command">
+      <purpose>Run CLI commands for development, testing, and deployment</purpose>
+      <when_to_use>When setting up development environment, running tests, or deploying</when_to_use>
+      <best_practices>
+        <practice>Use appropriate working directory for context-specific commands</practice>
+        <practice>Include error handling and validation in scripts</practice>
+        <practice>Use environment variables for configuration</practice>
+        <practice>Provide clear output for debugging and monitoring</practice>
+      </best_practices>
+      <example scenario="Setting up database and running migrations">
+        <code><![CDATA[
+cd packages/data-ops && npm run setup:database
+cd packages/data-ops && npm run migrate
+cd packages/data-ops && npm run seed
+        ]]></code>
+      </example>
+    </tool>
+
+    <tool name="ask_followup_question">
+      <purpose>Gather additional information from users to make informed decisions</purpose>
+      <when_to_use>When requirements are unclear or multiple approaches are possible</when_to_use>
+      <best_practices>
+        <practice>Provide 2-4 specific, actionable suggestions</practice>
+        <practice>Order suggestions by likelihood or importance</practice>
+        <practice>Make suggestions complete without placeholders</practice>
+        <practice>Include mode switches when appropriate for specialized tasks</practice>
+      </best_practices>
+      <example scenario="Choosing authentication approach">
+        <code><![CDATA[
+<ask_followup_question>
+<question>What authentication approach should we implement for this application?</question>
+<follow_up>
+<suggest>JWT with refresh tokens for stateless authentication</suggest>
+<suggest>Session-based authentication with server-side sessions</suggest>
+<suggest>OAuth 2.0 integration with third-party providers</suggest>
+<suggest mode="auth-specialist">Use auth specialist mode for detailed security implementation</suggest>
+</follow_up>
+</ask_followup_question>
+        ]]></code>
+      </example>
+    </tool>
+
+    <tool name="switch_mode">
+      <purpose>Hand off to specialized modes for specific tasks</purpose>
+      <when_to_use>When a task requires specialized expertise beyond full-stack scope</when_to_use>
+      <best_practices>
+        <practice>Switch to modes with deeper expertise in specific domains</practice>
+        <practice>Provide clear context about the work to be continued</practice>
+        <practice>Choose the most appropriate specialist mode for the task</practice>
+      </best_practices>
+      <example scenario="Complex database optimization needed">
+        <code><![CDATA[
+<switch_mode>
+<mode_slug>database-administrator</mode_slug>
+<reason>Need specialized database optimization and query performance tuning</reason>
+</switch_mode>
+        ]]></code>
+      </example>
+    </tool>
+  </tool_specific_guidance>
+
+  <fullstack_workflow_patterns>
+    <pattern name="feature_development_sequence">
+      <description>Optimal tool usage sequence for developing new features</description>
+      <steps>
+        <step number="1">
+          <tool>semantic_search_with_context</tool>
+          <purpose>Understand existing related functionality and patterns</purpose>
+        </step>
+        <step number="2">
+          <tool>read_file</tool>
+          <purpose>Examine specific implementations for consistency</purpose>
+        </step>
+        <step number="3">
+          <tool>write_to_file</tool>
+          <purpose>Create new components, services, or modify existing ones</purpose>
+        </step>
+        <step number="4">
+          <tool>execute_command</tool>
+          <purpose>Run tests and validate implementation</purpose>
+        </step>
+        <step number="5">
+          <tool>analyze_impact</tool>
+          <purpose>Verify changes don't break existing functionality</purpose>
+        </step>
+      </steps>
+    </pattern>
+
+    <pattern name="debugging_sequence">
+      <description>Systematic approach to debugging full-stack issues</description>
+      <steps>
+        <step number="1">
+          <tool>semantic_search_with_context</tool>
+          <purpose>Find all code related to the problematic functionality</purpose>
+        </step>
+        <step number="2">
+          <tool>read_file</tool>
+          <purpose>Examine the specific implementation details</purpose>
+        </step>
+        <step number="3">
+          <tool>execute_command</tool>
+          <purpose>Run specific tests or check logs</purpose>
+        </step>
+        <step number="4">
+          <tool>apply_diff</tool>
+          <purpose>Apply targeted fixes based on analysis</purpose>
+        </step>
+      </steps>
+    </pattern>
+
+    <pattern name="refactoring_sequence">
+      <description>Safe refactoring approach with full impact analysis</description>
+      <steps>
+        <step number="1">
+          <tool>analyze_impact</tool>
+          <purpose>Understand full scope of changes before refactoring</purpose>
+        </step>
+        <step number="2">
+          <tool>read_file</tool>
+          <purpose>Review current implementation in detail</purpose>
+        </step>
+        <step number="3">
+          <tool>apply_diff</tool>
+          <purpose>Apply refactoring changes systematically</purpose>
+        </step>
+        <step number="4">
+          <tool>execute_command</tool>
+          <purpose>Run tests to ensure refactoring doesn't break functionality</purpose>
+        </step>
+      </steps>
+    </pattern>
+  </fullstack_workflow_patterns>
+
+  <integration_with_other_modes>
+    <mode name="database-administrator">
+      <when_to_switch>Complex database schema changes, performance optimization, or migration planning</when_to_switch>
+      <handoff_context>Provide current schema, performance requirements, and specific optimization goals</handoff_context>
+    </mode>
+
+    <mode name="api-designer">
+      <when_to_switch>Complex API design, GraphQL schema creation, or API documentation</when_to_switch>
+      <handoff_context>Share business requirements, existing endpoints, and integration needs</handoff_context>
+    </mode>
+
+    <mode name="ui-designer">
+      <when_to_switch>Complex UI/UX design, component system architecture, or design system creation</when_to_switch>
+      <handoff_context>Provide user requirements, brand guidelines, and accessibility requirements</handoff_context>
+    </mode>
+
+    <mode name="performance-engineer">
+      <when_to_switch>Performance bottlenecks, optimization across stack, or load testing</when_to_switch>
+      <handoff_context>Share performance metrics, bottlenecks identified, and optimization targets</handoff_context>
+    </mode>
+
+    <mode name="security-review">
+      <when_to_switch>Security audit, vulnerability assessment, or security implementation</when_to_switch>
+      <handoff_context>Provide security requirements, compliance standards, and threat model</handoff_context>
+    </mode>
+
+    <mode name="devops">
+      <when_to_switch>CI/CD pipeline setup, deployment configuration, or infrastructure management</when_to_switch>
+      <handoff_context>Share deployment requirements, scaling needs, and infrastructure preferences</handoff_context>
+    </mode>
+  </integration_with_other_modes>
+</tool_usage_guide>

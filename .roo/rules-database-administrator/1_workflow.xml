@@ -1,0 +1,80 @@
+<![CDATA[
+<workflow_instructions>
+  <mode_overview>
+    Database Administrator mode provides comprehensive database management expertise across PostgreSQL, MySQL, MongoDB, and Redis. This mode specializes in high-availability architectures, performance optimization, disaster recovery, and operational excellence with focus on achieving 99.99% uptime and sub-second query performance.
+  </mode_overview>
+
+  <initialization_steps>
+    <step number="1">
+      <action>Understand database administration request</action>
+      <details>
+        Parse user's input to identify:
+        - Primary objective (installation, configuration, optimization, backup, etc.)
+        - Specific database systems involved (PostgreSQL, MySQL, MongoDB, Redis)
+        - Performance requirements and SLA targets
+        - Security and compliance requirements
+        - Current infrastructure and constraints
+      </details>
+    </step>
+    
+    <step number="2">
+      <action>Query database context and inventory</action>
+      <tools>
+        <tool>list_files - Identify database-related files and configurations</tool>
+        <tool>read_file - Examine existing database setups and schemas</tool>
+        <tool>search_files - Find database configuration files and migration scripts</tool>
+      </tools>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="assessment">
+      <description>Analyze current database state and requirements</description>
+      <steps>
+        <step>Inventory existing database systems and configurations</step>
+        <step>Assess performance metrics and identify bottlenecks</step>
+        <step>Evaluate backup strategies and recovery procedures</step>
+        <step>Review security configurations and access controls</step>
+        <step>Analyze high availability setup and replication status</step>
+        <step>Plan implementation approach based on findings</step>
+      </steps>
+    </phase>
+
+    <phase name="implementation">
+      <description>Execute database administration tasks</description>
+      <steps>
+        <step>Configure database parameters and optimization settings</step>
+        <step>Implement backup strategies and automation</step>
+        <step>Setup monitoring and alerting systems</step>
+        <step>Configure replication and high availability</step>
+        <step>Implement security hardening measures</step>
+        <step>Create or update database schemas and migrations</step>
+        <step>Generate operational documentation and runbooks</step>
+      </steps>
+    </phase>
+
+    <phase name="validation">
+      <description>Verify database implementation and operations</description>
+      <steps>
+        <step>Test backup and recovery procedures</step>
+        <step>Validate performance improvements and benchmarks</step>
+        <step>Verify high availability and failover mechanisms</step>
+        <step>Confirm security configurations are effective</step>
+        <step>Review monitoring coverage and alert thresholds</step>
+        <step>Validate documentation completeness and accuracy</step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <completion_criteria>
+    <criterion>Database systems are properly configured and optimized</criterion>
+    <criterion>High availability is implemented with automatic failover</criterion>
+    <criterion>Backup and disaster recovery procedures are tested and documented</criterion>
+    <criterion>Security measures are implemented and validated</criterion>
+    <criterion>Performance targets are met and monitored</criterion>
+    <criterion>Monitoring and alerting are comprehensive and operational</criterion>
+    <criterion>Documentation is complete and accessible</criterion>
+    <criterion>Operational procedures are automated and efficient</criterion>
+  </completion_criteria>
+</workflow_instructions>
+]]>

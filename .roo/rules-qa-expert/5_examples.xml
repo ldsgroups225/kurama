@@ -1,0 +1,345 @@
+<![CDATA[
+<workflow_examples>
+  <example name="comprehensive_test_strategy_development">
+    <description>Complete workflow for developing a comprehensive testing strategy for a new application</description>
+    <scenario>
+      User requests: "I need to implement comprehensive testing for my new e-commerce application. We want to ensure high quality before launch."
+    </scenario>
+    <workflow_steps>
+      <step number="1">
+        <title>Initial Assessment and Requirements Gathering</title>
+        <actions>
+          <action>Use search_files to find existing test files and configuration</action>
+          <action>Use read_file to understand current testing approach</action>
+          <action>Use list_files to map out project structure</action>
+          <action>Ask follow-up questions to clarify quality requirements</action>
+        </actions>
+        <tools_used>
+          <tool>search_files - Find existing test patterns</tool>
+          <tool>read_file - Analyze current test implementation</tool>
+          <tool>list_files - Understand project structure</tool>
+          <tool>ask_followup_question - Clarify requirements</tool>
+        </tools_used>
+      </step>
+      
+      <step number="2">
+        <title>Test Strategy Development</title>
+        <actions>
+          <action>Analyze application architecture and identify testing needs</action>
+          <action>Define test types and coverage requirements</action>
+          <action>Establish quality metrics and acceptance criteria</action>
+          <action>Create comprehensive test strategy document</action>
+        </actions>
+        <deliverables>
+          <deliverable>Test strategy document with scope and approach</deliverable>
+          <deliverable>Quality metrics definition and thresholds</deliverable>
+          <deliverable>Test environment requirements</deliverable>
+        </deliverables>
+      </step>
+      
+      <step number="3">
+        <title>Test Implementation</title>
+        <actions>
+          <action>Create unit tests for core business logic</action>
+          <action>Implement integration tests for API endpoints</action>
+          <action>Develop end-to-end tests for critical user journeys</action>
+          <action>Set up performance and security testing</action>
+        </actions>
+        <tools_used>
+          <tool>write_to_file - Create new test files</tool>
+          <tool>apply_diff - Modify existing configurations</tool>
+          <tool>execute_command - Run tests and generate coverage</tool>
+        </tools_used>
+        <deliverables>
+          <deliverable>Unit test suite with >90% coverage</deliverable>
+          <deliverable>Integration test suite for all APIs</deliverable>
+          <deliverable>E2E test suite for critical workflows</deliverable>
+          <deliverable>Performance test baseline and thresholds</deliverable>
+        </deliverables>
+      </step>
+      
+      <step number="4">
+        <title>Quality Validation and Reporting</title>
+        <actions>
+          <action>Execute comprehensive test suite</action>
+          <action>Generate coverage and quality reports</action>
+          <action>Validate against quality requirements</action>
+          <action>Create quality dashboard and metrics</action>
+        </actions>
+        <tools_used>
+          <tool>execute_command - Run test suites</tool>
+          <tool>read_file - Review test results</tool>
+          <tool>write_to_file - Generate quality reports</tool>
+        </tools_used>
+        <deliverables>
+          <deliverable>Test execution report with results</deliverable>
+          <deliverable>Coverage analysis and gaps identification</deliverable>
+          <deliverable>Quality metrics dashboard</deliverable>
+          <deliverable>Recommendations for improvement</deliverable>
+        </deliverables>
+      </step>
+    </workflow_steps>
+    <completion_criteria>
+      <criterion>Test strategy documented and approved</criterion>
+      <criterion>All test types implemented with required coverage</criterion>
+      <criterion>Quality metrics meet defined thresholds</criterion>
+      <criterion>Comprehensive documentation provided</criterion>
+    </completion_criteria>
+  </example>
+
+  <example name="api_testing_implementation">
+    <description>Focused workflow for implementing comprehensive API testing</description>
+    <scenario>
+      User requests: "I need to implement testing for my REST API endpoints including authentication, data validation, and error handling."
+    </scenario>
+    <workflow_steps>
+      <step number="1">
+        <title>API Analysis and Test Planning</title>
+        <actions>
+          <action>Use search_files to find API implementation files</action>
+          <action>Use read_file to understand API structure and endpoints</action>
+          <action>Identify authentication mechanisms and data models</action>
+          <action>Plan test scenarios for each endpoint</action>
+        </actions>
+        <tools_used>
+          <tool>search_files - Find API files and existing tests</tool>
+          <tool>read_file - Analyze API implementation</tool>
+        </tools_used>
+      </step>
+      
+      <step number="2">
+        <title>Test Infrastructure Setup</title>
+        <actions>
+          <action>Create test data factories for API entities</action>
+          <action>Set up test database and fixtures</action>
+          <action>Configure test environment variables</action>
+          <action>Create test utilities and helpers</action>
+        </actions>
+        <tools_used>
+          <tool>write_to_file - Create test infrastructure files</tool>
+          <tool>apply_diff - Update test configuration</tool>
+        </tools_used>
+      </step>
+      
+      <step number="3">
+        <title>API Test Implementation</title>
+        <actions>
+          <action>Implement authentication endpoint tests</action>
+          <action>Create data validation tests for all endpoints</action>
+          <action>Develop error handling and edge case tests</action>
+          <action>Add performance and security tests</action>
+        </actions>
+        <tools_used>
+          <tool>write_to_file - Create comprehensive API test suite</tool>
+          <tool>apply_diff - Enhance existing tests</tool>
+        </tools_used>
+        <deliverables>
+          <deliverable>Authentication test suite with all scenarios</deliverable>
+          <deliverable>Data validation tests for all input types</deliverable>
+          <deliverable>Error handling tests for all status codes</deliverable>
+          <deliverable>Security tests for common vulnerabilities</deliverable>
+        </deliverables>
+      </step>
+      
+      <step number="4">
+        <title>Test Execution and Validation</title>
+        <actions>
+          <action>Run API test suite with coverage</action>
+          <action>Perform load testing for critical endpoints</action>
+          <action>Execute security vulnerability scans</action>
+          <action>Generate comprehensive test report</action>
+        </actions>
+        <tools_used>
+          <tool>execute_command - Run tests and performance checks</tool>
+          <tool>read_file - Analyze test results</tool>
+          <tool>write_to_file - Create test reports</tool>
+        </tools_used>
+        <deliverables>
+          <deliverable>API test execution report</deliverable>
+          <deliverable>Performance benchmark results</deliverable>
+          <deliverable>Security vulnerability assessment</deliverable>
+          <deliverable>Recommendations for API improvements</deliverable>
+        </deliverables>
+      </step>
+    </workflow_steps>
+    <completion_criteria>
+      <criterion>All API endpoints tested with comprehensive scenarios</criterion>
+      <criterion>Authentication and authorization properly validated</criterion>
+      <criterion>Data validation tests cover all input types</criterion>
+      <criterion>Performance and security benchmarks established</criterion>
+    </completion_criteria>
+  </example>
+
+  <example name="performance_testing_workflow">
+    <description>Complete workflow for implementing performance testing and optimization</description>
+    <scenario>
+      User requests: "My application is running slow. I need to identify performance bottlenecks and establish performance benchmarks."
+    </scenario>
+    <workflow_steps>
+      <step number="1">
+        <title>Performance Baseline Establishment</title>
+        <actions>
+          <action>Use search_files to find performance-related configurations</action>
+          <action>Use read_file to understand current performance monitoring</action>
+          <action>Identify critical user journeys and API endpoints</action>
+          <action>Establish performance testing environment</action>
+        </actions>
+        <tools_used>
+          <tool>search_files - Find performance configs and monitoring</tool>
+          <tool>read_file - Analyze current performance setup</tool>
+        </tools_used>
+      </step>
+      
+      <step number="2">
+        <title>Performance Test Implementation</title>
+        <actions>
+          <action>Create load testing scenarios for critical paths</action>
+          <action>Implement stress testing for peak load conditions</action>
+          <action>Set up continuous performance monitoring</action>
+          <action>Define performance budgets and thresholds</action>
+        </actions>
+        <tools_used>
+          <tool>write_to_file - Create performance test scripts</tool>
+          <tool>apply_diff - Update performance configurations</tool>
+        </tools_used>
+      </step>
+      
+      <step number="3">
+        <title>Performance Analysis and Optimization</title>
+        <actions>
+          <action>Execute performance test suite</action>
+          <action>Analyze performance metrics and bottlenecks</action>
+          <action>Identify optimization opportunities</action>
+          <action>Implement performance improvements</action>
+        </actions>
+        <tools_used>
+          <tool>execute_command - Run performance tests</tool>
+          <tool>read_file - Analyze performance results</tool>
+          <tool>apply_diff - Implement optimizations</tool>
+        </tools_used>
+        <deliverables>
+          <deliverable>Performance baseline report</deliverable>
+          <deliverable>Load testing results with metrics</deliverable>
+          <deliverable>Bottleneck analysis and recommendations</deliverable>
+          <deliverable>Performance optimization implementations</deliverable>
+        </deliverables>
+      </step>
+      
+      <step number="4">
+        <title>Continuous Performance Monitoring</title>
+        <actions>
+          <action>Set up automated performance monitoring</action>
+          <action>Create performance alerts and notifications</action>
+          <action>Establish performance regression testing</action>
+          <action>Generate performance dashboard</action>
+        </actions>
+        <tools_used>
+          <tool>write_to_file - Create monitoring configurations</tool>
+          <tool>execute_command - Set up monitoring tools</tool>
+        </tools_used>
+        <deliverables>
+          <deliverable>Continuous monitoring setup</deliverable>
+          <deliverable>Performance alert system</deliverable>
+          <deliverable>Regression testing automation</deliverable>
+          <deliverable>Performance dashboard and reports</deliverable>
+        </deliverables>
+      </step>
+    </workflow_steps>
+    <completion_criteria>
+      <criterion>Performance baselines established for all critical paths</criterion>
+      <criterion>Bottlenecks identified and addressed</criterion>
+      <criterion>Performance monitoring implemented</criterion>
+      <criterion>Performance budgets defined and enforced</criterion>
+    </completion_criteria>
+  </example>
+
+  <example name="security_testing_implementation">
+    <description>Comprehensive security testing workflow for application security assessment</description>
+    <scenario>
+      User requests: "I need to conduct a thorough security assessment of my application and implement security testing."
+    </scenario>
+    <workflow_steps>
+      <step number="1">
+        <title>Security Assessment Planning</title>
+        <actions>
+          <action>Use search_files to find security-related configurations</action>
+          <action>Use read_file to understand authentication and authorization</action>
+          <action>Identify security-sensitive data and operations</action>
+          <action>Plan comprehensive security test scenarios</action>
+        </actions>
+        <tools_used>
+          <tool>search_files - Find security configs and auth implementations</tool>
+          <tool>read_file - Analyze security mechanisms</tool>
+        </tools_used>
+      </step>
+      
+      <step number="2">
+        <title>Security Test Implementation</title>
+        <actions>
+          <action>Implement authentication and authorization tests</action>
+          <action>Create input validation and sanitization tests</action>
+          <action>Develop SQL injection and XSS prevention tests</action>
+          <action>Set up dependency vulnerability scanning</action>
+        </actions>
+        <tools_used>
+          <tool>write_to_file - Create security test suite</tool>
+          <tool>apply_diff - Enhance security configurations</tool>
+        </tools_used>
+        <deliverables>
+          <deliverable>Authentication security test suite</deliverable>
+          <deliverable>Input validation tests for all inputs</deliverable>
+          <deliverable>Common vulnerability tests (SQLi, XSS, CSRF)</deliverable>
+          <deliverable>Dependency security scan setup</deliverable>
+        </deliverables>
+      </step>
+      
+      <step number="3">
+        <title>Security Analysis and Remediation</title>
+        <actions>
+          <action>Execute comprehensive security test suite</action>
+          <action>Perform automated vulnerability scanning</action>
+          <action>Analyze security test results and findings</action>
+          <action>Implement security fixes and improvements</action>
+        </actions>
+        <tools_used>
+          <tool>execute_command - Run security tests and scans</tool>
+          <tool>read_file - Analyze security findings</tool>
+          <tool>apply_diff - Implement security fixes</tool>
+        </tools_used>
+        <deliverables>
+          <deliverable>Security assessment report with findings</deliverable>
+          <deliverable>Vulnerability severity analysis</deliverable>
+          <deliverable>Security remediation implementations</deliverable>
+          <deliverable>Security best practices documentation</deliverable>
+        </deliverables>
+      </step>
+      
+      <step number="4">
+        <title>Continuous Security Monitoring</title>
+        <actions>
+          <action>Set up automated security scanning</action>
+          <action>Create security incident response procedures</action>
+          <action>Implement security regression testing</action>
+          <action>Establish security compliance monitoring</action>
+        </actions>
+        <tools_used>
+          <tool>write_to_file - Create security monitoring configs</tool>
+          <tool>execute_command - Set up security tools</tool>
+        </tools_used>
+        <deliverables>
+          <deliverable>Automated security scanning setup</deliverable>
+          <deliverable>Security incident response procedures</deliverable>
+          <deliverable>Security regression testing automation</deliverable>
+          <deliverable>Compliance monitoring dashboard</deliverable>
+        </deliverables>
+      </step>
+    </workflow_steps>
+    <completion_criteria>
+      <criterion>Security assessment completed with comprehensive coverage</criterion>
+      <criterion>All vulnerabilities identified and remediated</criterion>
+      <criterion>Security monitoring implemented</criterion>
+      <criterion>Security compliance requirements met</criterion>
+    </completion_criteria>
+  </example>
+</workflow_examples>
+]]>

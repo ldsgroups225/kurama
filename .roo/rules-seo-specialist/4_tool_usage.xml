@@ -1,0 +1,365 @@
+<![CDATA[<tool_usage_guide>
+  <tool_priorities>
+    <priority level="1">
+      <tool>web_search</tool>
+      <when>Always use first for keyword research and competitor analysis</when>
+      <why>Provides real-time search data and competitive insights</why>
+    </priority>
+    <priority level="2">
+      <tool>codebase_search</tool>
+      <when>Use to find existing SEO implementations and content</when>
+      <why>Helps understand current SEO setup and identify optimization opportunities</why>
+    </priority>
+    <priority level="3">
+      <tool>read_file</tool>
+      <when>After identifying relevant files with codebase_search</when>
+      <why>Get full context of current SEO implementations</why>
+    </priority>
+    <priority level="4">
+      <tool>browser</tool>
+      <when>Use for testing SEO implementations and performance</when>
+      <why>Allows real-world testing of SEO changes and user experience</why>
+    </priority>
+  </tool_priorities>
+
+  <tool_specific_guidance>
+    <tool name="web_search">
+      <purpose>Conduct keyword research, competitor analysis, and SEO trend research</purpose>
+      <when_to_use>
+        <scenario>Researching target keywords and search volume</scenario>
+        <scenario>Analyzing competitor SEO strategies</scenario>
+        <scenario>Investigating SEO trends and algorithm updates</scenario>
+        <scenario>Finding SEO best practices and guidelines</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Use specific, targeted search queries for better results</practice>
+        <practice>Include current year in searches for recent information</practice>
+        <practice>Search for multiple sources to verify information</practice>
+        <practice>Focus on authoritative sources (Google, Moz, SEMrush, Ahrefs)</practice>
+      </best_practices>
+      <examples>
+        <example scenario="Keyword research">
+          <code>web_search: "best SEO tools 2024 keyword research difficulty"</code>
+          <output>Find current keyword research tools and techniques</output>
+        </example>
+        <example scenario="Competitor analysis">
+          <code>web_search: "competitor backlink analysis tools free"</code>
+          <output>Discover tools for analyzing competitor backlink profiles</output>
+        </example>
+      </examples>
+    </tool>
+
+    <tool name="codebase_search">
+      <purpose>Find existing SEO implementations, content, and configuration files</purpose>
+      <when_to_use>
+        <scenario>Analyzing current SEO setup</scenario>
+        <scenario>Finding existing meta tags and structured data</scenario>
+        <scenario>Locating sitemap and robots.txt files</scenario>
+        <scenario>Searching for SEO-related configuration</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Use semantic terms like "meta tags", "structured data", "sitemap"</practice>
+        <practice>Search for file patterns like "robots.txt", "sitemap.xml"</practice>
+        <practice>Look for SEO-related components and utilities</practice>
+        <practice>Search for analytics and tracking implementations</practice>
+      </best_practices>
+      <examples>
+        <example scenario="Finding meta tag implementation">
+          <code>codebase_search: "meta title description optimization"</code>
+          <output>Locate files where meta tags are implemented</output>
+        </example>
+        <example scenario="Finding structured data">
+          <code>codebase_search: "schema.org structured data JSON-LD"</code>
+          <output>Discover existing structured data implementations</output>
+        </example>
+      </examples>
+    </tool>
+
+    <tool name="read_file">
+      <purpose>Examine specific SEO implementations and configurations</purpose>
+      <when_to_use>
+        <scenario>Reviewing current meta tag implementation</scenario>
+        <scenario>Analyzing existing structured data</scenario>
+        <scenario>Checking robots.txt and sitemap configuration</scenario>
+        <scenario>Examining SEO-related configuration files</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Read complete files to understand full context</practice>
+        <practice>Pay attention to SEO-specific patterns and implementations</practice>
+        <practice>Note any missing or incomplete SEO elements</practice>
+        <practice>Document current state for comparison with best practices</practice>
+      </best_practices>
+      <examples>
+        <example scenario="Analyzing meta tags">
+          <code>read_file: index.html</code>
+          <output>Review current title, description, and meta tag implementation</output>
+        </example>
+        <example scenario="Checking structured data">
+          <code>read_file: schema.json</code>
+          <output>Examine existing structured data implementation and schema types</output>
+        </example>
+      </examples>
+    </tool>
+
+    <tool name="browser">
+      <purpose>Test SEO implementations, performance, and user experience</purpose>
+      <when_to_use>
+        <scenario>Testing Core Web Vitals and page performance</scenario>
+        <scenario>Validating structured data implementation</scenario>
+        <scenario>Testing mobile responsiveness and user experience</scenario>
+        <scenario>Checking search engine indexing and appearance</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Use browser developer tools for technical analysis</practice>
+        <practice>Test with different devices and screen sizes</practice>
+        <practice>Use SEO tools like Google Search Console simulator</practice>
+        <practice>Validate structured data with Google's Rich Results Test</practice>
+        <practice>Check page speed with PageSpeed Insights</practice>
+      </best_practices>
+      <examples>
+        <example scenario="Testing Core Web Vitals">
+          <code>browser: Navigate to page and use Lighthouse</code>
+          <output>Measure LCP, FID, CLS and identify performance issues</output>
+        </example>
+        <example scenario="Validating structured data">
+          <code>browser: Use Google Rich Results Test tool</code>
+          <output>Verify structured data is correctly implemented and will display</output>
+        </example>
+      </examples>
+    </tool>
+
+    <tool name="execute_command">
+      <purpose>Run SEO tools, generate sitemaps, and automate SEO tasks</purpose>
+      <when_to_use>
+        <scenario>Running SEO audit tools and linters</scenario>
+        <scenario>Generating XML sitemaps automatically</scenario>
+        <scenario>Optimizing images and assets</scenario>
+        <scenario>Running performance optimization scripts</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Use established SEO tools like lighthouse, screaming frog</practice>
+        <practice>Generate sitemaps for large sites programmatically</practice>
+        <practice>Automate image optimization and compression</practice>
+        <practice>Run SEO crawlers to identify technical issues</practice>
+      </best_practices>
+      <examples>
+        <example scenario="Running SEO audit">
+          <code>execute_command: "npx lighthouse --output=json --output-path=./audit"</code>
+          <output>Generate comprehensive SEO and performance audit report</output>
+        </example>
+        <example scenario="Generating sitemap">
+          <code>execute_command: "npm run generate-sitemap"</code>
+          <output>Create XML sitemap for search engine submission</output>
+        </example>
+      </examples>
+    </tool>
+
+    <tool name="apply_diff">
+      <purpose>Implement SEO optimizations and fix technical issues</purpose>
+      <when_to_use>
+        <scenario>Adding or updating meta tags</scenario>
+        <scenario>Implementing structured data</scenario>
+        <scenario>Creating or updating robots.txt and sitemap</scenario>
+        <scenario>Fixing SEO-related configuration issues</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Always read file first to ensure exact content match</practice>
+        <practice>Make multiple SEO-related changes in one diff when possible</practice>
+        <practice>Include line numbers for accuracy and context</practice>
+        <practice>Test changes after implementation</practice>
+      </best_practices>
+      <examples>
+        <example scenario="Updating meta tags">
+          <code>apply_diff: Update title and meta description</code>
+          <output>Improve on-page SEO with better meta tags</output>
+        </example>
+        <example scenario="Adding structured data">
+          <code>apply_diff: Add JSON-LD structured data</code>
+          <output>Enable rich snippets in search results</output>
+        </example>
+      </examples>
+    </tool>
+
+    <tool name="write_to_file">
+      <purpose>Create new SEO files, sitemaps, and documentation</purpose>
+      <when_to_use>
+        <scenario>Creating robots.txt file</scenario>
+        <scenario>Generating XML sitemap</scenario>
+        <scenario>Creating SEO documentation and reports</scenario>
+        <scenario>Adding new structured data implementations</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Follow SEO best practices for file structure</practice>
+        <practice>Include proper XML/JSON formatting for structured data</practice>
+        <practice>Create comprehensive documentation for SEO implementations</practice>
+        <practice>Use appropriate file extensions and MIME types</practice>
+      </best_practices>
+      <examples>
+        <example scenario="Creating sitemap">
+          <code>write_to_file: sitemap.xml</code>
+          <output>Generate comprehensive XML sitemap for search engines</output>
+        </example>
+        <example scenario="Creating robots.txt">
+          <code>write_to_file: robots.txt</code>
+          <output>Create proper robots.txt file for crawling instructions</output>
+        </example>
+      </examples>
+    </tool>
+
+    <tool name="search_files">
+      <purpose>Find SEO-related files and analyze project structure</purpose>
+      <when_to_use>
+        <scenario>Locating all SEO-related files in project</scenario>
+        <scenario>Finding files with specific SEO patterns</scenario>
+        <scenario>Analyzing project structure for SEO opportunities</scenario>
+        <scenario>Searching for configuration and template files</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Use regex patterns to find specific file types</practice>
+        <practice>Search for common SEO file names and patterns</practice>
+        <practice>Look for SEO-related content in various directories</practice>
+        <practice>Analyze search results to understand SEO setup</practice>
+      </best_practices>
+      <examples>
+        <example scenario="Finding SEO files">
+          <code>search_files: regex="\.(xml|txt|json)$" pattern="sitemap|robots|schema"</code>
+          <output>Locate all SEO-related configuration and data files</output>
+        </example>
+        <example scenario="Analyzing content structure">
+          <code>search_files: regex="\.(html|jsx|tsx)$" pattern="meta|title|description"</code>
+          <output>Find files where SEO meta tags are implemented</output>
+        </example>
+      </examples>
+    </tool>
+  </tool_specific_guidance>
+
+  <workflow_integration>
+    <integration_pattern name="seo_audit_workflow">
+      <description>Complete SEO audit workflow using multiple tools</description>
+      <steps>
+        <step number="1">
+          <action>Research current SEO landscape</action>
+          <tools>
+            <tool>web_search - Research competitor strategies and current best practices</tool>
+            <tool>codebase_search - Find existing SEO implementations</tool>
+          </tools>
+        </step>
+        <step number="2">
+          <action>Analyze current implementation</action>
+          <tools>
+            <tool>read_file - Examine meta tags and structured data</tool>
+            <tool>search_files - Locate all SEO-related files</tool>
+          </tools>
+        </step>
+        <step number="3">
+          <action>Test current performance</action>
+          <tools>
+            <tool>browser - Test Core Web Vitals and user experience</tool>
+            <tool>execute_command - Run automated SEO audits</tool>
+          </tools>
+        </step>
+        <step number="4">
+          <action>Implement improvements</action>
+          <tools>
+            <tool>apply_diff - Update meta tags and structured data</tool>
+            <tool>write_to_file - Create new sitemaps and configurations</tool>
+          </tools>
+        </step>
+        <step number="5">
+          <action>Validate changes</action>
+          <tools>
+            <tool>browser - Test SEO implementations</tool>
+            <tool>web_search - Verify with SEO tools</tool>
+          </tools>
+        </step>
+      </steps>
+    </integration_pattern>
+  </workflow_integration>
+
+  <mcp_tool_usage>
+    <tool name="context7">
+      <purpose>Get up-to-date documentation for SEO tools and platforms</purpose>
+      <when_to_use>
+        <scenario>Learning about new SEO tools and features</scenario>
+        <scenario>Getting documentation for SEO platforms</scenario>
+        <scenario>Understanding API integration for SEO tools</scenario>
+        <scenario>Finding best practices for specific SEO platforms</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Always resolve library ID first for accurate documentation</practice>
+        <practice>Focus on specific topics relevant to current task</practice>
+        <practice>Use appropriate token limits for comprehensive coverage</practice>
+        <practice>Document key insights and implementation details</practice>
+      </best_practices>
+      <examples>
+        <example scenario="Getting Google Search Console API docs">
+          <code>context7: resolve-library-id "Google Search Console API"</code>
+          <output>Get correct library ID for documentation access</output>
+        </example>
+        <example scenario="Learning structured data best practices">
+          <code>context7: get-library-docs "/schema/docs" topic "structured data"</code>
+          <output>Get comprehensive structured data implementation guide</output>
+        </example>
+      </examples>
+    </tool>
+
+    <tool name="exa">
+      <purpose>Get real-time SEO information and code examples</purpose>
+      <when_to_use>
+        <scenario>Finding current SEO implementation examples</scenario>
+        <scenario>Getting latest SEO best practices and code patterns</scenario>
+        <scenario>Researching specific SEO techniques and implementations</scenario>
+        <scenario>Finding solutions to SEO technical challenges</scenario>
+      </when_to_use>
+      <best_practices>
+        <practice>Use exa-code for programming-related SEO queries</practice>
+        <practice>Use web-search-exa for general SEO research</practice>
+        <practice>Adjust token limits based on complexity needed</practice>
+        <practice>Focus on recent and authoritative sources</practice>
+      </best_practices>
+      <examples>
+        <example scenario="Finding structured data examples">
+          <code>exa: get-code-context-exa "React structured data implementation 2024"</code>
+          <output>Get current best practices for React structured data</output>
+        </example>
+        <example scenario="Researching Core Web Vitals optimization">
+          <code>exa: get-code-context-exa "Core Web Vitals optimization techniques"</code>
+          <output>Find latest performance optimization strategies</output>
+        </example>
+      </examples>
+    </tool>
+  </mcp_tool_usage>
+
+  <error_handling_strategies>
+    <error_scenario name="web_search_fails">
+      <description>When web search doesn't return relevant results</description>
+      <recovery_steps>
+        <step>Refine search query with more specific terms</step>
+        <step>Try different search engines or tools</step>
+        <step>Use alternative research methods (forums, documentation)</step>
+        <step>Ask user for more specific requirements</step>
+      </recovery_steps>
+    </error_scenario>
+    
+    <error_scenario name="codebase_search_empty">
+      <description>When codebase search finds no relevant files</description>
+      <recovery_steps>
+        <step>Check if project is new or lacks SEO implementation</step>
+        <step>Search with broader terms and patterns</step>
+        <step>Use file listing to understand project structure</step>
+        <step>Focus on creating new SEO implementations</step>
+      </recovery_steps>
+    </error_scenario>
+    
+    <error_scenario name="browser_testing_fails">
+      <description>When browser testing reveals issues or errors</description>
+      <recovery_steps>
+        <step>Check browser console for JavaScript errors</step>
+        <step>Verify network requests and loading issues</step>
+        <step>Test with different browsers and devices</step>
+        <step>Document issues and create improvement plan</step>
+      </recovery_steps>
+    </error_scenario>
+  </error_handling_strategies>
+</tool_usage_guide>
+]]>

@@ -1,0 +1,324 @@
+<![CDATA[
+<tool_usage_guide>
+  <tool_priorities>
+    <priority level="1">
+      <tool>read_file</tool>
+      <when>Always start by examining existing database configurations and schemas</when>
+      <why>Understanding current setup is essential before making any database changes</why>
+    </priority>
+    <priority level="2">
+      <tool>execute_command</tool>
+      <when>For database operations, backups, and monitoring</when>
+      <why>Database administration requires command-line tools for direct database interaction</why>
+    </priority>
+    <priority level="3">
+      <tool>search_files</tool>
+      <when>To find database-related files and configurations</when>
+      <why>Locate all database configs, schemas, and migration files</why>
+    </priority>
+  </tool_priorities>
+
+  <database_specific_tools>
+    <tool name="postgresql_tools">
+      <purpose>PostgreSQL database administration operations</purpose>
+      <when_to_use>When working with PostgreSQL databases</when_to_use>
+      <commands>
+        <command name="psql_connection">
+          <syntax>psql -h [host] -p [port] -U [username] -d [database]</syntax>
+          <description>Connect to PostgreSQL database</description>
+          <example>psql -h localhost -p 5432 -U postgres -d appdb</example>
+        </command>
+        <command name="pg_dump_backup">
+          <syntax>pg_dump -h [host] -U [username] -d [database] -f [backup_file]</syntax>
+          <description>Create PostgreSQL backup</description>
+          <example>pg_dump -h localhost -U postgres -d appdb -f backup.sql</example>
+        </command>
+        <command name="pg_restore">
+          <syntax>pg_restore -h [host] -U [username] -d [database] [backup_file]</syntax>
+          <description>Restore PostgreSQL from backup</description>
+          <example>pg_restore -h localhost -U postgres -d appdb backup.dump</example>
+        </command>
+      </commands>
+    </tool>
+
+    <tool name="mysql_tools">
+      <purpose>MySQL database administration operations</purpose>
+      <when_to_use>When working with MySQL databases</when_to_use>
+      <commands>
+        <command name="mysql_connection">
+          <syntax>mysql -h [host] -P [port] -u [username] -p[password] [database]</syntax>
+          <description>Connect to MySQL database</description>
+          <example>mysql -h localhost -P 3306 -u root -p appdb</example>
+        </command>
+        <command name="mysqldump_backup">
+          <syntax>mysqldump -h [host] -u [username] -p[password] [database] > [backup_file]</syntax>
+          <description>Create MySQL backup</description>
+          <example>mysqldump -h localhost -u root -p appdb > backup.sql</example>
+        </command>
+        <command name="mysql_restore">
+          <syntax>mysql -h [host] -u [username] -p[password] [database] < [backup_file]</syntax>
+          <description>Restore MySQL from backup</description>
+          <example>mysql -h localhost -u root -p appdb < backup.sql</example>
+        </command>
+      </commands>
+    </tool>
+
+    <tool name="mongodb_tools">
+      <purpose>MongoDB database administration operations</purpose>
+      <when_to_use>When working with MongoDB databases</when_to_use>
+      <commands>
+        <command name="mongo_connection">
+          <syntax>mongo --host [host] --port [port] -u [username] -p [password] [database]</syntax>
+          <description>Connect to MongoDB database</description>
+          <example>mongo --host localhost --port 27017 -u admin -p appdb</example>
+        </command>
+        <command name="mongodump_backup">
+          <syntax>mongodump --host [host] --port [port] -u [username] -p [password] --db [database] --out [backup_dir]</syntax>
+          <description>Create MongoDB backup</description>
+          <example>mongodump --host localhost --port 27017 -u admin -p --db appdb --out ./backup</example>
+        </command>
+        <command name="mongorestore">
+          <syntax>mongorestore --host [host] --port [port] -u [username] -p [password] --db [database] [backup_dir]</syntax>
+          <description>Restore MongoDB from backup</description>
+          <example>mongorestore --host localhost --port 27017 -u admin -p --db appdb ./backup/appdb</example>
+        </command>
+      </commands>
+    </tool>
+
+    <tool name="redis_tools">
+      <purpose>Redis database administration operations</purpose>
+      <when_to_use>When working with Redis databases</when_to_use>
+      <commands>
+        <command name="redis_cli_connection">
+          <syntax>redis-cli -h [host] -p [port] -a [password]</syntax>
+          <description>Connect to Redis server</description>
+          <example>redis-cli -h localhost -p 6379 -a mypassword</example>
+        </command>
+        <command name="redis_backup">
+          <syntax>redis-cli --rdb [backup_file]</syntax>
+          <description>Create Redis RDB backup</description>
+          <example>redis-cli --rdb backup.rdb</example>
+        </command>
+        <command name="redis_monitor">
+          <syntax>redis-cli monitor</syntax>
+          <description>Monitor Redis commands in real-time</description>
+          <example>redis-cli monitor</example>
+        </command>
+      </commands>
+    </tool>
+  </database_specific_tools>
+
+  <monitoring_tools>
+    <tool name="performance_monitoring">
+      <purpose>Monitor database performance and identify bottlenecks</purpose>
+      <when_to_use>When analyzing database performance issues</when_to_use>
+      <commands>
+        <command name="postgresql_performance">
+          <syntax>psql -d [database] -c "SELECT * FROM pg_stat_activity;"</syntax>
+          <description>Check active PostgreSQL connections</description>
+          <example>psql -d appdb -c "SELECT * FROM pg_stat_activity;"</example>
+        </command>
+        <command name="mysql_performance">
+          <syntax>mysql -e "SHOW PROCESSLIST;"</syntax>
+          <description>Check active MySQL processes</description>
+          <example>mysql -e "SHOW PROCESSLIST;"</example>
+        </command>
+        <command name="redis_info">
+          <syntax>redis-cli info memory</syntax>
+          <description>Check Redis memory usage</description>
+          <example>redis-cli info memory</example>
+        </command>
+      </commands>
+    </tool>
+
+    <tool name="health_checks">
+      <purpose>Verify database health and connectivity</purpose>
+      <when_to_use>When checking database status and availability</when_to_use>
+      <commands>
+        <command name="postgresql_health">
+          <syntax>pg_isready -h [host] -p [port]</syntax>
+          <description>Check PostgreSQL server status</description>
+          <example>pg_isready -h localhost -p 5432</example>
+        </command>
+        <command name="mysql_health">
+          <syntax>mysqladmin -h [host] -u [username] -p[password] ping</syntax>
+          <description>Check MySQL server status</description>
+          <example>mysqladmin -h localhost -u root -p ping</example>
+        </command>
+        <command name="redis_health">
+          <syntax>redis-cli ping</syntax>
+          <description>Check Redis server status</description>
+          <example>redis-cli ping</example>
+        </command>
+      </commands>
+    </tool>
+  </monitoring_tools>
+
+  <backup_and_recovery_tools>
+    <tool name="automated_backups">
+      <purpose>Set up automated backup schedules</purpose>
+      <when_to_use>When implementing backup strategies</when_to_use>
+      <commands>
+        <command name="cron_backup_postgresql">
+          <syntax>crontab -e</syntax>
+          <description>Edit cron jobs for automated PostgreSQL backups</description>
+          <example># Daily backup at 2 AM
+0 2 * * * /usr/bin/pg_dump -U postgres appdb | gzip > /backups/appdb_$(date +\%Y\%m\%d).sql.gz</example>
+        </command>
+        <command name="cron_backup_mysql">
+          <syntax>crontab -e</syntax>
+          <description>Edit cron jobs for automated MySQL backups</description>
+          <example># Daily backup at 2 AM
+0 2 * * * /usr/bin/mysqldump -u root -p[password] appdb | gzip > /backups/appdb_$(date +\%Y\%m\%d).sql.gz</example>
+        </command>
+      </commands>
+    </tool>
+
+    <tool name="backup_verification">
+      <purpose>Verify backup integrity and test recovery</purpose>
+      <when_to_use>After creating backups to ensure they're valid</when_to_use>
+      <commands>
+        <command name="postgresql_backup_test">
+          <syntax>pg_restore --list [backup_file]</syntax>
+          <description>List contents of PostgreSQL backup</description>
+          <example>pg_restore --list backup.dump</example>
+        </command>
+        <command name="mysql_backup_test">
+          <syntax>mysql --one-database [database] < [backup_file]</syntax>
+          <description>Test MySQL backup restore</description>
+          <example>mysql --one-database testdb < backup.sql</example>
+        </command>
+      </commands>
+    </tool>
+  </backup_and_recovery_tools>
+
+  <security_tools>
+    <tool name="user_management">
+      <purpose>Manage database users and permissions</purpose>
+      <when_to_use>When setting up access control</when_to_use>
+      <commands>
+        <command name="postgresql_user_create">
+          <syntax>CREATE USER [username] WITH PASSWORD '[password]';</syntax>
+          <description>Create PostgreSQL user</description>
+          <example>CREATE USER app_user WITH PASSWORD 'secure_password';</example>
+        </command>
+        <command name="postgresql_grant_privileges">
+          <syntax>GRANT [privileges] ON [table] TO [username];</syntax>
+          <description>Grant PostgreSQL privileges</description>
+          <example>GRANT SELECT, INSERT, UPDATE, DELETE ON app_table TO app_user;</example>
+        </command>
+        <command name="mysql_user_create">
+          <syntax>CREATE USER '[username]'@'%' IDENTIFIED BY '[password]';</syntax>
+          <description>Create MySQL user</description>
+          <example>CREATE USER 'app_user'@'%' IDENTIFIED BY 'secure_password';</example>
+        </command>
+        <command name="mysql_grant_privileges">
+          <syntax>GRANT [privileges] ON [database].[table] TO '[username]'@'%';</syntax>
+          <description>Grant MySQL privileges</description>
+          <example>GRANT SELECT, INSERT, UPDATE, DELETE ON appdb.* TO 'app_user'@'%';</example>
+        </command>
+      </commands>
+    </tool>
+
+    <tool name="ssl_configuration">
+      <purpose>Configure SSL/TLS for database connections</purpose>
+      <when_to_use>When securing database connections</when_to_use>
+      <commands>
+        <command name="postgresql_ssl">
+          <syntax>sslmode=require; sslcert=/path/to/cert; sslkey=/path/to/key;</syntax>
+          <description>Configure PostgreSQL SSL</description>
+          <example>sslmode=require; sslcert=/etc/ssl/certs/server.crt; sslkey=/etc/ssl/private/server.key;</example>
+        </command>
+        <command name="mysql_ssl">
+          <syntax>--ssl-mode=REQUIRED --ssl-ca=/path/to/ca.pem --ssl-cert=/path/to/client-cert.pem --ssl-key=/path/to/client-key.pem</syntax>
+          <description>Configure MySQL SSL</description>
+          <example>mysql --ssl-mode=REQUIRED --ssl-ca=/etc/ssl/ca.pem --ssl-cert=/etc/ssl/client-cert.pem --ssl-key=/etc/ssl/client-key.pem</example>
+        </command>
+      </commands>
+    </tool>
+  </security_tools>
+
+  <file_operations>
+    <tool name="configuration_files">
+      <purpose>Manage database configuration files</purpose>
+      <when_to_use>When modifying database settings</when_to_use>
+      <file_patterns>
+        <pattern>postgresql.conf</pattern>
+        <pattern>pg_hba.conf</pattern>
+        <pattern>my.cnf</pattern>
+        <pattern>redis.conf</pattern>
+        <pattern>mongod.conf</pattern>
+      </file_patterns>
+      <operations>
+        <operation>Read existing configurations before making changes</operation>
+        <operation>Create backup of configuration files before modification</operation>
+        <operation>Test configuration changes in staging environment first</operation>
+        <operation>Reload configuration after changes using appropriate commands</operation>
+      </operations>
+    </tool>
+
+    <tool name="schema_files">
+      <purpose>Manage database schema and migration files</purpose>
+      <when_to_use>When working with database schemas</when_to_use>
+      <file_patterns>
+        <pattern>*.sql</pattern>
+        <pattern>migrations/*.sql</pattern>
+        <pattern>schema/*.sql</pattern>
+        <pattern>seeds/*.sql</pattern>
+      </file_patterns>
+      <operations>
+        <operation>Review schema changes for performance impact</operation>
+        <operation>Test migrations on copy of production data</operation>
+        <operation>Document schema changes with comments</operation>
+        <operation>Create rollback scripts for each migration</operation>
+      </operations>
+    </tool>
+  </file_operations>
+
+  <troubleshooting_tools>
+    <tool name="log_analysis">
+      <purpose>Analyze database logs for troubleshooting</purpose>
+      <when_to_use>When investigating database issues</when_to_use>
+      <commands>
+        <command name="postgresql_logs">
+          <syntax>tail -f /var/log/postgresql/postgresql.log</syntax>
+          <description>Monitor PostgreSQL logs in real-time</description>
+          <example>tail -f /var/log/postgresql/postgresql.log</example>
+        </command>
+        <command name="mysql_logs">
+          <syntax>tail -f /var/log/mysql/error.log</syntax>
+          <description>Monitor MySQL error logs</description>
+          <example>tail -f /var/log/mysql/error.log</example>
+        </command>
+        <command name="redis_logs">
+          <syntax>tail -f /var/log/redis/redis-server.log</syntax>
+          <description>Monitor Redis logs</description>
+          <example>tail -f /var/log/redis/redis-server.log</example>
+        </command>
+      </commands>
+    </tool>
+
+    <tool name="connection_troubleshooting">
+      <purpose>Troubleshoot database connection issues</purpose>
+      <when_to_use>When unable to connect to database</when_to_use>
+      <commands>
+        <command name="postgresql_connection_test">
+          <syntax>psql -h [host] -p [port] -U [username] -d [database] -c "SELECT version();"</syntax>
+          <description>Test PostgreSQL connection</description>
+          <example>psql -h localhost -p 5432 -U postgres -d appdb -c "SELECT version();"</example>
+        </command>
+        <command name="mysql_connection_test">
+          <syntax>mysql -h [host] -P [port] -u [username] -p -e "SELECT VERSION();"</syntax>
+          <description>Test MySQL connection</description>
+          <example>mysql -h localhost -P 3306 -u root -p -e "SELECT VERSION();"</example>
+        </command>
+        <command name="redis_connection_test">
+          <syntax>redis-cli -h [host] -p [port] ping</syntax>
+          <description>Test Redis connection</description>
+          <example>redis-cli -h localhost -p 6379 ping</example>
+        </command>
+      </commands>
+    </tool>
+  </troubleshooting_tools>
+</tool_usage_guide>
+]]>

@@ -1,0 +1,347 @@
+<common_patterns>
+  <research_templates>
+    <template name="user_interview_template">
+      <description>Comprehensive template for conducting user interviews</description>
+      <structure>
+        <section name="preparation">
+          <item>Research objectives and hypotheses</item>
+          <item>Participant screening criteria</item>
+          <item>Interview guide with questions</item>
+          <item>Consent form and ethics considerations</item>
+          <item>Recording setup and backup plan</item>
+        </section>
+        
+        <section name="interview_structure">
+          <phase name="introduction" duration="5 minutes">
+            <content>Welcome, purpose, consent, ground rules</content>
+          </phase>
+          <phase name="warm_up" duration="10 minutes">
+            <content>Background, context, general behaviors</content>
+          </phase>
+          <phase name="core_questions" duration="30-45 minutes">
+            <content>Main research questions and scenarios</content>
+          </phase>
+          <phase name="wrap_up" duration="5 minutes">
+            <content>Final thoughts, appreciation, next steps</content>
+          </phase>
+        </section>
+        
+        <section name="question_types">
+          <type name="behavioral">"Tell me about the last time you..."</type>
+          <type name="motivational">"What's most important to you when..."</type>
+          <type name="situational">"How would you handle..."</type>
+          <type name="reflective">"What did you learn from..."</type>
+        </section>
+      </structure>
+    </template>
+
+    <template name="usability_test_template">
+      <description>Template for planning and conducting usability tests</description>
+      <structure>
+        <section name="test_planning">
+          <item>Test objectives and success metrics</item>
+          <item>Task scenarios and success criteria</item>
+          <item>Participant recruitment criteria</item>
+          <item>Test environment and equipment setup</item>
+          <item>Data collection methods and tools</item>
+        </section>
+        
+        <section name="test_protocol">
+          <phase name="introduction" duration="5 minutes">
+            <content>Welcome, purpose, consent, think-aloud instructions</content>
+          </phase>
+          <phase name="warm_up" duration="5 minutes">
+            <content>System familiarity, basic navigation</content>
+          </phase>
+          <phase name="task_execution" duration="30-40 minutes">
+            <content>Complete tasks while thinking aloud</content>
+          </phase>
+          <phase name="post_test" duration="10 minutes">
+            <content>System Usability Scale, debrief questions</content>
+          </phase>
+        </section>
+        
+        <section name="metrics_collection">
+          <metric name="task_success">Binary completion rate</metric>
+          <metric name="time_on_task">Duration to complete each task</metric>
+          <metric name="error_rate">Number and severity of errors</metric>
+          <metric name="satisfaction">Subjective ratings and feedback</metric>
+          <metric name="efficiency">Time compared to optimal performance</metric>
+        </section>
+      </structure>
+    </template>
+
+    <template name="survey_template">
+      <description>Template for creating effective user surveys</description>
+      <structure>
+        <section name="survey_design">
+          <item>Clear title and purpose statement</item>
+          <item>Estimated completion time</item>
+          <item>Demographic questions (optional)</item>
+          <item>Main research questions</item>
+          <item>Open-ended feedback section</item>
+          <item>Thank you and next steps</item>
+        </section>
+        
+        <section name="question_patterns">
+          <pattern name="likert_scale">
+            <template><![CDATA[
+How satisfied are you with [feature]?
+○ Very Dissatisfied
+○ Dissatisfied  
+○ Neutral
+○ Satisfied
+○ Very Satisfied
+            ]]></template>
+          </pattern>
+          
+          <pattern name="frequency">
+            <template><![CDATA[
+How often do you [action]?
+○ Never
+○ Rarely
+○ Sometimes
+○ Often
+○ Very Often
+            ]]></template>
+          </pattern>
+          
+          <pattern name="ranking">
+            <template><![CDATA[
+Please rank these features from most important (1) to least important (5):
+[ ] Feature A
+[ ] Feature B
+[ ] Feature C
+[ ] Feature D
+[ ] Feature E
+            ]]></template>
+          </pattern>
+        </section>
+      </structure>
+    </template>
+
+    <template name="persona_template">
+      <description>Template for creating comprehensive user personas</description>
+      <structure>
+        <section name="basic_info">
+          <item>Name and photo (stock or illustrated)</item>
+          <item>Age, occupation, education level</item>
+          <item>Location, family status, income range</item>
+          <item>Technical proficiency level</item>
+        </section>
+        
+        <section name="context">
+          <item>Work environment and tools used</item>
+          <item>Daily routines and responsibilities</item>
+          <item>Goals and motivations</item>
+          <item>Challenges and pain points</item>
+        </section>
+        
+        <section name="behaviors">
+          <item>Preferred communication channels</item>
+          <item>Learning style and preferences</item>
+          <item>Decision-making process</item>
+          <item>Brand loyalties and preferences</item>
+        </section>
+        
+        <section name="needs_goals">
+          <item>Primary goals related to product</item>
+          <item>Secondary needs and desires</item>
+          <item>Success metrics and expectations</item>
+          <item>Barriers and concerns</item>
+        </section>
+        
+        <section name="quotes_scenarios">
+          <item>Representative quotes</item>
+          <item>Typical usage scenarios</item>
+          <item>Edge cases and special situations</item>
+          <item>Future aspirations</item>
+        </section>
+      </structure>
+    </template>
+
+    <template name="journey_map_template">
+      <description>Template for mapping user experiences across touchpoints</description>
+      <structure>
+        <section name="journey_phases">
+          <phase name="awareness">How users discover the product/service</phase>
+          <phase name="consideration">How users evaluate options</phase>
+          <phase name="acquisition">How users sign up or purchase</phase>
+          <phase name="service">How users interact with the product</phase>
+          <phase name="loyalty">How users maintain relationship</phase>
+          <phase name="advocacy">How users recommend to others</phase>
+        </section>
+        
+        <section name="mapping_elements">
+          <element name="actions">What users do at each stage</element>
+          <element name="thoughts">What users think and feel</element>
+          <element name="emotions">Emotional journey (high/low points)</element>
+          <element name="touchpoints">Where interactions occur</element>
+          <element name="pain_points">Frustrations and barriers</element>
+          <element name="opportunities">Areas for improvement</element>
+        </section>
+      </structure>
+    </template>
+  </research_templates>
+
+  <analysis_patterns>
+    <pattern name="affinity_diagramming">
+      <description>Organize qualitative data into themes and patterns</description>
+      <process>
+        <step>Write individual observations on separate notes</step>
+        <step>Group similar notes without talking</step>
+        <step>Discuss groupings and reach consensus</step>
+        <step>Name groups with descriptive labels</step>
+        <step>Identify relationships between groups</step>
+        <step>Prioritize insights by impact and feasibility</step>
+      </process>
+    </pattern>
+
+    <pattern name="jobs_to_be_done">
+      <description>Frame user needs as "jobs" users want to accomplish</description>
+      <framework>
+        <dimension name="functional">What users want to accomplish</dimension>
+        <dimension name="emotional">How users want to feel</dimension>
+        <dimension name="social">How users want to be perceived</dimension>
+        <dimension name="related">What users want to avoid</dimension>
+      </framework>
+      <template><![CDATA[
+When [situation], I want to [motivation], so I can [expected outcome]
+      ]]></template>
+    </pattern>
+
+    <pattern name="heuristic_evaluation">
+      <description>Systematic evaluation using established usability principles</description>
+      <heuristics>
+        <heuristic>Visibility of system status</heuristic>
+        <heuristic>Match between system and real world</heuristic>
+        <heuristic>User control and freedom</heuristic>
+        <heuristic>Consistency and standards</heuristic>
+        <heuristic>Error prevention</heuristic>
+        <heuristic>Recognition rather than recall</heuristic>
+        <heuristic>Flexibility and efficiency of use</heuristic>
+        <heuristic>Aesthetic and minimalist design</heuristic>
+        <heuristic>Help users recognize, diagnose, and recover from errors</heuristic>
+        <heuristic>Help and documentation</heuristic>
+      </heuristics>
+    </pattern>
+  </analysis_patterns>
+
+  <reporting_patterns>
+    <pattern name="executive_summary">
+      <description>Concise summary for leadership and stakeholders</description>
+      <structure>
+        <section name="key_findings">3-5 most important discoveries</section>
+        <section name="business_impact">Implications for metrics and goals</section>
+        <section name="recommendations">Prioritized action items</section>
+        <section name="next_steps">Immediate follow-up actions</section>
+      </structure>
+      <length>1-2 pages maximum</length>
+    </pattern>
+
+    <pattern name="detailed_report">
+      <description>Comprehensive report for product and design teams</description>
+      <structure>
+        <section name="executive_summary">High-level overview</section>
+        <section name="research_objectives">Goals and hypotheses</section>
+        <section name="methodology">Approach and participants</section>
+        <section name="key_findings">Detailed results and insights</section>
+        <section name="themes_patterns">Qualitative analysis</section>
+        <section name="quantitative_data">Statistical analysis</section>
+        <section name="recommendations">Specific, actionable suggestions</section>
+        <section name="appendices">Raw data, transcripts, materials</section>
+      </structure>
+    </pattern>
+
+    <pattern name="presentation_deck">
+      <description>Visual presentation for stakeholder meetings</description>
+      <structure>
+        <slide type="title">Research title and team</slide>
+        <slide type="context">Business problem and objectives</slide>
+        <slide type="methodology">Approach and participants</slide>
+        <slide type="key_findings">Main discoveries (3-5 slides)</slide>
+        <slide type="user_quotes">Powerful participant quotes</slide>
+        <slide type="recommendations">Actionable suggestions</slide>
+        <slide type="next_steps">Implementation plan</slide>
+        <slide type="q&a">Discussion and questions</slide>
+      </structure>
+      <guidelines>
+        <guideline>One main idea per slide</guideline>
+        <guideline>Use visuals over text when possible</guideline>
+        <guideline>Include direct user quotes</guideline>
+        <guideline>End with clear next steps</guideline>
+      </guidelines>
+    </pattern>
+  </reporting_patterns>
+
+  <measurement_patterns>
+    <pattern name="success_metrics">
+      <description>Define and track meaningful success metrics</description>
+      <categories>
+        <category name="task_success">
+          <metric>Completion rate</metric>
+          <metric>Time on task</metric>
+          <metric>Error rate</metric>
+          <metric>Efficiency</metric>
+        </category>
+        
+        <category name="user_satisfaction">
+          <metric>System Usability Scale (SUS)</metric>
+          <metric>Customer Satisfaction (CSAT)</metric>
+          <metric>Net Promoter Score (NPS)</metric>
+          <metric>User Effort Score (UES)</metric>
+        </category>
+        
+        <category name="business_impact">
+          <metric>Conversion rate</metric>
+          <metric>Retention rate</metric>
+          <metric>Support tickets</metric>
+          <metric>Revenue impact</metric>
+        </category>
+      </categories>
+    </pattern>
+
+    <pattern name="ab_testing">
+      <description>Statistical comparison of design alternatives</description>
+      <process>
+        <step>Formulate hypothesis and success criteria</step>
+        <step>Calculate required sample size</step>
+        <step>Implement variants and randomization</step>
+        <step>Run test until statistical significance</step>
+        <step>Analyze results and confidence intervals</step>
+        <step>Document findings and recommendations</step>
+      </process>
+      <formulas>
+        <formula name="conversion_rate">Conversions / Visitors * 100</formula>
+        <formula name="statistical_significance">P-value < 0.05</formula>
+        <formula name="confidence_interval">Mean ± (Z * Standard Error)</formula>
+      </formulas>
+    </pattern>
+  </measurement_patterns>
+
+  <communication_patterns>
+    <pattern name="stakeholder_update">
+      <description>Regular updates to keep stakeholders informed</description>
+      <frequency>Weekly during active research</frequency>
+      <content>
+        <item>Progress against timeline</item>
+        <item>Key findings to date</item>
+        <item>Challenges and blockers</item>
+        <item>Upcoming activities</item>
+        <item>Support needed</item>
+      </content>
+    </pattern>
+
+    <pattern name="research_insight">
+      <description>Format for sharing individual insights</description>
+      <structure>
+        <element name="observation">What we saw or heard</element>
+        <element name="interpretation">What it means</element>
+        <element name="implication">Why it matters</element>
+        <element name="recommendation">What to do about it</element>
+        <element name="confidence">How certain we are</element>
+        <element name="evidence">Supporting data points</element>
+      </structure>
+    </pattern>
+  </communication_patterns>
+</common_patterns>

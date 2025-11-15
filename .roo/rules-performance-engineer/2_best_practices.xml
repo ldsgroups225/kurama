@@ -1,0 +1,168 @@
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>Measure First, Optimize Second</name>
+      <description>Always establish performance baselines before making optimizations. Measure current performance, identify bottlenecks, then optimize based on data-driven decisions rather than assumptions.</description>
+      <rationale>Performance optimizations without baseline measurements are often premature and can lead to wasted effort or even performance degradation.</rationale>
+      <example>
+        <scenario>When optimizing database queries</scenario>
+        <good>Measure query execution times, add indexes, then measure improvement</good>
+        <bad>Add indexes based on theoretical analysis without measuring actual impact</bad>
+      </example>
+    </principle>
+    
+    <principle priority="high">
+      <name>Focus on High-Impact Optimizations</name>
+      <description>Prioritize optimizations that deliver the highest performance impact for the lowest cost. Use the 80/20 rule - focus on 20% of optimizations that deliver 80% of performance gains.</description>
+      <rationale>Not all optimizations have equal value. Concentrating on high-impact changes ensures maximum ROI on performance improvement efforts.</rationale>
+      <example>
+        <scenario>When faced with multiple performance issues</scenario>
+        <good>Optimize the slowest database queries first (20% effort, 80% impact)</good>
+        <bad>Make minor optimizations across many areas (80% effort, 20% impact)</bad>
+      </example>
+    </principle>
+    
+    <principle priority="high">
+      <name>Performance Budgets and Thresholds</name>
+      <description>Establish clear performance budgets and SLA thresholds. Every optimization should be evaluated against these predefined limits to prevent scope creep and ensure consistent user experience.</description>
+      <rationale>Performance budgets provide objective criteria for when optimizations are "good enough" and prevent endless optimization cycles.</rationale>
+      <example>
+        <scenario>Setting response time budgets</scenario>
+        <good>API responses < 200ms, database queries < 100ms, page load < 2s</good>
+        <bad>No clear performance targets leading to subjective optimization decisions</bad>
+      </example>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Incremental Deployment and Testing</name>
+      <description>Deploy optimizations incrementally with thorough testing at each stage. Use A/B testing, canary deployments, and gradual rollouts to validate improvements and minimize risk.</description>
+      <rationale>Large-scale performance changes can have unintended consequences. Incremental deployment allows for early detection of issues and quick rollback if needed.</rationale>
+      <example>
+        <scenario>Deploying caching improvements</scenario>
+        <good>Implement cache for 10% of traffic, measure results, then gradually increase</good>
+        <bad>Deploy cache changes to 100% of traffic without validation</bad>
+      </example>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Monitor Real-World Performance</name>
+      <description>Ensure performance testing and monitoring reflect real-world usage patterns. Test with realistic data volumes, user behaviors, and network conditions that match production environment.</description>
+      <rationale>Laboratory performance tests often don't reveal issues that appear in production due to different usage patterns, data distributions, and network conditions.</rationale>
+      <example>
+        <scenario>Load testing configuration</scenario>
+        <good>Use production-like data volumes and realistic user behavior patterns in tests</good>
+        <bad>Test with artificial data that doesn't match production usage patterns</bad>
+      </example>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Consider System-Wide Impact</name>
+      <description>Evaluate optimizations in the context of the entire system stack. Performance improvements in one area may create bottlenecks in another. Consider end-to-end user experience rather than isolated component performance.</description>
+      <rationale>Optimizing one component to be extremely fast doesn't help if other components become the bottleneck. System performance is determined by the slowest component.</rationale>
+      <example>
+        <scenario>Database optimization impact</scenario>
+        <good>Analyze how database optimizations affect overall response times and system load</good>
+        <bad>Optimize database queries in isolation without considering application-level impact</bad>
+      </example>
+    </principle>
+  </general_principles>
+
+  <code_conventions>
+    <convention category="performance_monitoring">
+      <rule>Consistent metric naming and collection</rule>
+      <examples>
+        <good>response_time_p95, throughput_rps, error_rate, cpu_utilization_percent</good>
+        <bad>ResponseTime, rps, errors, CPU (inconsistent naming)</bad>
+      </examples>
+    </convention>
+    
+    <convention category="optimization_comments">
+      <rule>Document optimization decisions with before/after metrics</rule>
+      <examples>
+        <good>
+          // Before optimization: Average response time: 450ms
+          // After optimization: Average response time: 180ms (60% improvement)
+        </good>
+        <bad>
+          // Optimized database query
+          // Added index without measuring impact
+        </bad>
+      </examples>
+    </convention>
+    
+    <convention category="performance_testing">
+      <rule>Standardized load test scenarios</rule>
+      <examples>
+        <good>baseline_test, stress_test, spike_test, soak_test with documented parameters</good>
+        <bad>Random performance tests without clear objectives</bad>
+      </examples>
+    </convention>
+    
+    <convention category="caching_strategies">
+      <rule>Consistent cache key patterns and TTL</rule>
+      <examples>
+        <good>user_profile_123, cache_ttl_300s, cache_invalidation_on_update</good>
+        <bad>Inconsistent cache keys and arbitrary TTL values</bad>
+      </examples>
+    </convention>
+  </code_conventions>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>Premature Optimization</description>
+      <why_problematic>Optimizing code without proper profiling and baseline measurements often leads to wasted effort and can even degrade performance.</why_problematic>
+      <correct_approach>Always measure first, then optimize based on data. Establish clear performance baselines before making changes.</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Micro-optimization Focus</description>
+      <why_problematic>Focusing on tiny optimizations while ignoring major architectural bottlenecks provides minimal overall performance improvement.</why_problematic>
+      <correct_approach>Use profiling tools to identify the biggest performance bottlenecks first. Focus on high-impact optimizations that provide maximum ROI.</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Ignoring Real-World Conditions</description>
+      <why_problematic>Performance optimizations that work in idealized test environments often fail in production due to different data volumes, network conditions, and user behaviors.</why_problematic>
+      <correct_approach>Test with realistic data volumes and usage patterns. Consider network latency, concurrent users, and data distribution in production environment.</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Insufficient Monitoring</description>
+      <why_problematic>Deploying performance changes without proper monitoring makes it impossible to detect regressions or measure actual impact.</why_problematic>
+      <correct_approach>Implement comprehensive monitoring before, during, and after optimizations. Set up alerts for performance regressions and establish clear SLA monitoring.</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Cache Invalidation Issues</description>
+      <why_problematic>Implementing caching without proper invalidation strategies leads to stale data and user experience issues.</why_problematic>
+      <correct_approach>Design comprehensive cache invalidation strategies. Consider time-based, event-driven, and manual invalidation approaches. Document cache invalidation rules clearly.</correct_approach>
+    </pitfall>
+  </common_pitfalls>
+
+  <quality_checklist>
+    <category name="before_optimizing">
+      <item>Performance baselines established and documented</item>
+      <item>Bottlenecks identified with impact analysis</item>
+      <item>Load testing completed with realistic scenarios</item>
+      <item>Monitoring systems implemented and operational</item>
+      <item>Performance budgets and SLA thresholds defined</item>
+    </category>
+    
+    <category name="during_optimization">
+      <item>Optimizations based on profiling data</item>
+      <item>High-impact optimizations prioritized</item>
+      <item>Cache strategies implemented with invalidation</item>
+      <item>Database optimizations validated with execution plans</item>
+      <item>Code changes tested for performance regressions</item>
+    </category>
+    
+    <category name="after_optimization">
+      <item>Performance improvements measured and quantified</item>
+      <item>Before/after performance comparisons documented</item>
+      <item>SLA compliance validated</item>
+      <item>Monitoring dashboards configured and functional</item>
+      <item>Optimization decisions documented with rationale</item>
+      <item>Performance regression tests implemented</item>
+    </category>
+  </quality_checklist>
+</best_practices>

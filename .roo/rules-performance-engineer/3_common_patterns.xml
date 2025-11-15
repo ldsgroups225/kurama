@@ -1,0 +1,283 @@
+<common_patterns>
+  <performance_optimization_patterns>
+    <pattern name="database_query_optimization">
+      <description>Optimizing database queries for better performance</description>
+      <when_to_use>When database queries are identified as bottlenecks through profiling or monitoring</when_to_use>
+      <implementation>
+        <code language="sql">
+          -- Before: SELECT * FROM users WHERE email = ?
+          -- After: SELECT id, name, email FROM users WHERE email = ? AND status = 'active'
+        </code>
+        <explanation>Added specific index on email and status columns for targeted query optimization</explanation>
+      </implementation>
+    </pattern>
+    
+    <pattern name="caching_strategies">
+      <description>Implementing effective caching mechanisms</description>
+      <when_to_use>When implementing or improving caching for frequently accessed data</when_to_use>
+      <implementation>
+        <code language="javascript">
+          // Redis cache with TTL and invalidation
+          const cache = new Redis({
+            host: process.env.REDIS_HOST,
+            port: process.env.REDIS_PORT,
+            retryDelayOnFailover: 100
+            maxRetriesPerRequest: 3
+          });
+
+          // Cache key pattern
+          const cacheKey = `user:${userId}:profile:${profileId}`;
+          const cacheTTL = 300; // 5 minutes
+
+          // Get with cache
+          async function getUserProfile(userId, profileId) {
+            const key = `user:${userId}:profile:${profileId}`;
+            const cached = await cache.get(key);
+            if (cached) return JSON.parse(cached);
+            
+            // Cache miss - fetch from database
+            const profile = await db.query(
+              'SELECT * FROM user_profiles WHERE user_id = ? AND profile_id = ?',
+              [userId, profileId]
+            );
+            
+            // Set cache with TTL
+            await cache.setex(key, JSON.stringify(profile), 'EX', cacheTTL);
+            return profile;
+          }
+        </code>
+        <explanation>Multi-level caching with user-specific and profile-specific keys, 5-minute TTL, and cache-aside pattern for database queries</explanation>
+      </implementation>
+    </pattern>
+    
+    <pattern name="connection_pooling">
+      <description>Managing database connections efficiently</description>
+      <when_to_use>When applications make frequent database connections or need to scale connection handling</when_to_use>
+      <implementation>
+        <code language="javascript">
+          // PostgreSQL connection pool
+          const { Pool } = require('pg').Pool;
+          const pool = new Pool({
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT,
+            database: process.env.DB_NAME,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            max: 20, // Maximum number of connections
+            min: 5,  // Minimum number of connections
+            idleTimeoutMillis: 30000,
+            connectionTimeoutMillis: 5000,
+          });
+
+          // Using connection pool
+          async function queryDatabase(sql, params) {
+            const client = await pool.connect();
+            try {
+              const result = await client.query(sql, params);
+              return result;
+            } finally {
+              client.release();
+            }
+          }
+        </code>
+        <explanation>Connection pooling reduces connection overhead and prevents connection exhaustion under load. Pool size configured based on application requirements.</explanation>
+      </implementation>
+    </pattern>
+    
+    <pattern name="async_processing">
+      <description>Implementing non-blocking operations for better throughput</description>
+      <when_to_use>When synchronous operations are blocking system performance or scalability</when_to_use>
+      <implementation>
+        <code language="javascript">
+          // Synchronous file processing (blocking)
+          function processFileSync(filePath) {
+            const data = fs.readFileSync(filePath);
+            // Process data synchronously
+            return processData(data);
+          }
+
+          // Asynchronous file processing (non-blocking)
+          async function processFileAsync(filePath) {
+            const data = await fs.readFile(filePath);
+            // Process data asynchronously
+            return processData(data);
+          }
+
+          // Batch processing for multiple files
+          async function processBatchFiles(filePaths) {
+            const promises = filePaths.map(path => processFileAsync(path));
+            return Promise.all(promises);
+          }
+        </code>
+        <explanation>Asynchronous operations prevent blocking and allow better resource utilization. Use Promise.all() for parallel processing when operations are independent.</explanation>
+      </implementation>
+    </pattern>
+    
+    <pattern name="lazy_loading">
+      <description>Implementing lazy loading for improved initial page load</description>
+      <when_to_use>When applications have large datasets or components that aren't needed immediately</when_to_use>
+      <implementation>
+        <code language="javascript">
+          // React lazy loading example
+          const LazyComponent = React.lazy(() => import('./HeavyComponent'));
+
+          // Dynamic import with code splitting
+          const loadModule = async (moduleName) => {
+            const module = await import(`./modules/${moduleName}.js`);
+            return module;
+          };
+
+          // Intersection Observer for lazy loading
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                const lazyComponent = entry.target.dataset.lazyComponent;
+                if (lazyComponent && !entry.target.dataset.loaded) {
+                  import(lazyComponent).then(() => {
+                    entry.target.dataset.loaded = 'true';
+                  });
+                }
+              }
+            });
+          });
+
+          observer.observe(document.querySelectorAll('.lazy-load'));
+        </code>
+        <explanation>Lazy loading reduces initial bundle size and improves perceived performance by loading resources only when needed. Code splitting allows for better caching strategies.</explanation>
+      </implementation>
+    </pattern>
+  </performance_optimization_patterns>
+
+  <load_testing_patterns>
+    <pattern name="load_test_configuration">
+      <description>Configuring comprehensive load testing scenarios</description>
+      <when_to_use>When designing load tests to validate system performance under various conditions</when_to_use>
+      <implementation>
+        <code language="javascript">
+          // Load test configuration
+          const loadTestConfig = {
+            scenarios: [
+              {
+                name: 'baseline',
+                description: 'Current system performance baseline',
+                weight: 10,
+                rampUp: { duration: 60, target: 100 },
+                hold: { duration: 300, target: 100 }
+              },
+              {
+                name: 'peak_load',
+                description: 'Expected peak traffic simulation',
+                weight: 30,
+                rampUp: { duration: 120, target: 500 },
+                hold: { duration: 600, target: 500 }
+              },
+              {
+                name: 'stress_test',
+                description: 'System breaking point identification',
+                weight: 40,
+                rampUp: { duration: 30, target: 1000 },
+                hold: { duration: 300, target: 1000 }
+              },
+              {
+                name: 'spike_test',
+                description: 'Sudden traffic spike handling',
+                weight: 20,
+                rampUp: { duration: 5, target: 2000 }
+              }
+            ],
+            thresholds: {
+              responseTime: { p95: 500, avg: 300 }, // milliseconds
+              errorRate: { max: 0.01 }, // 1%
+              throughput: { min: 1000 } // requests per second
+            },
+            monitoring: {
+                collectMetrics: ['responseTime', 'errorRate', 'throughput', 'cpuUsage', 'memoryUsage'],
+                alertThresholds: {
+                  responseTimeP95: 800,
+                  errorRate: 0.02,
+                  cpuUsage: 80,
+                  memoryUsage: 85
+                }
+              }
+            };
+          };
+        </code>
+        <explanation>Comprehensive load test configuration with multiple scenarios, weighted importance, and clear thresholds for automated performance validation.</explanation>
+      </implementation>
+    </pattern>
+    
+    <pattern name="monitoring_setup">
+      <description>Implementing comprehensive performance monitoring</description>
+      <when_to_use>When setting up monitoring to track system performance and identify issues</when_to_use>
+      <implementation>
+        <code language="javascript">
+          // Application Performance Monitoring (APM)
+          const apm = require('elastic-apm-node');
+          
+          apm.startTransaction('user-request', {
+            userId: req.user.id,
+            operation: req.operation
+          });
+
+          // Custom metrics collection
+          const histogram = new prometheus.Histogram({
+            name: 'api_response_time_seconds',
+            help: 'API response time in seconds',
+            buckets: [0.1, 0.25, 0.5, 1, 2.5, 5, 10]
+          });
+
+          // Real User Monitoring (RUM)
+          const rumConfig = {
+            apiKey: process.env.RUM_API_KEY,
+            sampleRate: 0.1, // 10% of users
+            trackResources: ['js', 'css', 'images'],
+            trackInteractions: ['click', 'scroll', 'form-submit']
+          };
+
+          // Infrastructure monitoring
+          const systemMetrics = {
+            cpu: () => os.cpus(),
+            memory: () => os.totalmem() - os.freemem(),
+            disk: () => fs.statSync('/').size,
+            network: () => require('system-network-stats')
+          };
+        </code>
+        <explanation>Multi-layered monitoring approach covering application performance, user experience, and system infrastructure. Custom metrics, histograms, and automated alerting provide comprehensive visibility.</explanation>
+      </implementation>
+    </pattern>
+  </load_testing_patterns>
+
+  <profiling_patterns>
+    <pattern name="application_profiling">
+      <description>Profiling application code to identify performance bottlenecks</description>
+      <when_to_use>When investigating performance issues or optimizing critical code paths</when_to_use>
+      <implementation>
+        <code language="javascript">
+          // Node.js built-in profiler
+          const profiler = require('v8-profiler-next');
+          
+          profiler.startProfiling('CPU');
+          
+          // Profile specific function
+          function expensiveOperation() {
+            profiler.startProfiling('CPU');
+            // ... expensive operations ...
+            profiler.stopProfiling('CPU');
+          }
+
+          // Chrome DevTools profiling
+          console.profile('Starting profile');
+          // ... operations to profile ...
+          console.profileEnd();
+          
+          // Memory profiling
+          if (process.env.NODE_ENV === 'development') {
+            const heapdump = require('heapdump');
+            heapdump.writeSnapshot('./heapdump-' + Date.now() + '.heapsnapshot');
+          }
+        </code>
+        <explanation>Multiple profiling techniques for different environments and use cases. Built-in profilers for production, browser tools for development, and memory profiling for leak detection.</explanation>
+      </implementation>
+    </pattern>
+  </profiling_patterns>
+</common_patterns>

@@ -1,0 +1,119 @@
+<workflow_instructions>
+  <mode_overview>
+    The refactoring-specialist mode guides users through systematic code transformation processes to improve code quality, reduce complexity, and enhance maintainability while preserving all existing behavior. This mode focuses on safe, test-driven refactoring with comprehensive analysis and validation.
+  </mode_overview>
+
+  <initialization_steps>
+    <step number="1">
+      <action>Understand the refactoring request</action>
+      <details>
+        Parse the user's input to identify:
+        - Primary refactoring objectives (complexity reduction, performance improvement, etc.)
+        - Specific code quality issues to address
+        - Constraints and requirements (must preserve behavior, performance targets)
+        - Scope of refactoring (specific files, modules, or entire codebase)
+      </details>
+    </step>
+    
+    <step number="2">
+      <action>Gather refactoring context</action>
+      <tools>
+        <tool>codebase_search - Find relevant code and identify smell patterns</tool>
+        <tool>list_files - Understand project structure and identify affected areas</tool>
+        <tool>read_file - Examine specific implementations and complexity</tool>
+        <tool>search_files - Identify code smells and patterns</tool>
+      </tools>
+    </step>
+    
+    <step number="3">
+      <action>Establish refactoring baseline</action>
+      <details>
+        Before making changes:
+        - Run existing tests to ensure current behavior is captured
+        - Measure current code metrics (complexity, coupling, cohesion)
+        - Identify test coverage gaps that need addressing
+        - Document current state for comparison
+      </details>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="analysis">
+      <description>Analyze code quality issues and refactoring opportunities</description>
+      <steps>
+        <step>Identify code smells and anti-patterns</step>
+        <step>Assess complexity metrics and hotspots</step>
+        <step>Evaluate coupling and cohesion issues</step>
+        <step>Analyze performance bottlenecks and inefficiencies</step>
+        <step>Prioritize refactoring opportunities by impact and effort</step>
+      </steps>
+    </phase>
+
+    <phase name="planning">
+      <description>Create detailed refactoring plan with safety measures</description>
+      <steps>
+        <step>Define refactoring scope and sequence</step>
+        <step>Plan test coverage strategy (characterization tests first)</step>
+        <step>Identify safe refactoring techniques for each issue</step>
+        <step>Establish rollback strategy and validation checkpoints</step>
+        <step>Document refactoring rationale and expected improvements</step>
+      </steps>
+    </phase>
+
+    <phase name="implementation">
+      <description>Execute refactoring changes systematically</description>
+      <steps>
+        <step>Write characterization tests for behavior preservation</step>
+        <step>Apply refactoring patterns incrementally</step>
+        <step>Run tests after each change to verify behavior</step>
+        <step>Update documentation and comments as needed</step>
+        <step>Monitor metrics to confirm improvements</step>
+      </steps>
+    </phase>
+
+    <phase name="validation">
+      <description>Verify refactoring success and quality improvements</description>
+      <steps>
+        <step>Run full test suite to ensure no regressions</step>
+        <step>Compare before/after metrics to quantify improvements</step>
+        <step>Validate code quality standards compliance</step>
+        <step>Review performance impact and benchmarks</step>
+        <step>Ensure documentation reflects new structure</step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <completion_criteria>
+    <criterion>All identified code smells have been addressed</criterion>
+    <criterion>Code complexity metrics have measurably improved</criterion>
+    <criterion>100% backward compatibility preserved (no behavior changes)</criterion>
+    <criterion>Test coverage maintained or improved</criterion>
+    <criterion>Documentation updated to reflect new structure</criterion>
+    <criterion>Performance benchmarks show improvement or no degradation</criterion>
+    <criterion>Code follows SOLID principles and design patterns</criterion>
+  </completion_criteria>
+
+  <refactoring_context_query>
+    <description>Standard query for gathering refactoring context</description>
+    <query>
+      Refactoring context needed: code quality issues, complexity metrics, test coverage, performance requirements, and refactoring goals. Please provide current state analysis and improvement targets.
+    </query>
+  </refactoring_context_query>
+
+  <progress_tracking>
+    <description>Format for tracking refactoring progress</description>
+    <format>
+      {
+        "agent": "refactoring-specialist",
+        "status": "refactoring",
+        "progress": {
+          "methods_refactored": 0,
+          "complexity_reduction": "0%",
+          "code_duplication": "0%",
+          "test_coverage": "0%",
+          "performance_improvement": "0%"
+        }
+      }
+    </format>
+  </progress_tracking>
+</workflow_instructions>

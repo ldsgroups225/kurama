@@ -1,0 +1,745 @@
+<common_patterns>
+  <overview>
+    Reusable mobile development patterns and code examples for React Native and Flutter applications. These patterns follow best practices for cross-platform development, performance optimization, and platform-specific implementations.
+  </overview>
+
+  <cross_platform_patterns>
+    <pattern name="platform_detection">
+      <description>Detect and handle platform-specific code and features</description>
+      <code language="typescript">
+        <![CDATA[
+import { Platform } from 'react-native';
+
+const isIOS = Platform.OS === 'ios';
+const isAndroid = Platform.OS === 'android';
+
+export const PlatformUtils = {
+  isIOS,
+  isAndroid,
+  selectPlatform: (iosComponent, androidComponent) => isIOS ? iosComponent : androidComponent,
+  getPlatformSpecificStyles: (baseStyles) => ({
+    ...baseStyles,
+    ...(isIOS ? iosStyles : androidStyles)
+  })
+};
+        ]]></code>
+      <explanation>
+        Use Platform.OS to conditionally render components or apply platform-specific styles and behaviors.
+      </explanation>
+    </pattern>
+
+    <pattern name="shared_service_layer">
+      <description>Platform-agnostic business logic and services</description>
+      <code language="typescript">
+        <![CDATA[
+// Shared service interface
+export interface IAuthService {
+  login: (credentials: Credentials) => Promise<User>;
+  logout: () => Promise<void>;
+  getCurrentUser: () => Promise<User | null>;
+}
+
+// Platform-specific implementations
+export class IOSSAuthService implements IAuthService {
+  async login(credentials: Credentials): Promise<User> {
+    // iOS-specific authentication using Keychain
+  }
+}
+
+export class AndroidAuthService implements IAuthService {
+  async login(credentials: Credentials): Promise<User> {
+    // Android-specific authentication using Keystore
+  }
+}
+
+// Usage
+const authService: IAuthService = Platform.select({
+  ios: () => new IOSSAuthService(),
+  android: () => new AndroidAuthService()
+});
+        ]]></code>
+      <explanation>
+        Create shared interfaces and implement platform-specific versions. Use Platform.select() to get the correct implementation at runtime.
+      </explanation>
+    </pattern>
+
+    <pattern name="responsive_layout">
+      <description>Adaptive layouts for different screen sizes and orientations</description>
+      <code language="typescript">
+        <![CDATA[
+import { Dimensions, StyleSheet } from 'react-native';
+
+const useResponsiveLayout = () => {
+  const [screenData, setScreenData] = useState(Dimensions.get('window'));
+
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setScreenData(window);
+    });
+
+    return () => subscription.remove();
+  }, []);
+
+  const styles = StyleSheet.create({
+    container: {
+      padding: screenData.width > 768 ? 24 : 16,
+      maxWidth: screenData.width > 768 ? 768 : '100%'
+    },
+    text: {
+      fontSize: screenData.width > 768 ? 18 : 16
+    }
+  });
+
+  return { styles, screenData };
+};
+        ]]></code>
+      <explanation>
+        Use Dimensions API to create responsive layouts that adapt to different screen sizes and orientations.
+      </explanation>
+    </pattern>
+
+    <pattern name="offline_data_manager">
+      <description>Offline-first data synchronization with conflict resolution</description>
+      <code language="typescript">
+        <![CDATA[
+interface SyncAction {
+  id: string;
+  type: 'create' | 'update' | 'delete';
+  data: any;
+  timestamp: number;
+}
+
+interface ConflictResolution {
+  resolve: (local: any, remote: any) => any;
+  strategy: 'client_wins' | 'server_wins' | 'merge' | 'manual';
+}
+
+class OfflineDataManager {
+  private queue: SyncAction[] = [];
+  private isProcessing = false;
+
+  addAction = (action: SyncAction): void => {
+    this.queue.push({ ...action, timestamp: Date.now() });
+    this.processQueue();
+  };
+
+  processQueue = async (): Promise<void> => {
+    if (this.isProcessing) return;
+    
+    this.isProcessing = true;
+    
+    while (this.queue.length > 0) {
+      const action = this.queue.shift();
+      
+      try {
+        await this.executeAction(action);
+      } catch (error) {
+        console.error('Sync action failed:', error);
+        // Add to retry queue or handle error
+      }
+    }
+    
+    this.isProcessing = false;
+  };
+
+  private executeAction = async (action: SyncAction): Promise<void> => {
+    switch (action.type) {
+      case 'create':
+        await this.createItem(action.data);
+        break;
+      case 'update':
+        await this.updateItem(action.data);
+        break;
+      case 'delete':
+        await this.deleteItem(action.data);
+        break;
+    }
+  };
+
+  // Conflict resolution methods
+  resolveConflicts = async (localItems: any[], remoteItems: any[]): Promise<any[]> => {
+    // Implement conflict resolution strategy
+    return this.mergeStrategy(localItems, remoteItems);
+  };
+}
+        ]]></code>
+      <explanation>
+        Implement a robust offline data manager with action queuing, conflict resolution, and sync capabilities.
+      </explanation>
+    </pattern>
+  </cross_platform_patterns>
+
+  <performance_patterns>
+    <pattern name="image_optimization">
+      <description>Efficient image loading and caching for mobile</description>
+      <code language="typescript">
+        <![CDATA[
+import FastImage from 'react-native-fast-image';
+
+interface OptimizedImageProps {
+  source: { uri: string } | number;
+  style?: any;
+  resizeMode?: 'cover' | 'contain' | 'stretch' | 'repeat';
+  priority?: FastImage.priority;
+}
+
+const OptimizedImage: React.FC<OptimizedImageProps> = ({ 
+  source, 
+  style, 
+  resizeMode = 'cover',
+  priority = FastImage.priority.normal
+}) => {
+  return (
+    <FastImage
+      source={source}
+      style={style}
+      resizeMode={resizeMode}
+      priority={priority}
+      // Progressive loading
+      progressiveRenderingEnabled={Platform.OS === 'ios'}
+      // Cache control
+      cachePolicy={FastImage.cachePolicy.immutable}
+      // Placeholder for better UX
+      placeholder={
+        <View style={styles.placeholder}>
+          <ActivityIndicator size="small" />
+        </View>
+      }
+      onLoad={() => console.log('Image loaded')}
+      onError={(error) => console.log('Image load error:', error)}
+    />
+  );
+};
+
+const styles = StyleSheet.create({
+  placeholder: {
+    width: '100%',
+    height: 200,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
+});
+        ]]></code>
+      <explanation>
+        Use FastImage for optimized image loading with caching, progressive rendering, and proper placeholder handling.
+      </explanation>
+    </pattern>
+
+    <pattern name="memory_management">
+      <description>Efficient memory usage and cleanup patterns</description>
+      <code language="typescript">
+        <![CDATA[
+import React, { useEffect, useRef } from 'react';
+
+const useMemoryManagement = () => {
+  const timers = useRef<NodeJS.Timeout[]>([]);
+  const listeners = useRef<(() => void)[]>([]);
+
+  const addTimer = (timer: NodeJS.Timeout) => {
+    timers.current.push(timer);
+  };
+
+  const addListener = (listener: () => void) => {
+    listeners.current.push(listener);
+  };
+
+  const cleanup = () => {
+    // Clear all timers
+    timers.current.forEach(timer => clearTimeout(timer));
+    timers.current = [];
+    
+    // Remove all listeners
+    listeners.current.forEach(listener => listener());
+    listeners.current = [];
+  };
+
+  useEffect(() => {
+    return cleanup;
+  }, []);
+
+  return { addTimer, addListener, cleanup };
+};
+
+// Usage example
+const MyComponent: React.FC = () => {
+  const { addTimer, cleanup } = useMemoryManagement();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Some operation
+    }, 1000);
+    
+    addTimer(timer);
+
+    return () => {
+      // Component will be unmounted
+      cleanup();
+    };
+  }, []);
+};
+        ]]></code>
+      <explanation>
+        Properly manage timers, listeners, and other resources to prevent memory leaks in React components.
+      </explanation>
+    </pattern>
+
+    <pattern name="battery_optimization">
+      <description>Battery-conscious background task management</description>
+      <code language="typescript">
+        <![CDATA[
+import { AppState, Platform } from 'react-native';
+
+class BatteryOptimizer {
+  private static instance: BatteryOptimizer;
+  private backgroundTasks: Map<string, NodeJS.Timeout> = new Map();
+  private isAppInBackground = false;
+
+  static getInstance(): BatteryOptimizer {
+    if (!BatteryOptimizer.instance) {
+      BatteryOptimizer.instance = new BatteryOptimizer();
+    }
+    return BatteryOptimizer.instance;
+  }
+
+  private constructor() {
+    this.setupAppStateListener();
+  }
+
+  private setupAppStateListener = () => {
+    AppState.addEventListener('change', this.handleAppStateChange);
+  };
+
+  private handleAppStateChange = (nextAppState: AppStateStatus) => {
+    const wasInBackground = this.isAppInBackground;
+    this.isAppInBackground = nextAppState === 'background';
+
+    if (wasInBackground && !this.isAppInBackground) {
+      // App coming to foreground - pause background tasks
+      this.pauseBackgroundTasks();
+    } else if (!wasInBackground && this.isAppInBackground) {
+      // App going to background - start background tasks
+      this.resumeBackgroundTasks();
+    }
+  };
+
+  private pauseBackgroundTasks = () => {
+    this.backgroundTasks.forEach((timer, taskId) => {
+      clearTimeout(timer);
+    });
+    this.backgroundTasks.clear();
+  };
+
+  private resumeBackgroundTasks = () => {
+    // Resume or start optimized background tasks
+    const optimizedInterval = Platform.select({
+      ios: 30000, // 30 seconds on iOS
+      android: 60000  // 1 minute on Android
+    });
+
+    const task = setInterval(() => {
+      // Efficient background operation
+      this.performBackgroundTask();
+    }, optimizedInterval);
+
+    this.backgroundTasks.set('main', task);
+  };
+
+  private performBackgroundTask = () => {
+    // Implement efficient background processing
+    // Batch operations, minimize wake-ups, etc.
+  };
+
+  public addBackgroundTask = (taskId: string, task: () => void, options?: {
+    interval?: number;
+    requiresForeground?: boolean;
+  }) => {
+    if (this.isAppInBackground) {
+      const interval = options?.interval || Platform.select({
+        ios: 30000,
+        android: 60000
+      });
+
+      const timer = setInterval(task, interval);
+      this.backgroundTasks.set(taskId, timer);
+    } else {
+      // Execute immediately if app is in foreground
+      task();
+    }
+  };
+
+  public cleanup = () => {
+    this.backgroundTasks.forEach((timer) => clearTimeout(timer));
+    this.backgroundTasks.clear();
+    AppState.removeEventListener('change', this.handleAppStateChange);
+  }
+}
+        ]]></code>
+      <explanation>
+        Implement battery-conscious background task management that pauses/resumes based on app state and uses platform-optimized intervals.
+      </explanation>
+    </pattern>
+  </performance_patterns>
+
+  <native_integration_patterns>
+    <pattern name="biometric_authentication">
+      <description>Platform-specific biometric authentication implementation</description>
+      <code language="typescript">
+        <![CDATA[
+import { Platform } from 'react-native';
+import TouchID from '@react-native-community/touch-id';
+import BiometricManager from 'react-native-biometrics';
+
+interface BiometricAuth {
+  authenticate: () => Promise<boolean>;
+  getSupportedTypes: () => Promise<string[]>;
+}
+
+class BiometricAuthService implements BiometricAuth {
+  async authenticate(): Promise<boolean> {
+    if (Platform.OS === 'ios') {
+      return this.authenticateWithTouchID();
+    } else {
+      return this.authenticateWithBiometrics();
+    }
+  }
+
+  private async authenticateWithTouchID(): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      TouchID.authenticate('', 'Authenticate to access your device', (error, success) => {
+        if (success) {
+          resolve(true);
+        } else {
+          reject(error);
+        }
+      });
+    });
+  }
+
+  private async authenticateWithBiometrics(): Promise<boolean> {
+    try {
+      const { available } = await BiometricManager.isSensorAvailable();
+      
+      if (available) {
+        const { success } = await BiometricManager.authenticate(
+          'Sign in with biometrics',
+          'Use your fingerprint or face to sign in'
+        );
+        return success;
+      } else {
+        throw new Error('Biometrics not available');
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+}
+        ]]></code>
+      <explanation>
+        Implement platform-specific biometric authentication using TouchID for iOS and BiometricManager for Android.
+      </explanation>
+    </pattern>
+
+    <pattern name="push_notifications">
+      <description>Unified push notification setup for FCM and APNS</description>
+      <code language="typescript">
+        <![CDATA[
+import { Platform } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
+import PushNotificationIOS from '@react-native-community/push-notification-ios';
+
+interface PushNotificationService {
+  initialize: () => Promise<void>;
+  getToken: () => Promise<string>;
+  requestPermissions: () => Promise<boolean>;
+}
+
+class UnifiedPushService implements PushNotificationService {
+  private fcmToken: string | null = null;
+
+  async initialize(): Promise<void> {
+    if (Platform.OS === 'ios') {
+      await this.initializeAPNS();
+    } else {
+      await this.initializeFCM();
+    }
+  }
+
+  private async initializeFCM(): Promise<void> {
+    // Request permission
+    const authStatus = await messaging().requestPermission();
+    if (authStatus !== messaging.AuthorizationStatus.AUTHORIZED) {
+      throw new Error('Firebase messaging permission denied');
+    }
+
+    // Get token
+    this.fcmToken = await messaging().getToken();
+    
+    // Setup message handlers
+    messaging().onMessage(async remoteMessage => {
+      await this.handleRemoteMessage(remoteMessage);
+    });
+
+    // Handle background messages
+    messaging().setBackgroundMessageHandler(async remoteMessage => {
+      await this.handleBackgroundMessage(remoteMessage);
+    });
+  }
+
+  private async initializeAPNS(): Promise<void> {
+    // Request permissions
+    const result = await PushNotificationIOS.requestPermissions();
+    if (!result.granted) {
+      throw new Error('Push notification permissions denied');
+    }
+
+    // Get device token
+    const deviceToken = await PushNotificationIOS.getDeviceToken();
+
+    // Setup notification handlers
+    PushNotificationIOS.addEventListener('notification', this.handleLocalNotification);
+  }
+
+  async getToken(): Promise<string> {
+    return Platform.OS === 'ios' 
+      ? await PushNotificationIOS.getDeviceToken()
+      : this.fcmToken || '';
+  }
+
+  async requestPermissions(): Promise<boolean> {
+    if (Platform.OS === 'ios') {
+      const result = await PushNotificationIOS.requestPermissions();
+      return result.granted;
+    } else {
+      const authStatus = await messaging().requestPermission();
+      return authStatus === messaging.AuthorizationStatus.AUTHORIZED;
+    }
+  }
+
+  private handleRemoteMessage = async (message: any): Promise<void> => {
+    // Unified message handling logic
+    console.log('Received remote message:', message);
+  };
+
+  private handleBackgroundMessage = async (message: any): Promise<void> => {
+    // Background message handling
+    console.log('Received background message:', message);
+  };
+
+  private handleLocalNotification = (notification: any): void => {
+    // Local notification handling
+    console.log('Received local notification:', notification);
+  }
+}
+        ]]></code>
+      <explanation>
+        Create a unified push notification service that handles both FCM (Android) and APNS (iOS) with consistent interface.
+      </explanation>
+    </pattern>
+  </native_integration_patterns>
+
+  <testing_patterns>
+    <pattern name="platform_testing">
+      <description>Cross-platform testing utilities and helpers</description>
+      <code language="typescript">
+        <![CDATA[
+import { Platform } from 'react-native';
+
+interface PlatformTestUtils {
+  mockPlatform: (platform: 'ios' | 'android') => void;
+  restorePlatform: () => void;
+  runOnPlatform: <T>(iosCallback: () => T, androidCallback: () => T) => T;
+  withMockedPlatform: <T>(callback: (platform: 'ios' | 'android') => T) => T;
+}
+
+class PlatformTestUtilsImpl implements PlatformTestUtils {
+  private originalPlatform: typeof Platform.OS;
+
+  constructor() {
+    this.originalPlatform = Platform.OS;
+  }
+
+  mockPlatform(platform: 'ios' | 'android'): void {
+    jest.spyOn(Platform, 'OS').mockReturnValue(platform);
+  }
+
+  restorePlatform(): void {
+    jest.spyOn(Platform, 'OS').mockReturnValue(this.originalPlatform);
+  }
+
+  runOnPlatform<T>(iosCallback: () => T, androidCallback: () => T): T {
+    if (Platform.OS === 'ios') {
+      return iosCallback();
+    } else {
+      return androidCallback();
+    }
+  }
+
+  withMockedPlatform<T>(callback: (platform: 'ios' | 'android') => T): T {
+    const originalPlatform = Platform.OS;
+    
+    try {
+      callback(Platform.OS);
+      const result = callback(Platform.OS);
+      return result;
+    } finally {
+      Platform.OS = originalPlatform;
+    }
+  }
+}
+
+// Usage in tests
+describe('PlatformTestUtils', () => {
+  let platformUtils: PlatformTestUtils;
+
+  beforeEach(() => {
+    platformUtils = new PlatformTestUtilsImpl();
+  });
+
+  afterEach(() => {
+    platformUtils.restorePlatform();
+  });
+
+  it('should run iOS callback on iOS', () => {
+    const result = platformUtils.runOnPlatform(
+      () => 'ios-result',
+      () => 'android-result'
+    );
+    expect(result).toBe('ios-result');
+  });
+
+  it('should run Android callback on Android', () => {
+    platformUtils.mockPlatform('android');
+    const result = platformUtils.runOnPlatform(
+      () => 'ios-result',
+      () => 'android-result'
+    );
+    expect(result).toBe('android-result');
+  });
+});
+        ]]></code>
+      <explanation>
+        Create platform testing utilities that allow testing platform-specific code paths and behaviors consistently across different platforms.
+      </explanation>
+    </pattern>
+  </testing_patterns>
+  </common_patterns>
+
+  <integration_patterns>
+    <pattern name="navigation_integration">
+      <description>Platform-agnostic navigation with platform-specific implementations</description>
+      <code language="typescript">
+        <![CDATA[
+import { Platform } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+interface NavigationService {
+  navigate: (screen: string, params?: any) => void;
+  goBack: () => void;
+  getCurrentRoute: () => string | null;
+}
+
+interface PlatformNavigationProps {
+  title: string;
+  headerStyle?: any;
+  headerTintColor?: string;
+}
+
+// Platform-specific navigation components
+const IOSNavigation: React.FC<PlatformNavigationProps> = ({ 
+  title, 
+  headerStyle,
+  headerTintColor 
+}) => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#ffffff',
+          shadowColor: '#000000',
+          ...headerStyle
+        },
+        headerTintColor: headerTintColor || '#007AFF',
+        headerTitleStyle: {
+          fontWeight: '600'
+        }
+      }}
+    >
+      {/* iOS-specific screens */}
+    </Stack.Navigator>
+  );
+};
+
+const AndroidNavigation: React.FC<PlatformNavigationProps> = ({ 
+  title, 
+  headerStyle,
+  headerTintColor 
+}) => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#6200EE',
+          elevation: 4,
+          ...headerStyle
+        },
+        headerTintColor: headerTintColor || '#FFFFFF',
+        headerTitleStyle: {
+          fontWeight: '500'
+        }
+      }}
+    >
+      {/* Android-specific screens */}
+    </Stack.Navigator>
+  );
+};
+
+// Platform-agnostic navigation service
+class NavigationService implements NavigationService {
+  private navigation: any;
+
+  constructor(navigation: any) {
+    this.navigation = navigation;
+  }
+
+  navigate = (screen: string, params?: any): void => {
+    this.navigation.navigate(screen, params);
+  };
+
+  goBack = (): void => {
+    this.navigation.goBack();
+  };
+
+  getCurrentRoute = (): string | null => {
+    return this.navigation.getCurrentRoute()?.name || null;
+  };
+}
+
+// Usage
+const App: React.FC = () => {
+  const navigationService = new NavigationService(useNavigation());
+
+  return (
+    <NavigationContainer>
+      {Platform.OS === 'ios' ? (
+        <IOSNavigation 
+          title="My App"
+          headerTintColor="#007AFF"
+        />
+      ) : (
+        <AndroidNavigation 
+          title="My App"
+          headerTintColor="#FFFFFF"
+        />
+      )}
+    </NavigationContainer>
+  );
+};
+        ]]></code>
+      <explanation>
+        Implement platform-specific navigation components while maintaining a shared navigation service interface for consistent behavior across platforms.
+      </explanation>
+    </pattern>
+  </integration_patterns>
+</common_patterns>

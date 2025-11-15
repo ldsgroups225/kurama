@@ -1,0 +1,152 @@
+<workflow_instructions>
+  <mode_overview>
+    The mobile-developer mode specializes in cross-platform mobile application development using React Native and Flutter. This mode guides users through the complete mobile development lifecycle from initial setup to deployment, focusing on performance optimization, battery efficiency, and platform-specific excellence while maintaining high code reuse between platforms.
+  </mode_overview>
+
+  <initialization_steps>
+    <step number="1">
+      <action>Understand the mobile development request</action>
+      <details>
+        Parse the user's input to identify:
+        - Target platforms (iOS, Android, or both)
+        - Framework preference (React Native, Flutter, or both)
+        - Primary features and functionality requirements
+        - Performance and battery constraints
+        - Native integration requirements
+        - Deployment targets and app store requirements
+      </details>
+    </step>
+    
+    <step number="2">
+      <action>Gather mobile project context</action>
+      <tools>
+        <tool>codebase_search - Find existing mobile code and configurations</tool>
+        <tool>list_files - Understand mobile project structure</tool>
+        <tool>read_file - Examine package.json, metro.config.js, pubspec.yaml, and mobile-specific configs</tool>
+      </tools>
+    </step>
+    
+    <step number="3">
+      <action>Query mobile platform context</action>
+      <details>
+        Request mobile-specific context including:
+        - Existing native modules and platform-specific code
+        - Current performance benchmarks and battery impact
+        - Push notification setup status (FCM/APNS)
+        - Deep linking configuration
+        - Current build and deployment configuration
+        - Offline sync implementation status
+      </details>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="platform_analysis">
+      <description>Analyze mobile platform requirements and constraints</description>
+      <steps>
+        <step>Evaluate target platform versions and device capabilities</step>
+        <step>Assess native API requirements and permissions</step>
+        <step>Plan cross-platform architecture for maximum code reuse</step>
+        <step>Identify platform-specific UI/UX requirements</step>
+      </steps>
+    </phase>
+
+    <phase name="cross_platform_implementation">
+      <description>Build shared codebase maximizing platform reuse</description>
+      <steps>
+        <step>Implement shared business logic and state management</step>
+        <step>Create platform-agnostic components and services</step>
+        <step>Build unified networking layer with platform adapters</step>
+        <step>Implement shared validation and utility functions</step>
+        <step>Set up cross-platform testing framework</step>
+      </steps>
+    </phase>
+
+    <phase name="platform_specific_optimization">
+      <description>Optimize for each target platform</description>
+      <steps>
+        <step>Implement platform-specific UI following native guidelines</step>
+        <step>Optimize performance for target devices and OS versions</step>
+        <step>Configure platform-specific navigation and gestures</step>
+        <step>Implement native module integrations</step>
+        <step>Set up platform-specific push notifications</step>
+      </steps>
+    </phase>
+
+    <phase name="performance_optimization">
+      <description>Optimize for performance and battery efficiency</description>
+      <steps>
+        <step>Profile app startup time and optimize cold starts</step>
+        <step>Optimize memory usage and prevent leaks</step>
+        <step>Implement efficient image caching and loading</step>
+        <step>Optimize network requests and implement batching</step>
+        <step>Profile battery consumption and optimize background tasks</step>
+        <step>Ensure 60 FPS scrolling and animations</step>
+      </steps>
+    </phase>
+
+    <phase name="native_integration">
+      <description>Integrate platform-specific native features</description>
+      <steps>
+        <step>Implement camera and photo library access</step>
+        <step>Set up GPS and location services</step>
+        <step>Integrate biometric authentication</step>
+        <step>Connect device sensors (accelerometer, gyroscope)</step>
+        <step>Implement Bluetooth connectivity</step>
+        <step>Set up local storage with encryption</step>
+        <step>Configure background services and tasks</step>
+      </steps>
+    </phase>
+
+    <phase name="offline_first_architecture">
+      <description>Implement robust offline functionality</description>
+      <steps>
+        <step>Set up local database (SQLite, Realm, etc.)</step>
+        <step>Implement action queue for offline operations</step>
+        <step>Build conflict resolution strategies</step>
+        <step>Create delta sync mechanisms</step>
+        <step>Implement retry logic with exponential backoff</step>
+        <step>Add data compression for sync efficiency</step>
+      </steps>
+    </phase>
+
+    <phase name="build_and_deployment">
+      <description>Configure build processes and deployment</description>
+      <steps>
+        <step>Set up iOS code signing and provisioning</step>
+        <step>Configure Android keystore and build variants</step>
+        <step>Implement build flavors and schemes</step>
+        <step>Configure environment-specific builds</step>
+        <step>Set up automated build processes</step>
+        <step>Prepare app store submission assets</step>
+        <step>Configure crash reporting and analytics</step>
+      </steps>
+    </phase>
+
+    <phase name="testing_and_validation">
+      <description>Comprehensive testing and validation</description>
+      <steps>
+        <step>Run unit tests for business logic</step>
+        <step>Test native module integrations</step>
+        <step>Perform UI tests on real devices</step>
+        <step>Run platform-specific test suites</step>
+        <step>Profile performance and memory usage</step>
+        <step>Test battery consumption and ANR scenarios</step>
+        <step>Validate app store requirements</step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <completion_criteria>
+    <criterion>Cross-platform code sharing exceeds 80%</criterion>
+    <criterion>Platform-specific UI follows native guidelines</criterion>
+    <criterion>Offline-first data architecture implemented</criterion>
+    <criterion>Push notifications configured for FCM and APNS</criterion>
+    <criterion>Deep linking properly configured</criterion>
+    <criterion>Performance benchmarks met (cold start <2s, memory <150MB)</criterion>
+    <criterion>App size under 50MB initial download</criterion>
+    <criterion>Crash rate below 0.1%</criterion>
+    <criterion>Battery consumption under 5% per hour</criterion>
+    <criterion>Ready for app store submission</criterion>
+  </completion_criteria>
+</workflow_instructions>

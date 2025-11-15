@@ -1,0 +1,333 @@
+<examples>
+  <example name="database_performance_optimization">
+    <description>Complete workflow for optimizing slow database queries and improving response times</description>
+    <context>When users report slow API responses and database analysis reveals inefficient queries</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Performance Analysis</title>
+        <actions>
+          <action>Use codebase_search to find database queries and slow endpoints</action>
+          <action>Read configuration files to understand current database setup</action>
+          <action>Identify N+1 query patterns and missing indexes</action>
+        </actions>
+      </step>
+      <step number="2">
+        <title>Load Testing</title>
+        <actions>
+          <action>Create load test scenarios for identified slow endpoints</action>
+          <action>Execute load tests to establish baseline performance metrics</action>
+          <action>Document current response times and throughput</action>
+        </actions>
+      </step>
+      <step number="3">
+        <title>Query Optimization</title>
+        <actions>
+          <action>Optimize SQL queries by adding proper WHERE clauses</action>
+          <action>Add database indexes for frequently queried columns</action>
+          <action>Implement query result caching where appropriate</action>
+        </actions>
+      </step>
+      <step number="4">
+        <title>Validation</title>
+        <actions>
+          <action>Re-run load tests to measure performance improvements</action>
+          <action>Compare results against baseline metrics</action>
+          <action>Document performance gains and optimization impact</action>
+        </actions>
+      </step>
+    </workflow_steps>
+    <code_examples>
+      <example language="sql">
+        <title>Before: Inefficient query with N+1 problem</title>
+        <code><![CDATA[
+-- Slow query causing N+1 problem
+SELECT u.*, p.* 
+FROM users u 
+LEFT JOIN posts p ON u.id = p.user_id 
+WHERE u.status = 'active';
+        ]]></code>
+      </example>
+      <example language="sql">
+        <title>After: Optimized query with proper indexing</title>
+        <code><![CDATA[
+-- Optimized query with specific columns and indexes
+SELECT u.id, u.name, u.email, COUNT(p.id) as post_count
+FROM users u 
+LEFT JOIN posts p ON u.id = p.user_id AND p.status = 'published'
+WHERE u.status = 'active'
+GROUP BY u.id, u.name, u.email;
+
+-- Add indexes for performance
+CREATE INDEX idx_users_status ON users(status);
+CREATE INDEX idx_posts_user_status ON posts(user_id, status);
+        ]]></code>
+      </example>
+    </code_examples>
+    <expected_outcomes>
+      <outcome>Response time improved from 2.1s to 0.3s (85% improvement)</outcome>
+      <outcome>Database load reduced by 60% through query optimization</outcome>
+      <outcome>System can handle 3x more concurrent users</outcome>
+    </expected_outcomes>
+  </example>
+
+  <example name="api_caching_implementation">
+    <description>Implementing caching strategy to reduce API response times and database load</description>
+    <context>When API endpoints are experiencing high traffic and database queries are becoming bottlenecks</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Cache Analysis</title>
+        <actions>
+          <action>Identify frequently accessed API endpoints</action>
+          <action>Analyze data freshness requirements for each endpoint</action>
+          <action>Determine appropriate cache TTL values</action>
+        </actions>
+      </step>
+      <step number="2">
+        <title>Cache Implementation</title>
+        <actions>
+          <action>Implement Redis caching layer for API responses</action>
+          <action>Add cache invalidation logic for data updates</action>
+          <action>Create cache warming strategies for critical endpoints</action>
+        </actions>
+      </step>
+      <step number="3">
+        <title>Performance Testing</title>
+        <actions>
+          <action>Load test cached endpoints to verify performance gains</action>
+          <action>Test cache invalidation and refresh mechanisms</action>
+          <action>Monitor cache hit rates and memory usage</action>
+        </actions>
+      </step>
+    </workflow_steps>
+    <code_examples>
+      <example language="javascript">
+        <title>Redis caching implementation</title>
+        <code><![CDATA[
+const redis = require('redis');
+const client = redis.createClient();
+
+class CacheService {
+  async get(key) {
+    try {
+      const data = await client.get(key);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Cache get error:', error);
+      return null;
+    }
+  }
+
+  async set(key, data, ttl = 300) {
+    try {
+      await client.setex(key, ttl, JSON.stringify(data));
+    } catch (error) {
+      console.error('Cache set error:', error);
+    }
+  }
+
+  async invalidate(pattern) {
+    try {
+      const keys = await client.keys(pattern);
+      if (keys.length > 0) {
+        await client.del(keys);
+      }
+    } catch (error) {
+      console.error('Cache invalidation error:', error);
+    }
+  }
+}
+
+// Usage in API endpoint
+app.get('/api/users/:id', async (req, res) => {
+  const cacheKey = `user:${req.params.id}`;
+  let user = await cacheService.get(cacheKey);
+  
+  if (!user) {
+    user = await database.getUserById(req.params.id);
+    await cacheService.set(cacheKey, user, 600); // 10 minutes TTL
+  }
+  
+  res.json(user);
+});
+        ]]></code>
+      </example>
+    </code_examples>
+    <expected_outcomes>
+      <outcome>API response time reduced by 70% for cached endpoints</outcome>
+      <outcome>Database query load decreased by 80%</outcome>
+      <outcome>Cache hit rate achieved 85% for frequently accessed data</outcome>
+    </expected_outcomes>
+  </example>
+
+  <example name="frontend_performance_optimization">
+    <description>Optimizing frontend performance through code splitting and lazy loading</description>
+    <context>When web application has slow initial load times and poor user experience</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Performance Audit</title>
+        <actions>
+          <action>Analyze bundle size and loading performance</action>
+          <action>Identify large JavaScript bundles and unused code</action>
+          <action>Measure Core Web Vitals and user experience metrics</action>
+        </actions>
+      </step>
+      <step number="2">
+        <title>Code Splitting</title>
+        <actions>
+          <action>Implement route-based code splitting</action>
+          <action>Add lazy loading for non-critical components</action>
+          <action>Optimize bundle loading with dynamic imports</action>
+        </actions>
+      </step>
+      <step number="3">
+        <title>Asset Optimization</title>
+        <actions>
+          <action>Compress images and implement WebP format</action>
+          <action>Add resource hints (preload, prefetch)</action>
+          <action>Implement service worker for offline caching</action>
+        </actions>
+      </step>
+    </workflow_steps>
+    <code_examples>
+      <example language="javascript">
+        <title>React code splitting and lazy loading</title>
+        <code><![CDATA[
+// Route-based code splitting
+import { lazy, Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
+
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Settings = lazy(() => import('./pages/Settings'));
+
+function App() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/settings" element={<Settings />} />
+      </Routes>
+    </Suspense>
+  );
+}
+
+// Component lazy loading with intersection observer
+const LazyComponent = ({ component: Component, ...props }) => {
+  const [isIntersecting, setIsIntersecting] = useState(false);
+  const ref = useRef();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsIntersecting(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref}>
+      {isIntersecting ? <Component {...props} /> : <div>Loading...</div>}
+    </div>
+  );
+};
+        ]]></code>
+      </example>
+    </code_examples>
+    <expected_outcomes>
+      <outcome>Initial bundle size reduced by 60%</outcome>
+      <outcome>First Contentful Paint improved from 3.2s to 1.1s</outcome>
+      <outcome>Largest Contentful Paint improved from 4.5s to 2.0s</outcome>
+    </expected_outcomes>
+  </example>
+
+  <example name="load_testing_and_monitoring_setup">
+    <description>Setting up comprehensive load testing and monitoring for production systems</description>
+    <context>When preparing for high-traffic events or establishing performance monitoring</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Test Planning</title>
+        <actions>
+          <action>Define performance SLAs and success criteria</action>
+          <action>Create realistic user scenarios and load patterns</action>
+          <action>Set up test environment with production-like configuration</action>
+        </actions>
+      </step>
+      <step number="2">
+        <title>Load Testing</title>
+        <actions>
+          <action>Execute gradual ramp-up load tests</action>
+          <action>Perform stress testing to find breaking points</action>
+          <action>Run spike tests for traffic surge scenarios</action>
+        </actions>
+      </step>
+      <step number="3">
+        <title>Monitoring Setup</title>
+        <actions>
+          <action>Implement APM monitoring for application performance</action>
+          <action>Set up infrastructure monitoring for servers and databases</action>
+          <action>Create performance dashboards and alerting rules</action>
+        </actions>
+      </step>
+    </workflow_steps>
+    <code_examples>
+      <example language="javascript">
+        <title>Load testing configuration with Artillery</title>
+        <code><![CDATA[
+// artillery-config.yml
+config:
+  target: 'https://api.example.com'
+  phases:
+    - duration: 60
+      arrivalRate: 10
+    - duration: 120
+      arrivalRate: 50
+    - duration: 60
+      arrivalRate: 100
+  payload:
+    path: "./test-data.csv"
+    fields:
+      - "userId"
+      - "productId"
+
+scenarios:
+  - name: "API Load Test"
+    weight: 70
+    flow:
+      - get:
+          url: "/api/users/{{ userId }}"
+      - think: 1
+      - post:
+          url: "/api/products/{{ productId }}/purchase"
+          json:
+            quantity: 1
+      - think: 2
+
+  - name: "Database Stress Test"
+    weight: 30
+    flow:
+      - post:
+          url: "/api/search"
+          json:
+            query: "test search"
+            limit: 50
+        ]]></code>
+      </example>
+    </code_examples>
+    <expected_outcomes>
+      <outcome>System validated to handle 10x current traffic load</outcome>
+      <outcome>Performance monitoring provides real-time insights into bottlenecks</outcome>
+      <outcome>Alert system notifies of performance degradation within 30 seconds</outcome>
+    </expected_outcomes>
+  </example>
+</examples>

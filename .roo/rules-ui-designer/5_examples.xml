@@ -1,0 +1,440 @@
+<examples>
+  <example name="design_system_component">
+    <description>Creating a reusable button component with design system integration</description>
+    <context>User needs a new button component that follows the established design system</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Research Existing Patterns</title>
+        <action>Search for existing button components and design tokens</action>
+        <tool_usage>
+          <tool>codebase_search</tool>
+          <query>button component design system</query>
+        </tool_usage>
+      </step>
+      
+      <step number="2">
+        <title>Analyze Design System</title>
+        <action>Read design tokens and existing component patterns</action>
+        <tool_usage>
+          <tool>read_file</tool>
+          <files>
+            <file>src/styles/tokens.css</file>
+            <file>src/components/ui/button.tsx</file>
+            <file>src/components/ui/index.ts</file>
+          </files>
+        </tool_usage>
+      </step>
+      
+      <step number="3">
+        <title>Create Component</title>
+        <action>Implement new button variant with proper styling</action>
+        <tool_usage>
+          <tool>write_to_file</tool>
+          <file>src/components/ui/button-variant.tsx</file>
+          <content>
+            <![CDATA[
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { ButtonProps } from './button';
+
+interface ButtonVariantProps extends Omit<ButtonProps, 'variant'> {
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';
+  size?: 'sm' | 'md' | 'lg';
+}
+
+export const ButtonVariant = React.forwardRef<HTMLButtonElement, ButtonVariantProps>(
+  ({ className, variant = 'primary', size = 'md', children, ...props }, ref) => {
+    const baseClasses = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background';
+    
+    const variants = {
+      primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+      secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+      outline: 'border border-input hover:bg-accent hover:text-accent-foreground',
+      ghost: 'hover:bg-accent hover:text-accent-foreground',
+      destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+    };
+    
+    const sizes = {
+      sm: 'h-9 px-3 text-sm',
+      md: 'h-10 px-4 py-2',
+      lg: 'h-11 px-8'
+    };
+
+    return (
+      <button
+        className={cn(
+          baseClasses,
+          variants[variant],
+          sizes[size],
+          className
+        )}
+        ref={ref}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  }
+);
+
+ButtonVariant.displayName = 'ButtonVariant';
+            ]]>
+          </content>
+        </tool_usage>
+      </step>
+      
+      <step number="4">
+        <title>Create Documentation</title>
+        <action>Add component documentation and usage examples</action>
+        <tool_usage>
+          <tool>write_to_file</tool>
+          <file>src/components/ui/button-variant.md</file>
+          <content>
+            <![CDATA[
+# Button Variant Component
+
+A flexible button component that follows the design system with multiple variants and sizes.
+
+## Variants
+
+- **primary**: Main action buttons with brand color
+- **secondary**: Secondary actions with subtle styling  
+- **outline**: Transparent background with border
+- **ghost**: Minimal styling for subtle actions
+- **destructive**: Destructive actions with red styling
+
+## Sizes
+
+- **sm**: Compact for tight spaces (h-9, px-3)
+- **md**: Standard default size (h-10, px-4)
+- **lg**: Prominent for important actions (h-11, px-8)
+
+## Usage
+
+```tsx
+import { ButtonVariant } from '@/components/ui/button-variant';
+
+// Primary button
+<ButtonVariant variant="primary" size="md">
+  Save Changes
+</ButtonVariant>
+
+// Outline button
+<ButtonVariant variant="outline" size="sm">
+  Cancel
+</ButtonVariant>
+
+// Destructive action
+<ButtonVariant variant="destructive" size="lg">
+  Delete Item
+</ButtonVariant>
+```
+
+## Accessibility
+
+- Supports keyboard navigation
+- Proper focus management
+- Screen reader compatible
+- High contrast support
+            ]]>
+          </content>
+        </tool_usage>
+      </step>
+      
+      <step number="5">
+        <title>Test Implementation</title>
+        <action>Test component across different devices and browsers</action>
+        <tool_usage>
+          <tool>browser</tool>
+          <actions>
+            <action>Test responsive behavior</action>
+            <action>Validate keyboard navigation</action>
+            <action>Check color contrast</action>
+            <action>Verify accessibility attributes</action>
+          </actions>
+        </tool_usage>
+      </step>
+    </workflow_steps>
+  </example>
+
+  <example name="responsive_layout_design">
+    <description>Creating a responsive card layout that works across all devices</description>
+    <context>User needs a product card layout that adapts from mobile to desktop</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Analyze Requirements</title>
+        <action>Understand layout constraints and content requirements</action>
+        <questions>
+          <question>What content needs to be displayed in each card?</question>
+          <question>How should cards arrange on different screen sizes?</question>
+          <question>Are there any specific interaction requirements?</question>
+        </questions>
+      </step>
+      
+      <step number="2">
+        <title>Design Mobile-First Layout</title>
+        <action>Create base layout for mobile devices</action>
+        <tool_usage>
+          <tool>write_to_file</tool>
+          <file>src/components/layout/product-card.tsx</file>
+          <content>
+            <![CDATA[
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+
+interface ProductCardProps {
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    image: string;
+    category: string;
+    rating: number;
+    description: string;
+  };
+  className?: string;
+}
+
+export const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
+  return (
+    <Card className={cn('w-full max-w-sm mx-auto', className)}>
+      <CardHeader className="p-0">
+        <div className="relative aspect-square overflow-hidden rounded-t-lg">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
+          />
+          <Badge className="absolute top-2 right-2">
+            {product.category}
+          </Badge>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="p-4">
+        <div className="space-y-2">
+          <h3 className="font-semibold text-lg line-clamp-2">
+            {product.name}
+          </h3>
+          
+          <p className="text-sm text-muted-foreground line-clamp-3">
+            {product.description}
+          </p>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-2xl font-bold text-primary">
+              ${product.price}
+            </span>
+            
+            <div className="flex items-center space-x-1">
+              <span className="text-yellow-500">★</span>
+              <span className="text-sm font-medium">
+                {product.rating.toFixed(1)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+      
+      <CardFooter className="p-4 pt-0">
+        <Button className="w-full">
+          Add to Cart
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};
+            ]]>
+          </content>
+        </tool_usage>
+      </step>
+      
+      <step number="3">
+        <title>Create Responsive Grid</title>
+        <action>Implement responsive grid system for cards</action>
+        <tool_usage>
+          <tool>write_to_file</tool>
+          <file>src/components/layout/product-grid.tsx</file>
+          <content>
+            <![CDATA[
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { ProductCard } from './product-card';
+
+interface ProductGridProps {
+  products: any[];
+  className?: string;
+}
+
+export const ProductGrid: React.FC<ProductGridProps> = ({ products, className }) => {
+  return (
+    <div className={cn(
+      // Mobile: 1 column
+      'grid grid-cols-1 gap-4',
+      // Tablet: 2 columns
+      'sm:grid-cols-2',
+      // Desktop: 3 columns
+      'lg:grid-cols-3',
+      // Large desktop: 4 columns
+      'xl:grid-cols-4',
+      className
+    )}>
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+};
+            ]]>
+          </content>
+        </tool_usage>
+      </step>
+      
+      <step number="4">
+        <title>Add Responsive Styles</title>
+        <action>Create responsive styles for different breakpoints</action>
+        <tool_usage>
+          <tool>write_to_file</tool>
+          <file>src/styles/responsive.css</file>
+          <content>
+            <![CDATA[
+/* Responsive breakpoints */
+@media (min-width: 640px) {
+  .product-card {
+    max-width: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .product-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Touch-friendly targets */
+@media (hover: none) and (pointer: coarse) {
+  .button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .hover-scale {
+    transform: none !important;
+  }
+}
+            ]]>
+          </content>
+        </tool_usage>
+      </step>
+      
+      <step number="5">
+        <title>Test Responsiveness</title>
+        <action>Validate layout across all device sizes</action>
+        <tool_usage>
+          <tool>browser</tool>
+          <testing_steps>
+            <step>Test mobile (320px - 767px)</step>
+            <step>Test tablet (768px - 1023px)</step>
+            <step>Test desktop (1024px+)</step>
+            <step>Test touch interactions</step>
+            <step>Test accessibility features</step>
+          </testing_steps>
+        </tool_usage>
+      </step>
+    </workflow_steps>
+  </example>
+
+  <example name="accessibility_improvement">
+    <description>Improving accessibility of an existing form component</description>
+    <context>Form has accessibility issues that need to be addressed</context>
+    <workflow_steps>
+      <step number="1">
+        <title>Audit Current Implementation</title>
+        <action>Identify accessibility issues in existing form</action>
+        <tool_usage>
+          <tool>read_file</tool>
+          <files>
+            <file>src/components/forms/contact-form.tsx</file>
+          </files>
+        </tool_usage>
+      </step>
+      
+      <step number="2">
+        <title>Apply Accessibility Fixes</title>
+        <action>Update form with proper accessibility attributes</action>
+        <tool_usage>
+          <tool>apply_diff</tool>
+          <file>src/components/forms/contact-form.tsx</file>
+          <diff>
+            <![CDATA[
+<<<<<<< SEARCH
+:start_line:15
+-------
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Your name"
+          className="w-full px-3 py-2 border rounded"
+        />
+=======
+        <input
+          type="text"
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Your name"
+          aria-label="Full name"
+          aria-required="true"
+          aria-invalid={errors.name ? 'true' : 'false'}
+          aria-describedby={errors.name ? 'name-error' : undefined}
+          className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+        />
+        {errors.name && (
+          <span id="name-error" className="text-red-500 text-sm" role="alert">
+            {errors.name}
+          </span>
+        )}
+>>>>>>> REPLACE
+            ]]>
+          </diff>
+        </tool_usage>
+      </step>
+      
+      <step number="3">
+        <title>Validate Accessibility</title>
+        <action>Test with screen readers and keyboard navigation</action>
+        <tool_usage>
+          <tool>browser</tool>
+          <accessibility_tests>
+            <test>Keyboard navigation through all form fields</test>
+            <test>Screen reader announcement of labels and errors</test>
+            <test>Focus management and tab order</test>
+            <test>Color contrast validation</test>
+            <test>ARIA attribute verification</test>
+          </accessibility_tests>
+        </tool_usage>
+      </step>
+    </workflow_steps>
+  </example>
+</examples>

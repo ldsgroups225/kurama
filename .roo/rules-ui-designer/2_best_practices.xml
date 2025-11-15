@@ -1,0 +1,143 @@
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>Accessibility First</name>
+      <description>Design for all users from the start, ensuring WCAG 2.1 AA compliance</description>
+      <rationale>Accessibility is not optional - it's essential for inclusive design and legal compliance</rationale>
+      <example>
+        <scenario>Designing a form</scenario>
+        <good>Use semantic HTML, proper labels, sufficient color contrast, and keyboard navigation</good>
+        <bad>Rely on color alone for status indicators, skip alt text, ignore keyboard users</bad>
+      </example>
+    </principle>
+    
+    <principle priority="high">
+      <name>Mobile-First Responsive Design</name>
+      <description>Design for mobile devices first, then scale up to larger screens</description>
+      <rationale>Mobile traffic dominates web usage; mobile-first ensures better performance and UX</rationale>
+      <example>
+        <scenario>Creating a layout</scenario>
+        <good>Single column on mobile, progressive enhancement for tablets and desktop</good>
+        <bad>Desktop layout that breaks or requires excessive zooming on mobile</bad>
+      </example>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Consistency Over Creativity</name>
+      <description>Maintain design consistency across all components and interactions</description>
+      <rationale>Consistency reduces cognitive load and improves user confidence</rationale>
+      <example>
+        <scenario>Button design</scenario>
+        <good>All buttons follow same visual style, hover states, and interaction patterns</good>
+        <bad>Different button styles for similar actions throughout the interface</bad>
+      </example>
+    </principle>
+  </general_principles>
+
+  <visual_design_principles>
+    <principle priority="high">
+      <name>Visual Hierarchy</name>
+      <description>Guide user attention through strategic use of size, color, and spacing</description>
+      <guidelines>
+        <guideline>Use size to indicate importance (larger = more important)</guideline>
+        <guideline>Apply color purposefully for meaning and brand consistency</guideline>
+        <guideline>Use white space to reduce clutter and improve focus</guideline>
+        <guideline>Establish clear reading patterns (F-pattern, Z-pattern)</guideline>
+      </guidelines>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Color and Typography</name>
+      <description>Use color and typography strategically for readability and brand</description>
+      <guidelines>
+        <guideline>Ensure 4.5:1 contrast ratio for normal text (WCAG AA)</guideline>
+        <guideline>Limit color palette to 3-5 primary colors plus neutrals</guideline>
+        <guideline>Use no more than 2-3 font families for consistency</guideline>
+        <guideline>Establish clear type scale (h1-h6, body, small, etc.)</guideline>
+      </guidelines>
+    </principle>
+  </visual_design_principles>
+
+  <interaction_design_principles>
+    <principle priority="high">
+      <name>Feedback and Affordance</name>
+      <description>Provide clear feedback for all interactions and make actions discoverable</description>
+      <guidelines>
+        <guideline>Show hover states for all interactive elements</guideline>
+        <guideline>Provide loading indicators for async operations</guideline>
+        <guideline>Use micro-interactions to acknowledge user actions</guideline>
+        <guideline>Make disabled states clearly distinguishable</guideline>
+      </guidelines>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Progressive Disclosure</name>
+      <description>Reveal complexity gradually to avoid overwhelming users</description>
+      <guidelines>
+        <guideline>Hide advanced features behind clear entry points</guideline>
+        <guideline>Use tooltips and help text strategically</guideline>
+        <guideline>Group related information logically</guideline>
+        <guideline>Allow users to control detail level</guideline>
+      </guidelines>
+    </principle>
+  </interaction_design_principles>
+
+  <performance_guidelines>
+    <principle priority="high">
+      <name>Performance-Aware Design</name>
+      <description>Design with performance constraints in mind</description>
+      <guidelines>
+        <guideline>Optimize images and assets for web delivery</guideline>
+        <guideline>Minimize custom fonts and font weights</guideline>
+        <guideline>Use CSS animations instead of JavaScript when possible</guideline>
+        <guideline>Design for graceful degradation on slow connections</guideline>
+      </guidelines>
+    </principle>
+  </performance_guidelines>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>Over-designing with excessive animations and effects</description>
+      <why_problematic>Slows performance, distracts users, can cause motion sickness</why_problematic>
+      <correct_approach>Use animations purposefully to enhance understanding and delight</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Ignoring accessibility until the end</description>
+      <why_problematic>Expensive to retrofit, may require complete redesign</why_problematic>
+      <correct_approach>Design accessibility from the start, test with assistive technologies</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Designing in isolation from development constraints</description>
+      <why_problematic>Creates unrealistic expectations and implementation challenges</why_problematic>
+      <correct_approach>Collaborate with developers throughout the design process</correct_approach>
+    </pitfall>
+  </common_pitfalls>
+
+  <quality_checklist>
+    <category name="accessibility">
+      <item>All interactive elements are keyboard accessible</item>
+      <item>Color contrast meets WCAG AA standards</item>
+      <item>Images have descriptive alt text</item>
+      <item>Forms have proper labels and error messages</item>
+      <item>Focus indicators are visible and clear</item>
+    </category>
+    
+    <category name="responsiveness">
+      <item>Design works on mobile (320px+)</item>
+      <item>Layout adapts to tablet (768px+)</item>
+      <item>Desktop layout optimized (1024px+)</item>
+      <item>Touch targets are at least 44px</item>
+      <item>Text remains readable at all sizes</item>
+    </category>
+    
+    <category name="usability">
+      <item>Navigation is intuitive and consistent</item>
+      <item>Feedback is provided for all actions</item>
+      <item>Error states are clear and helpful</item>
+      <item>Load times are acceptable</item>
+      <item>Design follows established patterns</item>
+    </category>
+  </quality_checklist>
+</best_practices>

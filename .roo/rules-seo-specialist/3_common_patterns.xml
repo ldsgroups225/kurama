@@ -1,0 +1,541 @@
+<![CDATA[<common_patterns>
+  <technical_seo_patterns>
+    <pattern name="meta_tags_optimization">
+      <description>Comprehensive meta tag optimization for search engines</description>
+      <template><![CDATA[
+<head>
+  <!-- Primary meta tags -->
+  <title>{{primary_keyword}} - {{secondary_keyword}} | {{brand_name}}</title>
+  <meta name="description" content="{{compelling_description_under_160_chars}}">
+  <meta name="keywords" content="{{primary_keyword}}, {{secondary_keyword}}, {{long_tail_variations}}">
+  
+  <!-- Open Graph for social sharing -->
+  <meta property="og:title" content="{{og_title}}">
+  <meta property="og:description" content="{{og_description}}">
+  <meta property="og:image" content="{{featured_image_url}}">
+  <meta property="og:url" content="{{page_canonical_url}}">
+  <meta property="og:type" content="{{content_type}}">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{twitter_title}}">
+  <meta name="twitter:description" content="{{twitter_description}}">
+  <meta name="twitter:image" content="{{twitter_image}}">
+  
+  <!-- Technical SEO -->
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <link rel="canonical" href="{{canonical_url}}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "{{schema_type}}",
+    "headline": "{{article_headline}}",
+    "description": "{{article_description}}",
+    "image": "{{featured_image_url}}",
+    "author": {
+      "@type": "Person",
+      "name": "{{author_name}}"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "{{organization_name}}",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{logo_url}}"
+      }
+    },
+    "datePublished": "{{publish_date}}",
+    "dateModified": "{{modified_date}}"
+  }
+  </script>
+</head>
+      ]]></template>
+    </pattern>
+    
+    <pattern name="robots_txt_configuration">
+      <description>Robots.txt file for search engine crawling control</description>
+      <template><![CDATA[
+User-agent: *
+Allow: /
+
+# Block common non-content paths
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
+Disallow: /temp/
+Disallow: /*.json$
+Disallow: /*?*
+
+# Allow specific important directories
+Allow: /css/
+Allow: /js/
+Allow: /images/
+
+# Sitemap location
+Sitemap: {{base_url}}/sitemap.xml
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
+      ]]></template>
+    </pattern>
+    
+    <pattern name="sitemap_xml_structure">
+      <description>XML sitemap for comprehensive site indexing</description>
+      <template><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Homepage -->
+  <url>
+    <loc>{{base_url}}/</loc>
+    <lastmod>{{current_date}}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- Important pages -->
+  <url>
+    <loc>{{base_url}}/about</loc>
+    <lastmod>{{last_modified_date}}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Blog posts/articles -->
+  {{#each blog_posts}}
+  <url>
+    <loc>{{base_url}}/blog/{{slug}}</loc>
+    <lastmod>{{modified_date}}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  {{/each}}
+  
+  <!-- Product/Service pages -->
+  {{#each products}}
+  <url>
+    <loc>{{base_url}}/products/{{slug}}</loc>
+    <lastmod>{{modified_date}}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  {{/each}}
+</urlset>
+      ]]></template>
+    </pattern>
+  </technical_seo_patterns>
+
+  <content_optimization_patterns>
+    <pattern name="seo_friendly_content_structure">
+      <description>Content structure optimized for search engines and users</description>
+      <template><![CDATA[
+<article class="seo-content">
+  <header>
+    <h1>{{primary_keyword}}</h1>
+    <p class="lead">{{compelling_introduction_with_primary_keyword}}</p>
+  </header>
+  
+  <section class="content-body">
+    <h2>{{secondary_keyword_1}}</h2>
+    <p>{{comprehensive_content_section_1}}</p>
+    
+    <!-- Include semantic variations and related concepts -->
+    <h3>{{long_tail_variation_1}}</h3>
+    <p>{{detailed_explanation}}</p>
+    
+    <h2>{{secondary_keyword_2}}</h2>
+    <p>{{comprehensive_content_section_2}}</p>
+    
+    <!-- Internal linking to related content -->
+    <p>Learn more about <a href="/{{related_topic_slug}}">{{related_topic}}</a> and how it relates to {{primary_keyword}}.</p>
+  </section>
+  
+  <aside class="related-content">
+    <h3>Related Topics</h3>
+    <ul>
+      {{#each related_topics}}
+      <li><a href="{{url}}">{{title}}</a></li>
+      {{/each}}
+    </ul>
+  </aside>
+  
+  <footer>
+    <div class="author-info">
+      <img src="{{author_avatar}}" alt="{{author_name}}" />
+      <p>Written by <strong>{{author_name}}</strong>, {{author_credentials}}</p>
+      <time datetime="{{publish_date}}">{{formatted_date}}</time>
+    </div>
+  </footer>
+</article>
+      ]]></template>
+    </pattern>
+    
+    <pattern name="image_seo_optimization">
+      <description>Image optimization for search engines and performance</description>
+      <template><![CDATA[
+<img 
+  src="{{optimized_image_url}}" 
+  alt="{{descriptive_alt_text_with_keywords}}" 
+  title="{{image_title_with_keywords}}"
+  width="{{optimal_width}}" 
+  height="{{optimal_height}}"
+  loading="lazy"
+  decoding="async"
+  class="{{css_classes}}"
+  
+  <!-- Structured data for images -->
+  itemprop="image"
+  itemscope
+  itemtype="https://schema.org/ImageObject"
+>
+  <meta itemprop="url" content="{{image_url}}">
+  <meta itemprop="width" content="{{image_width}}">
+  <meta itemprop="height" content="{{image_height}}">
+  <meta itemprop="caption" content="{{image_caption}}">
+</img>
+
+<!-- Picture element for responsive images -->
+<picture>
+  <source 
+    media="(min-width: 1200px)" 
+    srcset="{{large_image_url}}"
+  >
+  <source 
+    media="(min-width: 768px)" 
+    srcset="{{medium_image_url}}"
+  >
+  <source 
+    srcset="{{small_image_url}}"
+  >
+  <img 
+    src="{{fallback_image_url}}" 
+    alt="{{descriptive_alt_text}}"
+    loading="lazy"
+  >
+</picture>
+      ]]></template>
+    </pattern>
+  </content_optimization_patterns>
+
+  <structured_data_patterns>
+    <pattern name="article_schema">
+      <description>Structured data for articles and blog posts</description>
+      <template><![CDATA[
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{article_title}}",
+  "description": "{{article_description}}",
+  "image": "{{featured_image_url}}",
+  "author": {
+    "@type": "Person",
+    "name": "{{author_name}}",
+    "url": "{{author_profile_url}}",
+    "sameAs": ["{{author_twitter_url}}", "{{author_linkedin_url}}"]
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{organization_name}}",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{organization_logo_url}}",
+      "width": {{logo_width}},
+      "height": {{logo_height}}
+    }
+  },
+  "datePublished": "{{publish_date_iso}}",
+  "dateModified": "{{modified_date_iso}}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{article_canonical_url}}"
+  },
+  "wordCount": {{article_word_count}},
+  "keywords": ["{{primary_keyword}}", "{{secondary_keyword_1}}", "{{secondary_keyword_2}}"]
+}
+</script>
+      ]]></template>
+    </pattern>
+    
+    <pattern name="local_business_schema">
+      <description>Structured data for local businesses</description>
+      <template><![CDATA[
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "{{business_name}}",
+  "description": "{{business_description}}",
+  "image": "{{business_image_url}}",
+  "telephone": "{{business_phone}}",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "{{street_address}}",
+    "addressLocality": "{{city}}",
+    "addressRegion": "{{state}}",
+    "postalCode": "{{postal_code}}",
+    "addressCountry": "{{country}}"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": {{latitude}},
+    "longitude": {{longitude}}
+  },
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": "Monday",
+      "opens": "{{monday_open}}",
+      "closes": "{{monday_close}}"
+    },
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": "Tuesday",
+      "opens": "{{tuesday_open}}",
+      "closes": "{{tuesday_close}}"
+    }
+  ],
+  "sameAs": ["{{website_url}}", "{{facebook_url}}", "{{twitter_url}}"]
+}
+</script>
+      ]]></template>
+    </pattern>
+    
+    <pattern name="product_schema">
+      <description>Structured data for e-commerce products</description>
+      <template><![CDATA[
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{product_name}}",
+  "description": "{{product_description}}",
+  "image": "{{product_image_url}}",
+  "brand": {
+    "@type": "Brand",
+    "name": "{{brand_name}}"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "{{current_price}}",
+    "priceCurrency": "{{currency}}",
+    "availability": "{{availability_status}}",
+    "priceValidUntil": "{{sale_end_date}}",
+    "seller": {
+      "@type": "Organization",
+      "name": "{{seller_name}}"
+    }
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": {{average_rating}},
+    "reviewCount": {{review_count}},
+    "bestRating": 5,
+    "worstRating": 1
+  },
+  "review": [
+    {{#each reviews}}
+    {
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": "{{reviewer_name}}"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": {{rating}}
+      },
+      "reviewBody": "{{review_text}}",
+      "datePublished": "{{review_date}}"
+    }
+    {{/each}}
+  ]
+}
+</script>
+      ]]></template>
+    </pattern>
+  </structured_data_patterns>
+
+  <performance_optimization_patterns>
+    <pattern name="critical_css_injection">
+      <description>Critical CSS for above-the-fold content</description>
+      <template><![CDATA[
+<style>
+/* Critical CSS for above-the-fold content */
+.critical-above-fold {
+  /* Hero section */
+  .hero { display: block; }
+  .hero h1 { 
+    font-size: 2.5rem; 
+    line-height: 1.2; 
+    margin-bottom: 1rem; 
+  }
+  .hero p { 
+    font-size: 1.1rem; 
+    margin-bottom: 1.5rem; 
+  }
+  
+  /* Navigation */
+  .nav { display: flex; }
+  .nav-item { 
+    padding: 0.5rem 1rem; 
+    text-decoration: none; 
+  }
+  
+  /* Critical buttons */
+  .cta-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+  }
+}
+</style>
+
+<script>
+// Critical CSS injection for performance
+(function() {
+  var css = document.querySelector('.critical-above-fold').textContent;
+  var style = document.createElement('style');
+  style.type = 'text/css';
+  style.appendChild(document.createTextNode(css));
+  document.head.appendChild(style);
+})();
+</script>
+      ]]></template>
+    </pattern>
+    
+    <pattern name="lazy_loading_implementation">
+      <description>Lazy loading for images and iframes</description>
+      <template><![CDATA[
+<!-- Native lazy loading for images -->
+<img 
+  src="{{placeholder_image}}" 
+  data-src="{{actual_image_url}}" 
+  alt="{{descriptive_alt_text}}"
+  loading="lazy"
+  decoding="async"
+  class="lazy-image"
+  width="{{image_width}}"
+  height="{{image_height}}"
+>
+
+<!-- Intersection Observer for custom lazy loading -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const lazyImages = document.querySelectorAll('.lazy-image');
+  
+  const imageObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        img.src = img.dataset.src;
+        img.classList.remove('lazy-image');
+        observer.unobserve(img);
+      }
+    });
+  });
+  
+  lazyImages.forEach(img => imageObserver.observe(img));
+});
+</script>
+
+<!-- Lazy loading for iframes -->
+<iframe 
+  data-src="{{video_url}}" 
+  title="{{video_title}}"
+  loading="lazy"
+  class="lazy-iframe"
+  width="{{iframe_width}}"
+  height="{{iframe_height}}"
+  frameborder="0"
+  allowfullscreen
+></iframe>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const lazyIframes = document.querySelectorAll('.lazy-iframe');
+  
+  const iframeObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const iframe = entry.target;
+        iframe.src = iframe.dataset.src;
+        iframe.classList.remove('lazy-iframe');
+        observer.unobserve(iframe);
+      }
+    });
+  });
+  
+  lazyIframes.forEach(iframe => iframeObserver.observe(iframe));
+});
+</script>
+      ]]></template>
+    </pattern>
+  </performance_optimization_patterns>
+
+  <analytics_tracking_patterns>
+    <pattern name="google_analytics_4_setup">
+      <description>Google Analytics 4 with enhanced ecommerce and SEO tracking</description>
+      <template><![CDATA[
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id={{measurement_id}}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  
+  gtag('config', '{{measurement_id}}', {
+    page_title: document.title,
+    page_location: window.location.href,
+    content_group: '{{content_category}}',
+    custom_map: {
+      'custom_dimension_1': 'author_name',
+      'custom_dimension_2': 'content_category',
+      'custom_dimension_3': 'target_keyword'
+    }
+  });
+  
+  // Enhanced ecommerce tracking
+  gtag('config', '{{measurement_id}}', {
+    currency: '{{currency_code}}',
+    send_page_view: false
+  });
+</script>
+
+<!-- SEO performance tracking -->
+<script>
+// Track Core Web Vitals
+function trackCoreWebVitals() {
+  gtag('event', 'core_web_vitals', {
+    'event_category': 'Performance',
+    'custom_parameter': 'LCP'
+  });
+}
+
+// Track search rankings
+function trackKeywordRanking(keyword, position, url) {
+  gtag('event', 'keyword_ranking', {
+    'event_category': 'SEO',
+    'custom_parameter': keyword,
+    'value': position
+  });
+}
+
+// Track organic traffic
+function trackOrganicTraffic(source, medium, campaign) {
+  gtag('event', 'organic_traffic', {
+    'event_category': 'Acquisition',
+    'event_label': source + '/' + medium
+  });
+}
+</script>
+      ]]></template>
+    </pattern>
+  </analytics_tracking_patterns>
+</common_patterns>
+]]>

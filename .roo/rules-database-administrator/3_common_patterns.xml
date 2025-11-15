@@ -1,0 +1,287 @@
+<![CDATA[
+<common_patterns>
+  <database_setup_patterns>
+    <pattern name="postgresql_configuration">
+      <description>Production-ready PostgreSQL configuration with performance tuning</description>
+      <example>
+        <code language="sql">
+-- PostgreSQL Configuration Example
+-- Basic Settings
+shared_buffers = 256MB
+effective_cache_size = 4GB
+work_mem = 2GB
+maintenance_work_mem = 1GB
+
+-- Performance Tuning
+random_page_cost = 1.1
+effective_io_concurrency = 200
+checkpoint_completion_target = 0.9
+wal_buffers = 16MB
+default_statistics_target = 100
+
+-- High Availability Setup
+-- Streaming Replication
+primary_conninfo = 'host=primary.db port=5432 sslmode=require'
+standby_conninfo = 'host=standby.db port=5432 sslmode=require'
+recovery_min_apply_delay = 30s
+recovery_target_timeline = 5min
+        </code>
+        <explanation>
+          Optimize for high concurrency with proper connection pooling and WAL configuration for write-heavy workloads.
+        </explanation>
+      </example>
+    </pattern>
+    
+    <pattern name="mysql_optimization">
+      <description>MySQL performance optimization with proper indexing</description>
+      <example>
+        <code language="sql">
+-- MySQL Performance Optimization
+-- InnoDB Configuration
+innodb_buffer_pool_size = 1G
+innodb_log_file_size = 256M
+innodb_flush_log_at_trx_commit = 1
+innodb_flush_method = O_DIRECT
+
+-- Query Optimization
+-- Enable query cache
+query_cache_size = 128M
+query_cache_type = 1
+
+-- Connection Settings
+max_connections = 200
+max_allowed_packet = 64M
+thread_cache_size = 16M
+        </code>
+        <explanation>
+          Configure InnoDB for OLTP workloads with proper buffer sizing and query caching.
+        </explanation>
+      </example>
+    </pattern>
+    
+    <pattern name="mongodb_replication">
+      <description>MongoDB replica set configuration for high availability</description>
+      <example>
+        <code language="javascript">
+// MongoDB Replica Set Configuration
+{
+  "_id": "rs0",
+  "members": [
+    {
+      "_id": 1,
+      "host": "mongo1.example.com:27017",
+      "priority": 1,
+      "slaveDelay": 0,
+      "votes": 1
+    },
+    {
+      "_id": 2,
+      "host": "mongo2.example.com:27017",
+      "priority": 1,
+      "slaveDelay": 0,
+      "votes": 1
+    },
+    {
+      "_id": 3,
+      "host": "mongo3.example.com:27017",
+      "priority": 1,
+      "slaveDelay": 0,
+      "votes": 1
+    }
+  ],
+  "settings": {
+    "heartbeatIntervalMillis": 2000,
+    "heartbeatTimeoutMillis": 10000,
+    "electionTimeoutMillis": 10000
+    "getLastErrorModes": [
+      "majority",
+      "writable",
+      "lastVote"
+    ]
+  }
+}
+        </code>
+        <explanation>
+          Configure MongoDB replica set with automatic failover and proper heartbeat settings.
+        </explanation>
+      </example>
+    </pattern>
+    
+    <pattern name="redis_clustering">
+      <description>Redis clustering configuration for high availability</description>
+      <example>
+        <code language="conf">
+# Redis Cluster Configuration
+port 7000
+cluster-enabled yes
+cluster-config-file nodes.conf
+cluster-node-timeout 5000
+appendonly yes
+appendfilename appendonly.aof
+        </code>
+        <explanation>
+          Enable Redis clustering for horizontal scaling and persistence.
+        </explanation>
+      </example>
+    </pattern>
+  </database_setup_patterns>
+
+  <backup_strategies>
+    <pattern name="postgresql_backup">
+      <description>PostgreSQL continuous backup with point-in-time recovery</description>
+      <example>
+        <code language="bash">
+#!/bin/bash
+# PostgreSQL Backup Script
+BACKUP_DIR="/backups/postgresql"
+DATE=$(date +%Y%m%d)
+DB_NAME="appdb"
+
+# Create base backup
+pg_dump -h localhost -U postgres -d $DB_NAME -f $BACKUP_DIR/$DB_NAME-$DATE.sql
+
+# Compress backup
+gzip $BACKUP_DIR/$DB_NAME-$DATE.sql.gz
+
+# Cleanup old backups (keep last 7 days)
+find $BACKUP_DIR -name "*.sql.gz" -mtime +7 -delete
+        </code>
+        <explanation>
+          Automated daily backups with compression and retention policy.
+        </explanation>
+      </example>
+    </pattern>
+    
+    <pattern name="mysql_backup">
+      <description>MySQL backup with binary logs and verification</description>
+      <example>
+        <code language="bash">
+#!/bin/bash
+# MySQL Backup Script
+BACKUP_DIR="/backups/mysql"
+DATE=$(date +%Y%m%d)
+DB_NAME="appdb"
+
+# Full backup with binary logs
+mysqldump --single-transaction --all-databases --routines --triggers --events --master-data=2 --flush-logs --lock-tables --quick --compress --result-file=$BACKUP_DIR/$DB_NAME-$DATE.sql.gz
+
+# Verify backup integrity
+mysql --check-tables --check-upgrade --auto-repair $BACKUP_DIR/$DB_NAME-$DATE.sql.gz
+        </code>
+        <explanation>
+          Complete MySQL backups with verification and compression for reliable recovery.
+        </explanation>
+      </example>
+    </pattern>
+  </backup_strategies>
+
+  <monitoring_configurations>
+    <pattern name="postgresql_monitoring">
+      <description>PostgreSQL monitoring with pg_stat_statements and custom metrics</description>
+      <example>
+        <code language="sql">
+-- Enable pg_stat_statements
+ALTER SYSTEM SET pg_stat_statements.track = 'all';
+
+-- Create monitoring view
+CREATE VIEW db_performance_metrics AS
+SELECT 
+  schemaname,
+  tablename,
+  n_tup_ins,
+  n_tup_upd,
+  n_tup_del,
+  seq_scan,
+  seq_tup_read,
+  idx_scan,
+  idx_tup_fetch,
+  idx_tup_insert,
+  hot_update
+        FROM pg_stat_user_tables
+        WHERE schemaname NOT IN ('pg_catalog', 'information_schema');
+
+-- Grant access to monitoring view
+GRANT SELECT ON db_performance_metrics TO monitoring_role;
+        </code>
+        <explanation>
+          Enable detailed performance monitoring with custom views for better visibility.
+        </explanation>
+      </example>
+    </pattern>
+    
+    <pattern name="redis_monitoring">
+      <description>Redis monitoring with INFO log analysis and key metrics</description>
+      <example>
+        <code language="conf">
+# Redis Monitoring Configuration
+logfile /var/log/redis/redis-server.log
+loglevel notice
+syslog-enabled yes
+
+# Custom monitoring script
+redis-cli INFO keyspace | grep -E "used_memory_peak:" | awk '{print $2}' | tail -1
+        </code>
+        <explanation>
+          Monitor Redis memory usage and key patterns for performance optimization.
+        </explanation>
+      </example>
+    </pattern>
+  </monitoring_configurations>
+
+  <security_configurations>
+    <pattern name="postgresql_security">
+      <description>PostgreSQL security hardening with row-level security and encryption</description>
+      <example>
+        <code language="sql">
+-- Enable row-level security
+ALTER SYSTEM SET row_security = 'on';
+
+-- Create secure role with limited privileges
+CREATE ROLE read_only_role;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO read_only_role;
+
+-- Enable encryption
+ALTER SYSTEM SET ssl = 'on';
+ALTER SYSTEM SET ssl_cert_file = '/path/to/server.crt';
+ALTER SYSTEM SET ssl_key_file = '/path/to/server.key';
+
+-- Audit logging
+ALTER SYSTEM SET log_destination = 'csvlog';
+ALTER SYSTEM SET log_directory = '/var/log/postgresql/audit';
+ALTER SYSTEM SET log_filename = 'postgresql-%Y-%m-%d.log';
+        </code>
+        <explanation>
+          Implement comprehensive security with encryption, limited privileges, and audit logging.
+        </explanation>
+      </example>
+    </pattern>
+  </security_configurations>
+
+  <migration_scripts>
+    <pattern name="zero_downtime_migration">
+      <description>Zero-downtime database migration using blue-green deployment</description>
+      <example>
+        <code language="sql">
+-- Zero-downtime Migration Strategy
+-- 1. Setup new database as replica
+CREATE DATABASE newdb WITH TEMPLATE template0;
+
+-- 2. Sync data using logical replication
+-- Run on new database
+pg_dump -h newdb -U replica_user -Fc -v -s | psql -h newdb -c "SELECT pg_start_logical_replication('appdb', 'replication_slot');" 
+
+-- 3. Promote replica to primary
+-- When sync is complete, promote new database
+SELECT pg_promote_replica('newdb');
+
+-- 4. Update application connection
+-- Switch application to new database
+        </code>
+        <explanation>
+          Migrate with zero downtime using logical replication and promotion.
+        </explanation>
+      </example>
+    </pattern>
+  </migration_scripts>
+</common_patterns>
+]]>

@@ -1,0 +1,552 @@
+<common_patterns>
+  <code_smells>
+    <smell name="long_method">
+      <description>Methods that are too long and do too many things</description>
+      <indicators>
+        <indicator>More than 20-30 lines</indicator>
+        <indicator>Multiple levels of nesting</indicator>
+        <indicator>Hard to understand what the method does</indicator>
+        <indicator>Multiple responsibilities</indicator>
+      </indicators>
+      <refactoring_technique>Extract Method</refactoring_technique>
+      <example>
+        <before language="typescript">
+          <![CDATA[
+function processOrder(order: Order) {
+  // Validate order
+  if (!order.customerId) return null;
+  if (!order.items || order.items.length === 0) return null;
+  
+  // Calculate totals
+  let subtotal = 0;
+  let tax = 0;
+  let shipping = 0;
+  
+  for (const item of order.items) {
+    subtotal += item.price * item.quantity;
+    if (item.category === 'food') {
+      tax += item.price * item.quantity * 0.08;
+    }
+    if (item.weight > 10) {
+      shipping += item.weight * 0.5;
+    }
+  }
+  
+  const total = subtotal + tax + shipping;
+  
+  // Apply discount
+  let discount = 0;
+  if (order.customerType === 'premium' && total > 100) {
+    discount = total * 0.1;
+  }
+  
+  const finalTotal = total - discount;
+  
+  // Create order result
+  return {
+    orderId: order.id,
+    subtotal,
+    tax,
+    shipping,
+    discount,
+    total: finalTotal,
+    timestamp: new Date().toISOString()
+  };
+}
+          ]]>
+        </before>
+        <after language="typescript">
+          <![CDATA[
+function processOrder(order: Order): OrderResult | null {
+  if (!isValidOrder(order)) return null;
+  
+  const totals = calculateOrderTotals(order.items);
+  const discount = calculateDiscount(order.customerType, totals.subtotal);
+  
+  return {
+    orderId: order.id,
+    ...totals,
+    discount,
+    finalTotal: totals.subtotal + totals.tax + totals.shipping - discount,
+    timestamp: new Date().toISOString()
+  };
+}
+
+function calculateOrderTotals(items: OrderItem[]): OrderTotals {
+  let subtotal = 0;
+  let tax = 0;
+  let shipping = 0;
+  
+  for (const item of items) {
+    subtotal += item.price * item.quantity;
+    tax += calculateTax(item);
+    shipping += calculateShipping(item);
+  }
+  
+  return { subtotal, tax, shipping };
+}
+
+function calculateDiscount(customerType: string, subtotal: number): number {
+  return customerType === 'premium' && subtotal > 100 ? subtotal * 0.1 : 0;
+}
+          ]]>
+        </after>
+      </example>
+    </smell>
+    
+    <smell name="large_class">
+      <description>Classes that are too large and have too many responsibilities</description>
+      <indicators>
+        <indicator>More than 200-300 lines</indicator>
+        <indicator>Too many methods or properties</indicator>
+        <indicator>Multiple reasons to change</indicator>
+        <indicator>Low cohesion between methods</indicator>
+      </indicators>
+      <refactoring_technique>Extract Class</refactoring_technique>
+      <example>
+        <before language="typescript">
+          <![CDATA[
+class UserService {
+  private users: User[] = [];
+  
+  constructor() {
+    this.loadUsers();
+  }
+  
+  async loadUsers() {
+    this.users = await this.fetchUsersFromDatabase();
+  }
+  
+  async fetchUsersFromDatabase(): Promise<User[]> {
+    // Database fetching logic
+    return [];
+  }
+  
+  async createUser(userData: CreateUserRequest): Promise<User> {
+    // Validation
+    if (!userData.email || !userData.name) {
+      throw new Error('Email and name required');
+    }
+    
+    // Create user
+    const user = {
+      id: Math.random().toString(36),
+      email: userData.email,
+      name: userData.name,
+      createdAt: new Date(),
+      isActive: true
+    };
+    
+    this.users.push(user);
+    await this.saveUserToDatabase(user);
+    return user;
+  }
+  
+  async updateUser(id: string, updates: Partial<User>): Promise<User> {
+    const userIndex = this.users.findIndex(u => u.id === id);
+    if (userIndex === -1) {
+      throw new Error('User not found');
+    }
+    
+    Object.assign(this.users[userIndex], updates);
+    await this.updateUserInDatabase(id, updates);
+    return this.users[userIndex];
+  }
+  
+  async deleteUser(id: string): Promise<void> {
+    this.users = this.users.filter(u => u.id !== id);
+    await this.deleteUserFromDatabase(id);
+  }
+  
+  async saveUserToDatabase(user: User): Promise<void> {
+    // Database save logic
+  }
+  
+  async updateUserInDatabase(id: string, updates: Partial<User>): Promise<void> {
+    // Database update logic
+  }
+  
+  async deleteUserFromDatabase(id: string): Promise<void> {
+    // Database delete logic
+  }
+  
+  // User validation methods
+  private validateEmail(email: string): boolean {
+    return email.includes('@');
+  }
+  
+  private validateName(name: string): boolean {
+    return name.length > 0;
+  }
+}
+          ]]>
+        </before>
+        <after language="typescript">
+          <![CDATA[
+class UserService {
+  private users: User[] = [];
+  private database: Database;
+  
+  constructor(database: Database) {
+    this.database = database;
+  }
+  
+  async loadUsers(): Promise<void> {
+    this.users = await this.database.fetchUsers();
+  }
+  
+  async createUser(userData: CreateUserRequest): Promise<User> {
+    const user = this.createUserObject(userData);
+    await this.database.saveUser(user);
+    return user;
+  }
+  
+  async updateUser(id: string, updates: Partial<User>): Promise<User> {
+    const user = await this.findUserById(id);
+    if (!user) throw new Error('User not found');
+    
+    const updatedUser = { ...user, ...updates };
+    await this.database.updateUser(id, updatedUser);
+    return updatedUser;
+  }
+  
+  async deleteUser(id: string): Promise<void> {
+    await this.database.deleteUser(id);
+  }
+  
+  private createUserObject(userData: CreateUserRequest): User {
+    return {
+      id: Math.random().toString(36),
+      email: userData.email,
+      name: userData.name,
+      createdAt: new Date(),
+      isActive: true
+    };
+  }
+  
+  private async findUserById(id: string): Promise<User | null> {
+    return this.users.find(u => u.id === id) || null;
+  }
+}
+
+class UserValidator {
+  static validateEmail(email: string): boolean {
+    return email.includes('@');
+  }
+  
+  static validateName(name: string): boolean {
+    return name.length > 0;
+  }
+}
+
+class UserDatabase {
+  async fetchUsers(): Promise<User[]> {
+    // Database fetching logic
+    return [];
+  }
+  
+  async saveUser(user: User): Promise<void> {
+    // Database save logic
+  }
+  
+  async updateUser(id: string, updates: Partial<User>): Promise<void> {
+    // Database update logic
+  }
+  
+  async deleteUser(id: string): Promise<void> {
+    // Database delete logic
+  }
+}
+          ]]>
+        </after>
+      </example>
+    </smell>
+    
+    <smell name="long_parameter_list">
+      <description>Methods with too many parameters, making them hard to use and understand</description>
+      <indicators>
+        <indicator>More than 3-4 parameters</indicator>
+        <indicator>Parameters that could be grouped into objects</indicator>
+        <indicator>Similar parameters across multiple methods</indicator>
+      </indicators>
+      <refactoring_technique>Introduce Parameter Object</refactoring_technique>
+      <example>
+        <before language="typescript">
+          <![CDATA[
+function createUser(
+  firstName: string,
+  lastName: string,
+  email: string,
+  age: number,
+  address: string,
+  city: string,
+  state: string,
+  zipCode: string,
+  country: string,
+  phone: string,
+  newsletter: boolean
+): Promise<User> {
+  // Implementation
+}
+          ]]>
+        </before>
+        <after language="typescript">
+          <![CDATA[
+interface CreateUserRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  age: number;
+  address: Address;
+  phone?: string;
+  newsletter: boolean;
+}
+
+interface Address {
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+}
+
+function createUser(userData: CreateUserRequest): Promise<User> {
+  // Implementation with structured parameter
+}
+          ]]>
+        </after>
+      </example>
+    </smell>
+    
+    <smell name="duplicate_code">
+      <description>Similar or identical code in multiple places</description>
+      <indicators>
+        <indicator>Same logic implemented in different ways</indicator>
+        <indicator>Copied and pasted code blocks</indicator>
+        <indicator>Similar methods with slight variations</indicator>
+      </indicators>
+      <refactoring_technique>Extract Method/Template Method</refactoring_technique>
+      <example>
+        <before language="typescript">
+          <![CDATA[
+// File A
+function calculateDiscount(price: number, customerType: string): number {
+  if (customerType === 'premium') {
+    return price * 0.1;
+  }
+  return 0;
+}
+
+// File B
+function applyDiscount(amount: number, customerType: string): number {
+  if (customerType === 'premium') {
+    return amount * 0.1;
+  }
+  return amount;
+}
+          ]]>
+        </before>
+        <after language="typescript">
+          <![CDATA[
+function calculateDiscount(price: number, customerType: string): number {
+  return customerType === 'premium' ? price * 0.1 : 0;
+}
+
+function applyDiscount(amount: number, customerType: string): number {
+  return calculateDiscount(amount, customerType);
+}
+          ]]>
+        </after>
+      </example>
+    </smell>
+  </code_smells>
+
+  <refactoring_techniques>
+    <technique name="extract_method">
+      <description>Extract a portion of a large method into a new, well-named method</description>
+      <when_to_use>When a method is doing multiple things or has complex logic</when_to_use>
+      <steps>
+        <step>Identify cohesive code block to extract</step>
+        <step>Create new method with descriptive name</step>
+        <step>Replace original code with method call</step>
+        <step>Test that behavior is preserved</step>
+      </steps>
+    </technique>
+    
+    <technique name="extract_class">
+      <description>Extract related functionality into a separate class</description>
+      <when_to_use>When a class has multiple responsibilities or large sections</when_to_use>
+      <steps>
+        <step>Identify cohesive responsibility group</step>
+        <step>Create new class with single responsibility</step>
+        <step>Move relevant methods and properties</step>
+        <step>Update original class to use new class</step>
+        <step>Test both classes independently</step>
+      </steps>
+    </technique>
+    
+    <technique name="replace_conditional_with_polymorphism">
+      <description>Replace complex conditional logic with polymorphic objects</description>
+      <when_to_use>When you have type-specific behavior scattered in conditionals</when_to_use>
+      <steps>
+        <step>Create base class/interface for common behavior</step>
+        <step>Create specific classes for each type</step>
+        <step>Replace conditional logic with polymorphic calls</step>
+        <step>Test all type-specific behaviors</step>
+      </steps>
+    </technique>
+    
+    <technique name="introduce_parameter_object">
+      <description>Group related parameters into a single object</description>
+      <when_to_use>When methods have too many parameters or related parameters</when_to_use>
+      <steps>
+        <step>Create interface/type for parameter group</step>
+        <step>Update method signature to use parameter object</step>
+        <step>Update all method calls to pass parameter object</step>
+        <step>Test with parameter object</step>
+      </steps>
+    </technique>
+    
+    <technique name="move_method">
+      <description>Move method to a more appropriate class</description>
+      <when_to_use>When method is used more by another class than its current class</when_to_use>
+      <steps>
+        <step>Identify target class that uses the method most</step>
+        <step>Move method to target class</step>
+        <step>Update current class to use method via target class</step>
+        <step>Update all method calls</step>
+        <step>Test both classes</step>
+      </steps>
+    </technique>
+    
+    <technique name="inline_method">
+      <description>Replace simple method call with method body directly</description>
+      <when_to_use>When method adds unnecessary indirection</when_to_use>
+      <steps>
+        <step>Verify method is simple and only called once</step>
+        <step>Replace method call with method body</step>
+        <step>Remove the original method</step>
+        <step>Test that behavior is unchanged</step>
+      </steps>
+    </technique>
+  </refactoring_techniques>
+
+  <design_patterns>
+    <pattern name="strategy">
+      <description>Encapsulate algorithms and make them interchangeable</description>
+      <when_to_use>When you have multiple ways to do something and need to choose at runtime</when_to_use>
+      <example>
+        <code language="typescript">
+          <![CDATA[
+interface PaymentStrategy {
+  calculate(amount: number): number;
+}
+
+class CreditCardPayment implements PaymentStrategy {
+  calculate(amount: number): number {
+    return amount + 0.03; // 3% processing fee
+  }
+}
+
+class PayPalPayment implements PaymentStrategy {
+  calculate(amount: number): number {
+    return amount + 0.02; // 2% processing fee
+  }
+}
+
+class PaymentProcessor {
+  constructor(private strategy: PaymentStrategy) {}
+  
+  processPayment(amount: number): number {
+    return this.strategy.calculate(amount);
+  }
+}
+          ]]>
+        </code>
+      </example>
+    </pattern>
+    
+    <pattern name="factory">
+      <description>Create objects without specifying their exact classes</description>
+      <when_to_use>When you need to create different types based on input</when_to_use>
+      <example>
+        <code language="typescript">
+          <![CDATA[
+interface NotificationSender {
+  send(message: string): void;
+}
+
+class EmailNotificationSender implements NotificationSender {
+  send(message: string): void {
+    console.log(`Email: ${message}`);
+  }
+}
+
+class SMSNotificationSender implements NotificationSender {
+  send(message: string): void {
+    console.log(`SMS: ${message}`);
+  }
+}
+
+class PushNotificationSender implements NotificationSender {
+  send(message: string): void {
+    console.log(`Push: ${message}`);
+  }
+}
+
+class NotificationFactory {
+  static create(type: 'email' | 'sms' | 'push'): NotificationSender {
+    switch (type) {
+      case 'email':
+        return new EmailNotificationSender();
+      case 'sms':
+        return new SMSNotificationSender();
+      case 'push':
+        return new PushNotificationSender();
+      default:
+        throw new Error(`Unknown notification type: ${type}`);
+    }
+  }
+}
+          ]]>
+        </code>
+      </example>
+    </pattern>
+    
+    <pattern name="observer">
+      <description>Define one-to-many dependency between objects</description>
+      <when_to_use>When multiple objects need to react to changes in one object</when_to_use>
+      <example>
+        <code language="typescript">
+          <![CDATA[
+interface Observer {
+  update(data: any): void;
+}
+
+class DataStore {
+  private observers: Observer[] = [];
+  private data: any = null;
+  
+  subscribe(observer: Observer): void {
+    this.observers.push(observer);
+  }
+  
+  unsubscribe(observer: Observer): void {
+    this.observers = this.observers.filter(obs => obs !== observer);
+  }
+  
+  setData(newData: any): void {
+    this.data = newData;
+    this.notifyObservers();
+  }
+  
+  private notifyObservers(): void {
+    this.observers.forEach(observer => observer.update(this.data));
+  }
+}
+          ]]>
+        </code>
+      </example>
+    </pattern>
+  </design_patterns>
+</common_patterns>

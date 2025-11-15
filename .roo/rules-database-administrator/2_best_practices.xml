@@ -1,0 +1,163 @@
+<![CDATA[
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>Data Integrity and Safety First</name>
+      <description>Always prioritize data integrity and safety over performance optimizations. Never implement changes that could risk data loss or corruption without proper backups and testing.</description>
+      <rationale>Database systems are critical infrastructure; data loss can be catastrophic. Safety measures prevent accidental data corruption and ensure recoverability.</rationale>
+      <example>
+        <scenario>When optimizing queries, always test in staging first and have rollback plans ready</scenario>
+        <good>Test optimizations on non-production data first, implement with proper monitoring</good>
+        <bad>Applying performance changes directly to production without testing</bad>
+      </example>
+    </principle>
+    
+    <principle priority="high">
+      <name>Backup Before Changes</name>
+      <description>Never make structural changes without creating a verified backup and testing the restore procedure.</description>
+      <rationale>Changes can introduce unexpected issues; having reliable backups ensures quick recovery and minimizes downtime.</rationale>
+    </principle>
+    
+    <principle priority="high">
+      <name>Principle of Least Privilege</name>
+      <description>Grant minimum necessary permissions and follow security best practices for access control.</description>
+      <rationale>Reducing access surface minimizes security risks and prevents accidental modifications.</rationale>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Performance Baseline Establishment</name>
+      <description>Establish performance baselines before making optimizations to measure impact accurately.</description>
+      <rationale>Without baselines, you cannot determine if changes actually improve performance or make it worse.</rationale>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Documentation and Runbooks</name>
+      <description>Maintain comprehensive documentation and operational runbooks for all database procedures.</description>
+      <rationale>Clear documentation ensures knowledge transfer and enables consistent operations across team members.</rationale>
+    </principle>
+  </general_principles>
+
+  <database_specific_principles>
+    <principle priority="high">
+      <name>High Availability Architecture</name>
+      <description>Design for 99.99% uptime with automatic failover and load balancing.</description>
+      <rationale>High availability prevents single points of failure and ensures continuous service availability.</rationale>
+      <example>
+        <scenario>Implement streaming replication with automatic failover for PostgreSQL</scenario>
+        <good>Use synchronous streaming replication with hot standby and automatic promotion</good>
+        <bad>Simple master-slave setup without automatic failover</bad>
+      </example>
+    </principle>
+    
+    <principle priority="high">
+      <name>Security Hardening</name>
+      <description>Implement comprehensive security measures including encryption, access control, and audit logging.</description>
+      <rationale>Security breaches can be catastrophic; layered security prevents unauthorized access and detects suspicious activities.</rationale>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Capacity Planning</name>
+      <description>Plan for growth and implement scaling strategies before capacity becomes critical.</description>
+      <rationale>Proactive capacity planning prevents emergency migrations and ensures consistent performance during growth.</rationale>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Monitoring and Alerting</name>
+      <description>Implement comprehensive monitoring with alerting for performance, availability, and security metrics.</description>
+      <rationale>Early detection of issues prevents outages and enables proactive maintenance.</rationale>
+    </principle>
+  </database_specific_principles>
+
+  <code_conventions>
+    <convention category="naming">
+      <rule>Use descriptive names for database objects</rule>
+      <examples>
+        <good>user_profiles, user_sessions, lesson_progress, backup_logs</good>
+        <bad>tbl1, temp, data, items</bad>
+      </examples>
+    </convention>
+    
+    <convention category="structure">
+      <rule>Organize database files logically</rule>
+      <template>
+        database/
+        ├── migrations/
+        ├── schemas/
+        ├── seeds/
+        ├── backups/
+        ├── monitoring/
+        └── scripts/
+      </template>
+    </convention>
+    
+    <convention category="security">
+      <rule>Never commit credentials to version control</rule>
+      <examples>
+        <good>Use environment variables and secret management systems</good>
+        <bad>Hardcoded passwords in configuration files</bad>
+      </examples>
+    </convention>
+  </code_conventions>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>Ignoring backup testing</description>
+      <why_problematic>Backup systems may fail when actually needed, leading to data loss during recovery scenarios.</why_problematic>
+      <correct_approach>Regularly test backup restore procedures and verify backup integrity</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Over-optimizing without measurement</description>
+      <why_problematic>Making too many changes at once can introduce instability and make it difficult to identify the root cause of issues.</why_problematic>
+      <correct_approach>Make incremental changes and measure impact at each step</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Neglecting security updates</description>
+      <why_problematic>Database security vulnerabilities are constantly being discovered; failing to apply security updates can lead to breaches.</why_problematic>
+      <correct_approach>Stay current with security patches and implement a regular security update schedule</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Single point of failure</description>
+      <why_problematic>Relying on a single database server without replication or backup creates a single point of failure.</why_problematic>
+      <correct_approach>Implement high availability with multiple nodes and regular backups</correct_approach>
+    </pitfall>
+  </common_pitfalls>
+
+  <quality_checklist>
+    <category name="planning">
+      <item>Verify backup strategies meet RTO/RPO requirements</item>
+      <item>Confirm high availability architecture is properly designed</item>
+      <item>Validate security measures comply with requirements</item>
+      <item>Ensure monitoring covers all critical metrics</item>
+      <item>Review capacity planning for projected growth</item>
+    </category>
+    <category name="implementation">
+      <item>Test all changes in staging environment first</item>
+      <item>Verify backups before and after structural changes</item>
+      <item>Implement security hardening measures</item>
+      <item>Establish performance baselines before optimization</item>
+      <item>Create comprehensive monitoring and alerting</item>
+      <item>Document all procedures and configurations</item>
+    </category>
+    <category name="validation">
+      <item>Test backup and restore procedures thoroughly</item>
+      <item>Verify failover mechanisms work correctly</item>
+      <item>Validate performance improvements meet targets</item>
+      <item>Confirm security measures are effective</item>
+      <item>Test monitoring and alerting systems</item>
+      <item>Review documentation completeness and accuracy</item>
+    </category>
+    <category name="completion">
+      <item>All systems achieve 99.99% uptime SLA</item>
+      <item>RTO < 1 hour, RPO < 5 minutes for critical data</item>
+      <item>Automated backup testing with successful restores</item>
+      <item>Performance targets met and monitored</item>
+      <item>Security measures implemented and audited</item>
+      <item>Comprehensive documentation and runbooks created</item>
+      <item>Team trained on operational procedures</item>
+    </category>
+  </quality_checklist>
+</best_practices>
+]]>

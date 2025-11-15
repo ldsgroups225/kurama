@@ -1,0 +1,218 @@
+<![CDATA[<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>Security First</name>
+      <description>Always prioritize security vulnerabilities in code reviews, as they pose the highest risk to applications and users</description>
+      <rationale>Security vulnerabilities can lead to data breaches, unauthorized access, and system compromise, making them the most critical issues to identify and address</rationale>
+      <example>
+        <scenario>When reviewing authentication code</scenario>
+        <good>Immediately flag hardcoded credentials, missing input validation, and inadequate session management</good>
+        <bad>Focus only on code style while ignoring potential SQL injection vulnerabilities</bad>
+      </example>
+    </principle>
+    
+    <principle priority="high">
+      <name>Constructive Feedback</name>
+      <description>Provide feedback in a constructive, educational manner that helps developers learn and improve</description>
+      <rationale>Code reviews should be learning opportunities, not just fault-finding exercises. Constructive feedback builds team culture and improves code quality over time</rationale>
+      <example>
+        <scenario>When identifying a code issue</scenario>
+        <good>"Consider using parameterized queries here to prevent SQL injection. Here's an example of how to implement this safely..."</good>
+        <bad>"This is vulnerable to SQL injection. Fix it."</bad>
+      </example>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Context-Aware Review</name>
+      <description>Understand the broader context of changes, including business requirements, technical constraints, and team conventions</description>
+      <rationale>Code exists within a specific context. Understanding this context prevents suggesting inappropriate solutions and ensures recommendations are practical and relevant</rationale>
+      <example>
+        <scenario>Reviewing a quick fix for production issue</scenario>
+        <good>Recognize the urgency and suggest follow-up improvements for later implementation</good>
+        <bad>Insist on complete refactoring when a simple fix addresses the immediate issue</bad>
+      </example>
+    </principle>
+  </general_principles>
+
+  <code_review_categories>
+    <category name="security_review">
+      <focus_areas>
+        <area>Input validation and sanitization</area>
+        <area>Authentication and authorization</area>
+        <area>Data encryption and protection</area>
+        <area>Injection vulnerabilities (SQL, XSS, Command)</area>
+        <area>Security misconfigurations</area>
+        <area>Sensitive data exposure</area>
+      </focus_areas>
+      <checklist>
+        <item>Verify all user inputs are validated and sanitized</item>
+        <item>Check for proper authentication and authorization mechanisms</item>
+        <item>Ensure sensitive data is encrypted at rest and in transit</item>
+        <item>Look for potential injection vulnerabilities</item>
+        <item>Review security configurations and defaults</item>
+        <item>Check for hardcoded secrets or credentials</item>
+      </checklist>
+    </category>
+    
+    <category name="performance_review">
+      <focus_areas>
+        <area>Algorithm efficiency and complexity</area>
+        <area>Database query optimization</area>
+        <area>Memory usage and resource management</area>
+        <area>Network calls and API efficiency</area>
+        <area>Caching strategies</area>
+        <area>Async operations and concurrency</area>
+      </focus_areas>
+      <checklist>
+        <item>Analyze algorithm complexity (Big O notation)</item>
+        <item>Review database queries for efficiency</item>
+        <item>Check for memory leaks or excessive resource usage</item>
+        <item>Evaluate network call patterns and batching</item>
+        <item>Assess caching implementation</item>
+        <item>Review async/await usage and error handling</item>
+      </checklist>
+    </category>
+    
+    <category name="maintainability_review">
+      <focus_areas>
+        <area>Code organization and structure</area>
+        <area>Naming conventions and clarity</area>
+        <area>Documentation and comments</area>
+        <area>Complexity management</area>
+        <area>Code duplication</area>
+        <area>Design patterns and architecture</area>
+      </focus_areas>
+      <checklist>
+        <item>Ensure functions and classes have single responsibilities</item>
+        <item>Verify naming is descriptive and consistent</item>
+        <item>Check for adequate documentation and comments</item>
+        <item>Assess cyclomatic complexity and suggest simplification</item>
+        <item>Identify and suggest elimination of code duplication</item>
+        <item>Review adherence to design patterns and architectural principles</item>
+      </checklist>
+    </category>
+    
+    <category name="testing_review">
+      <focus_areas>
+        <area>Test coverage and completeness</area>
+        <area>Test quality and effectiveness</area>
+        <area>Edge cases and error handling</area>
+        <area>Mock usage and test isolation</area>
+        <area>Integration and end-to-end testing</area>
+        <area>Performance and load testing</area>
+      </focus_areas>
+      <checklist>
+        <item>Verify test coverage meets project standards</item>
+        <item>Assess test quality and meaningful assertions</item>
+        <item>Check for coverage of edge cases and error conditions</item>
+        <item>Review mock usage and test isolation</item>
+        <item>Evaluate integration test coverage</item>
+        <item>Consider performance testing requirements</item>
+      </checklist>
+    </category>
+  </code_review_categories>
+
+  <language_specific_guidelines>
+    <language name="javascript_typescript">
+      <conventions>
+        <convention>Use modern ES6+ features appropriately</convention>
+        <convention>Implement proper error handling with try/catch</convention>
+        <convention>Use TypeScript for type safety when applicable</convention>
+        <convention>Follow async/await patterns over callbacks</convention>
+        <convention>Implement proper memory management and avoid memory leaks</convention>
+      </conventions>
+      <common_issues>
+        <issue>Callback hell and promise chaining</issue>
+        <>Type coercion bugs</issue>
+        <this>context issues in callbacks</this>
+        <issue>Memory leaks in event listeners</issue>
+        <issue>Inconsistent error handling</issue>
+      </common_issues>
+    </language>
+    
+    <language name="python">
+      <conventions>
+        <convention>Follow PEP 8 style guidelines</convention>
+        <convention>Use type hints for better code clarity</convention>
+        <convention>Implement proper exception handling</convention>
+        <convention>Use context managers for resource management</convention>
+        <convention>Follow Pythonic idioms and patterns</convention>
+      </conventions>
+      <common_issues>
+        <issue>Improper exception handling</issue>
+        <issue>Resource leaks (file handles, connections)</issue>
+        <issue>Security issues with eval() and exec()</issue>
+        <issue>Import and dependency management</issue>
+        <issue>Inconsistent coding style</issue>
+      </common_issues>
+    </language>
+    
+    <language name="java">
+      <conventions>
+        <convention>Follow Java naming conventions</convention>
+        <convention>Implement proper exception handling</convention>
+        <convention>Use appropriate design patterns</convention>
+        <convention>Follow SOLID principles</convention>
+        <convention>Implement proper memory management</convention>
+      </conventions>
+      <common_issues>
+        <issue>Memory leaks and resource management</issue>
+        <issue>Improper exception handling</issue>
+        <issue>Over-engineering and excessive complexity</issue>
+        <issue>Thread safety issues</issue>
+        <issue>Poor separation of concerns</issue>
+      </common_issues>
+    </language>
+  </language_specific_guidelines>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>Focusing only on code style and formatting</description>
+      <why_problematic>While important, code style should not overshadow functional issues like security vulnerabilities or performance problems</why_problematic>
+      <correct_approach>Prioritize functional issues first, then address style and formatting as secondary concerns</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Nitpicking minor issues in large changes</description>
+      <why_problematic>Overwhelming developers with minor feedback can delay important changes and reduce review effectiveness</why_problematic>
+      <correct_approach>Focus on significant issues and group minor suggestions together or address them separately</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Providing feedback without context or explanations</description>
+      <why_problematic>Unexplained feedback doesn't help developers understand the reasoning or learn from the review</why_problematic>
+      <correct_approach>Always explain the "why" behind feedback and provide examples or references</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Ignoring business context and requirements</description>
+      <why_problematic>Technical perfection without considering business needs can lead to over-engineering or missed deadlines</why_problematic>
+      <correct_approach>Balance technical excellence with practical business constraints and requirements</correct_approach>
+    </pitfall>
+  </common_pitfalls>
+
+  <quality_checklist>
+    <category name="before_reviewing">
+      <item>Understand the purpose and scope of changes</item>
+      <item>Review related documentation and requirements</item>
+      <item>Set up the development environment if needed</item>
+      <item>Identify key areas to focus on (security, performance, etc.)</item>
+    </category>
+    <category name="during_review">
+      <item>Check security vulnerabilities first and foremost</item>
+      <item>Analyze performance implications and bottlenecks</item>
+      <item>Assess code maintainability and readability</item>
+      <item>Verify test coverage and quality</item>
+      <item>Check adherence to coding standards and conventions</item>
+      <item>Document findings with specific examples and line numbers</item>
+    </category>
+    <category name="after_review">
+      <item>Prioritize findings by severity and impact</item>
+      <item>Provide constructive, actionable feedback</item>
+      <item>Suggest specific improvements with examples</item>
+      <item>Offer to discuss complex issues further</item>
+      <item>Follow up on critical issues until resolved</item>
+    </category>
+  </quality_checklist>
+</best_practices>
+]]>

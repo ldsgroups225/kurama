@@ -1,0 +1,180 @@
+<tool_usage_guide>
+  <tool_priorities>
+    <priority level="1">
+      <tool>codebase_search</tool>
+      <when>Always use first to find performance-related code, configurations, and existing optimization patterns</when>
+      <why>Semantic search helps identify performance bottlenecks, caching implementations, and monitoring setups more effectively than keyword searches.</why>
+    </priority>
+    <priority level="2">
+      <tool>read_file</tool>
+      <when>After identifying relevant files, examine their contents to understand current performance implementations and identify optimization opportunities</when>
+      <why>Full context is essential for making informed performance optimization decisions and avoiding unintended side effects.</why>
+    </priority>
+    <priority level="3">
+      <tool>command</tool>
+      <when>Execute performance profiling tools, load testing commands, and monitoring setup scripts</when>
+      <why>Command-line tools are essential for performance analysis, benchmarking, and system-level optimizations that require external tooling.</why>
+    </priority>
+    <priority level="4">
+      <tool>mcp</tool>
+      <when>Use performance monitoring and analysis tools through MCP servers for advanced insights and integrations</when>
+      <why>MCP tools provide specialized performance analysis capabilities and real-time data from external monitoring systems.</why>
+    </priority>
+    <priority level="5">
+      <tool>apply_diff</tool>
+      <when>Make targeted performance optimizations to code, configurations, and documentation files</when>
+      <why>Apply diff is the primary tool for implementing performance improvements while maintaining code quality and consistency.</why>
+    </priority>
+  </tool_priorities>
+
+  <tool_specific_guidance>
+    <tool name="codebase_search">
+      <purpose>Find performance-related code, configurations, and existing optimization patterns</purpose>
+      <when_to_use>At the beginning of performance analysis to understand current implementation</when_to_use>
+      <syntax>
+        <command>Use semantic search queries to find performance bottlenecks, caching implementations, database queries, and monitoring setups</command>
+        <parameters>
+          <parameter name="query" required="true">
+            <description>Natural language query describing performance issues or optimization needs</description>
+            <type>string</type>
+            <example>"slow database queries causing high response times"</example>
+          </parameter>
+        </parameters>
+      </syntax>
+      <examples>
+        <example scenario="database_performance_analysis">
+          <code>codebase_search "N+1 query optimization slow response time database performance"</code>
+          <output>Finds files with database queries, performance-related configurations, and existing optimization patterns</output>
+        </example>
+      </examples>
+    </tool_usage>
+    </tool>
+
+    <tool name="read_file">
+      <purpose>Examine specific performance implementations and configurations</purpose>
+      <when_to_use>When analyzing specific files identified through codebase_search or when detailed code review is needed</when_to_use>
+      <syntax>
+        <command>Read the complete contents of performance-related files</command>
+        <parameters>
+          <parameter name="path" required="true">
+            <description>Path to the file to read</description>
+            <type>string</type>
+            <example>performance/monitoring/config.js</example>
+          </parameter>
+        </parameters>
+      </syntax>
+      <examples>
+        <example scenario="analyzing_monitoring_config">
+          <code>read_file "performance/monitoring/config.js"</code>
+          <output>Provides complete monitoring configuration for analysis and improvement recommendations</output>
+        </example>
+      </examples>
+    </tool_usage>
+    </tool>
+
+    <tool name="command">
+      <purpose>Execute performance profiling and testing commands</purpose>
+      <when_to_use>When running performance analysis tools, load tests, or setting up monitoring infrastructure</when_to_use>
+      <syntax>
+        <command>Execute performance-related command-line tools and scripts</command>
+        <parameters>
+          <parameter name="command" required="true">
+            <description>Command to execute</description>
+            <type>string</type>
+            <example>npm run benchmark</example>
+          </parameter>
+          <parameter name="args" required="false">
+            <description>Additional arguments for the command</description>
+            <type>array</type>
+            <example>["--config", "benchmark.js"]</example>
+          </parameter>
+        </parameters>
+      </syntax>
+      <examples>
+        <example scenario="running_load_test">
+          <code>command "npm run loadtest" ["--config", "load-test-config.js"]</code>
+          <output>Executes configured load test to measure system performance under various conditions</output>
+        </example>
+      </examples>
+    </tool_usage>
+    </tool>
+
+    <tool name="mcp">
+      <purpose>Access performance monitoring and analysis tools through MCP servers</purpose>
+      <when_to_use>When specialized performance analysis tools are available through MCP servers for advanced insights</when_to_use>
+      <syntax>
+        <command>Use MCP tools for performance analysis and monitoring</command>
+        <parameters>
+          <parameter name="server_name" required="true">
+            <description>Name of the MCP server providing performance tools</description>
+            <type>string</type>
+            <example>performance-analyzer</example>
+          </parameter>
+          <parameter name="tool_name" required="true">
+            <description>Specific performance analysis tool to use</description>
+            <type>string</type>
+            <example>profiler</example>
+          </parameter>
+          <parameter name="arguments" required="false">
+            <description>Arguments for the performance analysis tool</description>
+            <type>object</type>
+            <example>{"target": "api-endpoints", "metrics": ["response_time", "throughput"]}</example>
+          </parameter>
+        </parameters>
+      </syntax>
+      <examples>
+        <example scenario="analyzing_performance_with_mcp">
+          <code>mcp "performance-analyzer" "profiler" {"target": "api-endpoints", "metrics": ["response_time", "throughput"]}</code>
+          <output>Uses specialized performance analysis tool to identify bottlenecks and optimization opportunities</output>
+        </example>
+      </examples>
+    </tool_usage>
+    </tool>
+
+    <tool name="apply_diff">
+      <purpose>Implement performance optimizations in code and configuration files</purpose>
+      <when_to_use>When making specific performance improvements identified through analysis or testing</when_to_use>
+      <syntax>
+        <command>Apply targeted changes to optimize performance while maintaining code quality</command>
+        <parameters>
+          <parameter name="path" required="true">
+            <description>Path to the file to modify</description>
+            <type>string</type>
+            <example>src/database/queries/user-profile.sql</example>
+          </parameter>
+          <parameter name="diff" required="true">
+            <description>Changes to apply to the file</description>
+            <type>object</type>
+            <example>
+              <![CDATA[
+              <search>
+                <start_line>15</start_line>
+                <end_line>25</end_line>
+                <content>SELECT * FROM users WHERE email = ?</content>
+                <replacement>
+                  <start_line>15</start_line>
+                  <end_line>25</end_line>
+                  <content>SELECT id, name, email FROM users WHERE email = ? AND status = 'active'</content>
+                </replacement>
+              </search>
+              <add>
+                <start_line>30</start_line>
+                  <end_line>35</end_line>
+                  <content>-- Add index on email and status for query optimization</content>
+                </add>
+              </diff>
+            ]]>
+            </example>
+          </parameter>
+        </parameters>
+      </syntax>
+      <examples>
+        <example scenario="database_query_optimization">
+          <code>apply_diff "src/database/queries/user-profile.sql"</code>
+          <output>Optimizes database query by adding specific index and improving WHERE clause for better performance</output>
+        </example>
+      </examples>
+    </tool_usage>
+    </tool>
+  </tool_specific_guidance>
+</tool_usage_guide>

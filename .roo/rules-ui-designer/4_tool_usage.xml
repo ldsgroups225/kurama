@@ -1,0 +1,214 @@
+<tool_usage_guide>
+  <tool_priorities>
+    <priority level="1">
+      <tool>codebase_search</tool>
+      <when>Always use first to find existing design patterns and components</when>
+      <why>Semantic search finds design-related functionality better than keywords</why>
+    </priority>
+    <priority level="2">
+      <tool>read_file</tool>
+      <when>After identifying relevant design files and components</when>
+      <why>Get full context of existing design systems and implementations</why>
+    </priority>
+    <priority level="3">
+      <tool>list_files</tool>
+      <when>To explore design assets, documentation, and component structures</when>
+      <why>Understanding project organization and available resources</why>
+    </priority>
+  </tool_priorities>
+
+  <tool_specific_guidance>
+    <tool name="codebase_search">
+      <best_practices>
+        <practice>Search for design-related terms: "design system", "components", "styles", "theme"</practice>
+        <practice>Look for existing patterns before creating new ones</practice>
+        <practice>Use semantic queries like "button component" or "color palette"</practice>
+      </best_practices>
+      <example_queries>
+        <query>design system components</query>
+        <query>color palette and theme</query>
+        <query>responsive layout patterns</query>
+        <query>accessibility implementation</query>
+        <query>animation and interaction patterns</query>
+      </example_queries>
+    </tool>
+
+    <tool name="read_file">
+      <best_practices>
+        <practice>Read design system files first to understand constraints</practice>
+        <practice>Examine existing components for consistency patterns</practice>
+        <practice>Review style guides and brand guidelines</practice>
+        <practice>Check documentation for design principles and rules</practice>
+      </best_practices>
+      <target_files>
+        <file_type>Design system documentation (*.md, *.txt)</file_type>
+        <file_type>Style sheets (*.css, *.scss, *.sass)</file_type>
+        <file_type>Component libraries (components/**/*)</file_type>
+        <file_type>Theme configuration (theme.*, *.theme.*)</file_type>
+        <file_type>Brand guidelines (brand.*, guidelines.*)</file_type>
+      </target_files>
+    </tool>
+
+    <tool name="apply_diff">
+      <best_practices>
+        <practice>Always read file first to ensure exact content match</practice>
+        <practice>Make design changes that respect existing patterns</practice>
+        <practice>Include comments explaining design decisions</practice>
+        <practice>Test accessibility impact of visual changes</practice>
+      </best_practices>
+      <example_scenarios>
+        <scenario>Updating component styles</scenario>
+        <code><![CDATA[
+<apply_diff>
+<path>components/ui/button.tsx</path>
+<diff>
+<<<<<<< SEARCH
+:start_line:15
+-------
+  className="bg-blue-500 text-white px-4 py-2 rounded"
+=======
+  className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
+>>>>>>> REPLACE
+</diff>
+</apply_diff>
+        ]]></code>
+      </example_scenarios>
+    </tool>
+
+    <tool name="write_to_file">
+      <best_practices>
+        <practice>Create new design components following established patterns</practice>
+        <practice>Include comprehensive documentation and examples</practice>
+        <practice>Ensure responsive design and accessibility</practice>
+        <practice>Follow naming conventions and file structure</practice>
+      </best_practices>
+      <file_types>
+        <type>Component files (*.tsx, *.jsx, *.vue, *.svelte)</type>
+        <type>Style sheets (*.css, *.scss, *.module.css)</type>
+        <type>Design tokens (tokens.*, variables.*)</type>
+        <type>Documentation (*.md, *.mdx)</type>
+        <type>Story files (*.stories.*)</type>
+      </file_types>
+    </tool>
+
+    <tool name="browser">
+      <best_practices>
+        <practice>Test designs across different screen sizes</practice>
+        <practice>Validate accessibility with screen readers</practice>
+        <practice>Check color contrast and visual hierarchy</practice>
+        <practice>Test keyboard navigation and focus states</practice>
+      </best_practices>
+      <testing_scenarios>
+        <scenario>Responsive testing</scenario>
+        <steps>
+          <step>Test mobile viewport (320px - 767px)</step>
+          <step>Test tablet viewport (768px - 1023px)</step>
+          <step>Test desktop viewport (1024px+)</step>
+          <step>Test orientation changes</step>
+        </steps>
+      </testing_scenarios>
+    </tool>
+
+    <tool name="ask_followup_question">
+      <best_practices>
+        <practice>Ask about brand preferences and constraints</practice>
+        <practice>Clarify target audience and use cases</practice>
+        <practice>Confirm technical requirements and limitations</practice>
+        <practice>Validate design direction before implementation</practice>
+      </best_practices>
+      <example_questions>
+        <question>What brand colors and typography should I use for this design?</question>
+        <follow_up>
+          <suggest>Use existing brand guidelines from the project</suggest>
+          <suggest>Create a new modern color palette with blue accent</suggest>
+          <suggest>Follow Material Design or another established system</suggest>
+          <suggest>Use neutral colors with minimal accent</suggest>
+        </follow_up>
+      </example_questions>
+    </tool>
+  </tool_specific_guidance>
+
+  <design_specific_workflows>
+    <workflow name="component_creation">
+      <steps>
+        <step>Search for existing similar components</step>
+        <step>Read design system documentation</step>
+        <step>Identify required props and variants</step>
+        <step>Create component with proper styling</step>
+        <step>Add accessibility attributes</step>
+        <step>Create documentation and examples</step>
+        <step>Test across devices and browsers</step>
+      </steps>
+      <tools_used>
+        <tool>codebase_search - Find existing patterns</tool>
+        <tool>read_file - Understand constraints</tool>
+        <tool>write_to_file - Create component</tool>
+        <tool>browser - Test implementation</tool>
+      </tools_used>
+    </workflow>
+
+    <workflow name="design_system_update">
+      <steps>
+        <step>Analyze current design system</step>
+        <step>Identify areas for improvement</step>
+        <step>Plan changes with minimal breaking changes</step>
+        <step>Update design tokens and variables</step>
+        <step>Update affected components</step>
+        <step>Update documentation</step>
+        <step>Test for regressions</step>
+      </steps>
+      <tools_used>
+        <tool>read_file - Current system analysis</tool>
+        <tool>apply_diff - Incremental updates</tool>
+        <tool>write_to_file - New documentation</tool>
+        <tool>browser - Validation testing</tool>
+      </tools_used>
+    </workflow>
+  </design_specific_workflows>
+
+  <file_access_guidelines>
+    <access_pattern name="design_files">
+      <allowed_paths>
+        <path>components/**/* - UI components</path>
+        <path>styles/**/* - Style sheets and themes</path>
+        <path>assets/**/* - Images, icons, fonts</path>
+        <path>design/**/* - Design system files</path>
+        <path>stories/**/* - Storybook stories</path>
+      </allowed_paths>
+      <restricted_paths>
+        <path>server/**/* - Backend code</path>
+        <path>database/**/* - Database schemas</path>
+        <path>config/**/* - Server configuration</path>
+      </restricted_paths>
+    </access_pattern>
+  </file_access_guidelines>
+
+  <quality_assurance_tools>
+    <tool name="accessibility_testing">
+      <methods>
+        <method>Keyboard navigation testing</method>
+        <method>Screen reader compatibility</method>
+        <method>Color contrast validation</method>
+        <method>Focus management testing</method>
+        <method>ARIA attribute verification</method>
+      </methods>
+      <tools>
+        <tool>browser - Manual testing</tool>
+        <tool>command - Automated testing tools</tool>
+      </tools>
+    </tool>
+
+    <tool name="performance_testing">
+      <methods>
+        <method>Image optimization verification</method>
+        <method>Animation performance testing</method>
+        <method>Bundle size impact analysis</method>
+        <method>Rendering performance measurement</method>
+      </methods>
+      <tools>
+        <tool>browser - Performance profiling</tool>
+        <tool>command - Build analysis tools</tool>
+      </tools>
+    </tool>
+  </quality_assurance_tools>
+</tool_usage_guide>

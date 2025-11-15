@@ -1,0 +1,137 @@
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>Behavior Preservation First</name>
+      <description>Never change external behavior during refactoring. All refactoring must preserve existing functionality exactly as implemented.</description>
+      <rationale>Refactoring is about improving internal structure, not changing what the code does. Tests ensure behavior preservation.</rationale>
+      <example>
+        <scenario>When extracting a method from a long function</scenario>
+        <good>Write tests first, then extract method ensuring all existing behavior is maintained</good>
+        <bad>Extract method without tests, potentially changing return values or side effects</bad>
+      </example>
+    </principle>
+    
+    <principle priority="high">
+      <name>Small, Incremental Changes</name>
+      <description>Make refactoring changes in small, testable increments rather than large, risky transformations.</description>
+      <rationale>Small changes are easier to test, review, and roll back if issues arise. Each change should be verifiable.</rationale>
+      <example>
+        <scenario>When breaking down a large class</scenario>
+        <good>Extract one method at a time, testing after each extraction</good>
+        <bad>Completely rewrite the class in one large change</bad>
+      </example>
+    </principle>
+    
+    <principle priority="high">
+      <name>Test-Driven Refactoring</name>
+      <description>Always have comprehensive test coverage before, during, and after refactoring changes.</description>
+      <rationale>Tests provide safety net and confidence that refactoring hasn't broken anything. They also document expected behavior.</rationale>
+      <example>
+        <scenario>When refactoring complex conditional logic</scenario>
+        <good>Write characterization tests, then refactor with tests passing</good>
+        <bad>Refactor without tests, hoping behavior is preserved</bad>
+      </example>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Measure and Quantify Improvements</name>
+      <description>Use objective metrics to demonstrate refactoring value and guide decisions.</description>
+      <rationale>Quantifiable improvements help justify refactoring effort and identify successful techniques.</rationale>
+      <example>
+        <scenario>When reducing complexity</scenario>
+        <good>Measure cyclomatic complexity before and after, report percentage reduction</good>
+        <bad>Claim "improved readability" without measurable evidence</bad>
+      </example>
+    </principle>
+    
+    <principle priority="medium">
+      <name>Leave Code Cleaner Than Found</name>
+      <description>Always improve code quality beyond just fixing the immediate issue.</description>
+      <rationale>The "boy scout rule" applies - leave the code better organized and cleaner than when you started.</rationale>
+      <example>
+        <scenario>When extracting a method</scenario>
+        <good>Also improve naming, add documentation, and organize imports</good>
+        <bad>Only extract method, leaving surrounding code unchanged</bad>
+      </example>
+    </principle>
+  </general_principles>
+
+  <code_conventions>
+    <convention category="naming">
+      <rule>Use intention-revealing names</rule>
+      <description>Names should clearly express what the code does and why it exists.</description>
+      <examples>
+        <good>calculateCustomerDiscount, validateUserInput, renderPaymentSummary</good>
+        <bad>processData, handleStuff, doLogic</bad>
+      </examples>
+    </convention>
+    
+    <convention category="structure">
+      <rule>Single Responsibility Principle</rule>
+      <description>Each class, function, and module should have one reason to change.</description>
+      <examples>
+        <good>Separate validation, processing, and persistence into distinct classes</good>
+        <bad>One class that handles validation, processing, database calls, and UI rendering</bad>
+      </examples>
+    </convention>
+    
+    <convention category="complexity">
+      <rule>Keep cognitive complexity low</rule>
+      <description>Avoid deep nesting, complex conditionals, and long parameter lists.</description>
+      <examples>
+        <good>Extract complex conditions to well-named boolean functions</good>
+        <bad>Nested if-else chains more than 3 levels deep</bad>
+      </examples>
+    </convention>
+  </code_conventions>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>Refactoring without tests</description>
+      <why_problematic>High risk of breaking existing behavior and introducing subtle bugs</why_problematic>
+      <correct_approach>Always write characterization tests first, then refactor with tests passing</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Large, wholesale changes</description>
+      <why_problematic>Difficult to review, test, and roll back. High risk of introducing multiple issues</why_problematic>
+      <correct_approach>Break down into small, incremental changes that can be individually tested</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Ignoring performance impact</description>
+      <why_problematic>Some refactoring techniques can improve readability but hurt performance</why_problematic>
+      <correct_approach>Measure performance before and after refactoring, ensure no regression</correct_approach>
+    </pitfall>
+    
+    <pitfall>
+      <description>Over-engineering</description>
+      <why_problematic>Adding unnecessary abstraction or complexity in the name of "clean code"</why_problematic>
+      <correct_approach>Apply appropriate refactoring for the actual problem, don't add patterns just because they're "good practices"</correct_approach>
+    </pitfall>
+  </common_pitfalls>
+
+  <quality_checklist>
+    <category name="before_starting">
+      <item>Understand current behavior through tests</item>
+      <item>Measure baseline metrics (complexity, coupling, performance)</item>
+      <item>Identify specific code smells and improvement opportunities</item>
+      <item>Plan refactoring sequence with safety checkpoints</item>
+    </category>
+    <category name="during_refactoring">
+      <item>Write characterization tests before changing code</item>
+      <item>Make smallest possible change that addresses the issue</item>
+      <item>Run tests after each change to verify behavior</item>
+      <item>Update documentation and comments to reflect changes</item>
+      <item>Monitor metrics to confirm improvements</item>
+    </category>
+    <category name="before_completion">
+      <item>All tests pass with no regressions</item>
+      <item>Complexity metrics show measurable improvement</item>
+      <item>Performance is maintained or improved</item>
+      <item>Code follows SOLID principles and project patterns</item>
+      <item>Documentation accurately reflects new structure</item>
+      <item>Code is cleaner and more maintainable than found</item>
+    </category>
+  </quality_checklist>
+</best_practices>
