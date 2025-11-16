@@ -128,17 +128,17 @@ export function SyncStatus() {
             >
               {isSyncing
                 ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Synchronisation...
-                  </>
-                )
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Synchronisation...
+                    </>
+                  )
                 : (
-                  <>
-                    <CloudUpload className="mr-2 h-4 w-4" />
-                    Réessayer tout
-                  </>
-                )}
+                    <>
+                      <CloudUpload className="mr-2 h-4 w-4" />
+                      Réessayer tout
+                    </>
+                  )}
             </Button>
           )}
 

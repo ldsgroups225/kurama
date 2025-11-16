@@ -92,7 +92,7 @@ export function ConflictResolutionDialog() {
 
         <div className="space-y-4">
           {/* Conflict count */}
-          {conflicts.length > 1 && (
+          {conflicts.length > 1 && currentConflict && (
             <div className="text-sm text-muted-foreground">
               Conflit
               {' '}
@@ -104,21 +104,25 @@ export function ConflictResolutionDialog() {
             </div>
           )}
 
-          <div className="rounded-lg border p-4">
-            <h4 className="mb-2 font-medium">Vos modifications (locales)</h4>
-            <pre className="max-h-40 overflow-auto rounded bg-muted p-2 text-xs">
-              {String(JSON.stringify(currentConflict.localData, null, 2))}
-            </pre>
-          </div>
+          {currentConflict && (
+            <>
+              <div className="rounded-lg border p-4">
+                <h4 className="mb-2 font-medium">Vos modifications (locales)</h4>
+                <pre className="max-h-40 overflow-auto rounded bg-muted p-2 text-xs">
+                  {String(JSON.stringify(currentConflict.localData, null, 2) || 'N/A')}
+                </pre>
+              </div>
 
-          {/* Server data */}
-          {currentConflict.serverData && (
-            <div className="rounded-lg border p-4">
-              <h4 className="mb-2 font-medium">Données du serveur</h4>
-              <pre className="max-h-40 overflow-auto rounded bg-muted p-2 text-xs">
-                {String(JSON.stringify(currentConflict.serverData, null, 2))}
-              </pre>
-            </div>
+              {/* Server data */}
+              {currentConflict.serverData && (
+                <div className="rounded-lg border p-4">
+                  <h4 className="mb-2 font-medium">Données du serveur</h4>
+                  <pre className="max-h-40 overflow-auto rounded bg-muted p-2 text-xs">
+                    {String(JSON.stringify(currentConflict.serverData, null, 2) || 'N/A')}
+                  </pre>
+                </div>
+              )}
+            </>
           )}
         </div>
 

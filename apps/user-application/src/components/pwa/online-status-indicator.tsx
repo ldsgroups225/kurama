@@ -24,21 +24,27 @@ export function OnlineStatusIndicator() {
 
   return (
     <div className="flex items-center gap-2 text-sm">
-      {isOnline ? (
-        <>
-          <Wifi className="h-4 w-4 text-success" />
-          <span className="text-success">
-            En ligne {isChecking && '(vérification...)'}
-          </span>
-        </>
-      ) : (
-        <>
-          <WifiOff className="h-4 w-4 text-error" />
-          <span className="text-error">
-            Hors ligne {offlineDuration > 0 && `depuis ${formatDuration(offlineDuration)}`}
-          </span>
-        </>
-      )}
+      {isOnline
+        ? (
+            <>
+              <Wifi className="h-4 w-4 text-success" />
+              <span className="text-success">
+                En ligne
+                {' '}
+                {isChecking && '(vérification...)'}
+              </span>
+            </>
+          )
+        : (
+            <>
+              <WifiOff className="h-4 w-4 text-error" />
+              <span className="text-error">
+                Hors ligne
+                {' '}
+                {offlineDuration > 0 && `depuis ${formatDuration(offlineDuration)}`}
+              </span>
+            </>
+          )}
     </div>
   )
 }

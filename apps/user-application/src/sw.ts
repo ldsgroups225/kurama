@@ -1,4 +1,5 @@
 /// <reference lib="webworker" />
+/* eslint-disable no-console */
 
 import type { ManifestEntry } from 'workbox-build'
 import { clientsClaim } from 'workbox-core'
@@ -268,7 +269,8 @@ self.addEventListener('sync', (event: Event) => {
               messageChannel.port1.onmessage = (event) => {
                 if (event.data.success) {
                   console.log('[SW] Mutation sync completed successfully')
-                } else {
+                }
+                else {
                   console.error('[SW] Mutation sync failed:', event.data.error)
                 }
                 resolve()
@@ -292,7 +294,8 @@ self.addEventListener('sync', (event: Event) => {
 
           await Promise.all(promises)
           console.log('[SW] Background sync completed')
-        } catch (error) {
+        }
+        catch (error) {
           console.error('[SW] Background sync error:', error)
           // Re-throw to trigger retry
           throw error

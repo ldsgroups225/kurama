@@ -27,7 +27,8 @@ export function createDexiePersister(): Persister {
           staleTime: 24 * 60 * 60 * 1000, // 24 hours
           pinned: false,
         })
-      } catch (error) {
+      }
+      catch (error) {
         console.error('Failed to persist query cache:', error)
         // Don't throw - allow app to continue without persistence
       }
@@ -55,7 +56,8 @@ export function createDexiePersister(): Persister {
         }
 
         return cached.value as PersistedClient
-      } catch (error) {
+      }
+      catch (error) {
         console.error('Failed to restore query cache:', error)
         return undefined
       }
@@ -69,7 +71,8 @@ export function createDexiePersister(): Persister {
 
       try {
         await db.queryCache.delete(key)
-      } catch (error) {
+      }
+      catch (error) {
         console.error('Failed to remove query cache:', error)
         // Don't throw - allow app to continue
       }
@@ -85,7 +88,8 @@ export async function getQueryCacheSize(): Promise<number> {
     const entries = await db.queryCache.toArray()
     const jsonString = JSON.stringify(entries)
     return new Blob([jsonString]).size
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to calculate query cache size:', error)
     return 0
   }
@@ -100,14 +104,15 @@ export async function clearOldQueryCache(daysOld: number = 7): Promise<number> {
     const oldEntries = await db.queryCache
       .where('timestamp')
       .below(cutoffTime)
-      .and((entry) => !entry.pinned) // Don't delete pinned entries
+      .and(entry => !entry.pinned) // Don't delete pinned entries
       .toArray()
 
-    const keys = oldEntries.map((entry) => entry.key)
+    const keys = oldEntries.map(entry => entry.key)
     await db.queryCache.bulkDelete(keys)
 
     return keys.length
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to clear old query cache:', error)
     return 0
   }
@@ -119,7 +124,8 @@ export async function clearOldQueryCache(daysOld: number = 7): Promise<number> {
 export async function pinQueryCache(key: string): Promise<void> {
   try {
     await db.queryCache.update(key, { pinned: true })
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to pin query cache:', error)
   }
 }
@@ -130,7 +136,8 @@ export async function pinQueryCache(key: string): Promise<void> {
 export async function unpinQueryCache(key: string): Promise<void> {
   try {
     await db.queryCache.update(key, { pinned: false })
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to unpin query cache:', error)
   }
 }

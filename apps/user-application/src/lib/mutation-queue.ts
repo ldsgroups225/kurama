@@ -134,6 +134,7 @@ export class MutationQueueManagerImpl implements MutationQueueManager {
         const syncManager = (registration as any).sync
         if (syncManager) {
           await syncManager.register('sync-mutations')
+          // eslint-disable-next-line no-console
           console.log('[MutationQueue] Background sync registered')
         }
         else {
@@ -163,6 +164,7 @@ export class MutationQueueManagerImpl implements MutationQueueManager {
     }
 
     const handleOnline = () => {
+      // eslint-disable-next-line no-console
       console.log('[MutationQueue] Online event detected, processing queue')
       this.processQueue().catch((error) => {
         console.error('[MutationQueue] Failed to process queue on online event:', error)
@@ -170,7 +172,8 @@ export class MutationQueueManagerImpl implements MutationQueueManager {
     }
 
     window.addEventListener('online', handleOnline)
-      ; (window as any).__mutationQueueOnlineListenerSetup = true
+    ; (window as any).__mutationQueueOnlineListenerSetup = true
+    // eslint-disable-next-line no-console
     console.log('[MutationQueue] Online event fallback setup complete')
   }
 

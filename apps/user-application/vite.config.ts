@@ -33,7 +33,7 @@ const config = defineConfig({
       gzipSize: true,
       brotliSize: true,
       template: 'treemap', // sunburst, treemap, network
-    }),
+    }) as any,
     // PWA configuration
     VitePWA({
       registerType: 'autoUpdate',

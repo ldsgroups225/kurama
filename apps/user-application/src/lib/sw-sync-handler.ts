@@ -4,6 +4,7 @@ import { getMutationQueueManager } from './mutation-queue'
  * Setup service worker message handler for background sync
  * Listens for SYNC_MUTATIONS messages from the service worker
  */
+/* eslint-disable no-console */
 export function setupServiceWorkerSyncHandler(): void {
   if (!('serviceWorker' in navigator)) {
     console.warn('[SW Sync] Service Worker not supported')
@@ -28,7 +29,8 @@ export function setupServiceWorkerSyncHandler(): void {
         }
 
         console.log('[SW Sync] Mutation queue processed successfully')
-      } catch (error) {
+      }
+      catch (error) {
         console.error('[SW Sync] Failed to process mutation queue:', error)
 
         // Send error response back to service worker

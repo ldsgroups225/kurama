@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
 import { RefreshCw, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -16,45 +16,65 @@ export function UpdatePrompt() {
       return
     }
 
+    let updateInterval: NodeJS.Timeout | null = null
+
     const checkForUpdates = async () => {
       const registration = await navigator.serviceWorker.ready
 
       // Check for updates every hour
-      setInterval(() => {
+      updateInterval = setInterval(() => {
         registration.update()
       }, 60 * 60 * 1000)
 
       // Listen for new service worker
-      registration.addEventListener('updatefound', () => {
+      const handleUpdateFound = () => {
         const newWorker = registration.installing
 
         if (!newWorker) {
           return
         }
 
-        newWorker.addEventListener('statechange', () => {
+        const handleStateChange = () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
             // New service worker is installed and waiting
             setWaitingWorker(newWorker)
             setShowPrompt(true)
           }
-        })
-      })
+        }
+
+        newWorker.addEventListener('statechange', handleStateChange)
+      }
+
+      registration.addEventListener('updatefound', handleUpdateFound)
 
       // Check if there's already a waiting worker
       if (registration.waiting) {
         setWaitingWorker(registration.waiting)
         setShowPrompt(true)
       }
+
+      return () => {
+        if (updateInterval) {
+          clearInterval(updateInterval)
+        }
+        registration.removeEventListener('updatefound', handleUpdateFound)
+      }
     }
 
-    checkForUpdates()
-
     // Listen for controller change (when new SW takes over)
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
+    const handleControllerChange = () => {
       // Reload the page to use the new service worker
       window.location.reload()
-    })
+    }
+
+    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange)
+
+    const cleanupPromise = checkForUpdates()
+
+    return () => {
+      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange)
+      cleanupPromise.then(cleanup => cleanup?.())
+    }
   }, [])
 
   const handleUpdate = () => {
