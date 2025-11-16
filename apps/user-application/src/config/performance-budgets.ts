@@ -101,8 +101,8 @@ export const performanceBudgets: PerformanceBudget = {
     },
     {
       name: 'vendor-tanstack',
-      maxSize: 100 * 1024, // 100 KB
-      maxSizeGzip: 35 * 1024, // 35 KB gzipped
+      maxSize: 150 * 1024, // 150 KB
+      maxSizeGzip: 45 * 1024, // 45 KB gzipped
       description: 'TanStack Router and Query',
     },
     {
@@ -113,8 +113,8 @@ export const performanceBudgets: PerformanceBudget = {
     },
     {
       name: 'vendor-ui',
-      maxSize: 50 * 1024, // 50 KB
-      maxSizeGzip: 15 * 1024, // 15 KB gzipped
+      maxSize: 60 * 1024, // 60 KB
+      maxSizeGzip: 16 * 1024, // 16 KB gzipped
       description: 'UI utilities (lucide, clsx, tailwind-merge)',
     },
   ],

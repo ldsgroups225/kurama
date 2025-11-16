@@ -88,9 +88,7 @@ deploy:frontend:production:
   script:
     - cd apps/user-application
     - pnpm run build
-    - export CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID
-    - export CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN
-    - npx wrangler pages deploy dist/client --project-name=kurama
+    - CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN npx wrangler pages deploy dist/client --project-name=kurama
   environment:
     name: production/frontend
     url: https://kurama.app
@@ -126,9 +124,7 @@ deploy:frontend:preview:
   script:
     - cd apps/user-application
     - pnpm run build
-    - export CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID
-    - export CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN
-    - npx wrangler pages deploy dist/client --project-name=kurama --branch=preview-$CI_MERGE_REQUEST_IID
+    - CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN npx wrangler pages deploy dist/client --project-name=kurama --branch=preview-$CI_MERGE_REQUEST_IID
   environment:
     name: preview/frontend-$CI_MERGE_REQUEST_IID
     url: https://preview-$CI_MERGE_REQUEST_IID.kurama.pages.dev
