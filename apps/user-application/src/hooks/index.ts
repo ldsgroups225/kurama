@@ -1,6 +1,8 @@
 export { useAutoplay } from './use-autoplay'
 export { useCardHeight } from './use-card-height'
 export { useCardSwipeAnimations } from './use-card-swipe-animations'
+export { useOnlineStatus } from './use-online-status'
+export type { OnlineStatus } from './use-online-status'
 export { useSessionState } from './use-session-state'
 export type { CardOrientation, SessionStats } from './use-session-state'
 export { createSwipeHandlers } from './use-swipe-handler'

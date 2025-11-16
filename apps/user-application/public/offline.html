@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hors ligne - Kurama</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+
+    .icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+      }
+    }
+
+    .icon svg {
+      width: 60px;
+      height: 60px;
+      stroke: white;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 16px;
+      color: #1a202c;
+    }
+
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #4a5568;
+      margin-bottom: 24px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: #fed7d7;
+      color: #c53030;
+      border-radius: 12px;
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+
+    .status.online {
+      background: #c6f6d5;
+      color: #2f855a;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    .button {
+      display: inline-block;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: none;
+      cursor: pointer;
+      margin: 8px;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .button:active {
+      transform: translateY(0);
+    }
+
+    .button.secondary {
+      background: #e2e8f0;
+      color: #2d3748;
+    }
+
+    .button.secondary:hover {
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .cached-routes {
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .cached-routes h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: #2d3748;
+    }
+
+    .route-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .route-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: #f7fafc;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #4a5568;
+      transition: background 0.2s;
+    }
+
+    .route-item:hover {
+      background: #edf2f7;
+    }
+
+    .route-icon {
+      width: 20px;
+      height: 20px;
+      stroke: #667eea;
+    }
+
+    .last-sync {
+      margin-top: 24px;
+      font-size: 14px;
+      color: #718096;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .icon {
+        width: 100px;
+        height: 100px;
+      }
+
+      .icon svg {
+        width: 50px;
+        height: 50px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M1 1h15M1 7h15M1 13h15"></path>
+        <path d="M16 17l2 2 4-4"></path>
+      </svg>
+    </div>
+
+    <h1>Vous êtes hors ligne</h1>
+
+    <div class="status" id="status">
+      <span class="status-dot"></span>
+      <span id="status-text">Aucune connexion Internet</span>
+    </div>
+
+    <p>
+      Pas de souci ! Vous pouvez toujours accéder aux contenus que vous avez consultés récemment.
+    </p>
+
+    <div>
+      <button class="button" onclick="window.location.reload()">
+        Réessayer
+      </button>
+      <a href="/" class="button secondary">
+        Retour à l'accueil
+      </a>
+    </div>
+
+    <div class="cached-routes" id="cached-routes">
+      <h2>Contenus disponibles hors ligne</h2>
+      <div class="route-list">
+        <a href="/app" class="route-item">
+          <svg class="route-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Tableau de bord</span>
+        </a>
+        <a href="/app/subjects" class="route-item">
+          <svg class="route-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
+          <span>Mes sujets</span>
+        </a>
+        <a href="/app/progress" class="route-item">
+          <svg class="route-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="20" x2="12" y2="10"></line>
+            <line x1="18" y1="20" x2="18" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="16"></line>
+          </svg>
+          <span>Ma progression</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="last-sync" id="last-sync">
+      Dernière synchronisation : <span id="sync-time">Inconnue</span>
+    </div>
+  </div>
+
+  <script>
+    // Check online status
+    function updateStatus() {
+      const status = document.getElementById('status');
+      const statusText = document.getElementById('status-text');
+
+      if (navigator.onLine) {
+        status.classList.add('online');
+        statusText.textContent = 'Connexion rétablie';
+
+        // Auto-reload after 2 seconds when back online
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        status.classList.remove('online');
+        statusText.textContent = 'Aucune connexion Internet';
+      }
+    }
+
+    // Listen for online/offline events
+    window.addEventListener('online', updateStatus);
+    window.addEventListener('offline', updateStatus);
+
+    // Initial status check
+    updateStatus();
+
+    // Get last sync time from localStorage
+    try {
+      const lastSync = localStorage.getItem('lastSyncTime');
+      if (lastSync) {
+        const syncDate = new Date(parseInt(lastSync));
+        const now = new Date();
+        const diffMinutes = Math.floor((now - syncDate) / 1000 / 60);
+
+        let timeText;
+        if (diffMinutes < 1) {
+          timeText = 'À l\'instant';
+        } else if (diffMinutes < 60) {
+          timeText = `Il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`;
+        } else if (diffMinutes < 1440) {
+          const hours = Math.floor(diffMinutes / 60);
+          timeText = `Il y a ${hours} heure${hours > 1 ? 's' : ''}`;
+        } else {
+          const days = Math.floor(diffMinutes / 1440);
+          timeText = `Il y a ${days} jour${days > 1 ? 's' : ''}`;
+        }
+
+        document.getElementById('sync-time').textContent = timeText;
+      }
+    } catch (e) {
+      console.error('Error reading last sync time:', e);
+    }
+
+    // Periodic connectivity check
+    setInterval(() => {
+      fetch('/api/health', { method: 'HEAD', cache: 'no-store' })
+        .then(() => {
+          if (!navigator.onLine) {
+            // Browser thinks we're offline but we can reach the server
+            window.location.reload();
+          }
+        })
+        .catch(() => {
+          // Still offline
+        });
+    }, 5000);
+  </script>
+</body>
+
+</html>

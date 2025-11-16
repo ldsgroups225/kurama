@@ -10,6 +10,8 @@ export interface QueryCacheEntry {
   timestamp: number // When cached (ms)
   staleTime: number // How long until stale (ms)
   pinned: boolean // Prevent eviction
+  isOptimistic?: boolean // Flag for optimistic updates
+  mutationId?: string // Associated mutation ID for optimistic data
 }
 
 /**
