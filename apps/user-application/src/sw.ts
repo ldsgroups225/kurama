@@ -2,7 +2,15 @@
 
 import type { ManifestEntry } from 'workbox-build'
 import { clientsClaim } from 'workbox-core'
+import { ExpirationPlugin } from 'workbox-expiration'
 import { precacheAndRoute } from 'workbox-precaching'
+import { registerRoute, setCatchHandler, setDefaultHandler } from 'workbox-routing'
+import {
+  CacheFirst,
+  NetworkFirst,
+  NetworkOnly,
+  StaleWhileRevalidate,
+} from 'workbox-strategies'
 
 // Declare service worker scope with Workbox types
 declare let self: ServiceWorkerGlobalScope & {
@@ -68,72 +76,134 @@ self.addEventListener('activate', (event) => {
 })
 
 /**
- * Service Worker Fetch Handler
- * Intercepts all network requests
+ * Workbox Caching Strategies
+ * Configure different caching strategies for different asset types
  */
-self.addEventListener('fetch', (event) => {
-  const { request } = event
-  const url = new URL(request.url)
 
-  // Skip cross-origin requests
-  if (url.origin !== self.location.origin) {
-    return
+// Cache names
+const CACHE_NAMES = {
+  STATIC: 'kurama-static-v1',
+  IMAGES: 'kurama-images-v1',
+  FONTS: 'kurama-fonts-v1',
+  API: 'kurama-api-v1',
+  RUNTIME: 'kurama-runtime-v1',
+}
+
+// 1. Cache JavaScript and CSS files with StaleWhileRevalidate
+// Serves cached version immediately while fetching update in background
+registerRoute(
+  ({ request }) => request.destination === 'script' || request.destination === 'style',
+  new StaleWhileRevalidate({
+    cacheName: CACHE_NAMES.STATIC,
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 60,
+        maxAgeSeconds: 60 * 60 * 24 * 90, // 90 days
+        purgeOnQuotaError: true,
+      }),
+    ],
+  }),
+)
+
+// 2. Cache images with CacheFirst strategy
+// Serves from cache if available, otherwise fetches and caches
+registerRoute(
+  ({ request }) => request.destination === 'image',
+  new CacheFirst({
+    cacheName: CACHE_NAMES.IMAGES,
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+        purgeOnQuotaError: true,
+      }),
+    ],
+  }),
+)
+
+// 3. Cache fonts with CacheFirst strategy (fonts rarely change)
+registerRoute(
+  ({ request }) => request.destination === 'font',
+  new CacheFirst({
+    cacheName: CACHE_NAMES.FONTS,
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 10,
+        maxAgeSeconds: 60 * 60 * 24 * 365, // 365 days
+        purgeOnQuotaError: true,
+      }),
+    ],
+  }),
+)
+
+// 4. Cache Google Fonts stylesheets with StaleWhileRevalidate
+registerRoute(
+  ({ url }) => url.origin === 'https://fonts.googleapis.com',
+  new StaleWhileRevalidate({
+    cacheName: 'google-fonts-stylesheets',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 10,
+        maxAgeSeconds: 60 * 60 * 24 * 365, // 365 days
+      }),
+    ],
+  }),
+)
+
+// 5. Cache Google Fonts files with CacheFirst
+registerRoute(
+  ({ url }) => url.origin === 'https://fonts.gstatic.com',
+  new CacheFirst({
+    cacheName: 'google-fonts-webfonts',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 10,
+        maxAgeSeconds: 60 * 60 * 24 * 365, // 365 days
+      }),
+    ],
+  }),
+)
+
+// 6. Cache API calls with NetworkFirst strategy
+// Tries network first, falls back to cache if offline
+registerRoute(
+  ({ url }) => url.pathname.startsWith('/api/'),
+  new NetworkFirst({
+    cacheName: CACHE_NAMES.API,
+    networkTimeoutSeconds: 3, // Fallback to cache after 3 seconds
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 60 * 60, // 1 hour
+        purgeOnQuotaError: true,
+      }),
+    ],
+  }),
+)
+
+// 7. Default handler for other requests - NetworkOnly
+setDefaultHandler(new NetworkOnly())
+
+// 8. Catch handler for failed requests
+// Provides offline fallback for navigation requests
+setCatchHandler(async ({ request }) => {
+  // Return offline page for navigation requests
+  if (request.mode === 'navigate') {
+    const response = await caches.match('/offline.html')
+    return (
+      response
+      || new Response('Offline - No cached content available', {
+        status: 503,
+        statusText: 'Service Unavailable',
+        headers: new Headers({
+          'Content-Type': 'text/plain',
+        }),
+      })
+    )
   }
 
-  // Let Workbox handle precached assets
-  // For other requests, use network-first strategy
-  event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Return cached response and update cache in background
-        fetch(request)
-          .then((response) => {
-            if (response && response.status === 200) {
-              const responseToCache = response.clone()
-              caches.open('kurama-runtime').then((cache) => {
-                cache.put(request, responseToCache)
-              })
-            }
-          })
-          .catch(() => {
-            // Network request failed, but we have cache
-          })
-        return cachedResponse
-      }
-
-      // No cache, fetch from network
-      return fetch(request)
-        .then((response) => {
-          // Cache successful responses
-          if (response && response.status === 200) {
-            const responseToCache = response.clone()
-            caches.open('kurama-runtime').then((cache) => {
-              cache.put(request, responseToCache)
-            })
-          }
-          return response
-        })
-        .catch(() => {
-          // Network request failed and no cache
-          // Return offline page for navigation requests
-          if (request.mode === 'navigate') {
-            return caches.match('/offline.html').then((offlineResponse) => {
-              return (
-                offlineResponse
-                || new Response('Offline - No cached content available', {
-                  status: 503,
-                  statusText: 'Service Unavailable',
-                  headers: new Headers({
-                    'Content-Type': 'text/plain',
-                  }),
-                })
-              )
-            })
-          }
-          throw new Error('Network request failed and no cache available')
-        })
-    }),
-  )
+  // For other requests, return a generic error
+  return Response.error()
 })
 
 /**
