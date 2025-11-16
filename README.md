@@ -1,181 +1,221 @@
+# Kurama
+
 <div align="center">
-  <img src="assets/images/logo.png" alt="Kurama Logo" width="120" />
-  <h1>Kurama</h1>
-  <p><strong>Préparez votre BEPC/BAC avec la répétition espacée.</strong></p>
-  <p>The ultimate web-based study platform for students in Côte d'Ivoire, built with TanStack Start, Drizzle ORM + PostgreSQL, and Tailwind CSS.</p>
+
+![Kurama Logo](public/logo512.png)
+
+**Plateforme d'étude intelligente pour les étudiants préparant BEPC/BAC en Côte d'Ivoire**
+
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?style=flat&logo=cloudflare)](https://workers.cloudflare.com/)
+[![TanStack Start](https://img.shields.io/badge/TanStack-Start-FFEF15?style=flat&logo=react)](https://tanstack.com/start)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+
+[Live Demo](https://kurama.yeko.workers.dev) · [Documentation](#documentation) · [Report Bug](https://github.com/yourusername/kurama/issues) · [Request Feature](https://github.com/yourusername/kurama/issues)
+
 </div>
 
-A monorepo SaaS application designed as an offline-first Progressive Web Application for students preparing for their BEPC (Brevet d'Études du Premier Cycle) and BAC (Baccalauréat) examinations in Côte d'Ivoire.
+## 📖 Description
 
-## 🚀 Key Features
+Kurama est une plateforme éducative innovante conçue pour aider les étudiants ivoiriens à préparer efficacement leurs examens du BEPC et du BAC. Notre approche combine la répétition espacée, la gamification et un contenu pédagogique aligné sur le programme du ministère de l'Éducation nationale.
 
-### 🎓 Educational Excellence
-- **Ministry-Aligned Content**: Pre-populated study sets for BEPC and BAC aligned with the official Côte d'Ivoire Ministry of Education programs
-- **Comprehensive Subject Coverage**: Mathematics, Sciences, Languages, History, Geography, and more
-- **Regular Content Updates**: New materials added based on curriculum changes
+### 🎯 Objectifs Principaux
 
-### 🧠 Smart Learning
-- **Spaced Repetition (SM-2)**: Scientifically proven algorithm that shows you cards right before you forget them
-- **Adaptive Difficulty**: System adjusts based on your performance
-- **Learning Analytics**: Track your progress with detailed statistics and insights
+- **Apprentissage Intelligent**: Utilisation de l'algorithme SM-2 de répétition espacée pour optimiser la mémorisation
+- **Gamification**: Système de XP, niveaux, achievements et streaks pour motiver les étudiants
+- **Accessibilité**: Application PWA (Progressive Web App) fonctionnant hors ligne
+- **Contenu de Qualité**: Matériel pédagogique aligné sur les programmes officiels ivoiriens
 
-### 📱 Study Modes
-- **Flashcards**: Classic card-flipping for active recall
-- **Quizzes**: Multiple-choice questions with instant feedback
-- **Timed Matching**: Race against the clock to match terms
-- **Exam Simulator**: Full-length practice exams that mirror real test conditions
+## ✨ Fonctionnalités Clés
 
-### 👥 Social Learning
-- **Study Groups**: Create or join collaborative study groups
-- **Shared Sets**: Share and discover study materials from peers
-- **Leaderboards**: Compete with friends and classmates
-- **Progress Sharing**: Celebrate achievements together
+### 🎓 Pédagogie
+- **Répétition Espacée**: Algorithme SM-2 pour optimiser les révisions
+- **Flashcards Interactives**: Contenu varié avec différents types de cartes
+- **Leçons Structurées**: Organisation par matières, niveaux et séries
+- **Suivi de Progrès**: Statistiques détaillées sur l'apprentissage
 
-### 💪 Technical Excellence
-- **Offline-First PWA**: Study anywhere, anytime - your progress syncs automatically when online
-- **Cross-Platform**: Works seamlessly on desktop, mobile, and tablet
-- **Fast & Responsive**: Optimized for smooth performance even on slower connections
+### 🎮 Gamification
+- **Système de XP**: Points d'expérience pour chaque activité
+- **Niveaux et Badges**: Récompenses pour les accomplissements
+- **Streaks**: Bonus pour l'apprentissage régulier
+- **Classements**: Comparaison avec d'autres étudiants (optionnel)
 
-## 🛠️ Tech Stack
+### 📱 Expérience Utilisateur
+- **Interface Responsive**: Adaptée à tous les appareils
+- **Mode Hors Ligne**: Accès au contenu sans connexion internet
+- **Thème Sombre/Clair**: Adaptation aux préférences utilisateur
+- **Performance Optimisée**: Chargement rapide et navigation fluide
 
-**Frontend (user-application)**:
-- TanStack Start - Full-stack React framework with file-based routing
-- React 19 with TypeScript
-- TanStack Router & Query with SSR integration
-- Tailwind CSS v4 with Shadcn components
-- Better Auth for authentication
-- Vite for build tooling
+### 🔐 Authentification et Sécurité
+- **Email OTP**: Authentification par code à usage unique
+- **Google OAuth**: Connexion via compte Google
+- **Profils Utilisateurs**: Personnalisation de l'expérience
+- **Données Sécurisées**: Protection des informations personnelles
 
-**Backend (data-service)**:
-- Hono web framework for Cloudflare Workers
-- TypeScript
-- Shared data-ops package for database operations
+### 💰 Monétisation
+- **Abonnements Premium**: Accès à du contenu avancé via Polar SDK
+- **Essai Gratuit**: Période d'essai pour découvrir les fonctionnalités premium
+- **Paiements Sécurisés**: Intégration avec des solutions de paiement reconnues
 
-**Shared (data-ops)**:
-- Drizzle ORM with PostgreSQL
-- Better Auth integration
-- Zod for schema validation
-- Multiple database adapters (Neon, Planetscale, SQLite)
+## 🏗️ Architecture Technique
 
-## 📋 Setup
-
-### Prerequisites
-- Node.js 18+
-- pnpm (recommended) or npm
-- PostgreSQL database (or use managed service like Neon)
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/your-org/kurama.git
-cd kurama
-
-# Install dependencies and build required packages
-pnpm run setup
-```
-
-### Environment Configuration
-
-Create your environment file:
-
-```bash
-cp .env.example .env.local
-```
-
-Configure the following variables in `.env.local`:
-
-```env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/kurama"
-
-# Authentication (Better Auth)
-BETTER_AUTH_SECRET="your-secret-key-here"
-BETTER_AUTH_URL="http://localhost:3000"
-
-# App Configuration
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-NEXT_PUBLIC_APP_NAME="Kurama"
-```
-
-## 💻 Development
-
-### User Application
-```bash
-pnpm run dev:user-application
-```
-Starts the frontend development server on port 3000.
-
-### Data Service
-```bash
-pnpm run dev:data-service
-```
-Starts the backend API service with Cloudflare Workers.
-
-### Data Ops Development
-```bash
-# Build the data-ops package
-pnpm run --filter @kurama/data-ops build
-
-# Generate database migrations
-pnpm run --filter @kurama/data-ops drizzle:generate
-
-# Run database migrations
-pnpm run --filter @kurama/data-ops drizzle:migrate
-
-# Generate auth schema
-pnpm run --filter @kurama/data-ops better-auth:generate
-```
-
-## 🚀 Deployment
-
-### User Application (Cloudflare Pages)
-```bash
-pnpm run deploy:user-application
-```
-
-### Data Service (Cloudflare Workers)
-```bash
-pnpm run deploy:data-service
-```
-
-## 🏗️ Project Structure
+Kurama est construit comme une application monorepo avec une architecture moderne et évolutive :
 
 ```
 kurama/
 ├── apps/
-│   ├── user-application/     # TanStack Start frontend
-│   └── data-service/         # Hono API backend
-├── packages/
-│   └── data-ops/            # Shared utilities (auth, database, schemas)
-└── docs/                    # Documentation
+│   ├── user-application/     # Frontend TanStack Start
+│   └── data-service/         # Backend API Hono
+└── packages/
+    └── data-ops/             # Utilitaires partagés
 ```
 
-## 🤝 Contributing
+### 📦 Composants
 
-We love contributions! Here's how you can help:
+#### Frontend (`apps/user-application`)
+- **Framework**: TanStack Start (React 19)
+- **Styling**: Tailwind CSS v4 avec Shadcn/UI
+- **State Management**: TanStack Query avec persistance
+- **Authentification**: Better Auth
+- **PWA**: Service Worker avec Workbox
+- **Déploiement**: Cloudflare Workers
 
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feat/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'feat: add amazing feature'`)
-4. **Push** to the branch (`git push origin feat/amazing-feature`)
-5. **Open** a Pull Request
+#### Backend (`apps/data-service`)
+- **Framework**: Hono sur Cloudflare Workers
+- **Base de Données**: PostgreSQL avec Drizzle ORM
+- **Validation**: Zod schemas
+- **Déploiement**: Cloudflare Workers
 
-## 📄 License
+#### Package Partagé (`packages/data-ops`)
+- **Authentification**: Configuration Better Auth
+- **Base de Données**: Schémas Drizzle et migrations
+- **Validation**: Schémas Zod partagés
+- **Utilitaires**: Fonctions communes
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+## 🚀 Démarrage Rapide
+
+### Prérequis
+
+- Node.js 18+ et pnpm
+- Un compte Cloudflare
+- Une base de données PostgreSQL
+
+### Installation
+
+```bash
+# Cloner le repository
+git clone https://github.com/yourusername/kurama.git
+cd kurama
+
+# Installer les dépendances
+pnpm install
+
+# Construire le package partagé
+pnpm run build:data-ops
+```
+
+### Développement Local
+
+```bash
+# Démarrer le frontend
+pnpm run dev:kurama-frontend
+
+# Démarrer le backend
+pnpm run dev:kurama-backend
+```
+
+### Variables d'Environnement
+
+Créez les fichiers `.env` nécessaires :
+
+```bash
+# Pour le frontend
+cp apps/user-application/.env.example apps/user-application/.env
+
+# Pour le backend
+cp apps/data-service/.env.example apps/data-service/.env
+```
+
+Configurez les variables requises :
+- `DATABASE_HOST`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`
+- `BETTER_AUTH_SECRET`
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+- `POLAR_ACCESS_TOKEN` (optionnel)
+
+## 📚 Documentation
+
+- [Architecture du Système](docs/ARCHITECTURE.md) - Vue d'ensemble technique
+- [Guide de Développement](docs/DEVELOPMENT.md) - Configuration de l'environnement de développement
+- [Documentation API](docs/API.md) - Référence de l'API backend
+- [Guide de Déploiement](docs/DEPLOYMENT.md) - Instructions de mise en production
+- [Guide de Contribution](docs/CONTRIBUTING.md) - Comment contribuer au projet
+
+## 🛠️ Stack Technique
+
+### Frontend
+- **Framework**: [TanStack Start](https://tanstack.com/start) (React 19)
+- **Routing**: [TanStack Router](https://tanstack.com/router)
+- **State Management**: [TanStack Query](https://tanstack.com/query)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **UI Components**: [Shadcn/UI](https://ui.shadcn.com/)
+- **Authentification**: [Better Auth](https://better-auth.com/)
+- **PWA**: [Workbox](https://developer.chrome.com/docs/workbox/)
+
+### Backend
+- **Runtime**: [Cloudflare Workers](https://workers.cloudflare.com/)
+- **Framework**: [Hono](https://hono.dev/)
+- **Base de Données**: [PostgreSQL](https://www.postgresql.org/)
+- **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
+- **Validation**: [Zod](https://zod.dev/)
+
+### Développement
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Package Manager**: [pnpm](https://pnpm.io/)
+- **Testing**: [Vitest](https://vitest.dev/)
+- **Linting**: [ESLint](https://eslint.org/)
+
+### Déploiement
+- **Platform**: [Cloudflare Workers](https://workers.cloudflare.com/)
+- **CLI**: [Wrangler](https://developers.cloudflare.com/workers/wrangler/)
+- **CI/CD**: GitHub Actions
+
+## 🌍 Déploiement en Production
+
+- **Frontend**: https://kurama.yeko.workers.dev
+- **Backend**: https://back-kurama.yeko.workers.dev
+
+## 🤝 Contribuer
+
+Les contributions sont les bienvenues ! Merci de lire notre [Guide de Contribution](docs/CONTRIBUTING.md) pour connaître les procédures.
+
+### Étapes pour Contribuer
+
+1. Fork le projet
+2. Créer une branche (`git checkout -b feature/AmazingFeature`)
+3. Committer vos changements (`git commit -m 'Add some AmazingFeature'`)
+4. Pusher vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrir une Pull Request
+
+## 📄 Licence
+
+Ce projet est sous licence ISC - voir le fichier [LICENSE](LICENSE) pour les détails.
+
+## 🙏 Remerciements
+
+- Au ministère de l'Éducation nationale de Côte d'Ivoire pour les programmes officiels
+- À la communauté open source pour les outils incroyables utilisés
+- À tous les testeurs bêta pour leurs retours précieux
+
+## 📞 Contact
+
+- **Site Web**: https://kurama.yeko.workers.dev
+- **Email**: contact@kurama.ci
+- **Twitter**: [@kurama_ci](https://twitter.com/kurama_ci)
 
 ---
 
 <div align="center">
-  <p>Built with ❤️ for students in Côte d'Ivoire</p>
-  <p>
-    <a href="https://kurama.app">Website</a> •
-    <a href="https://docs.kurama.app">Documentation</a> •
-    <a href="https://twitter.com/kurama">Twitter</a> •
-    <a href="https://discord.gg/kurama">Discord</a>
-  </p>
-  <p>
-    <sub>Star ⭐ the repo if you find it useful!</sub>
-  </p>
+
+Made with ❤️ in Côte d'Ivoire
+
 </div>

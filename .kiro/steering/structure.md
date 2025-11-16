@@ -17,96 +17,128 @@
 ```
 src/
 ├── components/
-│   ├── auth/              # Authentication components
-│   ├── demo/              # Demo/example components
-│   ├── gamification/      # Gamification system components
-│   │   ├── achievement-badge.tsx
-│   │   ├── achievement-showcase.tsx
-│   │   ├── gamification-summary.tsx
-│   │   ├── leaderboard-widget.tsx
-│   │   ├── level-badge.tsx
-│   │   ├── reward-animation.tsx
-│   │   └── streak-calendar.tsx
+│   ├── auth/              # Authentication (email OTP, Google OAuth)
+│   ├── gamification/      # XP, levels, achievements, streaks, leaderboards
+│   ├── learning/          # Flashcards, quiz, exam modes
+│   ├── onboarding/        # Student/parent profile setup
+│   ├── payments/polar/    # Polar SDK integration
+│   ├── pwa/               # Offline, sync, install prompts
 │   ├── landing/           # Landing page sections
-│   ├── navigation/        # Nav bar, menus
-│   ├── onboarding/        # User profile setup
-│   │   ├── onboarding-screen.tsx
-│   │   ├── parent-profile-form.tsx
-│   │   └── student-profile-form.tsx
-│   ├── payments/polar/    # Polar payment integration
-│   ├── theme/             # Theme provider and toggle
-│   └── ui/                # shadcn/ui components
+│   ├── layout/            # Header, sidebar
+│   ├── main/              # Dashboard components
+│   ├── navigation/        # Navigation bar
+│   ├── theme/             # Theme provider, toggle
+│   ├── ui/                # shadcn/ui components
+│   └── skeletons/         # Loading skeletons
 ├── core/
-│   ├── functions/         # TanStack server functions
-│   │   ├── profile.ts     # User profile operations
-│   │   ├── learning.ts    # Learning content (subjects, lessons, cards)
-│   │   └── payments.ts    # Polar payment integration
+│   ├── functions/         # Server functions (profile, learning, payments)
 │   └── middleware/        # Auth, Polar middleware
+├── hooks/                 # Custom hooks (auth, offline, swipe, etc.)
 ├── integrations/
-│   └── tanstack-query/    # Query client setup
-├── lib/                   # Utilities (auth-client, utils)
-├── routes/                # File-based routes
-│   ├── _auth/            # Protected routes
-│   │   └── app/          # Main app routes
-│   │       ├── index.tsx              # Dashboard/home
-│   │       ├── subjects.index.tsx     # Subject selection (learning flow entry)
-│   │       ├── subjects.$subjectId.tsx # Lesson selection for subject
-│   │       ├── lessons.$lessonId.tsx   # Learning mode selection
-│   │       ├── lessons.$lessonId.session.tsx  # Active learning session
-│   │       ├── lessons.$lessonId.summary.tsx  # Session results
-│   │       ├── progress.tsx           # Progress tracking
-│   │       ├── groups.tsx             # Study groups
-│   │       └── profile.tsx            # User profile
-│   ├── onboarding/       # Profile setup flow
-│   └── [public routes]   # Landing, auth, etc.
-├── utils/                 # Helper functions (SEO, etc)
+│   └── tanstack-query/    # Query client, context, devtools
+├── lib/                   # Utilities (auth-client, db, spaced-repetition, PWA)
+├── routes/                # File-based routing
+│   ├── __root.tsx         # Root layout with theme provider
+│   ├── index.tsx          # Landing page
+│   ├── onboarding.tsx     # Profile setup flow
+│   ├── api/
+│   │   ├── auth.$.tsx     # Better Auth API routes
+│   │   └── metrics.tsx    # Metrics endpoint
+│   └── _auth/             # Protected routes (auth guard)
+│       ├── route.tsx      # Auth guard wrapper
+│       └── app/
+│           ├── index.tsx              # Dashboard
+│           ├── subjects.index.tsx     # Subject selection
+│           ├── subjects.$subjectId.tsx # Lessons for subject
+│           ├── lessons.$lessonId.tsx   # Mode selection
+│           ├── lesson-session.$lessonId.tsx  # Active session
+│           ├── lesson-summary.$lessonId.tsx  # Results
+│           ├── progress.tsx           # Progress tracking
+│           ├── groups.tsx             # Study groups
+│           └── profile.tsx            # User profile
+├── config/                # Performance budgets
+├── utils/                 # Helpers (SEO, UUID, etc.)
+├── test/                  # Test setup
 ├── router.tsx             # Router configuration
-├── server.ts              # Server entry point
+├── server.ts              # Custom server entry (Cloudflare)
 ├── start.tsx              # Client entry point
-└── styles.css             # Global Tailwind styles with semantic color utilities
+├── sw.ts                  # Service worker
+└── styles.css             # Global Tailwind + semantic colors
 ```
 
 ## Data Service (`apps/data-service` - package name: `kurama-backend`)
 
 ```
 src/
-├── hono/                  # Hono app setup
+├── hono/
+│   ├── app.ts             # Hono app setup with routes
+│   └── app.test.ts        # Hono tests
+├── durable-objects/       # Cloudflare Durable Objects (planned)
+├── workflows/             # Cloudflare Workflows (planned)
 └── index.ts               # Worker entry point
 ```
 
-Note: Currently minimal implementation with basic Hono setup. Durable Objects and Workflows are planned but not yet implemented.
+**Status**: Minimal implementation with basic Hono setup. Durable Objects and Workflows planned for future releases.
 
 ## Data Ops (`packages/data-ops` - package name: `@kurama/data-ops`)
 
 ```
 src/
-├── auth/                  # Better Auth setup
-├── config/                # Configuration files (auth.ts)
-├── database/              # Database connection setup
-├── drizzle/               # Migrations and schemas
-│   ├── auth-schema.ts    # Better Auth tables
-│   └── schema.ts         # User profiles, curriculum data
-├── queries/               # Database queries
-│   ├── polar.ts          # Polar payment queries
-│   └── profiles.ts       # User profile queries
-└── zod-schema/            # Zod validation schemas
-    ├── onboarding.ts     # Profile validation
-    └── [other schemas]
+├── auth/
+│   ├── setup.ts           # Better Auth configuration
+│   └── server.ts          # Server-side auth utilities
+├── config/
+│   └── auth.ts            # Auth configuration
+├── database/
+│   ├── setup.ts           # Database connection
+│   ├── seed-db.ts         # Base curriculum seeding
+│   ├── seed-lessons.ts    # Core lessons seeding
+│   └── seed-lessons-extended.ts  # Extended lessons
+├── drizzle/
+│   ├── schema.ts          # All database tables
+│   ├── auth-schema.ts     # Better Auth tables (auto-generated)
+│   ├── seed.ts            # Seed utilities
+│   └── migrations/        # Database migrations
+├── queries/
+│   ├── polar.ts           # Polar payment queries
+│   └── profiles.ts        # User profile queries
+└── zod-schema/
+    ├── profile.ts         # Profile validation
+    ├── polar.ts           # Payment validation
+    └── example.ts         # Example schemas
 ```
 
-Note: Package exports are structured by functionality:
-- `./auth/*` - Authentication utilities
-- `./database/*` - Database connection and setup
-- `./zod-schema/*` - Validation schemas
-- `./queries/*` - Database queries
+**Package Exports** (structured by feature):
+```typescript
+import { authClient } from "@kurama/data-ops/auth/client"
+import { getDb } from "@kurama/data-ops/database/setup"
+import { grades, subjects, lessons } from "@kurama/data-ops/drizzle/schema"
+import { studentProfileSchema } from "@kurama/data-ops/zod-schema/profile"
+```
 
 ### Database Schema
-- **User Profiles**: Students and parents with grade/series/subjects
-- **Curriculum**: Grades, series, subjects with coefficients
-- **Learning Content**: Subjects, lessons, flashcards with SM-2 spaced repetition
-- **Progress Tracking**: User progress per card, study sessions
-- **Auth**: Better Auth tables for authentication
-- **Polar**: Payment and subscription data
+
+**Educational Structure**:
+- `grades`: 13 levels (CP1-Tle)
+- `series`: 4 Lycée series (A, C, D, E)
+- `subjects`: 12 core subjects
+- `levelSeries`: Grade-series mappings
+- `subjectOfferings`: Subject availability with coefficients
+
+**Content**:
+- `lessons`: Educational lessons with metadata
+- `cards`: Flashcards for spaced repetition
+
+**User Data**:
+- `userProfiles`: Student/parent profiles
+- `userProgress`: SM-2 spaced repetition progress
+- `studySessions`: Learning session tracking
+
+**Authentication** (Better Auth):
+- `auth_user`, `auth_session`, `auth_account`
+
+**Payments**:
+- Polar integration tables
 
 ## Key Conventions
 
@@ -170,15 +202,25 @@ Note: Package exports are structured by functionality:
 3. Start development servers using individual app commands
 4. Use workspace filtering for package-specific operations
 
-### Recent Implementations
-- ✅ **Gamification System**: Complete XP, levels, achievements, streaks, leaderboards
-- ✅ **Color System Migration**: All inline colors converted to semantic utilities
-- ✅ **User Profiles**: Student/parent profiles with curriculum integration
-- ✅ **Onboarding Flow**: Multi-step profile setup with validation
-- ✅ **Profile Guard**: Redirect to onboarding if profile incomplete
-- ✅ **Learning Flow**: Complete subject → lesson → mode → session → summary flow
-  - Subject selection with icons and colors
-  - Lesson browsing with difficulty badges and duration
-  - Learning mode selection (Flashcards, Quiz, Exam)
-  - Interactive flashcard session with flip animations
-  - Session summary with XP rewards and performance feedback
+### Implementation Status
+
+**✅ Completed**:
+- Gamification system (XP, levels, achievements, streaks, leaderboards)
+- Semantic color system (all inline colors migrated)
+- User profiles (student/parent with curriculum)
+- Onboarding flow (multi-step profile setup)
+- Profile guard (redirect if incomplete)
+- Learning flow (subject → lesson → mode → session → summary)
+- Authentication (email OTP + Google OAuth)
+- PWA capabilities (offline-first, service workers)
+- Payment integration (Polar SDK)
+- Database schema (curriculum + user data)
+- Deployment (Cloudflare Pages + Workers)
+
+**🔄 Planned**:
+- Durable Objects (real-time features)
+- Cloudflare Workflows (background jobs)
+- Quiz mode (multiple choice)
+- Exam mode (timed simulation)
+- Advanced analytics
+- Social features (messaging)

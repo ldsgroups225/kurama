@@ -1,109 +1,148 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for working with Kurama - an offline-first PWA study platform for BEPC/BAC students in Côte d'Ivoire.
 
 ## Project Overview
 
-This is a monorepo SaaS application built with pnpm workspaces, containing:
-- **user-application**: TanStack Start frontend application deployed on Cloudflare
-- **data-service**: Hono-based API service deployed on Cloudflare Workers
-- **@kurama/data-ops**: Shared package for auth, database, schemas, and queries
+**Kurama** is a monorepo SaaS application with three main packages:
+- **kurama-frontend** (`apps/user-application`): TanStack Start frontend on Cloudflare Pages
+- **kurama-backend** (`apps/data-service`): Hono API on Cloudflare Workers
+- **@kurama/data-ops** (`packages/data-ops`): Shared auth, database, schemas, queries
 
-## Commands
+**Status**: Production-ready with core features fully implemented.
 
-### Root Level Commands
-- `pnpm run setup` - Install all dependencies and build required packages
-- `pnpm run build:data-ops` - Build the shared data-ops package (required before running apps)
-- `pnpm run dev:kurama-frontend` - Start frontend development server on port 3000
-- `pnpm run dev:kurama-backend` - Start backend API service with Cloudflare Workers
-- `pnpm run deploy:kurama-frontend` - Build and deploy frontend to Cloudflare Pages
-- `pnpm run deploy:kurama-backend` - Build and deploy backend service to Cloudflare Workers
+## Quick Start
 
-### User Application (Frontend) Commands
-Navigate to `apps/user-application`:
-- `pnpm dev` - Start development server on port 3000
-- `pnpm build` - Build for production (wrangler-compatible output)
-- `pnpm deploy` - Build and deploy to Cloudflare Pages
-- `pnpm serve` - Preview production build
-- `pnpm cf-typegen` - Generate Cloudflare types
-- `pnpm test` - Run tests with Vitest (uses Testing Library)
+```bash
+pnpm run setup                    # Install deps + build data-ops
+pnpm run dev:kurama-frontend      # Frontend on port 3000
+pnpm run dev:kurama-backend       # Backend with Cloudflare Workers
+```
 
-### Data Service (Backend) Commands
-Navigate to `apps/data-service`:
-- `pnpm dev` - Start development server with Cloudflare Workers
-- `pnpm start` - Start local development server
-- `pnpm deploy` - Deploy to Cloudflare Workers
-- `pnpm test` - Run tests with Vitest (Cloudflare Workers pool)
-- `pnpm cf-typegen` - Generate Cloudflare types
+## Essential Commands
 
-### Data Ops Package Commands
-Navigate to `packages/data-ops`:
-- `pnpm build` - Compile TypeScript to dist/ with path aliases
-- `pnpm drizzle:generate` - Generate database migrations
-- `pnpm drizzle:migrate` - Run database migrations
-- `pnpm drizzle:pull` - Pull database schema
-- `pnpm better-auth:generate` - Generate Better Auth schema
+### Root Level
+```bash
+pnpm run setup                    # Initial setup
+pnpm run build:data-ops           # Build shared package (required before apps)
+pnpm run dev:kurama-frontend      # Start frontend
+pnpm run dev:kurama-backend       # Start backend
+pnpm run deploy:kurama-frontend   # Deploy to Cloudflare Pages
+pnpm run deploy:kurama-backend    # Deploy to Cloudflare Workers
+pnpm test                         # Run all tests
+pnpm run typecheck                # Type checking
+```
+
+### Frontend (`apps/user-application`)
+```bash
+pnpm dev                          # Dev server on port 3000
+pnpm build                        # Production build
+pnpm deploy                       # Build and deploy
+pnpm test                         # Run tests
+pnpm run perf:check-bundles       # Check bundle sizes
+```
+
+### Backend (`apps/data-service`)
+```bash
+pnpm dev                          # Dev with Cloudflare Workers
+pnpm deploy                       # Deploy to Workers
+pnpm test                         # Run tests
+```
+
+### Data Ops (`packages/data-ops`)
+```bash
+pnpm build                        # Build package
+pnpm run drizzle:generate         # Generate migrations
+pnpm run drizzle:migrate          # Apply migrations
+pnpm run seed:full                # Seed all data
+pnpm run better-auth:generate     # Generate auth schema
+```
 
 ## Architecture
 
-### Monorepo Structure
-- `apps/user-application` - TanStack Start frontend (React 19, TypeScript, Tailwind CSS v4)
-- `apps/data-service` - Hono API service (Cloudflare Workers)
-- `packages/data-ops` - Shared utilities (auth, database, zod schemas, queries)
-
 ### Tech Stack
 
-**Frontend (user-application)**:
-- TanStack Start - Full-stack React framework with file-based routing
-- React 19 with TypeScript
-- TanStack Router & Query with SSR integration
-- Tailwind CSS v4 with Shadcn components (new-york style, zinc theme)
-- Better Auth for authentication with Google OAuth
-- Vite for build tooling with Cloudflare plugin
-- Polar SDK for payment and subscription management
+**Frontend**:
+- TanStack Start 1.133.22 (React 19 SSR framework)
+- TanStack Router 1.133.22 (file-based routing)
+- TanStack Query 5.90.9 (server state management)
+- Tailwind CSS v4 (semantic color system)
+- shadcn/ui (Radix UI components)
+- Better Auth 1.3.29 (email OTP + Google OAuth)
+- Polar SDK 0.34.17 (payments)
+- Workbox (PWA/service workers)
+- Dexie (IndexedDB for offline)
 
-**Backend (data-service)**:
-- Hono web framework for Cloudflare Workers
-- TypeScript
-- Shared data-ops package for database operations
+**Backend**:
+- Hono 4.8.3 (web framework)
+- Cloudflare Workers (runtime)
+- Vitest (testing)
 
-**Shared (data-ops)**:
-- Drizzle ORM with PostgreSQL
-- Better Auth integration
-- Zod for schema validation
-- Multiple database adapters (Neon, Planetscale, SQLite)
+**Shared**:
+- Drizzle ORM 0.44.5 (PostgreSQL/MySQL/SQLite)
+- Better Auth 1.3.7 (authentication)
+- Zod 4.1.0 (validation)
 
-### Key Architectural Patterns
+### Key Patterns
 
-**Monorepo Dependencies**: The apps depend on the workspace package `@kurama/data-ops` which must be built before running applications.
-
-**Database Layer**: Data-ops package provides a unified database interface with support for multiple database providers. Uses Drizzle ORM with auto-generated schema from Better Auth.
-
-**Authentication**: Better Auth is configured across the stack, with auth schema generation and database integration handled in the data-ops package. Includes Google OAuth integration.
-
-**Cloudflare Deployment**: Both applications are designed for Cloudflare deployment (Pages for frontend, Workers for backend) with wrangler configuration.
-
-**TanStack Start Architecture**: Frontend uses file-based routing with SSR integration:
-- `src/routes/` - Auto-generates route tree from file system
-- `src/router.tsx` - Router setup with TanStack Query SSR integration
-- `src/routes/__root.tsx` - Root layout with theme provider and SEO
-- `src/server.ts` - Custom server with Better Auth integration
-- Path aliases: `@/*` maps to `src/*`
-
-### Development Workflow
-
-1. Run `pnpm run setup` for initial setup
-2. Build data-ops package: `pnpm run build:data-ops`
-3. Start development servers individually as needed
-4. Use workspace filtering commands for package-specific operations
-
-### Testing
-- **Frontend**: Vitest with Testing Library and React Testing Library
-- **Backend**: Vitest with Cloudflare Workers pool testing
-- Both applications use Vitest as the test runner
-
-### Package Manager
-Uses pnpm workspace configuration. Key points:
+**Monorepo**: pnpm workspaces with workspace filtering
 - Package names: `kurama-frontend`, `kurama-backend`, `@kurama/data-ops`
-- Use workspace filtering: `pnpm run --filter <package-name>` for package-specific operations
-- The data-ops package must be built before running applications due to workspace dependencies
+- Build data-ops before running apps
+- Use `pnpm run --filter <package>` for package-specific commands
+
+**Frontend Architecture**:
+- File-based routing in `src/routes/`
+- Server functions in `src/core/functions/`
+- Middleware in `src/core/middleware/`
+- Components organized by feature
+- Semantic color utilities (no inline colors)
+
+**Database**:
+- Drizzle ORM with migrations
+- Better Auth for authentication
+- 13 grades, 4 series, 12 subjects
+- 17+ lessons, 61+ flashcards (seeded)
+
+**Deployment**:
+- Frontend: Cloudflare Pages
+- Backend: Cloudflare Workers
+- CI/CD: GitHub Actions
+- URLs: https://kurama.yeko.workers.dev (frontend), https://back-kurama.yeko.workers.dev (backend)
+
+## Core Features
+
+✅ **Learning System**: Subject → Lesson → Mode → Session → Summary flow
+✅ **Gamification**: XP, levels, achievements, streaks, leaderboards
+✅ **Authentication**: Email OTP + Google OAuth
+✅ **User Profiles**: Student/parent with curriculum integration
+✅ **PWA**: Offline-first with service workers
+✅ **Payments**: Polar SDK integration
+✅ **Database**: Curriculum + user data with SM-2 spaced repetition
+
+## Important Notes
+
+- **Server Functions**: Call with `{ data: value }` format when using input validators
+- **Routes**: Use `.index.tsx` for parent routes with children
+- **Colors**: Use semantic utilities (e.g., `bg-gradient-level`, `text-subject-math`)
+- **TypeScript**: Strict mode, no `any` types
+- **Testing**: Vitest with Testing Library
+- **Build**: Always build data-ops before running apps
+
+## Steering Files
+
+Comprehensive guidance available in `.kiro/steering/`:
+- `tech.md` - Tech stack and commands
+- `structure.md` - Project structure
+- `product.md` - Features and status
+- `conventions.md` - Code standards
+- `mcp-usage.md` - MCP tools
+- `learning-flow.md` - Learning system details
+- `deployment.md` - Infrastructure and deployment
+
+## Resources
+
+- [TanStack Start](https://tanstack.com/start)
+- [Drizzle ORM](https://orm.drizzle.team)
+- [Better Auth](https://www.better-auth.com/)
+- [Cloudflare Workers](https://workers.cloudflare.com/)
+- [Hono](https://hono.dev)

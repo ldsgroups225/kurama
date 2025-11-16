@@ -3,10 +3,11 @@
 ## General Principles
 
 ### Code Style
-- **TypeScript**: Strict mode enabled, no `any` types
-- **Naming**: camelCase for variables/functions, PascalCase for components/types
+- **TypeScript**: Strict mode, no `any` types (use `as any` only for metadata compatibility)
+- **Naming**: camelCase (variables/functions), PascalCase (components/types)
 - **Imports**: Absolute imports using `@/*` alias
-- **Exports**: Named exports preferred over default exports (except for routes)
+- **Exports**: Named exports preferred (except routes which use default)
+- **Comments**: JSDoc for public APIs, inline for complex logic
 
 ### Component Structure
 ```tsx
@@ -98,12 +99,12 @@ export function MyComponent({ title, onAction }: MyComponentProps) {
 // In component
 const { data, isLoading, error } = useQuery({
   queryKey: ['profile', userId],
-  queryFn: () => getProfile(userId),
+  queryFn: () => getProfile({ data: userId }),
 })
 
 // Server function (in core/functions/)
 export const getProfile = createServerFn({ method: "GET" })
-  .validator((userId: string) => userId)
+  .inputValidator((data: string) => data)
   .handler(async ({ data: userId }) => {
     const profile = await db.query.profiles.findFirst({
       where: eq(profiles.userId, userId),
@@ -111,6 +112,8 @@ export const getProfile = createServerFn({ method: "GET" })
     return profile
   })
 ```
+
+**Important**: Server functions with input validators must be called with `{ data: value }` format.
 
 ### Loading States
 ```tsx
@@ -261,7 +264,7 @@ const handleClick = useCallback(() => {
 
 ## Testing
 
-### Component Tests
+### Component Tests (Vitest + Testing Library)
 ```tsx
 import { render, screen } from "@testing-library/react"
 import { LevelBadge } from "./level-badge"
@@ -279,11 +282,17 @@ import { getProfile } from "./profile-functions"
 
 describe("getProfile", () => {
   it("returns user profile", async () => {
-    const profile = await getProfile("user-123")
+    const profile = await getProfile({ data: "user-123" })
     expect(profile).toBeDefined()
     expect(profile.userId).toBe("user-123")
   })
 })
+```
+
+### Running Tests
+```bash
+pnpm test              # Run all tests
+pnpm test:watch        # Watch mode (frontend only)
 ```
 
 ## Documentation
@@ -403,11 +412,33 @@ try {
 <button onClick={handleClick}>Click me</button>
 ```
 
+## Key Patterns
+
+### Route File Naming
+- Use `.index.tsx` for parent routes with children
+- Use `.$paramName.tsx` for dynamic routes
+- Example: `subjects.index.tsx` (parent) + `subjects.$subjectId.tsx` (child)
+
+### Semantic Colors
+All colors use utility classes (no inline Tailwind colors):
+- Gamification: `bg-gradient-xp`, `text-level`, `bg-gradient-streak`
+- Status: `bg-success`, `bg-error`, `bg-warning`, `bg-info`
+- Subjects: `text-subject-math`, `bg-subject-physics`
+
+### Error Handling
+- Use try-catch for async operations
+- Provide user-friendly error messages
+- Log errors for debugging
+- Use error boundaries for component errors
+
 ## Resources
 
-- [TanStack Start Docs](https://tanstack.com/start)
-- [TanStack Router Docs](https://tanstack.com/router)
-- [TanStack Query Docs](https://tanstack.com/query)
-- [Drizzle ORM Docs](https://orm.drizzle.team)
-- [shadcn/ui Docs](https://ui.shadcn.com)
-- [Tailwind CSS v4 Docs](https://tailwindcss.com)
+- [TanStack Start](https://tanstack.com/start)
+- [TanStack Router](https://tanstack.com/router)
+- [TanStack Query](https://tanstack.com/query)
+- [Drizzle ORM](https://orm.drizzle.team)
+- [Better Auth](https://www.better-auth.com/)
+- [shadcn/ui](https://ui.shadcn.com)
+- [Tailwind CSS v4](https://tailwindcss.com)
+- [Hono](https://hono.dev)
+- [Cloudflare Workers](https://workers.cloudflare.com/)

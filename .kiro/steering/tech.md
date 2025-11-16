@@ -4,81 +4,77 @@
 - **Package Manager**: pnpm (v10.22.0+)
 - **Monorepo**: pnpm workspaces with apps and packages
 - **Build Tool**: Vite (for user-application), TypeScript compiler (for data-ops)
-- **Deployment**: Cloudflare Workers via Wrangler
+- **Deployment**: Cloudflare Pages (frontend), Cloudflare Workers (backend)
 
-## Frontend (user-application)
-- **Framework**: TanStack Start (React-based SSR framework)
-- **Router**: TanStack Router with file-based routing
-- **State Management**: TanStack Query (React Query)
-- **Styling**: Tailwind CSS v4 with shadcn/ui components (New York style)
+## Frontend (user-application / kurama-frontend)
+- **Framework**: TanStack Start 1.133.22 (React 19 + TypeScript SSR)
+- **Router**: TanStack Router 1.133.22 with file-based routing
+- **State Management**: TanStack Query 5.90.9 with SSR integration
+- **Styling**: Tailwind CSS v4 with CSS variables, shadcn/ui (New York style)
 - **UI Library**: Radix UI primitives
 - **Icons**: Lucide React
-- **Auth**: Better Auth with Google OAuth
-- **Payments**: Polar SDK
+- **Auth**: Better Auth 1.3.29 with Google OAuth
+- **Payments**: Polar SDK 0.34.17
+- **PWA**: Workbox for service workers, Dexie for IndexedDB
+- **Animations**: Motion (Motion One)
+- **Testing**: Vitest with Testing Library
 
-## Backend (data-service)
-- **Framework**: Hono
+## Backend (data-service / kurama-backend)
+- **Framework**: Hono 4.8.3
 - **Runtime**: Cloudflare Workers
 - **Testing**: Vitest with Cloudflare Workers pool
+- **Planned**: Durable Objects, Cloudflare Workflows
 
-## Shared (data-ops)
-- **Database**: Drizzle ORM (supports Neon, PlanetScale, SQLite)
-- **Auth**: Better Auth with Polar and Google OAuth integration
-- **Validation**: Zod schemas
+## Shared (data-ops / @kurama/data-ops)
+- **Database**: Drizzle ORM 0.44.5 (Neon, PlanetScale, SQLite)
+- **Auth**: Better Auth 1.3.7 with Polar integration
+- **Validation**: Zod 4.1.0
 - **Build**: TypeScript with tsc-alias for path resolution
-- **Package Exports**: Structured exports for auth/, database/, zod-schema/, queries/
+- **Exports**: Structured by feature (auth/, database/, drizzle/, queries/, zod-schema/)
 
 ## TypeScript Configuration
-- Strict mode enabled
+- Strict mode enabled, no `any` types
 - Module resolution: bundler
-- Path aliases: `@/*` maps to `src/*`
+- Path aliases: `@/*` → `src/*`
 - Target: ES2022
 
-## Common Commands
+## Essential Commands
 
-### Setup
+### Initial Setup
 ```bash
-pnpm run setup  # Install deps and build data-ops
+pnpm run setup                    # Install deps + build data-ops
+pnpm run build:data-ops           # Build shared package (required before apps)
 ```
 
 ### Development
 ```bash
-pnpm run dev:kurama-frontend  # Start user app on port 3000
-pnpm run dev:kurama-backend   # Start data service
-```
-
-### Build
-```bash
-pnpm run build:data-ops  # Build shared package (required before running apps)
+pnpm run dev:kurama-frontend      # Frontend on port 3000
+pnpm run dev:kurama-backend       # Backend with Cloudflare Workers
 ```
 
 ### Deployment
 ```bash
-pnpm run deploy:kurama-frontend  # Deploy user app to Cloudflare Pages
-pnpm run deploy:kurama-backend   # Deploy data service to Cloudflare Workers
+pnpm run deploy:kurama-frontend   # Deploy to Cloudflare Pages
+pnpm run deploy:kurama-backend    # Deploy to Cloudflare Workers
 ```
 
-### Testing
+### Database Operations
 ```bash
-# Frontend testing (in apps/user-application)
-pnpm test  # Vitest with Testing Library
-
-# Backend testing (in apps/data-service)
-pnpm test  # Vitest with Cloudflare Workers pool
+pnpm run --filter @kurama/data-ops drizzle:generate
+pnpm run --filter @kurama/data-ops drizzle:migrate
+pnpm run --filter @kurama/data-ops seed:full
+pnpm run --filter @kurama/data-ops better-auth:generate
 ```
 
-### Database (in data-ops)
+### Testing & Quality
 ```bash
-pnpm run better-auth:generate  # Generate auth schema
-pnpm run drizzle:generate      # Generate migrations
-pnpm run drizzle:migrate       # Run migrations
+pnpm test                         # Run all tests
+pnpm run typecheck                # Type checking
+pnpm run lint:fix                 # Fix linting issues
+pnpm run perf:check-bundles       # Check bundle sizes
 ```
 
 ### Type Generation
 ```bash
-# Frontend (in apps/user-application)
-pnpm run cf-typegen  # Generate Cloudflare types
-
-# Backend (in apps/data-service)
-pnpm run cf-typegen  # Generate Cloudflare types
+pnpm run cf-typegen               # Generate Cloudflare types (both apps)
 ```
