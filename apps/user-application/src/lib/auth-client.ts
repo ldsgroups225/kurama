@@ -19,7 +19,7 @@ export async function signOut() {
     // Call Better Auth sign out
     await authClient.signOut()
 
-    console.log('Successfully signed out and cleared auth state')
+    console.warn('Successfully signed out and cleared auth state')
   }
   catch (error) {
     console.error('Error during sign out:', error)

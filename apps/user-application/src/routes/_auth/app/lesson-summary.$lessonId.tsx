@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/re
 import {
   Check,
   Clock,
+  CloudUpload,
   Home,
   RotateCcw,
   Target,
@@ -10,10 +11,12 @@ import {
   X,
 } from 'lucide-react'
 import { motion } from 'motion/react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { AppHeader } from '@/components/main'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useOnlineStatus } from '@/hooks/use-online-status'
+import { getMutationQueueManager } from '@/lib/mutation-queue'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 
 interface SearchParams {
@@ -44,10 +47,28 @@ function SummaryPage() {
   })
   const navigate = useNavigate()
 
+  // Offline support
+  const { isOnline } = useOnlineStatus()
+  const [pendingMutations, setPendingMutations] = useState(0)
+
   // Track route load performance
   useEffect(() => {
     const endTracking = trackRouteLoad('app-summary')
     return endTracking
+  }, [])
+
+  // Track pending mutations count
+  useEffect(() => {
+    const updatePendingCount = async () => {
+      const queueManager = getMutationQueueManager()
+      const count = await queueManager.getPendingCount()
+      setPendingMutations(count)
+    }
+
+    updatePendingCount()
+    const interval = setInterval(updatePendingCount, 5000)
+
+    return () => clearInterval(interval)
   }, [])
 
   const score = (total ?? 0) > 0 ? Math.round(((correct ?? 0) / (total ?? 1)) * 100) : 0
@@ -214,6 +235,33 @@ function SummaryPage() {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Sync Status - Show if offline or has pending mutations */}
+        {(!isOnline || pendingMutations > 0) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+          >
+            <Card className="border-2 border-info/50 bg-info/5">
+              <CardContent className="flex items-center gap-3 px-4 py-4">
+                <div className="bg-info flex h-10 w-10 items-center justify-center rounded-full">
+                  <CloudUpload className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-medium">
+                    {isOnline ? 'Synchronisation en cours...' : 'En attente de connexion'}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {pendingMutations > 0
+                      ? `${pendingMutations} action${pendingMutations > 1 ? 's' : ''} en attente`
+                      : 'Vos progrès seront synchronisés automatiquement'}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Motivational Message */}
         {score >= 70 && (

@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
+import { useToast } from '@/components/ui/use-toast'
 import { useOfflineContent } from '@/hooks/use-offline-content'
 import { db } from '@/lib/db'
 import { cn } from '@/lib/utils'
@@ -35,8 +36,11 @@ export function CacheManagement() {
   const [showClearDialog, setShowClearDialog] = useState(false)
   const [showClearOldDialog, setShowClearOldDialog] = useState(false)
   const [isClearing, setIsClearing] = useState(false)
+  const [showUnpinDialog, setShowUnpinDialog] = useState(false)
+  const [contentToUnpin, setContentToUnpin] = useState<string | null>(null)
 
   const { pinnedContent, removeOfflineContent } = useOfflineContent()
+  const { toast } = useToast()
 
   // Format bytes to human-readable format
   const formatBytes = useCallback((bytes: number): string => {
@@ -118,11 +122,11 @@ export function CacheManagement() {
       await loadStorageInfo()
 
       setShowClearDialog(false)
-      alert('Cache effacé avec succès!')
+      console.warn('Cache cleared successfully')
     }
     catch (error) {
       console.error('Failed to clear cache:', error)
-      alert('Échec de l\'effacement du cache')
+      console.error('Failed to clear cache')
     }
     finally {
       setIsClearing(false)
@@ -159,11 +163,18 @@ export function CacheManagement() {
       await loadStorageInfo()
 
       setShowClearOldDialog(false)
-      alert(`${staleEntries.length} entrées obsolètes supprimées!`)
+      toast({
+        title: 'Succès',
+        description: `${staleEntries.length} entrées obsolètes supprimées!`,
+      })
     }
     catch (error) {
       console.error('Failed to clear old data:', error)
-      alert('Échec de la suppression des données obsolètes')
+      toast({
+        title: 'Erreur',
+        description: 'Échec de la suppression des données obsolètes',
+        variant: 'destructive',
+      })
     }
     finally {
       setIsClearing(false)
@@ -171,15 +182,30 @@ export function CacheManagement() {
   }
 
   // Unpin content
-  const handleUnpin = async (contentId: string) => {
-    const confirmed = window.confirm(
-      'Êtes-vous sûr de vouloir retirer ce contenu des favoris hors ligne ?',
-    )
-    if (!confirmed)
+  const handleUnpin = (contentId: string) => {
+    setContentToUnpin(contentId)
+    setShowUnpinDialog(true)
+  }
+
+  const confirmUnpin = async () => {
+    if (!contentToUnpin)
       return
 
-    await removeOfflineContent(contentId)
-    await loadStorageInfo()
+    try {
+      await removeOfflineContent(contentToUnpin)
+      await loadStorageInfo()
+      setShowUnpinDialog(false)
+      setContentToUnpin(null)
+      console.warn('Content unpinned successfully')
+    }
+    catch (error) {
+      console.error('Failed to unpin content:', error)
+      toast({
+        title: 'Erreur',
+        description: 'Échec du retrait du contenu',
+        variant: 'destructive',
+      })
+    }
   }
 
   if (isLoading) {
@@ -230,7 +256,7 @@ export function CacheManagement() {
             </p>
             {storageInfo && storageInfo.usagePercent > 80 && (
               <div className="flex items-start gap-2 rounded-lg bg-warning/10 p-3 text-sm text-warning">
-                <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <p>
                   L'espace de stockage est presque plein. Envisagez de supprimer les anciennes
                   données.
@@ -356,6 +382,36 @@ export function CacheManagement() {
               disabled={isClearing}
             >
               {isClearing ? 'Suppression...' : 'Supprimer'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Unpin Content Dialog */}
+      <Dialog open={showUnpinDialog} onOpenChange={setShowUnpinDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Retirer des favoris hors ligne ?</DialogTitle>
+            <DialogDescription>
+              Êtes-vous sûr de vouloir retirer ce contenu des favoris hors ligne ? Le contenu sera
+              supprimé du cache local et ne sera plus disponible sans connexion internet.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowUnpinDialog(false)
+                setContentToUnpin(null)
+              }}
+            >
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmUnpin}
+            >
+              Retirer
             </Button>
           </DialogFooter>
         </DialogContent>

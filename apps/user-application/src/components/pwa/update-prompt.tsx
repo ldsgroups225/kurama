@@ -20,6 +20,7 @@ export function UpdatePrompt() {
 
     const checkForUpdates = async () => {
       const registration = await navigator.serviceWorker.ready
+      const eventListeners: Array<{ target: EventTarget, type: string, listener: EventListener }> = []
 
       // Check for updates every hour
       updateInterval = setInterval(() => {
@@ -42,10 +43,14 @@ export function UpdatePrompt() {
           }
         }
 
+        // eslint-disable-next-line react-web-api/no-leaked-event-listener
         newWorker.addEventListener('statechange', handleStateChange)
+        eventListeners.push({ target: newWorker, type: 'statechange', listener: handleStateChange })
       }
 
+      // eslint-disable-next-line react-web-api/no-leaked-event-listener
       registration.addEventListener('updatefound', handleUpdateFound)
+      eventListeners.push({ target: registration, type: 'updatefound', listener: handleUpdateFound })
 
       // Check if there's already a waiting worker
       if (registration.waiting) {
@@ -57,7 +62,11 @@ export function UpdatePrompt() {
         if (updateInterval) {
           clearInterval(updateInterval)
         }
-        registration.removeEventListener('updatefound', handleUpdateFound)
+
+        // Clean up all event listeners
+        eventListeners.forEach(({ target, type, listener }) => {
+          target.removeEventListener(type, listener)
+        })
       }
     }
 

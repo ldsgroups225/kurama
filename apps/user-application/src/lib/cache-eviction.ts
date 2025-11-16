@@ -75,17 +75,16 @@ export async function performCacheEviction(threshold = 80): Promise<EvictionResu
     }
   }
 
-  console.log(`Storage quota at ${stats.usagePercent.toFixed(1)}%, starting eviction...`)
+  console.warn(`Storage quota at ${stats.usagePercent.toFixed(1)}%, starting eviction...`)
 
   let evictedCount = 0
-  const initialUsage = stats.usage
 
   try {
     // Get all query cache entries sorted by timestamp (oldest first)
     // Exclude pinned content
     const candidates = await db.queryCache
       .where('pinned')
-      .equals(false)
+      .equals(0)
       .sortBy('timestamp')
 
     // Calculate target usage (reduce to 60% of quota)
@@ -109,7 +108,7 @@ export async function performCacheEviction(threshold = 80): Promise<EvictionResu
         evictedCount++
         freedBytes += entrySize
 
-        console.log(`Evicted cache entry: ${entry.key} (~${entrySize} bytes)`)
+        console.warn(`Evicted cache entry: ${entry.key} (~${entrySize} bytes)`)
       }
       catch (error) {
         console.error(`Failed to evict entry ${entry.key}:`, error)
@@ -137,7 +136,7 @@ export async function performCacheEviction(threshold = 80): Promise<EvictionResu
     // Get updated storage stats
     const updatedStats = await getStorageStats()
 
-    console.log(
+    console.warn(
       `Eviction complete: ${evictedCount} entries removed, `
       + `freed ~${freedBytes} bytes, `
       + `usage now at ${updatedStats.usagePercent.toFixed(1)}%`,
@@ -169,7 +168,7 @@ export async function monitorAndEvict(): Promise<void> {
   const stats = await getStorageStats()
 
   if (stats.isNearLimit) {
-    console.log('Storage limit approaching, triggering automatic eviction...')
+    console.warn('Storage limit approaching, triggering automatic eviction...')
     await performCacheEviction()
   }
 }
@@ -211,7 +210,7 @@ export async function evictByPattern(pattern: RegExp): Promise<number> {
       }
     }
 
-    console.log(`Evicted ${evictedCount} entries matching pattern: ${pattern}`)
+    console.warn(`Evicted ${evictedCount} entries matching pattern: ${pattern}`)
     return evictedCount
   }
   catch (error) {
@@ -229,7 +228,7 @@ export async function getEvictionCandidates(limit = 10) {
   try {
     const candidates = await db.queryCache
       .where('pinned')
-      .equals(false)
+      .equals(0)
       .sortBy('timestamp')
 
     return candidates.slice(0, limit).map(entry => ({

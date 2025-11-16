@@ -29,10 +29,14 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
   )
 
   // Derive AES key using PBKDF2
+
+  // Convert salt to proper ArrayBuffer type for crypto API compatibility
+  const saltBuffer = new Uint8Array(salt)
+
   return crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
-      salt,
+      salt: saltBuffer,
       iterations: 100000, // OWASP recommended minimum
       hash: 'SHA-256',
     },

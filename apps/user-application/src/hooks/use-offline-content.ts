@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useToast } from '@/components/ui/use-toast'
 import { db } from '@/lib/db'
 
 export interface OfflineContentItem {
@@ -22,24 +23,36 @@ export interface DownloadProgress {
  */
 export function useOfflineContent() {
   const [pinnedContent, setPinnedContent] = useState<OfflineContentItem[]>([])
-  const [downloadProgress, setDownloadProgress] = useState<Map<string, DownloadProgress>>(new Map())
+  const [downloadProgress, setDownloadProgress] = useState<Map<string, DownloadProgress>>(() => new Map())
   const [isOnCellular, setIsOnCellular] = useState(false)
+  const { toast } = useToast()
 
   // Check if user is on cellular connection
   useEffect(() => {
-    const checkConnection = () => {
+    const checkCellularConnection = () => {
       if ('connection' in navigator) {
         const conn = (navigator as any).connection
-        setIsOnCellular(conn?.type === 'cellular' || conn?.effectiveType === '2g' || conn?.effectiveType === '3g')
+        return conn?.type === 'cellular' || conn?.effectiveType === '2g' || conn?.effectiveType === '3g'
       }
+      return false
     }
 
-    checkConnection()
+    // Set initial connection status using setTimeout to defer the state update
+    const initialStatus = checkCellularConnection()
+    const timeoutId = setTimeout(() => setIsOnCellular(initialStatus), 0)
+
+    // Set up change listener
+    const handleConnectionChange = () => {
+      setIsOnCellular(checkCellularConnection())
+    }
 
     if ('connection' in navigator) {
       const conn = (navigator as any).connection
-      conn?.addEventListener('change', checkConnection)
-      return () => conn?.removeEventListener('change', checkConnection)
+      conn?.addEventListener('change', handleConnectionChange)
+      return () => {
+        clearTimeout(timeoutId)
+        conn?.removeEventListener('change', handleConnectionChange)
+      }
     }
   }, [])
 
@@ -71,12 +84,12 @@ export function useOfflineContent() {
   ): Promise<boolean> => {
     // Warn if on cellular
     if (isOnCellular) {
-      const confirmed = window.confirm(
-        'Vous êtes sur une connexion cellulaire. Le téléchargement peut consommer vos données mobiles. Continuer ?',
-      )
-      if (!confirmed) {
-        return false
-      }
+      toast({
+        title: 'Avertissement',
+        description: 'Vous êtes sur une connexion cellulaire. Le téléchargement peut consommer vos données mobiles.',
+        variant: 'default',
+      })
+      // Continue with download but user is aware
     }
 
     // Initialize progress
@@ -93,6 +106,12 @@ export function useOfflineContent() {
       // Fetch all URLs and cache them
       for (let i = 0; i < fetchUrls.length; i++) {
         const url = fetchUrls[i]
+
+        // Skip invalid URLs
+        if (!url) {
+          console.warn('[useOfflineContent] Skipping invalid URL at index', i)
+          continue
+        }
 
         try {
           const response = await fetch(url)
@@ -169,7 +188,7 @@ export function useOfflineContent() {
       }))
       return false
     }
-  }, [isOnCellular, pinnedContent])
+  }, [isOnCellular, pinnedContent, toast])
 
   /**
    * Remove content from offline storage

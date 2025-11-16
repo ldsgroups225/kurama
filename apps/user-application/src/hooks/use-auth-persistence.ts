@@ -45,7 +45,7 @@ export function useAuthPersistence() {
         })
 
         hasStoredToken.current = true
-        console.log('Auth token stored successfully')
+        console.warn('Auth token stored successfully')
       }
       catch (error) {
         console.error('Failed to store auth token:', error)
@@ -71,7 +71,7 @@ export function useAuthPersistence() {
 
         // Check if token is expiring soon (within 5 minutes)
         if (isTokenExpiringSoon(authState.expiryTime)) {
-          console.log('Token expiring soon, triggering refresh...')
+          console.warn('Token expiring soon, triggering refresh...')
           // Better Auth handles token refresh automatically through session checks
           // Trigger a session check by calling getSession
           await authClient.getSession()
@@ -108,7 +108,7 @@ export function useAuthPersistence() {
           // Clear all auth states on logout
           await clearAllAuthStates()
           hasStoredToken.current = false
-          console.log('Auth token cleared on logout')
+          console.warn('Auth token cleared on logout')
         }
         catch (error) {
           console.error('Failed to clear auth token:', error)
@@ -139,7 +139,7 @@ export async function restoreAuthSession(userId: string): Promise<boolean> {
     }
 
     // Token is still valid
-    console.log('Restored auth session from IndexedDB')
+    console.warn('Restored auth session from IndexedDB')
     return true
   }
   catch (error) {

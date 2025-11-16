@@ -1,7 +1,7 @@
 import type { TestSettings } from '@/components/learning/test-settings-sheet'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router'
-import { Loader2 } from 'lucide-react'
+import { Loader2, WifiOff } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Flashcard } from '@/components/learning/flashcard'
 import { Quiz } from '@/components/learning/quiz'
@@ -18,9 +18,12 @@ import { getLessonDetails } from '@/core/functions/learning'
 import { useAutoplay } from '@/hooks/use-autoplay'
 import { useCardHeight } from '@/hooks/use-card-height'
 import { useCardSwipeAnimations } from '@/hooks/use-card-swipe-animations'
+import { useOnlineStatus } from '@/hooks/use-online-status'
 import { useSessionState } from '@/hooks/use-session-state'
 import { createSwipeHandlers } from '@/hooks/use-swipe-handler'
 import { useViewportHeight } from '@/hooks/use-viewport-height'
+import { db } from '@/lib/db'
+import { getMutationQueueManager } from '@/lib/mutation-queue'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 
 interface SearchParams {
@@ -90,16 +93,51 @@ function SessionPage() {
   const cardHeight = useCardHeight(viewportHeight)
   const swipeAnimations = useCardSwipeAnimations()
 
+  // Offline support
+  const { isOnline } = useOnlineStatus()
+  const [pendingMutations, setPendingMutations] = useState(0)
+
   // Track route load performance
   useEffect(() => {
     const endTracking = trackRouteLoad('app-session')
     return endTracking
   }, [])
 
-  // Fetch lesson data
+  // Track pending mutations count
+  useEffect(() => {
+    const updatePendingCount = async () => {
+      const queueManager = getMutationQueueManager()
+      const count = await queueManager.getPendingCount()
+      setPendingMutations(count)
+    }
+
+    updatePendingCount()
+    const interval = setInterval(updatePendingCount, 5000)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  // Fetch lesson data with offline support
   const { data: lesson, isLoading } = useQuery({
     queryKey: ['lesson', lessonId],
-    queryFn: async () => await getLessonDetails({ data: Number(lessonId) }),
+    queryFn: async () => {
+      // Try to fetch from network first
+      if (isOnline) {
+        return await getLessonDetails({ data: Number(lessonId) })
+      }
+
+      // If offline, try to get from IndexedDB cache
+      const cachedLesson = await db.queryCache.get(`lesson-${lessonId}`)
+      if (cachedLesson) {
+        return cachedLesson.value
+      }
+
+      throw new Error('No cached data available offline')
+    },
+    // Enable offline-first behavior
+    networkMode: 'offlineFirst',
+    // Keep data fresh for 5 minutes
+    staleTime: 5 * 60 * 1000,
   })
 
   const cards = useMemo(() => (lesson as any)?.cards ?? [], [lesson])
@@ -116,21 +154,61 @@ function SessionPage() {
   }, [navigate, lessonId])
 
   const navigateToSummary = useCallback(
-    (finalCorrect?: number, finalIncorrect?: number) => {
+    async (finalCorrect?: number, finalIncorrect?: number) => {
       const duration = Math.floor((Date.now() - startTime) / 1000)
+      const correct = finalCorrect ?? sessionStats.correct
+      const incorrect = finalIncorrect ?? sessionStats.incorrect
+
+      // Queue XP and progress mutations if offline
+      if (!isOnline) {
+        const queueManager = getMutationQueueManager()
+
+        // Queue XP update mutation
+        await queueManager.enqueue({
+          type: 'create',
+          endpoint: '/api/progress/xp',
+          payload: {
+            lessonId: Number(lessonId),
+            correct,
+            incorrect,
+            duration,
+            mode,
+          },
+          optimisticData: {
+            xpGained: correct * 10, // Assume 10 XP per correct answer
+          },
+          userId: 'current-user', // TODO: Get from auth context
+          dependencies: [],
+        })
+
+        // Queue progress update mutation
+        await queueManager.enqueue({
+          type: 'update',
+          endpoint: `/api/progress/lesson/${lessonId}`,
+          payload: {
+            completed: true,
+            score: cards.length > 0 ? (correct / cards.length) * 100 : 0,
+            duration,
+          },
+          optimisticData: null,
+          userId: 'current-user', // TODO: Get from auth context
+          dependencies: [],
+        })
+      }
+
       navigate({
         to: '/app/lesson-summary/$lessonId',
         params: { lessonId },
         search: {
-          correct: finalCorrect ?? sessionStats.correct,
-          incorrect: finalIncorrect ?? sessionStats.incorrect,
+          correct,
+          incorrect,
           total: cards.length,
           duration,
           mode,
         },
       })
     },
-    [navigate, lessonId, startTime, sessionStats, cards.length, mode],
+    [navigate, lessonId, startTime, sessionStats, cards.length, mode, isOnline],
   )
 
   // Card interaction handlers
@@ -438,6 +516,23 @@ function SessionPage() {
         onClose={navigateToLesson}
         onSettings={() => setShowSettings(true)}
       />
+
+      {/* Offline indicator */}
+      {!isOnline && (
+        <div className="mx-auto max-w-lg px-4 pt-2">
+          <div className="flex items-center gap-2 rounded-lg bg-warning/10 px-3 py-2 text-sm text-warning">
+            <WifiOff className="h-4 w-4" />
+            <span>Mode hors ligne - Vos progrès seront synchronisés plus tard</span>
+            {pendingMutations > 0 && (
+              <span className="ml-auto rounded-full bg-warning/20 px-2 py-0.5 text-xs font-medium">
+                {pendingMutations}
+                {' '}
+                en attente
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       <main className="mx-auto max-w-lg py-6 px-4">
         {mode !== 'quiz' && (

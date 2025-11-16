@@ -3,5 +3,6 @@
     "BEPC",
     "dexie",
     "kurama"
-  ]
+  ],
+  "typescript.autoClosingTags": false
 }
