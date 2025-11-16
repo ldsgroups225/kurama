@@ -2,97 +2,44 @@ import { RefreshCw, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { setupUpdateStrategy, skipWaiting } from '@/lib/sw-update-strategy'
 
 /**
  * Update Prompt Component
  * Shows a prompt when a new service worker version is available
+ * Uses the enhanced update strategy with periodic checks every hour
  */
 export function UpdatePrompt() {
   const [showPrompt, setShowPrompt] = useState(false)
-  const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null)
+  const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null)
 
   useEffect(() => {
-    if (!('serviceWorker' in navigator)) {
-      return
-    }
-
-    let updateInterval: NodeJS.Timeout | null = null
-
-    const checkForUpdates = async () => {
-      const registration = await navigator.serviceWorker.ready
-      const eventListeners: Array<{ target: EventTarget, type: string, listener: EventListener }> = []
-
-      // Check for updates every hour
-      updateInterval = setInterval(() => {
-        registration.update()
-      }, 60 * 60 * 1000)
-
-      // Listen for new service worker
-      const handleUpdateFound = () => {
-        const newWorker = registration.installing
-
-        if (!newWorker) {
-          return
-        }
-
-        const handleStateChange = () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // New service worker is installed and waiting
-            setWaitingWorker(newWorker)
-            setShowPrompt(true)
-          }
-        }
-
-        // eslint-disable-next-line react-web-api/no-leaked-event-listener
-        newWorker.addEventListener('statechange', handleStateChange)
-        eventListeners.push({ target: newWorker, type: 'statechange', listener: handleStateChange })
-      }
-
-      // eslint-disable-next-line react-web-api/no-leaked-event-listener
-      registration.addEventListener('updatefound', handleUpdateFound)
-      eventListeners.push({ target: registration, type: 'updatefound', listener: handleUpdateFound })
-
-      // Check if there's already a waiting worker
-      if (registration.waiting) {
-        setWaitingWorker(registration.waiting)
+    // Setup update strategy with periodic checks every hour
+    const cleanup = setupUpdateStrategy({
+      updateInterval: 60 * 60 * 1000, // 1 hour
+      immediateCheck: true,
+      autoSkipWaiting: false, // Require user action
+      onUpdateReady: (reg) => {
+        console.log('[UpdatePrompt] Update ready, showing prompt')
+        setRegistration(reg)
         setShowPrompt(true)
-      }
+      },
+      onUpdateInstalled: () => {
+        console.log('[UpdatePrompt] First install complete')
+      },
+    })
 
-      return () => {
-        if (updateInterval) {
-          clearInterval(updateInterval)
-        }
-
-        // Clean up all event listeners
-        eventListeners.forEach(({ target, type, listener }) => {
-          target.removeEventListener(type, listener)
-        })
-      }
-    }
-
-    // Listen for controller change (when new SW takes over)
-    const handleControllerChange = () => {
-      // Reload the page to use the new service worker
-      window.location.reload()
-    }
-
-    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange)
-
-    const cleanupPromise = checkForUpdates()
-
-    return () => {
-      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange)
-      cleanupPromise.then(cleanup => cleanup?.())
-    }
+    return cleanup
   }, [])
 
   const handleUpdate = () => {
-    if (!waitingWorker) {
+    if (!registration) {
       return
     }
 
     // Tell the waiting service worker to skip waiting and become active
-    waitingWorker.postMessage({ type: 'SKIP_WAITING' })
+    skipWaiting(registration)
+    setShowPrompt(false)
   }
 
   const handleDismiss = () => {
