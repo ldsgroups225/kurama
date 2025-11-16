@@ -20,12 +20,12 @@ export function UpdatePrompt() {
       immediateCheck: true,
       autoSkipWaiting: false, // Require user action
       onUpdateReady: (reg) => {
-        console.log('[UpdatePrompt] Update ready, showing prompt')
+        console.warn('[UpdatePrompt] Update ready, showing prompt')
         setRegistration(reg)
         setShowPrompt(true)
       },
       onUpdateInstalled: () => {
-        console.log('[UpdatePrompt] First install complete')
+        console.warn('[UpdatePrompt] First install complete')
       },
     })
 

@@ -44,7 +44,7 @@ export function setupUpdateStrategy(config: UpdateStrategyConfig = {}): () => vo
 
   // Setup update checks
   navigator.serviceWorker.ready.then((registration) => {
-    console.log('[SW Update] Service Worker ready, setting up update strategy')
+    console.warn('[SW Update] Service Worker ready, setting up update strategy')
 
     // Immediate check if enabled
     if (immediateCheck) {
@@ -58,7 +58,7 @@ export function setupUpdateStrategy(config: UpdateStrategyConfig = {}): () => vo
 
     // Listen for updatefound event
     const handleUpdateFound = () => {
-      console.log('[SW Update] Update found')
+      console.warn('[SW Update] Update found')
       const newWorker = registration.installing
 
       if (!newWorker) {
@@ -69,12 +69,12 @@ export function setupUpdateStrategy(config: UpdateStrategyConfig = {}): () => vo
 
       // Listen for state changes on the new worker
       const handleStateChange = () => {
-        console.log('[SW Update] New worker state:', newWorker.state)
+        console.warn('[SW Update] New worker state:', newWorker.state)
 
         if (newWorker.state === 'installed') {
           if (navigator.serviceWorker.controller) {
             // New service worker is waiting
-            console.log('[SW Update] New service worker waiting')
+            console.warn('[SW Update] New service worker waiting')
             onUpdateReady?.(registration)
 
             // Auto skip waiting if enabled
@@ -84,7 +84,7 @@ export function setupUpdateStrategy(config: UpdateStrategyConfig = {}): () => vo
           }
           else {
             // First install
-            console.log('[SW Update] Service worker installed for the first time')
+            console.warn('[SW Update] Service worker installed for the first time')
             onUpdateInstalled?.()
           }
         }
@@ -103,7 +103,7 @@ export function setupUpdateStrategy(config: UpdateStrategyConfig = {}): () => vo
 
     // Check if there's already a waiting worker
     if (registration.waiting) {
-      console.log('[SW Update] Service worker already waiting')
+      console.warn('[SW Update] Service worker already waiting')
       onUpdateReady?.(registration)
 
       if (autoSkipWaiting) {
@@ -114,7 +114,7 @@ export function setupUpdateStrategy(config: UpdateStrategyConfig = {}): () => vo
 
   // Listen for controller change (when new SW takes over)
   const handleControllerChange = () => {
-    console.log('[SW Update] Controller changed, reloading page')
+    console.warn('[SW Update] Controller changed, reloading page')
     window.location.reload()
   }
 
@@ -140,17 +140,17 @@ export function setupUpdateStrategy(config: UpdateStrategyConfig = {}): () => vo
 async function checkForUpdate(registration: ServiceWorkerRegistration): Promise<void> {
   // Don't check if already installing or if offline
   if (registration.installing) {
-    console.log('[SW Update] Update already in progress')
+    console.warn('[SW Update] Update already in progress')
     return
   }
 
   if (!navigator.onLine) {
-    console.log('[SW Update] Offline, skipping update check')
+    console.warn('[SW Update] Offline, skipping update check')
     return
   }
 
   try {
-    console.log('[SW Update] Checking for updates...')
+    console.warn('[SW Update] Checking for updates...')
 
     // Fetch service worker with cache-busting headers
     const swUrl = registration.active?.scriptURL || '/sw.js'
@@ -165,7 +165,7 @@ async function checkForUpdate(registration: ServiceWorkerRegistration): Promise<
     if (response.status === 200) {
       // Trigger update check
       await registration.update()
-      console.log('[SW Update] Update check completed')
+      console.warn('[SW Update] Update check completed')
     }
   }
   catch (error) {
@@ -185,7 +185,7 @@ export async function triggerUpdate(): Promise<boolean> {
   try {
     const registration = await navigator.serviceWorker.ready
     await registration.update()
-    console.log('[SW Update] Manual update triggered')
+    console.warn('[SW Update] Manual update triggered')
     return true
   }
   catch (error) {
@@ -201,7 +201,7 @@ export async function triggerUpdate(): Promise<boolean> {
 export function skipWaiting(registration: ServiceWorkerRegistration): void {
   if (registration.waiting) {
     registration.waiting.postMessage({ type: 'SKIP_WAITING' })
-    console.log('[SW Update] Skip waiting message sent')
+    console.warn('[SW Update] Skip waiting message sent')
   }
 }
 

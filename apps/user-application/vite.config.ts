@@ -149,6 +149,13 @@ const config = defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Ensure help.html is precached for offline access
+        additionalManifestEntries: [
+          {
+            url: '/help.html',
+            revision: null,
+          },
+        ],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

@@ -37,7 +37,7 @@ export class RequestDeduplicator {
     // Check if request is already pending
     const pending = this.pendingRequests.get(url)
     if (pending) {
-      console.log(`[RequestDedup] Reusing pending request for: ${url}`)
+      console.warn(`[RequestDedup] Reusing pending request for: ${url}`)
       return pending.promise.then(response => response.clone())
     }
 
