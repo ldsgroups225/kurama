@@ -190,6 +190,12 @@ const config = defineConfig({
             '@tanstack/query-sync-storage-persister',
           ],
         },
+        // Optimize chunk file names for better caching
+        chunkFileNames: 'assets/chunk-[hash].js',
+        // Optimize asset file names
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        // Optimize entry file names
+        entryFileNames: 'assets/[name]-[hash].js',
       },
       // Explicitly exclude devtools from production builds
       external: (id) => {
@@ -201,11 +207,31 @@ const config = defineConfig({
         }
         return false
       },
+      // Tree-shaking optimizations
+      treeshake: {
+        moduleSideEffects: 'no-external',
+        propertyReadSideEffects: false,
+        tryCatchDeoptimization: false,
+      },
     },
     // Set chunk size warning limit
     chunkSizeWarningLimit: 500,
     // Enable detailed size reporting
     reportCompressedSize: true,
+    // Minification options
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: process.env.NODE_ENV === 'production',
+        drop_debugger: true,
+        pure_funcs: process.env.NODE_ENV === 'production' ? ['console.log', 'console.info'] : [],
+      },
+      format: {
+        comments: false,
+      },
+    },
+    // Source map configuration
+    sourcemap: process.env.NODE_ENV !== 'production',
   },
   optimizeDeps: {
     // Pre-bundle critical dependencies

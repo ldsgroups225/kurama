@@ -63,19 +63,24 @@ export class KuramaDB extends Dexie {
   constructor() {
     super('KuramaDB')
 
-    // Define schema version 1
+    // Define schema version 1 with compound indexes for optimal query performance
     this.version(1).stores({
       // Query cache: indexed by key, timestamp, and pinned status
-      queryCache: 'key, timestamp, pinned',
+      // Compound index [timestamp+pinned] for efficient LRU eviction queries
+      queryCache: 'key, timestamp, pinned, [timestamp+pinned], [pinned+timestamp]',
 
       // Mutation queue: indexed by id, status, createdAt, userId, and dependencies
-      mutationQueue: 'id, status, createdAt, userId, *dependencies',
+      // Compound indexes for common query patterns:
+      // - [status+createdAt]: Get pending mutations in chronological order
+      // - [userId+status]: Get user's mutations by status
+      // - [status+userId]: Alternative index for status-first queries
+      mutationQueue: 'id, status, createdAt, userId, *dependencies, [status+createdAt], [userId+status], [status+userId]',
 
       // App state: simple key-value store
       appState: 'key',
 
-      // Auth state: indexed by userId
-      authState: 'userId',
+      // Auth state: indexed by userId and expiryTime for token validation
+      authState: 'userId, expiryTime',
     })
   }
 }
