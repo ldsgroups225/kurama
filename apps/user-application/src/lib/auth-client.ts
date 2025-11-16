@@ -11,7 +11,7 @@ export const { useSession, signIn } = authClient
 /**
  * Enhanced sign out that also clears encrypted auth state from IndexedDB
  */
-export const signOut = async () => {
+export async function signOut() {
   try {
     // Clear encrypted auth state from IndexedDB
     await clearAllAuthStates()
@@ -20,7 +20,8 @@ export const signOut = async () => {
     await authClient.signOut()
 
     console.log('Successfully signed out and cleared auth state')
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error during sign out:', error)
     // Still attempt Better Auth sign out even if clearing state fails
     await authClient.signOut()

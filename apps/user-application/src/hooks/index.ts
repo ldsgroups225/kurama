@@ -2,6 +2,8 @@ export { restoreAuthSession, useAuthPersistence, validateCachedToken } from './u
 export { useAutoplay } from './use-autoplay'
 export { useCardHeight } from './use-card-height'
 export { useCardSwipeAnimations } from './use-card-swipe-animations'
+export { useOfflineContent } from './use-offline-content'
+export type { DownloadProgress, OfflineContentItem } from './use-offline-content'
 export { useOnlineStatus } from './use-online-status'
 export type { OnlineStatus } from './use-online-status'
 export { useSessionState } from './use-session-state'

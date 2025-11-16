@@ -25,7 +25,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
     passwordBuffer,
     'PBKDF2',
     false,
-    ['deriveBits', 'deriveKey']
+    ['deriveBits', 'deriveKey'],
   )
 
   // Derive AES key using PBKDF2
@@ -39,7 +39,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
     keyMaterial,
     { name: ALGORITHM, length: KEY_LENGTH },
     false, // Not extractable
-    ['encrypt', 'decrypt']
+    ['encrypt', 'decrypt'],
   )
 }
 
@@ -50,7 +50,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
 let sessionKey: CryptoKey | null = null
 let sessionSalt: Uint8Array | null = null
 
-async function getSessionKey(): Promise<{ key: CryptoKey; salt: Uint8Array }> {
+async function getSessionKey(): Promise<{ key: CryptoKey, salt: Uint8Array }> {
   if (sessionKey && sessionSalt) {
     return { key: sessionKey, salt: sessionSalt }
   }
@@ -87,7 +87,7 @@ export async function encryptToken(token: string): Promise<string> {
         tagLength: TAG_LENGTH,
       },
       key,
-      data
+      data,
     )
 
     // Combine IV + encrypted data for storage
@@ -98,7 +98,8 @@ export async function encryptToken(token: string): Promise<string> {
 
     // Convert to base64 for storage
     return btoa(String.fromCharCode(...combined))
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Token encryption failed:', error)
     throw new Error('Failed to encrypt authentication token')
   }
@@ -113,7 +114,7 @@ export async function decryptToken(encryptedToken: string): Promise<string> {
     const { key } = await getSessionKey()
 
     // Decode from base64
-    const combined = Uint8Array.from(atob(encryptedToken), (c) => c.charCodeAt(0))
+    const combined = Uint8Array.from(atob(encryptedToken), c => c.charCodeAt(0))
 
     // Extract IV and encrypted data
     const iv = combined.slice(0, IV_LENGTH)
@@ -127,13 +128,14 @@ export async function decryptToken(encryptedToken: string): Promise<string> {
         tagLength: TAG_LENGTH,
       },
       key,
-      encryptedData
+      encryptedData,
     )
 
     // Convert back to string
     const decoder = new TextDecoder()
     return decoder.decode(decryptedBuffer)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Token decryption failed:', error)
     throw new Error('Failed to decrypt authentication token')
   }
@@ -147,7 +149,7 @@ export async function storeAuthState(
   userId: string,
   token: string,
   expiryTime: number,
-  additionalData?: Record<string, unknown>
+  additionalData?: Record<string, unknown>,
 ): Promise<void> {
   try {
     // Encrypt the token
@@ -167,7 +169,8 @@ export async function storeAuthState(
       expiryTime,
       encryptedData,
     })
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to store auth state:', error)
     throw new Error('Failed to persist authentication state')
   }
@@ -178,8 +181,8 @@ export async function storeAuthState(
  * Returns null if token is expired or invalid
  */
 export async function getAuthState(
-  userId: string
-): Promise<{ token: string; expiryTime: number; additionalData?: Record<string, unknown> } | null> {
+  userId: string,
+): Promise<{ token: string, expiryTime: number, additionalData?: Record<string, unknown> } | null> {
   try {
     // Retrieve from IndexedDB
     const authState = await db.authState.get(userId)
@@ -210,7 +213,8 @@ export async function getAuthState(
       expiryTime: authState.expiryTime,
       additionalData,
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to retrieve auth state:', error)
     // If decryption fails, clear the corrupted state
     await clearAuthState(userId).catch(() => { })
@@ -225,7 +229,8 @@ export async function getAuthState(
 export async function clearAuthState(userId: string): Promise<void> {
   try {
     await db.authState.delete(userId)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to clear auth state:', error)
     throw new Error('Failed to clear authentication state')
   }
@@ -240,7 +245,8 @@ export async function clearAllAuthStates(): Promise<void> {
     // Also clear session key
     sessionKey = null
     sessionSalt = null
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to clear all auth states:', error)
     throw new Error('Failed to clear all authentication states')
   }
@@ -260,5 +266,5 @@ export function isTokenExpiringSoon(expiryTime: number, thresholdMs = 5 * 60 * 1
 export function isValidTokenFormat(token: string): boolean {
   // Basic JWT format: header.payload.signature
   const parts = token.split('.')
-  return parts.length === 3 && parts.every((part) => part.length > 0)
+  return parts.length === 3 && parts.every(part => part.length > 0)
 }

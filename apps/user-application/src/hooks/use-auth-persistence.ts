@@ -46,7 +46,8 @@ export function useAuthPersistence() {
 
         hasStoredToken.current = true
         console.log('Auth token stored successfully')
-      } catch (error) {
+      }
+      catch (error) {
         console.error('Failed to store auth token:', error)
       }
     }
@@ -74,7 +75,8 @@ export function useAuthPersistence() {
           // Better Auth handles token refresh automatically through session checks
           // Trigger a session check by calling getSession
           await authClient.getSession()
-        } else {
+        }
+        else {
           // Set up timer to check again before expiry
           const timeUntilExpiry = authState.expiryTime - Date.now()
           const checkInterval = Math.max(timeUntilExpiry - 5 * 60 * 1000, 60 * 1000) // Check 5 min before expiry or in 1 min
@@ -83,7 +85,8 @@ export function useAuthPersistence() {
             setupRefreshTimer()
           }, checkInterval)
         }
-      } catch (error) {
+      }
+      catch (error) {
         console.error('Failed to setup refresh timer:', error)
       }
     }
@@ -106,7 +109,8 @@ export function useAuthPersistence() {
           await clearAllAuthStates()
           hasStoredToken.current = false
           console.log('Auth token cleared on logout')
-        } catch (error) {
+        }
+        catch (error) {
           console.error('Failed to clear auth token:', error)
         }
       }
@@ -137,7 +141,8 @@ export async function restoreAuthSession(userId: string): Promise<boolean> {
     // Token is still valid
     console.log('Restored auth session from IndexedDB')
     return true
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to restore auth session:', error)
     return false
   }
@@ -162,7 +167,8 @@ export async function validateCachedToken(userId: string): Promise<boolean> {
     }
 
     return true
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to validate cached token:', error)
     return false
   }
