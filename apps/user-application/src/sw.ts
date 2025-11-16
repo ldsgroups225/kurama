@@ -244,18 +244,60 @@ self.addEventListener('message', (event) => {
  */
 self.addEventListener('sync', (event: Event) => {
   const syncEvent = event as SyncEvent
+
   if (syncEvent.tag === 'sync-mutations') {
-    console.log('[SW] Background sync: sync-mutations')
+    console.log('[SW] Background sync: sync-mutations triggered')
 
     syncEvent.waitUntil(
-      // Notify clients to process mutation queue
-      self.clients.matchAll().then((clients) => {
-        clients.forEach((client) => {
-          client.postMessage({
-            type: 'SYNC_MUTATIONS',
+      (async () => {
+        try {
+          // Notify all clients to process mutation queue
+          const clients = await self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
+
+          if (clients.length === 0) {
+            console.warn('[SW] No clients available to process mutations')
+            return
+          }
+
+          // Send message to all clients
+          const promises = clients.map((client) => {
+            return new Promise<void>((resolve) => {
+              const messageChannel = new MessageChannel()
+
+              // Listen for response from client
+              messageChannel.port1.onmessage = (event) => {
+                if (event.data.success) {
+                  console.log('[SW] Mutation sync completed successfully')
+                } else {
+                  console.error('[SW] Mutation sync failed:', event.data.error)
+                }
+                resolve()
+              }
+
+              // Send message with response port
+              client.postMessage(
+                {
+                  type: 'SYNC_MUTATIONS',
+                },
+                [messageChannel.port2],
+              )
+
+              // Timeout after 30 seconds
+              setTimeout(() => {
+                console.warn('[SW] Mutation sync timeout')
+                resolve()
+              }, 30000)
+            })
           })
-        })
-      }),
+
+          await Promise.all(promises)
+          console.log('[SW] Background sync completed')
+        } catch (error) {
+          console.error('[SW] Background sync error:', error)
+          // Re-throw to trigger retry
+          throw error
+        }
+      })(),
     )
   }
 })

@@ -90,6 +90,9 @@ export class MutationQueueManagerImpl implements MutationQueueManager {
       await this.applyOptimisticUpdate(id, queryKey, mutation.optimisticData)
     }
 
+    // Register background sync for offline mutations
+    await this.registerBackgroundSync()
+
     // Trigger processing if online
     if (navigator.onLine && !this.isProcessing) {
       // Process asynchronously without blocking
@@ -99,6 +102,59 @@ export class MutationQueueManagerImpl implements MutationQueueManager {
     }
 
     return id
+  }
+
+  /**
+   * Register background sync for mutation queue
+   * Falls back to online event listener if Background Sync API is not supported
+   */
+  private async registerBackgroundSync(): Promise<void> {
+    try {
+      // Check if Background Sync API is supported
+      if ('serviceWorker' in navigator && 'sync' in ServiceWorkerRegistration.prototype) {
+        const registration = await navigator.serviceWorker.ready
+        // Type assertion for Background Sync API
+        const syncManager = (registration as any).sync
+        if (syncManager) {
+          await syncManager.register('sync-mutations')
+          console.log('[MutationQueue] Background sync registered')
+        }
+        else {
+          this.setupOnlineEventFallback()
+        }
+      }
+      else {
+        // Fallback: Use online event listener
+        this.setupOnlineEventFallback()
+      }
+    }
+    catch (error) {
+      console.warn('[MutationQueue] Failed to register background sync:', error)
+      // Fallback to online event listener
+      this.setupOnlineEventFallback()
+    }
+  }
+
+  /**
+   * Setup fallback for browsers without Background Sync API
+   * Processes queue when browser comes back online
+   */
+  private setupOnlineEventFallback(): void {
+    // Only setup once
+    if ((window as any).__mutationQueueOnlineListenerSetup) {
+      return
+    }
+
+    const handleOnline = () => {
+      console.log('[MutationQueue] Online event detected, processing queue')
+      this.processQueue().catch((error) => {
+        console.error('[MutationQueue] Failed to process queue on online event:', error)
+      })
+    }
+
+    window.addEventListener('online', handleOnline)
+      ; (window as any).__mutationQueueOnlineListenerSetup = true
+    console.log('[MutationQueue] Online event fallback setup complete')
   }
 
   /**
