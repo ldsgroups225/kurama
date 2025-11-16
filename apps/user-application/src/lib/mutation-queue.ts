@@ -13,6 +13,21 @@ export interface QueueStatus {
 }
 
 /**
+ * Conflict resolution strategy
+ */
+export type ConflictResolutionStrategy = 'last-write-wins' | 'manual' | 'merge'
+
+/**
+ * Conflict data for resolution
+ */
+export interface ConflictData {
+  mutationId: string
+  localData: unknown
+  serverData: unknown
+  timestamp: number
+}
+
+/**
  * Mutation queue manager interface
  */
 export interface MutationQueueManager {
@@ -25,6 +40,8 @@ export interface MutationQueueManager {
   clearAll: () => Promise<void>
   applyOptimisticUpdate: (mutationId: string, queryKey: string, optimisticData: unknown) => Promise<void>
   revertOptimisticUpdate: (mutationId: string) => Promise<void>
+  getConflicts: () => Promise<ConflictData[]>
+  resolveConflict: (mutationId: string, strategy: ConflictResolutionStrategy, resolvedData?: unknown) => Promise<void>
 }
 
 /**
@@ -218,9 +235,23 @@ export class MutationQueueManagerImpl implements MutationQueueManager {
       if (!response.ok) {
         // Check for conflict status
         if (response.status === 409) {
+          // Get server data from response if available
+          let serverData: unknown
+          try {
+            serverData = await response.json()
+          }
+          catch {
+            serverData = null
+          }
+
+          // Store conflict with server data
           await db.mutationQueue.update(id, {
             status: 'conflict',
-            error: 'Server conflict detected',
+            error: JSON.stringify({
+              message: 'Server conflict detected',
+              serverData,
+              timestamp: Date.now(),
+            }),
           })
           return
         }
@@ -445,6 +476,136 @@ export class MutationQueueManagerImpl implements MutationQueueManager {
     // Simple derivation: use endpoint as key
     // In a real app, this would be more sophisticated
     return endpoint
+  }
+
+  /**
+   * Get all conflicts from the mutation queue
+   * @returns Array of conflict data
+   */
+  async getConflicts(): Promise<ConflictData[]> {
+    const conflicts = await db.mutationQueue
+      .where('status')
+      .equals('conflict')
+      .toArray()
+
+    return conflicts.map((mutation) => {
+      let serverData: unknown = null
+      let timestamp = mutation.createdAt
+
+      // Parse error field to extract server data
+      if (mutation.error) {
+        try {
+          const errorData = JSON.parse(mutation.error)
+          serverData = errorData.serverData
+          timestamp = errorData.timestamp || mutation.createdAt
+        }
+        catch {
+          // Error is just a string, no server data
+        }
+      }
+
+      return {
+        mutationId: mutation.id,
+        localData: mutation.payload,
+        serverData,
+        timestamp,
+      }
+    })
+  }
+
+  /**
+   * Resolve a conflict using the specified strategy
+   * @param mutationId - Mutation ID to resolve
+   * @param strategy - Resolution strategy to use
+   * @param resolvedData - Manually resolved data (for 'manual' strategy)
+   */
+  async resolveConflict(
+    mutationId: string,
+    strategy: ConflictResolutionStrategy,
+    resolvedData?: unknown,
+  ): Promise<void> {
+    const mutation = await db.mutationQueue.get(mutationId)
+    if (!mutation || mutation.status !== 'conflict') {
+      throw new Error(`Mutation ${mutationId} is not in conflict status`)
+    }
+
+    let finalData: unknown
+
+    switch (strategy) {
+      case 'last-write-wins':
+        // Use local data (last write wins)
+        finalData = mutation.payload
+        break
+
+      case 'manual':
+        // Use manually resolved data
+        if (!resolvedData) {
+          throw new Error('Manual resolution requires resolvedData parameter')
+        }
+        finalData = resolvedData
+        break
+
+      case 'merge':
+        // Merge local and server data
+        finalData = await this.mergeConflictData(mutation)
+        break
+
+      default:
+        throw new Error(`Unknown resolution strategy: ${strategy}`)
+    }
+
+    // Update mutation with resolved data and reset to pending
+    await db.mutationQueue.update(mutationId, {
+      payload: finalData,
+      status: 'pending',
+      error: undefined,
+      retryCount: 0,
+    })
+
+    // Trigger processing
+    if (navigator.onLine && !this.isProcessing) {
+      this.processQueue().catch((error) => {
+        console.error('Failed to process queue after conflict resolution:', error)
+      })
+    }
+  }
+
+  /**
+   * Merge local and server data for conflict resolution
+   * @param mutation - Mutation entry with conflict
+   * @returns Merged data
+   */
+  private async mergeConflictData(mutation: MutationQueueEntry): Promise<unknown> {
+    let serverData: unknown = null
+
+    // Extract server data from error field
+    if (mutation.error) {
+      try {
+        const errorData = JSON.parse(mutation.error)
+        serverData = errorData.serverData
+      }
+      catch {
+        // No server data available, use local data
+        return mutation.payload
+      }
+    }
+
+    // Simple merge: combine non-conflicting properties
+    if (
+      typeof mutation.payload === 'object'
+      && mutation.payload !== null
+      && typeof serverData === 'object'
+      && serverData !== null
+    ) {
+      // Merge objects, local data takes precedence for conflicts
+      return {
+        ...serverData,
+        ...mutation.payload,
+      }
+    }
+
+    // For non-objects, use local data
+    return mutation.payload
   }
 }
 

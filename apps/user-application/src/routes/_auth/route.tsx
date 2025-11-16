@@ -3,6 +3,12 @@ import { createFileRoute, Navigate, Outlet } from '@tanstack/react-router'
 import { useSetAtom } from 'jotai'
 import { useEffect } from 'react'
 import { GoogleLogin } from '@/components/auth/google-login'
+import {
+  ConflictResolutionDialog,
+  InstallPrompt,
+  OfflineBanner,
+  UpdatePrompt,
+} from '@/components/pwa'
 import { getProfileStatus, getUserProfile } from '@/core/functions/profile'
 import { userProfileAtom } from '@/lib/atoms'
 import { authClient } from '@/lib/auth-client'
@@ -81,5 +87,16 @@ function RouteComponent() {
   }
 
   // Authenticated and profile completed - show app
-  return <Outlet />
+  return (
+    <>
+      {/* PWA Components */}
+      <OfflineBanner />
+      <InstallPrompt />
+      <UpdatePrompt />
+      <ConflictResolutionDialog />
+
+      {/* Main App Content */}
+      <Outlet />
+    </>
+  )
 }

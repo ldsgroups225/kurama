@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { ExternalLink, Github, LogIn, Menu } from 'lucide-react'
 import * as React from 'react'
 import { AccountDialog } from '@/components/auth/account-dialog'
+import { SyncStatus } from '@/components/pwa'
 import { ThemeToggle } from '@/components/theme'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -125,40 +126,40 @@ export function NavigationBar() {
               <div key={item.label} className="group relative">
                 {item.isExternal
                   ? (
-                      <a
-                        href={item.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`
                           group flex items-center space-x-2 rounded-lg px-4 py-2
                           text-sm font-medium text-muted-foreground
                           transition-all duration-300
                           hover:bg-accent/50 hover:text-foreground
                         `}
-                      >
-                        <span>{item.label}</span>
-                        {item.label === 'GitHub'
-                          ? (
-                              <Github className="h-4 w-4" />
-                            )
-                          : (
-                              <ExternalLink className="h-4 w-4" />
-                            )}
-                      </a>
-                    )
+                    >
+                      <span>{item.label}</span>
+                      {item.label === 'GitHub'
+                        ? (
+                          <Github className="h-4 w-4" />
+                        )
+                        : (
+                          <ExternalLink className="h-4 w-4" />
+                        )}
+                    </a>
+                  )
                   : (
-                      <Link
-                        to={item.href}
-                        onClick={handleNavClick}
-                        className={`
+                    <Link
+                      to={item.href}
+                      onClick={handleNavClick}
+                      className={`
                           block rounded-lg px-4 py-2 text-sm font-medium
                           text-muted-foreground transition-all duration-300
                           hover:bg-accent/50 hover:text-foreground
                         `}
-                      >
-                        {item.label}
-                      </Link>
-                    )}
+                    >
+                      {item.label}
+                    </Link>
+                  )}
                 <div className={`
                   absolute bottom-0 left-1/2 h-0.5 w-0 -translate-x-1/2
                   transform bg-linear-to-r from-primary to-primary/80
@@ -169,8 +170,9 @@ export function NavigationBar() {
               </div>
             ))}
 
-            {/* Theme Toggle */}
-            <div className="ml-2 border-l border-border/30 pl-2">
+            {/* Sync Status & Theme Toggle */}
+            <div className="ml-2 flex items-center gap-1 border-l border-border/30 pl-2">
+              {session && <SyncStatus />}
               <ThemeToggle variant="ghost" align="end" />
             </div>
           </div>
@@ -183,41 +185,41 @@ export function NavigationBar() {
           >
             {session
               ? (
-                  <AccountDialog>
-                    <Button
-                      variant="ghost"
-                      className="flex items-center gap-2 px-3"
-                      data-profile-button
-                    >
-                      <Avatar className="h-7 w-7">
-                        <AvatarImage
-                          src={user?.image || undefined}
-                          alt={user?.name || 'User'}
-                        />
-                        <AvatarFallback className={`
+                <AccountDialog>
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2 px-3"
+                    data-profile-button
+                  >
+                    <Avatar className="h-7 w-7">
+                      <AvatarImage
+                        src={user?.image || undefined}
+                        alt={user?.name || 'User'}
+                      />
+                      <AvatarFallback className={`
                           bg-primary text-xs text-primary-foreground
                         `}
-                        >
-                          {fallbackText}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium">
-                        {user?.name || 'Account'}
-                      </span>
-                    </Button>
-                  </AccountDialog>
-                )
-              : (
-                  <Button
-                    onClick={handleGoogleSignIn}
-                    variant="default"
-                    className="gap-2"
-                    data-login-button
-                  >
-                    <LogIn className="h-4 w-4" />
-                    Sign In
+                      >
+                        {fallbackText}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm font-medium">
+                      {user?.name || 'Account'}
+                    </span>
                   </Button>
-                )}
+                </AccountDialog>
+              )
+              : (
+                <Button
+                  onClick={handleGoogleSignIn}
+                  variant="default"
+                  className="gap-2"
+                  data-login-button
+                >
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                </Button>
+              )}
           </div>
 
           {/* Mobile Menu Button + Theme Toggle */}
@@ -266,44 +268,44 @@ export function NavigationBar() {
                     <div key={item.label} className="group relative">
                       {item.isExternal
                         ? (
-                            <a
-                              href={item.href}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`
+                          <a
+                            href={item.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`
                                 flex w-full items-center justify-between
                                 rounded-lg px-4 py-3 text-sm font-medium
                                 text-muted-foreground transition-all
                                 duration-300
                                 hover:bg-accent/50 hover:text-foreground
                               `}
-                              onClick={() => setIsOpen(false)}
-                            >
-                              <span>{item.label}</span>
-                              {item.label === 'GitHub'
-                                ? (
-                                    <Github className="h-4 w-4" />
-                                  )
-                                : (
-                                    <ExternalLink className="h-4 w-4" />
-                                  )}
-                            </a>
-                          )
+                            onClick={() => setIsOpen(false)}
+                          >
+                            <span>{item.label}</span>
+                            {item.label === 'GitHub'
+                              ? (
+                                <Github className="h-4 w-4" />
+                              )
+                              : (
+                                <ExternalLink className="h-4 w-4" />
+                              )}
+                          </a>
+                        )
                         : (
-                            <Link
-                              to={item.href}
-                              onClick={handleNavClick}
-                              className={`
+                          <Link
+                            to={item.href}
+                            onClick={handleNavClick}
+                            className={`
                                 flex w-full items-center rounded-lg px-4 py-3
                                 text-left text-sm font-medium
                                 text-muted-foreground transition-all
                                 duration-300
                                 hover:bg-accent/50 hover:text-foreground
                               `}
-                            >
-                              {item.label}
-                            </Link>
-                          )}
+                          >
+                            {item.label}
+                          </Link>
+                        )}
                     </div>
                   ))}
                 </div>
@@ -312,46 +314,46 @@ export function NavigationBar() {
                 <div className="border-t border-border/50 pt-4">
                   {session
                     ? (
-                        <div
-                          className={`
+                      <div
+                        className={`
                             flex items-center gap-3 rounded-lg bg-accent/30 px-4
                             py-3
                           `}
-                          data-profile-button
-                        >
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage
-                              src={user?.image || undefined}
-                              alt={user?.name || 'User'}
-                            />
-                            <AvatarFallback className={`
+                        data-profile-button
+                      >
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src={user?.image || undefined}
+                            alt={user?.name || 'User'}
+                          />
+                          <AvatarFallback className={`
                               bg-primary text-sm text-primary-foreground
                             `}
-                            >
-                              {fallbackText}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">
-                              {user?.name || 'User'}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {user?.email}
-                            </p>
-                          </div>
+                          >
+                            {fallbackText}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">
+                            {user?.name || 'User'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {user?.email}
+                          </p>
                         </div>
-                      )
+                      </div>
+                    )
                     : (
-                        <Button
-                          onClick={handleGoogleSignIn}
-                          variant="default"
-                          className="w-full gap-2"
-                          data-login-button
-                        >
-                          <LogIn className="h-4 w-4" />
-                          Sign In with Google
-                        </Button>
-                      )}
+                      <Button
+                        onClick={handleGoogleSignIn}
+                        variant="default"
+                        className="w-full gap-2"
+                        data-login-button
+                      >
+                        <LogIn className="h-4 w-4" />
+                        Sign In with Google
+                      </Button>
+                    )}
                 </div>
               </SheetContent>
             </Sheet>
