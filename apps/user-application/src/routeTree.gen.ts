@@ -19,6 +19,7 @@ import { Route as AuthAppProgressRouteImport } from './routes/_auth/app/progress
 import { Route as AuthAppProfileRouteImport } from './routes/_auth/app/profile'
 import { Route as AuthAppGroupsRouteImport } from './routes/_auth/app/groups'
 import { Route as AuthAppSubjectsIndexRouteImport } from './routes/_auth/app/subjects.index'
+import { Route as AuthAppTestSummaryLessonIdRouteImport } from './routes/_auth/app/test-summary.$lessonId'
 import { Route as AuthAppSubjectsSubjectIdRouteImport } from './routes/_auth/app/subjects.$subjectId'
 import { Route as AuthAppPolarSubscriptionsRouteImport } from './routes/_auth/app/polar/subscriptions'
 import { Route as AuthAppPolarPortalRouteImport } from './routes/_auth/app/polar/portal'
@@ -78,6 +79,12 @@ const AuthAppSubjectsIndexRoute = AuthAppSubjectsIndexRouteImport.update({
   path: '/app/subjects/',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const AuthAppTestSummaryLessonIdRoute =
+  AuthAppTestSummaryLessonIdRouteImport.update({
+    id: '/app/test-summary/$lessonId',
+    path: '/app/test-summary/$lessonId',
+    getParentRoute: () => AuthRouteRoute,
+  } as any)
 const AuthAppSubjectsSubjectIdRoute =
   AuthAppSubjectsSubjectIdRouteImport.update({
     id: '/app/subjects/$subjectId',
@@ -134,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/app/polar/portal': typeof AuthAppPolarPortalRoute
   '/app/polar/subscriptions': typeof AuthAppPolarSubscriptionsRoute
   '/app/subjects/$subjectId': typeof AuthAppSubjectsSubjectIdRoute
+  '/app/test-summary/$lessonId': typeof AuthAppTestSummaryLessonIdRoute
   '/app/subjects': typeof AuthAppSubjectsIndexRoute
   '/app/polar/checkout/success': typeof AuthAppPolarCheckoutSuccessRoute
 }
@@ -152,6 +160,7 @@ export interface FileRoutesByTo {
   '/app/polar/portal': typeof AuthAppPolarPortalRoute
   '/app/polar/subscriptions': typeof AuthAppPolarSubscriptionsRoute
   '/app/subjects/$subjectId': typeof AuthAppSubjectsSubjectIdRoute
+  '/app/test-summary/$lessonId': typeof AuthAppTestSummaryLessonIdRoute
   '/app/subjects': typeof AuthAppSubjectsIndexRoute
   '/app/polar/checkout/success': typeof AuthAppPolarCheckoutSuccessRoute
 }
@@ -172,6 +181,7 @@ export interface FileRoutesById {
   '/_auth/app/polar/portal': typeof AuthAppPolarPortalRoute
   '/_auth/app/polar/subscriptions': typeof AuthAppPolarSubscriptionsRoute
   '/_auth/app/subjects/$subjectId': typeof AuthAppSubjectsSubjectIdRoute
+  '/_auth/app/test-summary/$lessonId': typeof AuthAppTestSummaryLessonIdRoute
   '/_auth/app/subjects/': typeof AuthAppSubjectsIndexRoute
   '/_auth/app/polar/checkout/success': typeof AuthAppPolarCheckoutSuccessRoute
 }
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/app/polar/portal'
     | '/app/polar/subscriptions'
     | '/app/subjects/$subjectId'
+    | '/app/test-summary/$lessonId'
     | '/app/subjects'
     | '/app/polar/checkout/success'
   fileRoutesByTo: FileRoutesByTo
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/app/polar/portal'
     | '/app/polar/subscriptions'
     | '/app/subjects/$subjectId'
+    | '/app/test-summary/$lessonId'
     | '/app/subjects'
     | '/app/polar/checkout/success'
   id:
@@ -229,6 +241,7 @@ export interface FileRouteTypes {
     | '/_auth/app/polar/portal'
     | '/_auth/app/polar/subscriptions'
     | '/_auth/app/subjects/$subjectId'
+    | '/_auth/app/test-summary/$lessonId'
     | '/_auth/app/subjects/'
     | '/_auth/app/polar/checkout/success'
   fileRoutesById: FileRoutesById
@@ -313,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAppSubjectsIndexRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_auth/app/test-summary/$lessonId': {
+      id: '/_auth/app/test-summary/$lessonId'
+      path: '/app/test-summary/$lessonId'
+      fullPath: '/app/test-summary/$lessonId'
+      preLoaderRoute: typeof AuthAppTestSummaryLessonIdRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
     '/_auth/app/subjects/$subjectId': {
       id: '/_auth/app/subjects/$subjectId'
       path: '/app/subjects/$subjectId'
@@ -376,6 +396,7 @@ interface AuthRouteRouteChildren {
   AuthAppPolarPortalRoute: typeof AuthAppPolarPortalRoute
   AuthAppPolarSubscriptionsRoute: typeof AuthAppPolarSubscriptionsRoute
   AuthAppSubjectsSubjectIdRoute: typeof AuthAppSubjectsSubjectIdRoute
+  AuthAppTestSummaryLessonIdRoute: typeof AuthAppTestSummaryLessonIdRoute
   AuthAppSubjectsIndexRoute: typeof AuthAppSubjectsIndexRoute
   AuthAppPolarCheckoutSuccessRoute: typeof AuthAppPolarCheckoutSuccessRoute
 }
@@ -391,6 +412,7 @@ const AuthRouteRouteChildren: AuthRouteRouteChildren = {
   AuthAppPolarPortalRoute: AuthAppPolarPortalRoute,
   AuthAppPolarSubscriptionsRoute: AuthAppPolarSubscriptionsRoute,
   AuthAppSubjectsSubjectIdRoute: AuthAppSubjectsSubjectIdRoute,
+  AuthAppTestSummaryLessonIdRoute: AuthAppTestSummaryLessonIdRoute,
   AuthAppSubjectsIndexRoute: AuthAppSubjectsIndexRoute,
   AuthAppPolarCheckoutSuccessRoute: AuthAppPolarCheckoutSuccessRoute,
 }

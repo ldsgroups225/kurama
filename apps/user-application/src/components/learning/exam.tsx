@@ -1,7 +1,7 @@
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { CheckCircle2, XCircle, Clock } from 'lucide-react'
+import { CheckCircle2, Clock, XCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 
 interface ExamProps {
   card: any
@@ -38,7 +38,13 @@ export function Exam({ card, cardIndex, totalCards, timeRemaining, onAnswer }: E
         <CardContent className="p-6">
           <div className="mb-4 flex items-center justify-between">
             <span className="text-sm font-medium text-muted-foreground">
-              Question {cardIndex + 1} / {totalCards}
+              Question
+              {' '}
+              {cardIndex + 1}
+              {' '}
+              /
+              {' '}
+              {totalCards}
             </span>
             <Badge variant="secondary" className="bg-gradient-streak text-white">
               Mode Examen

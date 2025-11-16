@@ -1,15 +1,18 @@
+import type { TestSettings } from '@/components/learning/test-settings-sheet'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { Loader2 } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Flashcard } from '@/components/learning/flashcard'
 import { Quiz } from '@/components/learning/quiz'
-import { Exam } from '@/components/learning/exam'
 import { QuizSettingsSheet } from '@/components/learning/quiz-settings-sheet'
 import { SessionControls } from '@/components/learning/session-controls'
 import { SessionCounterBadge } from '@/components/learning/session-counter-badge'
 import { SessionHeader } from '@/components/learning/session-header'
 import { SessionSettingsDialog } from '@/components/learning/session-settings-dialog'
+import { Test } from '@/components/learning/test'
+import { TestLoading } from '@/components/learning/test-loading'
+import { TestSettingsSheet } from '@/components/learning/test-settings-sheet'
 import { AppHeader } from '@/components/main'
 import { getLessonDetails } from '@/core/functions/learning'
 import { useAutoplay } from '@/hooks/use-autoplay'
@@ -24,7 +27,16 @@ interface SearchParams {
   mode?: 'flashcards' | 'quiz' | 'exam'
 }
 
-type QuizMode = 'memorize-all' | 'review-starred' | 'quick-review'
+interface TestAnswer {
+  question: string
+  userAnswer: string
+  correctAnswer: string
+  isCorrect: boolean
+  questionType: string
+}
+
+// Reserved for spaced repetition algorithm
+// type QuizMode = 'memorize-all' | 'review-starred' | 'quick-review'
 
 export const Route = createFileRoute('/_auth/app/lesson-session/$lessonId')({
   component: SessionPage,
@@ -43,7 +55,13 @@ function SessionPage() {
   // Quiz mode state
   const [showQuizSettings, setShowQuizSettings] = useState(mode === 'quiz')
   // const [quizMode, setQuizMode] = useState<QuizMode | null>(null) // Reserved for spaced repetition
-  const [hasStartedQuiz, setHasStartedQuiz] = useState(false)
+
+  // Test mode state
+  const [showTestSettings, setShowTestSettings] = useState(mode === 'exam')
+  const [testSettings, setTestSettings] = useState<TestSettings | null>(null)
+  const [hasStartedTest, setHasStartedTest] = useState(false)
+  const [testAnswers, setTestAnswers] = useState<TestAnswer[]>([])
+  const [showTestLoading, setShowTestLoading] = useState(false)
 
   // Session state management
   const {
@@ -84,7 +102,7 @@ function SessionPage() {
     queryFn: async () => await getLessonDetails({ data: Number(lessonId) }),
   })
 
-  const cards = (lesson as any)?.cards ?? []
+  const cards = useMemo(() => (lesson as any)?.cards ?? [], [lesson])
   const currentCard = cards[currentCardIndex]
   const progress = cards.length > 0 ? ((currentCardIndex + 1) / cards.length) * 100 : 0
   const isLastCard = currentCardIndex === cards.length - 1
@@ -203,19 +221,109 @@ function SessionPage() {
     onDragEnd: () => setIsDragging(false),
   })
 
+  // Generate test questions based on settings
+  // eslint-disable react-hooks/purity
+  const testQuestions = useMemo(() => {
+    if (!testSettings || !hasStartedTest)
+      return []
+
+    const availableTypes: Array<'multiple-choice' | 'written' | 'true-false'> = []
+    if (testSettings.multipleChoice)
+      availableTypes.push('multiple-choice')
+    if (testSettings.trueFalse)
+      availableTypes.push('true-false')
+    if (testSettings.written)
+      availableTypes.push('written')
+
+    if (availableTypes.length === 0)
+      return []
+
+    // Fisher-Yates shuffle for proper randomization
+    const shuffled = [...cards]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      // eslint-disable-next-line react-hooks/purity
+      const j = Math.floor(Math.random() * (i + 1))
+        ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    const selected = shuffled.slice(0, testSettings.questionCount)
+
+    // Assign random question types
+    return selected.map((card) => {
+      // eslint-disable-next-line react-hooks/purity
+      const randomType = availableTypes[Math.floor(Math.random() * availableTypes.length)]
+      return {
+        ...card,
+        questionType: randomType,
+      }
+    })
+  }, [testSettings, hasStartedTest, cards])
+
   // Handle quiz mode start - MUST be before any conditional returns
-  const handleStartQuiz = useCallback((_selectedMode: QuizMode) => {
-    // setQuizMode(selectedMode) // Reserved for spaced repetition algorithm
-    setHasStartedQuiz(true)
+  const handleStartQuiz = useCallback(() => {
+    // Reserved for spaced repetition algorithm
     setShowQuizSettings(false)
   }, [])
 
-  // Show quiz settings sheet on mount if mode is quiz and not started
-  useEffect(() => {
-    if (mode === 'quiz' && !hasStartedQuiz) {
-      setShowQuizSettings(true)
+  // Handle test mode start
+  const handleStartTest = useCallback((settings: TestSettings) => {
+    setTestSettings(settings)
+    setHasStartedTest(true)
+    setShowTestSettings(false)
+    setTestAnswers([])
+    setCurrentCardIndex(0)
+  }, [setCurrentCardIndex])
+
+  // Handle test answer
+  const handleTestAnswer = useCallback((isCorrect: boolean, userAnswer: string) => {
+    const currentQuestion = testQuestions[currentCardIndex]
+    const correctAnswer = testSettings?.answerWith === 'term'
+      ? currentQuestion.frontContent || currentQuestion.front
+      : currentQuestion.backContent || currentQuestion.back
+
+    const newAnswer: TestAnswer = {
+      question: testSettings?.answerWith === 'term'
+        ? currentQuestion.backContent || currentQuestion.back
+        : currentQuestion.frontContent || currentQuestion.front,
+      userAnswer,
+      correctAnswer,
+      isCorrect,
+      questionType: currentQuestion.questionType,
     }
-  }, [mode, hasStartedQuiz])
+
+    // Record answer
+    setTestAnswers(prev => [...prev, newAnswer])
+
+    // Update stats
+    incrementStat(isCorrect ? 'correct' : 'incorrect')
+
+    if (currentCardIndex === testQuestions.length - 1) {
+      // Show loading screen
+      setShowTestLoading(true)
+
+      // Navigate to summary after 2 seconds
+      setTimeout(() => {
+        const finalCorrect = isCorrect ? sessionStats.correct + 1 : sessionStats.correct
+        const finalIncorrect = !isCorrect ? sessionStats.incorrect + 1 : sessionStats.incorrect
+
+        navigate({
+          to: '/app/test-summary/$lessonId',
+          params: { lessonId },
+          search: {
+            correct: finalCorrect,
+            incorrect: finalIncorrect,
+            total: testQuestions.length,
+            answers: JSON.stringify([...testAnswers, newAnswer]),
+          },
+        })
+      }, 2000)
+    }
+    else {
+      setCurrentCardIndex(prev => prev + 1)
+    }
+  }, [currentCardIndex, testQuestions, testSettings, sessionStats, navigate, lessonId, testAnswers, incrementStat, setCurrentCardIndex])
+
+  // Show quiz/test settings based on mode - state is initialized correctly above
+  // No need for useEffect since state is initialized with the correct value
 
   // Autoplay functionality
   useAutoplay({
@@ -258,22 +366,38 @@ function SessionPage() {
       case 'quiz':
         return (
           <Quiz
+            key={currentCardIndex}
             card={currentCard}
             cardIndex={currentCardIndex}
             totalCards={cards.length}
             questionType="multiple-choice"
-            onAnswer={(isCorrect) => handleResponse(isCorrect ? 'correct' : 'incorrect')}
+            onAnswer={isCorrect => handleResponse(isCorrect ? 'correct' : 'incorrect')}
           />
         )
       case 'exam':
-        return (
-          <Exam
-            card={currentCard}
-            cardIndex={currentCardIndex}
-            totalCards={cards.length}
-            onAnswer={(isCorrect) => handleResponse(isCorrect ? 'correct' : 'incorrect')}
-          />
-        )
+        // Show loading screen
+        if (showTestLoading) {
+          return <TestLoading />
+        }
+
+        // Show test questions
+        if (hasStartedTest && testQuestions.length > 0) {
+          const currentQuestion = testQuestions[currentCardIndex]
+          return (
+            <Test
+              key={currentCardIndex}
+              card={currentQuestion}
+              cardIndex={currentCardIndex}
+              totalCards={testQuestions.length}
+              questionType={currentQuestion.questionType}
+              answerWith={testSettings?.answerWith || 'term'}
+              cardSide={testSettings?.cardSide || 'term'}
+              onAnswer={handleTestAnswer}
+            />
+          )
+        }
+
+        return null
       case 'flashcards':
       default:
         return (
@@ -356,6 +480,16 @@ function SessionPage() {
           totalCards={cards.length}
           onOpenChange={setShowQuizSettings}
           onStartQuiz={handleStartQuiz}
+        />
+      )}
+
+      {mode === 'exam' && (
+        <TestSettingsSheet
+          open={showTestSettings}
+          lessonTitle={(lesson as any)?.title || 'Leçon'}
+          totalCards={cards.length}
+          onOpenChange={setShowTestSettings}
+          onStartTest={handleStartTest}
         />
       )}
     </div>

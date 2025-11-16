@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { CheckCircle2, Star, Volume2, XCircle } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
-import { CheckCircle2, XCircle, Volume2, Star } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 interface QuizProps {
@@ -21,22 +21,14 @@ export function Quiz({ card, cardIndex, totalCards, questionType = 'multiple-cho
   const [showAnswer, setShowAnswer] = useState(false)
   const [userAnswer, setUserAnswer] = useState('')
 
-  // Reset state when card changes
-  useEffect(() => {
-    setSelectedAnswer(null)
-    setQuestionState('answering')
-    setShowAnswer(false)
-    setUserAnswer('')
-  }, [cardIndex])
-
-  if (!card) {
-    return null
-  }
-
-  const correctAnswer = card.backContent || card.back
+  const correctAnswer = card?.backContent || card?.back
 
   // Memoize shuffled options to prevent re-shuffling on re-renders
+  // eslint-disable react-hooks/purity
   const options = useMemo(() => {
+    if (!correctAnswer)
+      return []
+
     // In a real implementation, you'd have actual distractors from the database
     // For now, we'll create placeholder options
     const opts = [
@@ -46,12 +38,22 @@ export function Quiz({ card, cardIndex, totalCards, questionType = 'multiple-cho
       'Option incorrecte 3',
     ]
 
-    // Shuffle options once per card
-    return opts.sort(() => Math.random() - 0.5)
-  }, [cardIndex, correctAnswer])
+    // Fisher-Yates shuffle for proper randomization
+    for (let i = opts.length - 1; i > 0; i--) {
+      // eslint-disable-next-line react-hooks/purity
+      const j = Math.floor(Math.random() * (i + 1))
+        ;[opts[i], opts[j]] = [opts[j], opts[i]]
+    }
+    return opts
+  }, [correctAnswer])
+
+  if (!card) {
+    return null
+  }
 
   const handleOptionSelect = (index: number) => {
-    if (questionState !== 'answering') return
+    if (questionState !== 'answering')
+      return
 
     setSelectedAnswer(index)
     const isCorrect = options[index] === correctAnswer
@@ -98,17 +100,18 @@ export function Quiz({ card, cardIndex, totalCards, questionType = 'multiple-cho
   const renderMultipleChoice = () => (
     <>
       <div className="space-y-3">
-        {options.map((option, index) => {
-          const isSelected = selectedAnswer === index
+        {options.map((option) => {
+          const optionIndex = options.indexOf(option)
+          const isSelected = selectedAnswer === optionIndex
           const isCorrect = option === correctAnswer
           const showCorrectState = questionState !== 'answering' && isCorrect
           const showIncorrectState = questionState !== 'answering' && isSelected && !isCorrect
 
           return (
             <button
-              key={index}
+              key={`${option}-${optionIndex}`}
               type="button"
-              onClick={() => handleOptionSelect(index)}
+              onClick={() => handleOptionSelect(optionIndex)}
               disabled={questionState !== 'answering'}
               className={cn(
                 `
@@ -139,7 +142,7 @@ export function Quiz({ card, cardIndex, totalCards, questionType = 'multiple-cho
                     ? <CheckCircle2 className="h-5 w-5" />
                     : showIncorrectState
                       ? <XCircle className="h-5 w-5" />
-                      : String.fromCharCode(65 + index)}
+                      : String.fromCharCode(65 + optionIndex)}
                 </div>
                 <span className="flex-1 font-medium">{option}</span>
               </div>
@@ -167,7 +170,7 @@ export function Quiz({ card, cardIndex, totalCards, questionType = 'multiple-cho
           <input
             type="text"
             value={userAnswer}
-            onChange={(e) => setUserAnswer(e.target.value)}
+            onChange={e => setUserAnswer(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && userAnswer.trim()) {
                 handleWrittenSubmit()
@@ -209,7 +212,8 @@ export function Quiz({ card, cardIndex, totalCards, questionType = 'multiple-cho
   )
 
   const renderFeedback = () => {
-    if (questionState === 'answering') return null
+    if (questionState === 'answering')
+      return null
 
     return (
       <Card
@@ -224,24 +228,24 @@ export function Quiz({ card, cardIndex, totalCards, questionType = 'multiple-cho
             <div className="flex items-center gap-2">
               {questionState === 'correct'
                 ? (
-                  <>
-                    <CheckCircle2 className="h-5 w-5 text-success" />
-                    <span className="font-semibold text-success">Vous maîtrisez le sujet !</span>
-                  </>
-                )
-                : questionState === 'learning'
-                  ? (
                     <>
-                      <span className="text-lg">📚</span>
-                      <span className="font-semibold text-warning">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
+                      <CheckCircle2 className="h-5 w-5 text-success" />
+                      <span className="font-semibold text-success">Vous maîtrisez le sujet !</span>
                     </>
                   )
+                : questionState === 'learning'
+                  ? (
+                      <>
+                        <span className="text-lg">📚</span>
+                        <span className="font-semibold text-warning">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
+                      </>
+                    )
                   : (
-                    <>
-                      <XCircle className="h-5 w-5 text-error" />
-                      <span className="font-semibold text-error">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
-                    </>
-                  )}
+                      <>
+                        <XCircle className="h-5 w-5 text-error" />
+                        <span className="font-semibold text-error">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
+                      </>
+                    )}
             </div>
 
             {showAnswer && (

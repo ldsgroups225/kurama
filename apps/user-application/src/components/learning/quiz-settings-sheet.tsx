@@ -1,4 +1,7 @@
+import { BookOpen, Target, Zap } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Sheet,
   SheetContent,
@@ -7,9 +10,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
-import { BookOpen, Target, Zap } from 'lucide-react'
 
 interface QuizSettingsSheetProps {
   open: boolean
