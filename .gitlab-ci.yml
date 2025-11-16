@@ -68,15 +68,14 @@ deploy:backend:production:
   stage: deploy
   script:
     - cd apps/data-service
+    - export CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID
+    - export CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN
     - npx wrangler deploy
   environment:
     name: production/backend
     url: https://api.kurama.app
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  variables:
-    CLOUDFLARE_API_TOKEN: $CLOUDFLARE_API_TOKEN
-    CLOUDFLARE_ACCOUNT_ID: $CLOUDFLARE_ACCOUNT_ID
 
 # Deploy Frontend to Production
 deploy:frontend:production:
@@ -89,15 +88,14 @@ deploy:frontend:production:
   script:
     - cd apps/user-application
     - pnpm run build
+    - export CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID
+    - export CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN
     - npx wrangler pages deploy dist/client --project-name=kurama
   environment:
     name: production/frontend
     url: https://kurama.app
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  variables:
-    CLOUDFLARE_API_TOKEN: $CLOUDFLARE_API_TOKEN
-    CLOUDFLARE_ACCOUNT_ID: $CLOUDFLARE_ACCOUNT_ID
 
 # Deploy Backend Preview (Merge Requests)
 deploy:backend:preview:
@@ -107,6 +105,8 @@ deploy:backend:preview:
   stage: deploy
   script:
     - cd apps/data-service
+    - export CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID
+    - export CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN
     - npx wrangler deploy --env preview
   environment:
     name: preview/backend-$CI_MERGE_REQUEST_IID
@@ -114,9 +114,6 @@ deploy:backend:preview:
     on_stop: cleanup:backend:preview
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  variables:
-    CLOUDFLARE_API_TOKEN: $CLOUDFLARE_API_TOKEN
-    CLOUDFLARE_ACCOUNT_ID: $CLOUDFLARE_ACCOUNT_ID
 
 # Deploy Frontend Preview (Merge Requests)
 deploy:frontend:preview:
@@ -129,6 +126,8 @@ deploy:frontend:preview:
   script:
     - cd apps/user-application
     - pnpm run build
+    - export CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID
+    - export CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN
     - npx wrangler pages deploy dist/client --project-name=kurama --branch=preview-$CI_MERGE_REQUEST_IID
   environment:
     name: preview/frontend-$CI_MERGE_REQUEST_IID
@@ -136,9 +135,6 @@ deploy:frontend:preview:
     on_stop: cleanup:frontend:preview
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  variables:
-    CLOUDFLARE_API_TOKEN: $CLOUDFLARE_API_TOKEN
-    CLOUDFLARE_ACCOUNT_ID: $CLOUDFLARE_ACCOUNT_ID
 
 # Cleanup preview environments
 cleanup:backend:preview:
