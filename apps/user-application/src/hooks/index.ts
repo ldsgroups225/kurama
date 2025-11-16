@@ -1,3 +1,4 @@
+export { restoreAuthSession, useAuthPersistence, validateCachedToken } from './use-auth-persistence'
 export { useAutoplay } from './use-autoplay'
 export { useCardHeight } from './use-card-height'
 export { useCardSwipeAnimations } from './use-card-swipe-animations'

@@ -10,6 +10,7 @@ import {
   UpdatePrompt,
 } from '@/components/pwa'
 import { getProfileStatus, getUserProfile } from '@/core/functions/profile'
+import { useAuthPersistence } from '@/hooks'
 import { userProfileAtom } from '@/lib/atoms'
 import { authClient } from '@/lib/auth-client'
 
@@ -20,6 +21,9 @@ export const Route = createFileRoute('/_auth')({
 function RouteComponent() {
   const session = authClient.useSession()
   const setUserProfile = useSetAtom(userProfileAtom)
+
+  // Enable auth token persistence
+  useAuthPersistence()
 
   // Check profile completion status when user is authenticated
   const { data: profileStatus, isLoading: isLoadingProfile } = useQuery({
