@@ -242,19 +242,105 @@
   --color-info-from: var(--info-from);
   --color-info-to: var(--info-to);
   --color-info-bg: var(--info-bg);
+
+  /* Safe Area Spacings */
+  --spacing-safe-top: env(safe-area-inset-top);
+  --spacing-safe-bottom: env(safe-area-inset-bottom);
+  --spacing-safe-left: env(safe-area-inset-left);
+  --spacing-safe-right: env(safe-area-inset-right);
+
+  /* Native Font Stack - San Francisco (iOS), Roboto (Android), Segoe UI (Windows) */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+
+  /* NATIVE APP GLOBAL RESET */
+  :root {
+    /* App-like sizing */
+    height: 100%;
+    width: 100%;
+    /* Remove tap highlight on mobile */
+    -webkit-tap-highlight-color: transparent;
+    /* Font smoothing for native look */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Improve text rendering */
+    text-rendering: optimizeLegibility;
+    /* Prevent font boosting/scaling on orientation change */
+    -webkit-text-size-adjust: 100%;
+    /* Prevent accidental zooming on inputs */
+    touch-action: manipulation;
+    /* Set base font family to native stack */
+    font-family: var(--font-sans);
   }
 
+  html,
+  body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    /* Prevent pull-to-refresh/rubber-banding on the body itself */
+    overscroll-behavior-y: none;
+    /* Disable text selection globally to feel like an app UI */
+    -webkit-user-select: none;
+    user-select: none;
+    /* Disable callout menus (long press context menu) */
+    -webkit-touch-callout: none;
+  }
+
+  /* NATIVE TYPOGRAPHY POLISH */
   body {
     @apply bg-background text-foreground;
+    /* Set base font size to 17px (iOS standard) or slightly larger than web default */
+    /* Tracking tight makes it look more like iOS UI */
+    @apply text-[17px] leading-relaxed tracking-tight;
+  }
+
+  /* Re-enable text selection for inputs and enhance touch targets */
+  input,
+  textarea,
+  [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+    /* Remove iOS standard styles */
+    -webkit-appearance: none;
+    appearance: none;
+    /* Prevent iOS zoom on focus (must be at least 16px) */
+    font-size: 16px !important;
+  }
+
+  /* Select specific tweaks */
+  select {
+    -webkit-appearance: none;
+    appearance: none;
+    font-size: 16px !important;
+  }
+
+  /* Disable drag for images (ghost image effect) */
+  img,
+  a {
+    -webkit-user-drag: none;
+  }
+
+  /* Hide Scrollbars Globally but allow scrolling */
+  *::-webkit-scrollbar {
+    display: none;
+  }
+
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
   }
 }
 
 @layer utilities {
+
   /* XP System Gradients */
   .bg-gradient-xp {
     background: linear-gradient(to bottom right, var(--xp-from), var(--xp-to));
@@ -481,5 +567,51 @@
 
   .bg-subject-philosophy {
     background-color: oklch(0.97 0.03 330);
+  }
+}
+
+/* NATIVE PWA UTILITIES */
+
+/* Safe Area Utilities */
+@utility pt-safe {
+  padding-top: var(--spacing-safe-top);
+}
+
+@utility pb-safe {
+  padding-bottom: var(--spacing-safe-bottom);
+}
+
+@utility pl-safe {
+  padding-left: var(--spacing-safe-left);
+}
+
+@utility pr-safe {
+  padding-right: var(--spacing-safe-right);
+}
+
+@utility mt-safe {
+  margin-top: var(--spacing-safe-top);
+}
+
+@utility mb-safe {
+  margin-bottom: var(--spacing-safe-bottom);
+}
+
+/* Interaction Feedback */
+@utility active-press {
+  /* Native-like press effect: Scale down slightly and reduce opacity */
+  @apply transition-all duration-75 ease-out active:scale-[0.97] active:opacity-80;
+}
+
+/* Utility to hide scrollbar but keep scrolling functionality */
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+
+  /* Firefox */
+  &::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari and Opera */
   }
 }

@@ -2,7 +2,9 @@
   "cSpell.words": [
     "BEPC",
     "dexie",
-    "kurama"
+    "kurama",
+    "tailwindcss"
   ],
-  "typescript.autoClosingTags": false
+  "typescript.autoClosingTags": false,
+  "css.lint.unknownAtRules": "ignore"
 }
