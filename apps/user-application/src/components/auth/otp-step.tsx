@@ -252,32 +252,32 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
       <div className="text-center">
         {canResend
           ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleResend}
-              className={`
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleResend}
+                className={`
                   text-orange-600
                   hover:text-orange-700
                   dark:text-orange-500 dark:hover:text-orange-400
                 `}
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Renvoyer le code
-            </Button>
-          )
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Renvoyer le code
+              </Button>
+            )
           : (
-            <p className={`
+              <p className={`
                 text-sm text-zinc-500
                 dark:text-zinc-400
               `}
-            >
-              Renvoyer le code dans
-              {' '}
-              {countdown}
-              s
-            </p>
-          )}
+              >
+                Renvoyer le code dans
+                {' '}
+                {countdown}
+                s
+              </p>
+            )}
       </div>
     </div>
   )

@@ -250,11 +250,12 @@
   --spacing-safe-right: env(safe-area-inset-right);
 
   /* Native Font Stack - San Francisco (iOS), Roboto (Android), Segoe UI (Windows) */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
 @layer base {
-
   /* NATIVE APP GLOBAL RESET */
   :root {
     /* App-like sizing */
@@ -340,7 +341,6 @@
 }
 
 @layer utilities {
-
   /* XP System Gradients */
   .bg-gradient-xp {
     background: linear-gradient(to bottom right, var(--xp-from), var(--xp-to));
