@@ -51,7 +51,10 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
       if (signInError) {
         setError(signInError.message || 'Code invalide. Veuillez réessayer.')
         setOtp(['', '', '', '', '', ''])
-        inputRefs.current[0]?.focus()
+        // Delay focus to ensure keyboard stays open
+        setTimeout(() => {
+          inputRefs.current[0]?.focus()
+        }, 100)
         setIsLoading(false)
         return
       }
@@ -62,7 +65,10 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
     catch {
       setError('Une erreur s\'est produite. Veuillez réessayer.')
       setOtp(['', '', '', '', '', ''])
-      inputRefs.current[0]?.focus()
+      // Delay focus to ensure keyboard stays open
+      setTimeout(() => {
+        inputRefs.current[0]?.focus()
+      }, 100)
       setIsLoading(false)
     }
   }
@@ -78,12 +84,18 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
 
     // Auto-focus next input
     if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus()
+      // Use setTimeout to prevent keyboard from closing
+      setTimeout(() => {
+        inputRefs.current[index + 1]?.focus()
+      }, 0)
     }
 
-    // Auto-submit when all filled
+    // Auto-submit when all filled (with delay to keep keyboard open)
     if (newOtp.every(digit => digit) && index === 5) {
-      handleSubmit(newOtp.join(''))
+      // Delay submission slightly to ensure last input is properly focused
+      setTimeout(() => {
+        handleSubmit(newOtp.join(''))
+      }, 100)
     }
   }
 
@@ -104,8 +116,17 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
     const newOtp = digits.concat(padding).slice(0, 6)
     setOtp(newOtp)
 
+    // Focus last filled input to keep keyboard open
+    const lastFilledIndex = Math.min(digits.length - 1, 5)
+    setTimeout(() => {
+      inputRefs.current[lastFilledIndex]?.focus()
+    }, 0)
+
     if (newOtp.every(digit => digit)) {
-      handleSubmit(newOtp.join(''))
+      // Delay submission to keep keyboard open
+      setTimeout(() => {
+        handleSubmit(newOtp.join(''))
+      }, 100)
     }
   }
 
@@ -231,32 +252,32 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
       <div className="text-center">
         {canResend
           ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleResend}
-                className={`
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleResend}
+              className={`
                   text-orange-600
                   hover:text-orange-700
                   dark:text-orange-500 dark:hover:text-orange-400
                 `}
-              >
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Renvoyer le code
-              </Button>
-            )
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Renvoyer le code
+            </Button>
+          )
           : (
-              <p className={`
+            <p className={`
                 text-sm text-zinc-500
                 dark:text-zinc-400
               `}
-              >
-                Renvoyer le code dans
-                {' '}
-                {countdown}
-                s
-              </p>
-            )}
+            >
+              Renvoyer le code dans
+              {' '}
+              {countdown}
+              s
+            </p>
+          )}
       </div>
     </div>
   )
