@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { authClient } from '@/lib/auth-client'
 import { ArrowLeft, Loader2, RefreshCw } from '@/lib/icons'
-import { generateUUID } from '@/utils/generateUUID'
 
 interface OtpStepProps {
   email: string
@@ -18,11 +17,21 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
   const [countdown, setCountdown] = useState(60)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
   const router = useRouter()
+  const hasFocusedRef = useRef(false)
 
   useEffect(() => {
-    // Focus first input on mount
-    inputRefs.current[0]?.focus()
+    // Focus first input on mount with delay to ensure DOM is ready
+    if (!hasFocusedRef.current) {
+      const focusTimer = setTimeout(() => {
+        inputRefs.current[0]?.focus()
+        hasFocusedRef.current = true
+      }, 100)
 
+      return () => clearTimeout(focusTimer)
+    }
+  }, [])
+
+  useEffect(() => {
     // Start countdown
     const timer = setInterval(() => {
       setCountdown((prev) => {
@@ -205,7 +214,7 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
       <div className="flex justify-center gap-2" onPaste={handlePaste}>
         {otp.map((digit, index) => (
           <input
-            key={generateUUID()}
+            key={index}
             ref={(el) => {
               inputRefs.current[index] = el
             }}
@@ -216,6 +225,10 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
             onChange={e => handleChange(index, e.target.value)}
             onKeyDown={e => handleKeyDown(index, e)}
             disabled={isLoading}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
             className={`
               h-14 w-12 rounded-lg border-2 border-zinc-200 bg-white text-center
               text-2xl font-semibold text-zinc-900 transition-all outline-none
@@ -252,32 +265,32 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
       <div className="text-center">
         {canResend
           ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleResend}
-                className={`
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleResend}
+              className={`
                   text-orange-600
                   hover:text-orange-700
                   dark:text-orange-500 dark:hover:text-orange-400
                 `}
-              >
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Renvoyer le code
-              </Button>
-            )
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Renvoyer le code
+            </Button>
+          )
           : (
-              <p className={`
+            <p className={`
                 text-sm text-zinc-500
                 dark:text-zinc-400
               `}
-              >
-                Renvoyer le code dans
-                {' '}
-                {countdown}
-                s
-              </p>
-            )}
+            >
+              Renvoyer le code dans
+              {' '}
+              {countdown}
+              s
+            </p>
+          )}
       </div>
     </div>
   )
