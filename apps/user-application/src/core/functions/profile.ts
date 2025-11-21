@@ -1,9 +1,11 @@
+import type { UserProfileWithRelations } from '@kurama/data-ops/drizzle/schema'
 import { eq } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
 import {
   grades,
   series,
   userProfiles,
+
 } from '@kurama/data-ops/drizzle/schema'
 import { profileSchema } from '@kurama/data-ops/zod-schema/profile'
 import { createServerFn } from '@tanstack/react-start'
@@ -137,7 +139,7 @@ export const submitProfile = createServerFn({ method: 'POST' })
               ? validatedData.childrenMatricules ?? null
               : null,
           isCompleted: true,
-          updatedAt: new Date(),
+          updatedAt: new Date().toISOString(),
         },
       })
 
@@ -149,7 +151,7 @@ export const submitProfile = createServerFn({ method: 'POST' })
  */
 export const getUserProfile = createServerFn()
   .middleware([protectedFunctionMiddleware])
-  .handler(async ({ context }) => {
+  .handler(async ({ context }): Promise<UserProfileWithRelations | undefined> => {
     const db = getDb()
     const { userId } = context
 

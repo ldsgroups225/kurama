@@ -64,25 +64,26 @@ function RouteComponent() {
   // Cache profile data in localStorage when fetched
   // Only update if we have both profile and matching session
   useEffect(() => {
-    if (userProfile && session.data?.user && userProfile.userId === session.data.user.id) {
+    const profile = userProfile
+    if (profile && session.data?.user && profile.userId === session.data.user.id) {
       setUserProfile({
-        userType: userProfile.userType,
-        firstName: userProfile.firstName,
-        lastName: userProfile.lastName,
+        userType: profile.userType,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
         email: session.data.user.email ?? undefined,
         image: session.data.user.image ?? undefined,
         name: session.data.user.name ?? undefined,
-        phone: userProfile.phone ?? undefined,
-        age: userProfile.age ?? undefined,
-        gender: userProfile.gender ?? undefined,
-        city: userProfile.city ?? undefined,
-        idNumber: userProfile.idNumber ?? undefined,
-        gradeName: userProfile.grade?.name ?? undefined,
-        seriesName: userProfile.series?.name ?? undefined,
-        favoriteSubjects: userProfile.favoriteSubjects as string[] | undefined,
-        learningGoals: userProfile.learningGoals ?? undefined,
-        studyTime: userProfile.studyTime ?? undefined,
-        childrenMatricules: userProfile.childrenMatricules as number[] | undefined,
+        phone: profile.phone ?? undefined,
+        age: profile.age ?? undefined,
+        gender: profile.gender ?? undefined,
+        city: profile.city ?? undefined,
+        idNumber: profile.idNumber ?? undefined,
+        gradeName: profile.grade?.name ?? undefined,
+        seriesName: profile.series?.name ?? undefined,
+        favoriteSubjects: profile.favoriteSubjects ?? undefined,
+        learningGoals: profile.learningGoals ?? undefined,
+        studyTime: profile.studyTime ?? undefined,
+        childrenMatricules: profile.childrenMatricules ?? undefined,
       })
     }
   }, [userProfile, session.data, setUserProfile])

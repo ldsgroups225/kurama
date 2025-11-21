@@ -29,7 +29,7 @@ const svtLessons: LessonWithCards[] = [
       difficulty: "medium",
       estimatedDuration: 45,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
     },
     cards: [
       {
@@ -65,7 +65,7 @@ const svtLessons: LessonWithCards[] = [
       difficulty: "hard",
       estimatedDuration: 55,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
     },
     cards: [
       {
@@ -102,7 +102,7 @@ const historyLessons: LessonWithCards[] = [
       difficulty: "medium",
       estimatedDuration: 50,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
     },
     cards: [
       {
@@ -138,7 +138,7 @@ const historyLessons: LessonWithCards[] = [
       difficulty: "medium",
       estimatedDuration: 60,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
     },
     cards: [
       {
@@ -175,7 +175,7 @@ const philosophyLessons: LessonWithCards[] = [
       difficulty: "hard",
       estimatedDuration: 50,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
     },
     cards: [
       {
@@ -205,7 +205,7 @@ const philosophyLessons: LessonWithCards[] = [
       difficulty: "hard",
       estimatedDuration: 55,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
     },
     cards: [
       {
@@ -242,7 +242,7 @@ const economicsLessons: LessonWithCards[] = [
       difficulty: "medium",
       estimatedDuration: 45,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
     },
     cards: [
       {
@@ -278,7 +278,7 @@ const economicsLessons: LessonWithCards[] = [
       difficulty: "medium",
       estimatedDuration: 50,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
     },
     cards: [
       {
@@ -315,7 +315,7 @@ const spanishLessons: LessonWithCards[] = [
       difficulty: "medium",
       estimatedDuration: 40,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
     },
     cards: [
       {

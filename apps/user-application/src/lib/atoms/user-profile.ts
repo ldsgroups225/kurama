@@ -23,7 +23,7 @@ export interface UserProfileData {
   favoriteSubjects?: string[]
   learningGoals?: string
   studyTime?: string
-  childrenMatricules?: number[]
+  childrenMatricules?: string[]
 }
 
 /**

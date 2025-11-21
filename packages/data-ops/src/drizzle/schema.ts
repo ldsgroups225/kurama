@@ -40,10 +40,10 @@ export const authAccount = pgTable("auth_account", {
 	updatedAt: timestamp("updated_at", { mode: 'string' }).notNull(),
 }, (table) => [
 	foreignKey({
-			columns: [table.userId],
-			foreignColumns: [authUser.id],
-			name: "auth_account_user_id_auth_user_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.userId],
+		foreignColumns: [authUser.id],
+		name: "auth_account_user_id_auth_user_id_fk"
+	}).onDelete("cascade"),
 ]);
 
 export const authSession = pgTable("auth_session", {
@@ -57,10 +57,10 @@ export const authSession = pgTable("auth_session", {
 	userId: text("user_id").notNull(),
 }, (table) => [
 	foreignKey({
-			columns: [table.userId],
-			foreignColumns: [authUser.id],
-			name: "auth_session_user_id_auth_user_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.userId],
+		foreignColumns: [authUser.id],
+		name: "auth_session_user_id_auth_user_id_fk"
+	}).onDelete("cascade"),
 	unique("auth_session_token_unique").on(table.token),
 ]);
 
@@ -77,10 +77,10 @@ export const cards = pgTable("cards", {
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	foreignKey({
-			columns: [table.lessonId],
-			foreignColumns: [lessons.id],
-			name: "cards_lesson_id_lessons_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.lessonId],
+		foreignColumns: [lessons.id],
+		name: "cards_lesson_id_lessons_id_fk"
+	}).onDelete("cascade"),
 ]);
 
 export const subjects = pgTable("subjects", {
@@ -127,15 +127,15 @@ export const studySessions = pgTable("study_sessions", {
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	foreignKey({
-			columns: [table.userId],
-			foreignColumns: [authUser.id],
-			name: "study_sessions_user_id_auth_user_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.userId],
+		foreignColumns: [authUser.id],
+		name: "study_sessions_user_id_auth_user_id_fk"
+	}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.lessonId],
-			foreignColumns: [lessons.id],
-			name: "study_sessions_lesson_id_lessons_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.lessonId],
+		foreignColumns: [lessons.id],
+		name: "study_sessions_lesson_id_lessons_id_fk"
+	}).onDelete("cascade"),
 ]);
 
 export const subjectOfferings = pgTable("subject_offerings", {
@@ -147,57 +147,58 @@ export const subjectOfferings = pgTable("subject_offerings", {
 	coefficient: integer().default(1),
 }, (table) => [
 	foreignKey({
-			columns: [table.gradeId],
-			foreignColumns: [grades.id],
-			name: "subject_offerings_grade_id_grades_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.gradeId],
+		foreignColumns: [grades.id],
+		name: "subject_offerings_grade_id_grades_id_fk"
+	}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.subjectId],
-			foreignColumns: [subjects.id],
-			name: "subject_offerings_subject_id_subjects_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.subjectId],
+		foreignColumns: [subjects.id],
+		name: "subject_offerings_subject_id_subjects_id_fk"
+	}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.seriesId],
-			foreignColumns: [series.id],
-			name: "subject_offerings_series_id_series_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.seriesId],
+		foreignColumns: [series.id],
+		name: "subject_offerings_series_id_series_id_fk"
+	}).onDelete("cascade"),
 ]);
 
 export const userProfiles = pgTable("user_profiles", {
 	userId: text("user_id").primaryKey().notNull(),
-	userType: text("user_type").notNull(),
+	userType: text("user_type").$type<'student' | 'parent'>().notNull(),
 	firstName: text("first_name").notNull(),
 	lastName: text("last_name").notNull(),
 	phone: text(),
 	age: integer(),
-	gender: text(),
+	gender: text().$type<'male' | 'female'>(),
 	city: text(),
 	idNumber: text("id_number"),
 	gradeId: integer("grade_id"),
 	seriesId: integer("series_id"),
-	favoriteSubjects: json("favorite_subjects"),
+	favoriteSubjects: json("favorite_subjects").$type<string[]>(),
 	learningGoals: text("learning_goals"),
 	studyTime: text("study_time"),
-	childrenMatricules: json("children_matricules"),
+	childrenMatricules: json("children_matricules").$type<string[]>(),
+	xp: integer("xp").default(0).notNull(),
 	isCompleted: boolean("is_completed").default(false).notNull(),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	foreignKey({
-			columns: [table.userId],
-			foreignColumns: [authUser.id],
-			name: "user_profiles_user_id_auth_user_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.userId],
+		foreignColumns: [authUser.id],
+		name: "user_profiles_user_id_auth_user_id_fk"
+	}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.gradeId],
-			foreignColumns: [grades.id],
-			name: "user_profiles_grade_id_grades_id_fk"
-		}).onDelete("set null"),
+		columns: [table.gradeId],
+		foreignColumns: [grades.id],
+		name: "user_profiles_grade_id_grades_id_fk"
+	}).onDelete("set null"),
 	foreignKey({
-			columns: [table.seriesId],
-			foreignColumns: [series.id],
-			name: "user_profiles_series_id_series_id_fk"
-		}).onDelete("set null"),
+		columns: [table.seriesId],
+		foreignColumns: [series.id],
+		name: "user_profiles_series_id_series_id_fk"
+	}).onDelete("set null"),
 ]);
 
 export const userProgress = pgTable("user_progress", {
@@ -216,20 +217,20 @@ export const userProgress = pgTable("user_progress", {
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	foreignKey({
-			columns: [table.userId],
-			foreignColumns: [authUser.id],
-			name: "user_progress_user_id_auth_user_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.userId],
+		foreignColumns: [authUser.id],
+		name: "user_progress_user_id_auth_user_id_fk"
+	}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.cardId],
-			foreignColumns: [cards.id],
-			name: "user_progress_card_id_cards_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.cardId],
+		foreignColumns: [cards.id],
+		name: "user_progress_card_id_cards_id_fk"
+	}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.lessonId],
-			foreignColumns: [lessons.id],
-			name: "user_progress_lesson_id_lessons_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.lessonId],
+		foreignColumns: [lessons.id],
+		name: "user_progress_lesson_id_lessons_id_fk"
+	}).onDelete("cascade"),
 ]);
 
 export const lessons = pgTable("lessons", {
@@ -247,15 +248,15 @@ export const lessons = pgTable("lessons", {
 	displayOrder: integer("display_order").default(0).notNull(),
 }, (table) => [
 	foreignKey({
-			columns: [table.subjectId],
-			foreignColumns: [subjects.id],
-			name: "lessons_subject_id_subjects_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.subjectId],
+		foreignColumns: [subjects.id],
+		name: "lessons_subject_id_subjects_id_fk"
+	}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.authorId],
-			foreignColumns: [authUser.id],
-			name: "lessons_author_id_auth_user_id_fk"
-		}).onDelete("set null"),
+		columns: [table.authorId],
+		foreignColumns: [authUser.id],
+		name: "lessons_author_id_auth_user_id_fk"
+	}).onDelete("set null"),
 ]);
 
 export const userLessonMastery = pgTable("user_lesson_mastery", {
@@ -270,15 +271,15 @@ export const userLessonMastery = pgTable("user_lesson_mastery", {
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	foreignKey({
-			columns: [table.userId],
-			foreignColumns: [authUser.id],
-			name: "user_lesson_mastery_user_id_auth_user_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.userId],
+		foreignColumns: [authUser.id],
+		name: "user_lesson_mastery_user_id_auth_user_id_fk"
+	}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.lessonId],
-			foreignColumns: [lessons.id],
-			name: "user_lesson_mastery_lesson_id_lessons_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.lessonId],
+		foreignColumns: [lessons.id],
+		name: "user_lesson_mastery_lesson_id_lessons_id_fk"
+	}).onDelete("cascade"),
 	unique("user_lesson_mastery_user_id_lesson_id_unique").on(table.userId, table.lessonId),
 ]);
 
@@ -287,14 +288,34 @@ export const levelSeries = pgTable("level_series", {
 	seriesId: integer("series_id").notNull(),
 }, (table) => [
 	foreignKey({
-			columns: [table.gradeId],
-			foreignColumns: [grades.id],
-			name: "level_series_grade_id_grades_id_fk"
-		}).onDelete("cascade"),
+		columns: [table.gradeId],
+		foreignColumns: [grades.id],
+		name: "level_series_grade_id_grades_id_fk"
+	}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.seriesId],
-			foreignColumns: [series.id],
-			name: "level_series_series_id_series_id_fk"
-		}).onDelete("cascade"),
-	primaryKey({ columns: [table.gradeId, table.seriesId], name: "level_series_grade_id_series_id_pk"}),
+		columns: [table.seriesId],
+		foreignColumns: [series.id],
+		name: "level_series_series_id_series_id_fk"
+	}).onDelete("cascade"),
+	primaryKey({ columns: [table.gradeId, table.seriesId], name: "level_series_grade_id_series_id_pk" }),
 ]);
+
+// Insert types
+export type InsertGrade = typeof grades.$inferInsert;
+export type InsertSeries = typeof series.$inferInsert;
+export type InsertSubject = typeof subjects.$inferInsert;
+export type InsertLevelSeries = typeof levelSeries.$inferInsert;
+export type InsertSubjectOffering = typeof subjectOfferings.$inferInsert;
+export type InsertLesson = typeof lessons.$inferInsert;
+export type InsertCard = typeof cards.$inferInsert;
+
+// Select types
+export type SelectUserProfile = typeof userProfiles.$inferSelect;
+export type SelectGrade = typeof grades.$inferSelect;
+export type SelectSeries = typeof series.$inferSelect;
+
+// Complex types with relations
+export type UserProfileWithRelations = SelectUserProfile & {
+	grade: SelectGrade | null;
+	series: SelectSeries | null;
+};

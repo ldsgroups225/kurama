@@ -1,6 +1,6 @@
-import { and, asc, eq, inArray } from '@kurama/data-ops/database/drizzle-orm'
+import { and, asc, eq, inArray, sql } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
-import { cards, lessons, subjects, userLessonMastery } from '@kurama/data-ops/drizzle/schema'
+import { cards, lessons, subjects, userLessonMastery, userProfiles } from '@kurama/data-ops/drizzle/schema'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
 
@@ -56,7 +56,7 @@ export const getLessonsBySubject = createServerFn({ method: 'GET' })
 
     // Create a map for quick lookup
     const masteryMap = new Map(
-      masteryRecords.map((m: any) => [m.lessonId, m]),
+      masteryRecords.map(m => [m.lessonId, m]),
     )
 
     // Calculate lock status for each lesson
@@ -149,6 +149,13 @@ export const submitTestResult = createServerFn({ method: 'POST' })
     // Calculate percentage
     const percentage = Math.round((correctCount / totalCount) * 100)
     const isPassing = percentage >= 80
+    if (isPassing) {
+      // Award XP for passing the test (100 XP)
+      await db
+        .update(userProfiles)
+        .set({ xp: sql`${userProfiles.xp} + 100` })
+        .where(eq(userProfiles.userId, userId))
+    }
 
     // Get or create mastery record
     const existingMastery = await db.query.userLessonMastery.findFirst({
@@ -171,7 +178,7 @@ export const submitTestResult = createServerFn({ method: 'POST' })
         .set({
           successfulTestCount: newCount,
           lastTestScore: percentage,
-          lastTestAt: new Date(),
+          lastTestAt: new Date().toISOString(),
           isUnlocked: newCount >= 2,
         })
         .where(
@@ -192,7 +199,7 @@ export const submitTestResult = createServerFn({ method: 'POST' })
         lessonId,
         successfulTestCount: newMasteryCount,
         lastTestScore: percentage,
-        lastTestAt: new Date(),
+        lastTestAt: new Date().toISOString(),
         isUnlocked: newMasteryCount >= 2,
       })
     }

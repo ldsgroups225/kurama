@@ -159,6 +159,7 @@ CREATE TABLE "user_profiles" (
 	"learning_goals" text,
 	"study_time" text,
 	"children_matricules" json,
+	"xp" integer DEFAULT 0 NOT NULL,
 	"is_completed" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL

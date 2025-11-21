@@ -31,9 +31,9 @@ function ProgressIndicator({ steps, currentStep }: { steps: Steps[], currentStep
             <div className={`
               flex h-8 w-8 items-center justify-center rounded-full
               ${index <= currentStep
-          ? 'bg-gradient-xp text-white'
-          : 'bg-muted text-muted-foreground'
-        }
+                ? 'bg-gradient-xp text-white'
+                : 'bg-muted text-muted-foreground'
+              }
             `}
             >
               {index + 1}
@@ -41,9 +41,9 @@ function ProgressIndicator({ steps, currentStep }: { steps: Steps[], currentStep
             <span className={`
               mt-1 text-xs
               ${index <= currentStep
-          ? 'text-xp'
-          : `text-muted-foreground`
-        }
+                ? 'text-xp'
+                : `text-muted-foreground`
+              }
             `}
             >
               {step.label}
@@ -53,9 +53,9 @@ function ProgressIndicator({ steps, currentStep }: { steps: Steps[], currentStep
             <div className={`
               h-0.5 flex-1
               ${index < currentStep
-              ? `bg-gradient-xp-horizontal`
-              : `bg-muted`
-            }
+                ? `bg-gradient-xp-horizontal`
+                : `bg-muted`
+              }
             `}
             />
           )}
@@ -74,7 +74,7 @@ export function ParentProfileForm({
     userType: 'parent',
     firstName: '',
     lastName: '',
-    childrenMatricules: [] as number[],
+    childrenMatricules: [] as string[],
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -128,7 +128,7 @@ export function ParentProfileForm({
   const handleAddChild = () => {
     setFormData({
       ...formData,
-      childrenMatricules: [...(formData.childrenMatricules || []), 0],
+      childrenMatricules: [...(formData.childrenMatricules || []), ''],
     })
   }
 
@@ -143,9 +143,8 @@ export function ParentProfileForm({
 
   const handleChildMatriculeChange = (index: number, value: string) => {
     const newMatricules = [...(formData.childrenMatricules || [])]
-    // Convert string to number, or 0 if empty/invalid
-    const numValue = value.trim() === '' ? 0 : Number(value)
-    newMatricules[index] = Number.isNaN(numValue) ? 0 : numValue
+    // Store the string value directly
+    newMatricules[index] = value
     setFormData({
       ...formData,
       childrenMatricules: newMatricules,
@@ -157,9 +156,9 @@ export function ParentProfileForm({
     setIsSubmitting(true)
 
     try {
-      // Filter out zero/invalid matricules
+      // Filter out empty matricules
       const filteredMatricules = (formData.childrenMatricules || [])
-        .filter((m): m is number => m > 0)
+        .filter((m): m is string => m.trim().length > 0)
 
       submitMutation.mutate({
         data: {
@@ -331,9 +330,9 @@ export function ParentProfileForm({
                             </Label>
                             <Input
                               id={`child-${index}`}
-                              type="number"
+                              type="text"
                               placeholder="Entrer le matricule"
-                              value={matricule === 0 ? '' : matricule}
+                              value={matricule}
                               onChange={e =>
                                 handleChildMatriculeChange(index, e.target.value)}
                               disabled={isSubmitting}
@@ -385,14 +384,14 @@ export function ParentProfileForm({
                     >
                       {isSubmitting
                         ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Enregistrement...
-                            </>
-                          )
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Enregistrement...
+                          </>
+                        )
                         : (
-                            'Terminer'
-                          )}
+                          'Terminer'
+                        )}
                     </Button>
                   </div>
                 </>

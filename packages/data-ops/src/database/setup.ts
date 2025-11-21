@@ -3,8 +3,9 @@
 import { drizzle, type NeonHttpDatabase } from "drizzle-orm/neon-http";
 import * as schema from "@/drizzle/schema";
 import * as authSchema from "@/drizzle/auth-schema";
+import * as relations from "@/drizzle/relations";
 
-const fullSchema = { ...schema, ...authSchema };
+const fullSchema = { ...schema, ...authSchema, ...relations };
 
 type DbSchema = typeof fullSchema;
 type DbInstance = NeonHttpDatabase<DbSchema>;

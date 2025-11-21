@@ -1,4 +1,4 @@
-import type { Achievement, LeaderboardEntry } from '@/components/gamification'
+import type { Achievement } from '@/components/gamification'
 import { useQuery } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import {
@@ -10,19 +10,12 @@ import {
   Flame,
   Gamepad2,
   GraduationCap,
-  Rocket,
-  Star,
   Target,
   Timer,
-  Trophy,
-  Users,
-  Zap,
 } from 'lucide-react'
 import { useEffect } from 'react'
 import {
-
   AchievementShowcase,
-
   LeaderboardWidget,
   LevelBadge,
   StreakCalendar,
@@ -30,8 +23,9 @@ import {
 import { AppHeader, BottomNav, ChallengeCard, QuickActions, StatsGrid } from '@/components/main'
 import { Badge } from '@/components/ui/badge'
 import { getDashboardStats } from '@/core/functions/dashboard'
+import { getLeaderboard } from '@/core/functions/gamification'
+import { Rocket, Star, Trophy } from '@/lib/icons'
 import { trackRouteLoad } from '@/lib/performance-monitor'
-import { generateUUID } from '@/utils/generateUUID'
 
 export const Route = createLazyFileRoute('/_auth/app/')({
   component: AppHome,
@@ -48,6 +42,11 @@ function AppHome() {
   const { data: dashboardData } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: () => getDashboardStats(),
+  })
+
+  const { data: leaderboardData } = useQuery({
+    queryKey: ['leaderboard'],
+    queryFn: () => getLeaderboard(),
   })
 
   // Mock data - Replace with real data from your backend
@@ -120,50 +119,6 @@ function AppHome() {
       progress: 12,
       maxProgress: 30,
       rarity: 'rare',
-    },
-  ]
-
-  const leaderboardData: LeaderboardEntry[] = [
-    {
-      id: '1',
-      name: 'Aminata Koné',
-      avatar: undefined,
-      points: 3450,
-      rank: 1,
-      previousRank: 2,
-    },
-    {
-      id: '2',
-      name: 'Darius Kassi',
-      avatar: undefined,
-      points: 3240,
-      rank: 2,
-      previousRank: 1,
-      isCurrentUser: true,
-    },
-    {
-      id: '3',
-      name: 'Fatou Traoré',
-      avatar: undefined,
-      points: 2980,
-      rank: 3,
-      previousRank: 3,
-    },
-    {
-      id: '4',
-      name: 'Kouassi Yao',
-      avatar: undefined,
-      points: 2750,
-      rank: 4,
-      previousRank: 5,
-    },
-    {
-      id: '5',
-      name: 'Mariam Diallo',
-      avatar: undefined,
-      points: 2650,
-      rank: 5,
-      previousRank: 4,
     },
   ]
 
@@ -299,9 +254,8 @@ function AppHome() {
         {/* Leaderboard */}
         <section>
           <LeaderboardWidget
-            entries={leaderboardData}
-            currentUserId="2"
-            title="Classement Hebdomadaire"
+            entries={leaderboardData ?? []}
+            title="Classement Général"
           />
         </section>
 
@@ -321,33 +275,10 @@ function AppHome() {
           </div>
 
           <div className="space-y-3">
-            {[
-              {
-                subject: 'Physique-Chimie',
-                action: '20 cartes révisées',
-                time: 'Il y a 2h',
-                icon: Zap,
-                color: 'text-epic',
-              },
-              {
-                subject: 'Histoire-Géo',
-                action: 'Quiz complété (85%)',
-                time: 'Il y a 5h',
-                icon: Trophy,
-                color: 'text-level',
-              },
-              {
-                subject: 'Groupe d\'étude',
-                action: 'Nouveau message',
-                time: 'Il y a 1j',
-                icon: Users,
-                color: 'text-xp',
-              },
-            ].map((activity) => {
-              const Icon = activity.icon
+            {dashboardData?.recentSessions.map((session) => {
               return (
                 <div
-                  key={generateUUID()}
+                  key={session.id}
                   className={`
                     flex items-center gap-3 rounded-xl bg-muted/50 p-4
                     transition-colors
@@ -356,25 +287,29 @@ function AppHome() {
                 >
                   <div className={`
                     flex h-10 w-10 items-center justify-center rounded-full
-                    bg-background
-                    ${activity.color}
+                    bg-background text-primary
                   `}
                   >
-                    <Icon className="h-5 w-5" />
+                    <BookOpen className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-foreground">
-                      {activity.subject}
+                      {session.lessonTitle}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {activity.action}
+                      {session.subjectName}
+                      {' '}
+                      •
+                      {session.cardsReviewed}
+                      {' '}
+                      cartes
                     </p>
                   </div>
                   <span className={`
                     text-xs whitespace-nowrap text-muted-foreground
                   `}
                   >
-                    {activity.time}
+                    {new Date(session.startedAt).toLocaleDateString()}
                   </span>
                 </div>
               )

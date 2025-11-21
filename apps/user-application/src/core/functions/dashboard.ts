@@ -1,6 +1,6 @@
-import { and, eq, gte, sql } from '@kurama/data-ops/database/drizzle-orm'
+import { and, desc, eq, gte, sql } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
-import { studySessions, userLessonMastery, userProgress } from '@kurama/data-ops/drizzle/schema'
+import { studySessions, userLessonMastery, userProfiles, userProgress } from '@kurama/data-ops/drizzle/schema'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
 
@@ -31,7 +31,7 @@ export const getDashboardStats = createServerFn()
       .where(
         and(
           eq(userProgress.userId, userId),
-          gte(userProgress.lastReviewedAt, today),
+          gte(userProgress.lastReviewedAt, today.toISOString()),
         ),
       )
 
@@ -63,56 +63,83 @@ export const getDashboardStats = createServerFn()
       )
 
     const lessonsCompleted = Number(masteryResult[0]?.count ?? 0)
-    const totalXP = totalCardsStudied * 10 + lessonsCompleted * 100
+
+    // Get XP from user profile
+    const profile = await db.query.userProfiles.findFirst({
+      where: eq(userProfiles.userId, userId),
+    })
+    const totalXP = profile?.xp ?? 0
 
     // Calculate streak (consecutive days with study sessions)
     const sessionsResult = await db
       .select({
-        date: sql<string>`DATE(${studySessions.startedAt})`,
+        startedAt: studySessions.startedAt,
       })
       .from(studySessions)
       .where(eq(studySessions.userId, userId))
-      .orderBy(sql`DATE(${studySessions.startedAt}) DESC`)
-      .limit(365) // Check last year
+      .orderBy(desc(studySessions.startedAt))
 
-    const sessionDates = sessionsResult.map(r => r.date)
-    const uniqueDates = [...new Set(sessionDates)]
+    // Normalize to YYYY-MM-DD (UTC) to ensure consistency
+    const uniqueDates = Array.from(new Set(
+      sessionsResult.map((s) => {
+        const d = new Date(s.startedAt)
+        return d.toISOString().split('T')[0] // YYYY-MM-DD
+      }),
+    ))
 
     let currentStreak = 0
     let longestStreak = 0
-    let tempStreak = 0
 
     if (uniqueDates.length > 0) {
-      const todayStr = new Date().toISOString().split('T')[0]
-      const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+      const today = new Date().toISOString().split('T')[0]
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
 
-      // Check if user studied today or yesterday to maintain streak
-      if (uniqueDates[0] === todayStr || uniqueDates[0] === yesterdayStr) {
+      // Calculate Current Streak
+      // Check if the most recent study date is today or yesterday
+      if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
         currentStreak = 1
-        tempStreak = 1
-
         for (let i = 1; i < uniqueDates.length; i++) {
-          const currentDateStr = uniqueDates[i - 1]
-          const prevDateStr = uniqueDates[i]
-          if (!currentDateStr || !prevDateStr)
+          const prevDateStr = uniqueDates[i - 1]
+          const currDateStr = uniqueDates[i]
+          if (!prevDateStr || !currDateStr)
             continue
 
-          const currentDate = new Date(currentDateStr)
           const prevDate = new Date(prevDateStr)
-          const diffDays = Math.floor((currentDate.getTime() - prevDate.getTime()) / 86400000)
+          const currDate = new Date(currDateStr)
+          const diffTime = Math.abs(prevDate.getTime() - currDate.getTime())
+          const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
 
           if (diffDays === 1) {
             currentStreak++
-            tempStreak++
           }
           else {
-            longestStreak = Math.max(longestStreak, tempStreak)
-            tempStreak = 1
+            break // Streak broken
           }
         }
       }
 
-      longestStreak = Math.max(longestStreak, tempStreak, currentStreak)
+      // Calculate Longest Streak
+      let tempStreak = 1
+      for (let i = 1; i < uniqueDates.length; i++) {
+        const prevDateStr = uniqueDates[i - 1]
+        const currDateStr = uniqueDates[i]
+        if (!prevDateStr || !currDateStr)
+          continue
+
+        const prevDate = new Date(prevDateStr)
+        const currDate = new Date(currDateStr)
+        const diffTime = Math.abs(prevDate.getTime() - currDate.getTime())
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
+
+        if (diffDays === 1) {
+          tempStreak++
+        }
+        else {
+          longestStreak = Math.max(longestStreak, tempStreak)
+          tempStreak = 1
+        }
+      }
+      longestStreak = Math.max(longestStreak, tempStreak)
     }
 
     // Get recent study sessions

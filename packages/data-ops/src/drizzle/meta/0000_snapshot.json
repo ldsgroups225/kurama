@@ -1,5 +1,5 @@
 {
-  "id": "3a0e91e3-87f8-45bd-80ec-b28d3dbd290f",
+  "id": "6a5c7076-483c-46d8-9dfa-4dbdae5dcae5",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1135,6 +1135,13 @@
           "type": "json",
           "primaryKey": false,
           "notNull": false
+        },
+        "xp": {
+          "name": "xp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         },
         "is_completed": {
           "name": "is_completed",

@@ -62,7 +62,7 @@ export const parentProfileSchema = z.object({
     .max(50, "Le nom ne peut pas dépasser 50 caractères"),
   // Children Information
   childrenMatricules: z
-    .array(z.number().int().positive("Le matricule doit être un nombre positif"))
+    .array(z.string().min(1, "Le matricule ne peut pas être vide"))
     .optional(),
 });
 
