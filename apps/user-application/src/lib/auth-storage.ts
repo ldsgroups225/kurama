@@ -261,15 +261,15 @@ export async function clearUserAuthData(): Promise<void> {
     await Promise.all([
       db.authState.clear(), // Auth tokens
       db.mutationQueue.clear(), // User's pending mutations
-      // Preserve queryCache - contains curriculum data that's not user-specific
-      // Preserve appState - contains app-level configuration
+      // Note: queryCache will be selectively cleared by the auth route guard
+      // to remove user-specific queries while preserving curriculum data
     ])
 
     // Clear session encryption keys
     sessionKey = null
     sessionSalt = null
 
-    // Reset Jotai atoms to their initial values (proper way)
+    // Reset Jotai atoms to their initial values
     if (typeof window !== 'undefined' && window.localStorage) {
       // Reset user profile atom
       localStorage.removeItem('kurama:userProfile')

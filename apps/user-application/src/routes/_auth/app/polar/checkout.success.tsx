@@ -4,6 +4,7 @@ import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { collectSubscription, validPayment } from '@/core/functions/payments'
+import { authClient } from '@/lib/auth-client'
 
 const searchSchema = z.object({
   checkout_id: z.string(),
@@ -59,9 +60,10 @@ export const Route = createFileRoute('/_auth/app/polar/checkout/success')({
 function RouteComponent() {
   const loaderData = Route.useLoaderData()
   const nav = Route.useNavigate()
+  const session = authClient.useSession()
 
   const { data, isLoading, isFetching, error } = useQuery({
-    queryKey: [loaderData.checkoutId],
+    queryKey: ['subscription', session.data?.user?.id, loaderData.checkoutId],
     queryFn: collectSubscription,
     refetchInterval: (query) => {
       if (!query.state.data) {

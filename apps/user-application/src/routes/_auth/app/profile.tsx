@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   Bell,
@@ -9,7 +10,7 @@ import {
   Shield,
   User,
 } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -25,6 +26,8 @@ export const Route = createFileRoute('/_auth/app/profile')({
 function ProfilePage() {
   const { data: session } = useSession()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const [isSigningOut, setIsSigningOut] = useState(false)
 
   // Track route load performance
   useEffect(() => {
@@ -33,13 +36,16 @@ function ProfilePage() {
   }, [])
 
   const handleSignOut = async () => {
+    setIsSigningOut(true)
     try {
-      await signOut()
+      await signOut(queryClient)
+
       // Navigate to home page after sign out
-      navigate({ to: '/' })
+      navigate({ to: '/', replace: true })
     }
     catch (error) {
       console.error('Failed to sign out:', error)
+      setIsSigningOut(false)
     }
   }
 
@@ -188,13 +194,14 @@ function ProfilePage() {
         <Button
           variant="outline"
           onClick={handleSignOut}
+          disabled={isSigningOut}
           className={`
             w-full text-destructive
             hover:text-destructive
           `}
         >
-          <LogOut className="mr-2 h-4 w-4" />
-          Se Déconnecter
+          <LogOut className={`mr-2 h-4 w-4 ${isSigningOut ? 'animate-spin' : ''}`} />
+          {isSigningOut ? 'Déconnexion...' : 'Se Déconnecter'}
         </Button>
       </main>
 

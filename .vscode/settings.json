@@ -3,7 +3,8 @@
     "BEPC",
     "dexie",
     "kurama",
-    "tailwindcss"
+    "tailwindcss",
+    "tiktok"
   ],
   "typescript.autoClosingTags": false,
   "css.lint.unknownAtRules": "ignore"

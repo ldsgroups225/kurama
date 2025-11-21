@@ -1,4 +1,5 @@
-import { useRouter } from '@tanstack/react-router'
+/* eslint-disable react/no-array-index-key */
+
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { authClient } from '@/lib/auth-client'
@@ -16,7 +17,7 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
   const [canResend, setCanResend] = useState(false)
   const [countdown, setCountdown] = useState(60)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
-  const router = useRouter()
+
   const hasFocusedRef = useRef(false)
 
   useEffect(() => {
@@ -68,8 +69,9 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
         return
       }
 
-      // Success - redirect will happen automatically via session
-      router.invalidate()
+      // Success - force session refresh and invalidate router
+      await authClient.getSession()
+      window.location.assign('/app')
       // Keep loading state while redirect happens
     }
     catch {
@@ -231,12 +233,12 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
             autoCapitalize="off"
             spellCheck="false"
             className={`
-              h-14 w-12 rounded-lg border-2 border-zinc-200 bg-white text-center
-              text-2xl font-semibold text-zinc-900 transition-all outline-none
-              focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20
-              disabled:cursor-not-allowed disabled:opacity-50
-              dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50
-            `}
+        h-14 w-12 rounded-lg border-2 border-zinc-200 bg-white text-center
+        text-2xl font-semibold text-zinc-900 transition-all outline-none
+        focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20
+        disabled:cursor-not-allowed disabled:opacity-50
+        dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50
+      `}
           />
         ))}
       </div>
@@ -266,32 +268,32 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
       <div className="text-center">
         {canResend
           ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleResend}
-              className={`
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleResend}
+                className={`
                   text-orange-600
                   hover:text-orange-700
                   dark:text-orange-500 dark:hover:text-orange-400
                 `}
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Renvoyer le code
-            </Button>
-          )
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Renvoyer le code
+              </Button>
+            )
           : (
-            <p className={`
+              <p className={`
                 text-sm text-zinc-500
                 dark:text-zinc-400
               `}
-            >
-              Renvoyer le code dans
-              {' '}
-              {countdown}
-              s
-            </p>
-          )}
+              >
+                Renvoyer le code dans
+                {' '}
+                {countdown}
+                s
+              </p>
+            )}
       </div>
     </div>
   )

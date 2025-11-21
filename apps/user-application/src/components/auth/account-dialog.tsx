@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -8,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { authClient } from '@/lib/auth-client'
+import { authClient, signOut as signOutFn } from '@/lib/auth-client'
 import { LogOut, Palette } from '@/lib/icons'
 
 interface AccountDialogProps {
@@ -17,9 +18,10 @@ interface AccountDialogProps {
 
 export function AccountDialog({ children }: AccountDialogProps) {
   const { data: session } = authClient.useSession()
+  const queryClient = useQueryClient()
 
-  const signOut = async () => {
-    await authClient.signOut()
+  const handleSignOut = async () => {
+    await signOutFn(queryClient)
   }
 
   if (!session) {
@@ -71,7 +73,7 @@ export function AccountDialog({ children }: AccountDialogProps) {
               <ThemeToggle />
             </div>
             <Button
-              onClick={signOut}
+              onClick={handleSignOut}
               variant="outline"
               size="lg"
               className="w-full gap-2"

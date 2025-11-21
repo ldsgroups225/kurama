@@ -2,6 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { PricingGrid, useCheckout } from '@/components/payments/polar'
 import { collectSubscription, getProducts } from '@/core/functions/payments'
+import { authClient } from '@/lib/auth-client'
 
 export const Route = createFileRoute('/_auth/app/polar/subscriptions')({
   component: RouteComponent,
@@ -20,6 +21,8 @@ export const Route = createFileRoute('/_auth/app/polar/subscriptions')({
 })
 
 function RouteComponent() {
+  const session = authClient.useSession()
+
   const { data: products } = useSuspenseQuery({
     queryKey: ['products'],
     queryFn: getProducts,
@@ -27,7 +30,7 @@ function RouteComponent() {
   })
 
   const { data: subscription } = useSuspenseQuery({
-    queryKey: ['subscription'],
+    queryKey: ['subscription', session.data?.user?.id],
     queryFn: collectSubscription,
     refetchOnWindowFocus: true,
   })
