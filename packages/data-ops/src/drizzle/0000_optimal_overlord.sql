@@ -81,7 +81,8 @@ CREATE TABLE "lessons" (
 	"is_published" boolean DEFAULT false NOT NULL,
 	"published_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"display_order" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "level_series" (
@@ -127,6 +128,19 @@ CREATE TABLE "subjects" (
 	"display_order" integer NOT NULL,
 	CONSTRAINT "subjects_name_unique" UNIQUE("name"),
 	CONSTRAINT "subjects_abbreviation_unique" UNIQUE("abbreviation")
+);
+--> statement-breakpoint
+CREATE TABLE "user_lesson_mastery" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
+	"lesson_id" integer NOT NULL,
+	"successful_test_count" integer DEFAULT 0 NOT NULL,
+	"last_test_score" integer,
+	"last_test_at" timestamp,
+	"is_unlocked" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "user_lesson_mastery_user_id_lesson_id_unique" UNIQUE("user_id","lesson_id")
 );
 --> statement-breakpoint
 CREATE TABLE "user_profiles" (
@@ -178,6 +192,8 @@ ALTER TABLE "study_sessions" ADD CONSTRAINT "study_sessions_lesson_id_lessons_id
 ALTER TABLE "subject_offerings" ADD CONSTRAINT "subject_offerings_grade_id_grades_id_fk" FOREIGN KEY ("grade_id") REFERENCES "public"."grades"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "subject_offerings" ADD CONSTRAINT "subject_offerings_subject_id_subjects_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."subjects"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "subject_offerings" ADD CONSTRAINT "subject_offerings_series_id_series_id_fk" FOREIGN KEY ("series_id") REFERENCES "public"."series"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_lesson_mastery" ADD CONSTRAINT "user_lesson_mastery_user_id_auth_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."auth_user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_lesson_mastery" ADD CONSTRAINT "user_lesson_mastery_lesson_id_lessons_id_fk" FOREIGN KEY ("lesson_id") REFERENCES "public"."lessons"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_profiles" ADD CONSTRAINT "user_profiles_user_id_auth_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."auth_user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_profiles" ADD CONSTRAINT "user_profiles_grade_id_grades_id_fk" FOREIGN KEY ("grade_id") REFERENCES "public"."grades"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_profiles" ADD CONSTRAINT "user_profiles_series_id_series_id_fk" FOREIGN KEY ("series_id") REFERENCES "public"."series"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint

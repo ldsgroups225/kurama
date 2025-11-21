@@ -1,6 +1,6 @@
-import { asc, eq } from '@kurama/data-ops/database/drizzle-orm'
+import { and, asc, eq, inArray } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
-import { cards, lessons, subjects } from '@kurama/data-ops/drizzle/schema'
+import { cards, lessons, subjects, userLessonMastery } from '@kurama/data-ops/drizzle/schema'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
 
@@ -18,7 +18,7 @@ export const getSubjects = createServerFn()
   })
 
 /**
- * Get lessons for a specific subject
+ * Get lessons for a specific subject with lock status and mastery progress
  */
 export const getLessonsBySubject = createServerFn({ method: 'GET' })
   .middleware([protectedFunctionMiddleware])
@@ -28,18 +28,65 @@ export const getLessonsBySubject = createServerFn({ method: 'GET' })
     }
     return data
   })
-  .handler(async ({ data: subjectId }) => {
+  .handler(async ({ data: subjectId, context }) => {
     const db = getDb()
+    const userId = context.userId
 
+    // Fetch all lessons for the subject, ordered by displayOrder
     const lessonsData = await db.query.lessons.findMany({
       where: eq(lessons.subjectId, subjectId),
-      orderBy: [asc(lessons.id)],
+      orderBy: [asc(lessons.displayOrder)],
       with: {
         subject: true,
       },
     })
 
-    return lessonsData
+    if (lessonsData.length === 0) {
+      return []
+    }
+
+    // Fetch mastery records for all lessons
+    const lessonIds = lessonsData.map(l => l.id)
+    const masteryRecords = await db.query.userLessonMastery.findMany({
+      where: and(
+        eq(userLessonMastery.userId, userId),
+        inArray(userLessonMastery.lessonId, lessonIds),
+      ),
+    })
+
+    // Create a map for quick lookup
+    const masteryMap = new Map(
+      masteryRecords.map((m: any) => [m.lessonId, m]),
+    )
+
+    // Calculate lock status for each lesson
+    const lessonsWithStatus = lessonsData.map((lesson, index) => {
+      const mastery = masteryMap.get(lesson.id)
+      const masteryCount = mastery?.successfulTestCount ?? 0
+      const isCompleted = masteryCount >= 2
+
+      // First lesson is always unlocked
+      let isLocked = false
+      if (index > 0) {
+        // Check if previous lesson has been mastered
+        const previousLesson = lessonsData[index - 1]
+        if (previousLesson) {
+          const previousMastery = masteryMap.get(previousLesson.id)
+          const previousMasteryCount = previousMastery?.successfulTestCount ?? 0
+          isLocked = previousMasteryCount < 2
+        }
+      }
+
+      return {
+        ...lesson,
+        isLocked,
+        masteryCount,
+        isCompleted,
+        lastTestScore: mastery?.lastTestScore ?? null,
+      }
+    })
+
+    return lessonsWithStatus
   })
 
 /**
@@ -77,5 +124,109 @@ export const getLessonDetails = createServerFn({ method: 'GET' })
         ...card,
         metadata: (card.metadata ?? {}) as object,
       })),
+    }
+  })
+
+/**
+ * Submit test result and update mastery progress
+ */
+export const submitTestResult = createServerFn({ method: 'POST' })
+  .middleware([protectedFunctionMiddleware])
+  .inputValidator((data: { lessonId: number, correctCount: number, totalCount: number }) => {
+    if (typeof data.lessonId !== 'number' || Number.isNaN(data.lessonId)) {
+      throw new TypeError('Invalid input: lessonId must be a number')
+    }
+    if (typeof data.correctCount !== 'number' || typeof data.totalCount !== 'number') {
+      throw new TypeError('Invalid input: correctCount and totalCount must be numbers')
+    }
+    return data
+  })
+  .handler(async ({ data, context }) => {
+    const db = getDb()
+    const userId = context.userId
+    const { lessonId, correctCount, totalCount } = data
+
+    // Calculate percentage
+    const percentage = Math.round((correctCount / totalCount) * 100)
+    const isPassing = percentage >= 80
+
+    // Get or create mastery record
+    const existingMastery = await db.query.userLessonMastery.findFirst({
+      where: and(
+        eq(userLessonMastery.userId, userId),
+        eq(userLessonMastery.lessonId, lessonId),
+      ),
+    })
+
+    let newMasteryCount = 0
+    let wasUnlocked = false
+
+    if (existingMastery) {
+      // Update existing record
+      const newCount = isPassing ? existingMastery.successfulTestCount + 1 : existingMastery.successfulTestCount
+      newMasteryCount = newCount
+
+      await db
+        .update(userLessonMastery)
+        .set({
+          successfulTestCount: newCount,
+          lastTestScore: percentage,
+          lastTestAt: new Date(),
+          isUnlocked: newCount >= 2,
+        })
+        .where(
+          and(
+            eq(userLessonMastery.userId, userId),
+            eq(userLessonMastery.lessonId, lessonId),
+          ),
+        )
+
+      wasUnlocked = newCount >= 2 && existingMastery.successfulTestCount < 2
+    }
+    else {
+      // Create new record
+      newMasteryCount = isPassing ? 1 : 0
+
+      await db.insert(userLessonMastery).values({
+        userId,
+        lessonId,
+        successfulTestCount: newMasteryCount,
+        lastTestScore: percentage,
+        lastTestAt: new Date(),
+        isUnlocked: newMasteryCount >= 2,
+      })
+    }
+
+    // Check if next lesson should be unlocked
+    const currentLesson = await db.query.lessons.findFirst({
+      where: eq(lessons.id, lessonId),
+    })
+
+    let nextLessonUnlocked = false
+    let nextLessonTitle: string | null = null
+
+    if (currentLesson && newMasteryCount >= 2) {
+      // Find next lesson in sequence
+      const nextLesson = await db.query.lessons.findFirst({
+        where: and(
+          eq(lessons.subjectId, currentLesson.subjectId),
+          eq(lessons.displayOrder, currentLesson.displayOrder + 1),
+        ),
+      })
+
+      if (nextLesson) {
+        nextLessonUnlocked = wasUnlocked
+        nextLessonTitle = nextLesson.title
+      }
+    }
+
+    return {
+      percentage,
+      isPassing,
+      masteryCount: newMasteryCount,
+      masteryRequired: 2,
+      isCompleted: newMasteryCount >= 2,
+      nextLessonUnlocked,
+      nextLessonTitle,
     }
   })

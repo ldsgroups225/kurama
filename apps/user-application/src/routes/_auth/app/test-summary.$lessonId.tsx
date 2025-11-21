@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router'
-import { Check, Home, Lock, RefreshCw, X } from 'lucide-react'
+import { Check, Home, Lock, RefreshCw, Trophy, Unlock, X } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { AppHeader } from '@/components/main'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { submitTestResult } from '@/core/functions/learning'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
 
@@ -52,6 +53,44 @@ function TestSummaryPage() {
   const answers: TestAnswer[] = JSON.parse(answersJson || '[]')
   const score = (total ?? 0) > 0 ? Math.round(((correct ?? 0) / (total ?? 1)) * 100) : 0
   const incorrectCount = incorrect ?? 0
+
+  // Mastery tracking state
+  const [masteryResult, setMasteryResult] = useState<{
+    masteryCount: number
+    masteryRequired: number
+    isCompleted: boolean
+    nextLessonUnlocked: boolean
+    nextLessonTitle: string | null
+  } | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Submit test result on mount
+  useEffect(() => {
+    const submitResult = async () => {
+      if (isSubmitting)
+        return
+      setIsSubmitting(true)
+
+      try {
+        const result = await submitTestResult({
+          data: {
+            lessonId: Number(lessonId),
+            correctCount: correct ?? 0,
+            totalCount: total ?? 1,
+          },
+        })
+        setMasteryResult(result)
+      }
+      catch (error) {
+        console.error('Failed to submit test result:', error)
+      }
+      finally {
+        setIsSubmitting(false)
+      }
+    }
+
+    submitResult()
+  }, [lessonId, correct, total, isSubmitting])
 
   // Determine performance message
   let performanceMessage = ''
@@ -202,6 +241,101 @@ function TestSummaryPage() {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Mastery Progress Card */}
+        {masteryResult && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+          >
+            <Card className={`border-2 ${masteryResult.isCompleted
+              ? 'border-success/50 bg-success/5'
+              : masteryResult.masteryCount > 0
+                ? 'border-primary/50 bg-primary/5'
+                : 'border-border'
+            }`}
+            >
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  {/* Mastery Header */}
+                  <div className="flex items-center gap-3">
+                    {masteryResult.isCompleted
+                      ? (
+                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/20">
+                            <Trophy className="h-6 w-6 text-success" />
+                          </div>
+                        )
+                      : (
+                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
+                            <Lock className="h-6 w-6 text-primary" />
+                          </div>
+                        )}
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold">
+                        {masteryResult.isCompleted ? 'Leçon maîtrisée !' : 'Progression de maîtrise'}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {masteryResult.masteryCount}
+                        /
+                        {masteryResult.masteryRequired}
+                        {' '}
+                        tests réussis
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="relative h-3 w-full overflow-hidden rounded-full bg-border">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(masteryResult.masteryCount / masteryResult.masteryRequired) * 100}%` }}
+                      transition={{ duration: 0.8, delay: 0.3 }}
+                      className={`h-full ${masteryResult.isCompleted ? 'bg-success' : 'bg-primary'
+                      }`}
+                    />
+                  </div>
+
+                  {/* Feedback Message */}
+                  {score >= 80 && !masteryResult.isCompleted && (
+                    <div className="rounded-lg bg-primary/10 p-3 text-sm">
+                      <p className="font-medium text-primary">
+                        🎯 Excellent ! Plus que
+                        {' '}
+                        {masteryResult.masteryRequired - masteryResult.masteryCount}
+                        {' '}
+                        test(s) réussi(s) pour débloquer la prochaine leçon !
+                      </p>
+                    </div>
+                  )}
+
+                  {masteryResult.nextLessonUnlocked && masteryResult.nextLessonTitle && (
+                    <motion.div
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                      className="rounded-lg bg-success/10 p-4 text-center"
+                    >
+                      <Unlock className="mx-auto mb-2 h-8 w-8 text-success" />
+                      <p className="font-semibold text-success">
+                        🎉 Nouvelle leçon débloquée !
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {masteryResult.nextLessonTitle}
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {masteryResult.isCompleted && (
+                    <div className="rounded-lg bg-success/10 p-3 text-center text-sm font-medium text-success">
+                      ✅ Vous avez maîtrisé cette leçon !
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Next Steps */}
         <motion.div

@@ -50,7 +50,7 @@ function OnboardingPage() {
     }
 
     // Redirect to main app after successful profile completion
-    navigate({ to: '/app' })
+    navigate({ to: '/app', replace: true })
   }
 
   // Render based on current step

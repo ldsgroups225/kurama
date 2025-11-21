@@ -11,15 +11,29 @@ config({ path: resolve(__dirname, "../../.env") });
 
 import { initDatabase } from "./setup";
 import { lessons, cards, subjects } from "@/drizzle/schema";
-import type { InsertLesson, InsertCard } from "@/drizzle/schema";
 
 // ============================================================================
 // LESSON DATA BY SUBJECT
 // ============================================================================
 
 interface LessonWithCards {
-  lesson: Omit<InsertLesson, "subjectId">;
-  cards: Omit<InsertCard, "lessonId">[];
+  lesson: {
+    title: string;
+    description?: string;
+    difficulty?: string;
+    estimatedDuration?: number;
+    isPublished?: boolean;
+    publishedAt?: string;
+    displayOrder?: number;
+  };
+  cards: {
+    frontContent: string;
+    backContent: string;
+    cardType?: string;
+    difficulty?: number;
+    displayOrder: number;
+    metadata?: unknown;
+  }[];
 }
 
 // MATHÉMATIQUES
@@ -31,7 +45,8 @@ const mathLessons: LessonWithCards[] = [
       difficulty: "medium",
       estimatedDuration: 45,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
+      displayOrder: 1,
     },
     cards: [
       {
@@ -67,7 +82,8 @@ const mathLessons: LessonWithCards[] = [
       difficulty: "hard",
       estimatedDuration: 60,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
+      displayOrder: 2,
     },
     cards: [
       {
@@ -103,7 +119,8 @@ const mathLessons: LessonWithCards[] = [
       difficulty: "easy",
       estimatedDuration: 40,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
+      displayOrder: 3,
     },
     cards: [
       {
@@ -143,7 +160,8 @@ const frenchLessons: LessonWithCards[] = [
       difficulty: "medium",
       estimatedDuration: 35,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
+      displayOrder: 1,
     },
     cards: [
       {
@@ -173,7 +191,8 @@ const frenchLessons: LessonWithCards[] = [
       difficulty: "medium",
       estimatedDuration: 50,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
+      displayOrder: 2,
     },
     cards: [
       {
@@ -213,7 +232,8 @@ const englishLessons: LessonWithCards[] = [
       difficulty: "medium",
       estimatedDuration: 40,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
+      displayOrder: 1,
     },
     cards: [
       {
@@ -249,7 +269,8 @@ const englishLessons: LessonWithCards[] = [
       difficulty: "hard",
       estimatedDuration: 45,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
+      displayOrder: 2,
     },
     cards: [
       {
@@ -283,7 +304,8 @@ const physicsLessons: LessonWithCards[] = [
       difficulty: "medium",
       estimatedDuration: 50,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
+      displayOrder: 1,
     },
     cards: [
       {
@@ -319,7 +341,8 @@ const physicsLessons: LessonWithCards[] = [
       difficulty: "medium",
       estimatedDuration: 45,
       isPublished: true,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
+      displayOrder: 2,
     },
     cards: [
       {

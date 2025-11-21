@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate, useParams } from '@tanstack/react-router'
-import { BookOpen, ChevronRight, Clock, Loader2 } from 'lucide-react'
+import { BookOpen, CheckCircle2, ChevronRight, Clock, Loader2, Lock } from 'lucide-react'
 import { useEffect } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
 import { Badge } from '@/components/ui/badge'
@@ -86,34 +86,38 @@ function LessonsPage() {
         )}
 
         <div className="grid grid-cols-1 gap-3">
-          {lessons?.map((lesson, index) => (
-            <Link
-              key={lesson.id}
-              to="/app/lessons/$lessonId"
-              params={{ lessonId: String(lesson.id) }}
-              aria-label={`Leçon ${index + 1}: ${lesson.title}`}
-            >
-              <Card className={`
-                group cursor-pointer overflow-hidden border-2 transition-all
-                duration-200
-                hover:scale-[1.01] hover:border-primary/50 hover:shadow-xl
-              `}
-              >
-                <div className={`
-                  pointer-events-none absolute inset-0 bg-linear-to-br
-                  from-transparent to-primary/5 opacity-0 transition-opacity
-                  group-hover:opacity-100
+          {lessons?.map((lesson, index) => {
+            const isLocked = (lesson as any).isLocked ?? false
+            const masteryCount = (lesson as any).masteryCount ?? 0
+            const isCompleted = (lesson as any).isCompleted ?? false
+
+            const LessonCard = (
+              <Card
+                key={lesson.id}
+                className={`h-full transition-all duration-200 border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group relative
+                  ${isLocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:scale-[1.01] hover:shadow-lg hover:border-primary/20 hover:bg-card/80'}
                 `}
-                />
+              >
+                {/* Lock Overlay */}
+                {isLocked && (
+                  <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center text-center p-4 rounded-xl border border-border/50">
+                    <div className="bg-background/80 p-3 rounded-full mb-3 border border-border shadow-sm">
+                      <Lock className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Termine la leçon précédente
+                    </p>
+                  </div>
+                )}
 
                 {/* Lesson Number Badge */}
                 <div className={`
                   absolute top-3 left-3 flex h-8 w-8 items-center justify-center
-                  rounded-full bg-primary/10 text-sm font-bold text-primary
-                  shadow-sm
+                  rounded-full text-sm font-bold shadow-sm z-20
+                  ${isCompleted ? 'bg-success/20 text-success' : 'bg-primary/10 text-primary'}
                 `}
                 >
-                  {index + 1}
+                  {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : index + 1}
                 </div>
 
                 <CardHeader className="relative pb-2">
@@ -121,29 +125,42 @@ function LessonsPage() {
                     <div className="flex-1">
                       <CardTitle className={`
                         mb-1 text-lg transition-colors
-                        group-hover:text-primary
+                        ${!isLocked && 'group-hover:text-primary'}
                       `}
                       >
                         {lesson.title}
                       </CardTitle>
                       {lesson.description && (
-                        <p className={`
-                          line-clamp-2 text-sm text-muted-foreground
-                        `}
-                        >
+                        <p className="line-clamp-2 text-sm text-muted-foreground">
                           {lesson.description}
                         </p>
                       )}
                     </div>
-                    <ChevronRight className={`
-                      h-5 w-5 shrink-0 text-muted-foreground transition-all
-                      group-hover:translate-x-1 group-hover:text-primary
-                    `}
-                    />
+                    {!isLocked && (
+                      <ChevronRight className={`
+                        h-5 w-5 shrink-0 text-muted-foreground transition-all
+                        group-hover:translate-x-1 group-hover:text-primary
+                      `}
+                      />
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap items-center gap-2">
+                    {/* Mastery Progress */}
+                    {!isLocked && masteryCount < 2 && (
+                      <Badge variant="secondary" className="bg-primary/10 text-primary text-xs font-medium">
+                        🎯 Maîtrise:
+                        {' '}
+                        {masteryCount}
+                        /2
+                      </Badge>
+                    )}
+                    {isCompleted && (
+                      <Badge variant="secondary" className="bg-success/10 text-success text-xs font-medium">
+                        ✅ Maîtrisé
+                      </Badge>
+                    )}
                     {lesson.difficulty && (
                       <Badge
                         variant="secondary"
@@ -174,8 +191,24 @@ function LessonsPage() {
                   </div>
                 </CardContent>
               </Card>
-            </Link>
-          ))}
+            )
+
+            // Wrap in Link only if not locked
+            return isLocked
+              ? (
+                  <div key={lesson.id}>{LessonCard}</div>
+                )
+              : (
+                  <Link
+                    key={lesson.id}
+                    to="/app/lessons/$lessonId"
+                    params={{ lessonId: String(lesson.id) }}
+                    aria-label={`Leçon ${index + 1}: ${lesson.title}`}
+                  >
+                    {LessonCard}
+                  </Link>
+                )
+          })}
         </div>
       </main>
 

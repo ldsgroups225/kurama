@@ -1,4 +1,5 @@
 import type { Achievement, LeaderboardEntry } from '@/components/gamification'
+import { useQuery } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import {
   BookOpen,
@@ -28,6 +29,7 @@ import {
 } from '@/components/gamification'
 import { AppHeader, BottomNav, ChallengeCard, QuickActions, StatsGrid } from '@/components/main'
 import { Badge } from '@/components/ui/badge'
+import { getDashboardStats } from '@/core/functions/dashboard'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { generateUUID } from '@/utils/generateUUID'
 
@@ -42,11 +44,17 @@ function AppHome() {
     return endTracking
   }, [])
 
+  // Fetch real dashboard data
+  const { data: dashboardData } = useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: () => getDashboardStats(),
+  })
+
   // Mock data - Replace with real data from your backend
   const userLevel = {
-    level: 12,
-    currentXP: 2450,
-    nextLevelXP: 3000,
+    level: Math.floor((dashboardData?.totalXP ?? 0) / 500) + 1,
+    currentXP: (dashboardData?.totalXP ?? 0) % 500,
+    nextLevelXP: 500,
   }
 
   const achievements: Achievement[] = [
@@ -160,15 +168,15 @@ function AppHome() {
   ]
 
   const streakData = {
-    currentStreak: 12,
-    longestStreak: 28,
+    currentStreak: dashboardData?.currentStreak ?? 0,
+    longestStreak: dashboardData?.longestStreak ?? 0,
     streakHistory: Array.from({ length: 14 }, (_, i) => {
       const date = new Date()
       date.setDate(date.getDate() - (13 - i))
       return {
         date,
-        completed: i >= 2, // Last 12 days completed
-        count: i >= 2 ? 1 : 0,
+        completed: i >= (14 - (dashboardData?.currentStreak ?? 0)),
+        count: i >= (14 - (dashboardData?.currentStreak ?? 0)) ? 1 : 0,
       }
     }),
   }
@@ -177,34 +185,34 @@ function AppHome() {
     {
       icon: BookOpen,
       label: 'Cartes Étudiées',
-      value: '247',
-      subValue: '24 aujourd\'hui',
+      value: String(dashboardData?.totalCardsStudied ?? 0),
+      subValue: `${dashboardData?.cardsStudiedToday ?? 0} aujourd'hui`,
       color: 'text-xp',
-      progress: 65,
+      progress: Math.min(((dashboardData?.cardsStudiedToday ?? 0) / 25) * 100, 100),
     },
     {
       icon: Trophy,
       label: 'Points Gagnés',
-      value: '1,240',
-      subValue: '+120 cette semaine',
+      value: String(dashboardData?.totalXP ?? 0),
+      subValue: `Niveau ${userLevel.level}`,
       color: 'text-level',
-      progress: 80,
+      progress: (userLevel.currentXP / userLevel.nextLevelXP) * 100,
     },
     {
       icon: Target,
       label: 'Objectif Quotidien',
-      value: '18/25',
-      subValue: '7 cartes restantes',
+      value: `${dashboardData?.cardsStudiedToday ?? 0}/25`,
+      subValue: `${Math.max(0, 25 - (dashboardData?.cardsStudiedToday ?? 0))} cartes restantes`,
       color: 'text-success',
-      progress: 72,
+      progress: Math.min(((dashboardData?.cardsStudiedToday ?? 0) / 25) * 100, 100),
     },
     {
       icon: Flame,
       label: 'Série Actuelle',
-      value: '12 jours',
-      subValue: 'Record: 28 jours',
+      value: `${dashboardData?.currentStreak ?? 0} jours`,
+      subValue: `Record: ${dashboardData?.longestStreak ?? 0} jours`,
       color: 'text-streak',
-      progress: 43,
+      progress: Math.min(((dashboardData?.currentStreak ?? 0) / (dashboardData?.longestStreak || 1)) * 100, 100),
     },
   ]
 

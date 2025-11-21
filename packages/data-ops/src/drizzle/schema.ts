@@ -1,377 +1,300 @@
-import {
-  pgTable,
-  serial,
-  text,
-  integer,
-  boolean,
-  timestamp,
-  primaryKey,
-  json,
-} from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
-import { auth_user } from "./auth-schema";
+import { pgTable, text, timestamp, unique, boolean, foreignKey, serial, integer, json, primaryKey } from "drizzle-orm/pg-core"
+import { sql } from "drizzle-orm"
 
-// ============================================================================
-// EDUCATIONAL STRUCTURE TABLES
-// ============================================================================
 
-/**
- * Grades/Levels table (CP1, CP2, 6ème, 5ème, Tle, etc.)
- */
-export const grades = pgTable("grades", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull().unique(),
-  slug: text("slug").notNull().unique(),
-  isActive: boolean("is_active").default(true).notNull(),
-  category: text("category").notNull(), // 'PRIMARY', 'COLLEGE', 'LYCEE'
-  displayOrder: integer("display_order").notNull(),
+
+export const authVerification = pgTable("auth_verification", {
+	id: text().primaryKey().notNull(),
+	identifier: text().notNull(),
+	value: text().notNull(),
+	expiresAt: timestamp("expires_at", { mode: 'string' }).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
-/**
- * Series table (A, C, D, etc. for Lycée levels)
- */
-export const series = pgTable("series", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull().unique(),
-  description: text("description"),
-  displayOrder: integer("display_order").notNull(),
-});
+export const authUser = pgTable("auth_user", {
+	id: text().primaryKey().notNull(),
+	name: text().notNull(),
+	email: text().notNull(),
+	emailVerified: boolean("email_verified").default(false).notNull(),
+	image: text(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	unique("auth_user_email_unique").on(table.email),
+]);
 
-/**
- * Junction table: Which series are available for which grades
- */
-export const levelSeries = pgTable(
-  "level_series",
-  {
-    gradeId: integer("grade_id")
-      .notNull()
-      .references(() => grades.id, { onDelete: "cascade" }),
-    seriesId: integer("series_id")
-      .notNull()
-      .references(() => series.id, { onDelete: "cascade" }),
-  },
-  (table) => ({
-    pk: primaryKey({ columns: [table.gradeId, table.seriesId] }),
-  })
-);
+export const authAccount = pgTable("auth_account", {
+	id: text().primaryKey().notNull(),
+	accountId: text("account_id").notNull(),
+	providerId: text("provider_id").notNull(),
+	userId: text("user_id").notNull(),
+	accessToken: text("access_token"),
+	refreshToken: text("refresh_token"),
+	idToken: text("id_token"),
+	accessTokenExpiresAt: timestamp("access_token_expires_at", { mode: 'string' }),
+	refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { mode: 'string' }),
+	scope: text(),
+	password: text(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [authUser.id],
+			name: "auth_account_user_id_auth_user_id_fk"
+		}).onDelete("cascade"),
+]);
 
-/**
- * Subjects table (Mathématiques, Français, etc.)
- */
-export const subjects = pgTable("subjects", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull().unique(),
-  abbreviation: text("abbreviation").notNull().unique(),
-  description: text("description"),
-  displayOrder: integer("display_order").notNull(),
-});
+export const authSession = pgTable("auth_session", {
+	id: text().primaryKey().notNull(),
+	expiresAt: timestamp("expires_at", { mode: 'string' }).notNull(),
+	token: text().notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).notNull(),
+	ipAddress: text("ip_address"),
+	userAgent: text("user_agent"),
+	userId: text("user_id").notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [authUser.id],
+			name: "auth_session_user_id_auth_user_id_fk"
+		}).onDelete("cascade"),
+	unique("auth_session_token_unique").on(table.token),
+]);
 
-/**
- * Subject offerings: Which subjects are available for which grade/series combinations
- */
-export const subjectOfferings = pgTable("subject_offerings", {
-  id: serial("id").primaryKey(),
-  gradeId: integer("grade_id")
-    .notNull()
-    .references(() => grades.id, { onDelete: "cascade" }),
-  subjectId: integer("subject_id")
-    .notNull()
-    .references(() => subjects.id, { onDelete: "cascade" }),
-  seriesId: integer("series_id").references(() => series.id, {
-    onDelete: "cascade",
-  }),
-  isMandatory: boolean("is_mandatory").default(true).notNull(),
-  coefficient: integer("coefficient").default(1),
-});
-
-// ============================================================================
-// CONTENT TABLES
-// ============================================================================
-
-/**
- * Lessons table
- */
-export const lessons = pgTable("lessons", {
-  id: serial("id").primaryKey(),
-  subjectId: integer("subject_id")
-    .notNull()
-    .references(() => subjects.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  description: text("description"),
-  authorId: text("author_id").references(() => auth_user.id, {
-    onDelete: "set null",
-  }),
-  difficulty: text("difficulty"), // 'easy', 'medium', 'hard'
-  estimatedDuration: integer("estimated_duration"), // in minutes
-  isPublished: boolean("is_published").default(false).notNull(),
-  publishedAt: timestamp("published_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-});
-
-/**
- * Flashcards table
- */
 export const cards = pgTable("cards", {
-  id: serial("id").primaryKey(),
-  lessonId: integer("lesson_id")
-    .notNull()
-    .references(() => lessons.id, { onDelete: "cascade" }),
-  frontContent: text("front_content").notNull(),
-  backContent: text("back_content").notNull(),
-  cardType: text("card_type").default("basic").notNull(), // 'basic', 'cloze', 'multiple_choice'
-  difficulty: integer("difficulty").default(0), // SM-2 algorithm difficulty
-  displayOrder: integer("display_order").notNull(),
-  metadata: json("metadata"), // Additional data like images, audio, etc.
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-});
+	id: serial().primaryKey().notNull(),
+	lessonId: integer("lesson_id").notNull(),
+	frontContent: text("front_content").notNull(),
+	backContent: text("back_content").notNull(),
+	cardType: text("card_type").default('basic').notNull(),
+	difficulty: integer().default(0),
+	displayOrder: integer("display_order").notNull(),
+	metadata: json(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.lessonId],
+			foreignColumns: [lessons.id],
+			name: "cards_lesson_id_lessons_id_fk"
+		}).onDelete("cascade"),
+]);
 
-// ============================================================================
-// USER PROFILE TABLES
-// ============================================================================
+export const subjects = pgTable("subjects", {
+	id: serial().primaryKey().notNull(),
+	name: text().notNull(),
+	abbreviation: text().notNull(),
+	description: text(),
+	displayOrder: integer("display_order").notNull(),
+}, (table) => [
+	unique("subjects_name_unique").on(table.name),
+	unique("subjects_abbreviation_unique").on(table.abbreviation),
+]);
 
-/**
- * User profiles table - Extended user information
- */
-export const userProfiles = pgTable("user_profiles", {
-  userId: text("user_id")
-    .primaryKey()
-    .references(() => auth_user.id, { onDelete: "cascade" }),
-  userType: text("user_type", { enum: ["student", "parent"] }).notNull(),
+export const grades = pgTable("grades", {
+	id: serial().primaryKey().notNull(),
+	name: text().notNull(),
+	slug: text().notNull(),
+	isActive: boolean("is_active").default(true).notNull(),
+	category: text().notNull(),
+	displayOrder: integer("display_order").notNull(),
+}, (table) => [
+	unique("grades_name_unique").on(table.name),
+	unique("grades_slug_unique").on(table.slug),
+]);
 
-  // Basic Information (both student and parent)
-  firstName: text("first_name").notNull(),
-  lastName: text("last_name").notNull(),
+export const series = pgTable("series", {
+	id: serial().primaryKey().notNull(),
+	name: text().notNull(),
+	description: text(),
+	displayOrder: integer("display_order").notNull(),
+}, (table) => [
+	unique("series_name_unique").on(table.name),
+]);
 
-  // Student-specific fields
-  phone: text("phone"),
-  age: integer("age"),
-  gender: text("gender", { enum: ["male", "female"] }),
-  city: text("city"),
-  idNumber: text("id_number"), // Student matricule
-  gradeId: integer("grade_id").references(() => grades.id, {
-    onDelete: "set null",
-  }),
-  seriesId: integer("series_id").references(() => series.id, {
-    onDelete: "set null",
-  }),
-  favoriteSubjects: json("favorite_subjects").$type<string[]>(), // Array of subject names
-  learningGoals: text("learning_goals"),
-  studyTime: text("study_time"), // Daily study time preference
-
-  // Parent-specific fields
-  childrenMatricules: json("children_matricules").$type<number[]>(), // Array of student matricules
-
-  // Common fields
-  isCompleted: boolean("is_completed").default(false).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-});
-
-// ============================================================================
-// PROGRESS TRACKING TABLES
-// ============================================================================
-
-/**
- * User progress on cards (SM-2 spaced repetition)
- */
-export const userProgress = pgTable("user_progress", {
-  id: serial("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => auth_user.id, { onDelete: "cascade" }),
-  cardId: integer("card_id")
-    .notNull()
-    .references(() => cards.id, { onDelete: "cascade" }),
-  lessonId: integer("lesson_id")
-    .notNull()
-    .references(() => lessons.id, { onDelete: "cascade" }),
-  easeFactor: integer("ease_factor").default(2500).notNull(), // SM-2: 2.5 * 1000
-  interval: integer("interval").default(0).notNull(), // Days until next review
-  repetitions: integer("repetitions").default(0).notNull(),
-  lastReviewedAt: timestamp("last_reviewed_at"),
-  nextReviewAt: timestamp("next_review_at"),
-  totalReviews: integer("total_reviews").default(0).notNull(),
-  correctReviews: integer("correct_reviews").default(0).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-});
-
-/**
- * Study sessions tracking
- */
 export const studySessions = pgTable("study_sessions", {
-  id: serial("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => auth_user.id, { onDelete: "cascade" }),
-  lessonId: integer("lesson_id")
-    .notNull()
-    .references(() => lessons.id, { onDelete: "cascade" }),
-  startedAt: timestamp("started_at").defaultNow().notNull(),
-  endedAt: timestamp("ended_at"),
-  cardsReviewed: integer("cards_reviewed").default(0).notNull(),
-  cardsCorrect: integer("cards_correct").default(0).notNull(),
-  duration: integer("duration"), // in seconds
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+	id: serial().primaryKey().notNull(),
+	userId: text("user_id").notNull(),
+	lessonId: integer("lesson_id").notNull(),
+	startedAt: timestamp("started_at", { mode: 'string' }).defaultNow().notNull(),
+	endedAt: timestamp("ended_at", { mode: 'string' }),
+	cardsReviewed: integer("cards_reviewed").default(0).notNull(),
+	cardsCorrect: integer("cards_correct").default(0).notNull(),
+	duration: integer(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [authUser.id],
+			name: "study_sessions_user_id_auth_user_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.lessonId],
+			foreignColumns: [lessons.id],
+			name: "study_sessions_lesson_id_lessons_id_fk"
+		}).onDelete("cascade"),
+]);
 
-// ============================================================================
-// RELATIONS
-// ============================================================================
+export const subjectOfferings = pgTable("subject_offerings", {
+	id: serial().primaryKey().notNull(),
+	gradeId: integer("grade_id").notNull(),
+	subjectId: integer("subject_id").notNull(),
+	seriesId: integer("series_id"),
+	isMandatory: boolean("is_mandatory").default(true).notNull(),
+	coefficient: integer().default(1),
+}, (table) => [
+	foreignKey({
+			columns: [table.gradeId],
+			foreignColumns: [grades.id],
+			name: "subject_offerings_grade_id_grades_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.subjectId],
+			foreignColumns: [subjects.id],
+			name: "subject_offerings_subject_id_subjects_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.seriesId],
+			foreignColumns: [series.id],
+			name: "subject_offerings_series_id_series_id_fk"
+		}).onDelete("cascade"),
+]);
 
-export const gradesRelations = relations(grades, ({ many }) => ({
-  levelSeries: many(levelSeries),
-  subjectOfferings: many(subjectOfferings),
-  userProfiles: many(userProfiles),
-}));
+export const userProfiles = pgTable("user_profiles", {
+	userId: text("user_id").primaryKey().notNull(),
+	userType: text("user_type").notNull(),
+	firstName: text("first_name").notNull(),
+	lastName: text("last_name").notNull(),
+	phone: text(),
+	age: integer(),
+	gender: text(),
+	city: text(),
+	idNumber: text("id_number"),
+	gradeId: integer("grade_id"),
+	seriesId: integer("series_id"),
+	favoriteSubjects: json("favorite_subjects"),
+	learningGoals: text("learning_goals"),
+	studyTime: text("study_time"),
+	childrenMatricules: json("children_matricules"),
+	isCompleted: boolean("is_completed").default(false).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [authUser.id],
+			name: "user_profiles_user_id_auth_user_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.gradeId],
+			foreignColumns: [grades.id],
+			name: "user_profiles_grade_id_grades_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.seriesId],
+			foreignColumns: [series.id],
+			name: "user_profiles_series_id_series_id_fk"
+		}).onDelete("set null"),
+]);
 
-export const seriesRelations = relations(series, ({ many }) => ({
-  levelSeries: many(levelSeries),
-  subjectOfferings: many(subjectOfferings),
-  userProfiles: many(userProfiles),
-}));
+export const userProgress = pgTable("user_progress", {
+	id: serial().primaryKey().notNull(),
+	userId: text("user_id").notNull(),
+	cardId: integer("card_id").notNull(),
+	lessonId: integer("lesson_id").notNull(),
+	easeFactor: integer("ease_factor").default(2500).notNull(),
+	interval: integer().default(0).notNull(),
+	repetitions: integer().default(0).notNull(),
+	lastReviewedAt: timestamp("last_reviewed_at", { mode: 'string' }),
+	nextReviewAt: timestamp("next_review_at", { mode: 'string' }),
+	totalReviews: integer("total_reviews").default(0).notNull(),
+	correctReviews: integer("correct_reviews").default(0).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [authUser.id],
+			name: "user_progress_user_id_auth_user_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.cardId],
+			foreignColumns: [cards.id],
+			name: "user_progress_card_id_cards_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.lessonId],
+			foreignColumns: [lessons.id],
+			name: "user_progress_lesson_id_lessons_id_fk"
+		}).onDelete("cascade"),
+]);
 
-export const levelSeriesRelations = relations(levelSeries, ({ one }) => ({
-  grade: one(grades, {
-    fields: [levelSeries.gradeId],
-    references: [grades.id],
-  }),
-  series: one(series, {
-    fields: [levelSeries.seriesId],
-    references: [series.id],
-  }),
-}));
+export const lessons = pgTable("lessons", {
+	id: serial().primaryKey().notNull(),
+	subjectId: integer("subject_id").notNull(),
+	title: text().notNull(),
+	description: text(),
+	authorId: text("author_id"),
+	difficulty: text(),
+	estimatedDuration: integer("estimated_duration"),
+	isPublished: boolean("is_published").default(false).notNull(),
+	publishedAt: timestamp("published_at", { mode: 'string' }),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+	displayOrder: integer("display_order").default(0).notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.subjectId],
+			foreignColumns: [subjects.id],
+			name: "lessons_subject_id_subjects_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.authorId],
+			foreignColumns: [authUser.id],
+			name: "lessons_author_id_auth_user_id_fk"
+		}).onDelete("set null"),
+]);
 
-export const subjectsRelations = relations(subjects, ({ many }) => ({
-  subjectOfferings: many(subjectOfferings),
-  lessons: many(lessons),
-}));
+export const userLessonMastery = pgTable("user_lesson_mastery", {
+	id: serial().primaryKey().notNull(),
+	userId: text("user_id").notNull(),
+	lessonId: integer("lesson_id").notNull(),
+	successfulTestCount: integer("successful_test_count").default(0).notNull(),
+	lastTestScore: integer("last_test_score"),
+	lastTestAt: timestamp("last_test_at", { mode: 'string' }),
+	isUnlocked: boolean("is_unlocked").default(false).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [authUser.id],
+			name: "user_lesson_mastery_user_id_auth_user_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.lessonId],
+			foreignColumns: [lessons.id],
+			name: "user_lesson_mastery_lesson_id_lessons_id_fk"
+		}).onDelete("cascade"),
+	unique("user_lesson_mastery_user_id_lesson_id_unique").on(table.userId, table.lessonId),
+]);
 
-export const subjectOfferingsRelations = relations(
-  subjectOfferings,
-  ({ one }) => ({
-    grade: one(grades, {
-      fields: [subjectOfferings.gradeId],
-      references: [grades.id],
-    }),
-    subject: one(subjects, {
-      fields: [subjectOfferings.subjectId],
-      references: [subjects.id],
-    }),
-    series: one(series, {
-      fields: [subjectOfferings.seriesId],
-      references: [series.id],
-    }),
-  })
-);
-
-export const lessonsRelations = relations(lessons, ({ one, many }) => ({
-  subject: one(subjects, {
-    fields: [lessons.subjectId],
-    references: [subjects.id],
-  }),
-  author: one(auth_user, {
-    fields: [lessons.authorId],
-    references: [auth_user.id],
-  }),
-  cards: many(cards),
-  userProgress: many(userProgress),
-  studySessions: many(studySessions),
-}));
-
-export const cardsRelations = relations(cards, ({ one, many }) => ({
-  lesson: one(lessons, {
-    fields: [cards.lessonId],
-    references: [lessons.id],
-  }),
-  userProgress: many(userProgress),
-}));
-
-export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
-  user: one(auth_user, {
-    fields: [userProfiles.userId],
-    references: [auth_user.id],
-  }),
-  grade: one(grades, {
-    fields: [userProfiles.gradeId],
-    references: [grades.id],
-  }),
-  series: one(series, {
-    fields: [userProfiles.seriesId],
-    references: [series.id],
-  }),
-}));
-
-export const userProgressRelations = relations(userProgress, ({ one }) => ({
-  user: one(auth_user, {
-    fields: [userProgress.userId],
-    references: [auth_user.id],
-  }),
-  card: one(cards, {
-    fields: [userProgress.cardId],
-    references: [cards.id],
-  }),
-  lesson: one(lessons, {
-    fields: [userProgress.lessonId],
-    references: [lessons.id],
-  }),
-}));
-
-export const studySessionsRelations = relations(studySessions, ({ one }) => ({
-  user: one(auth_user, {
-    fields: [studySessions.userId],
-    references: [auth_user.id],
-  }),
-  lesson: one(lessons, {
-    fields: [studySessions.lessonId],
-    references: [lessons.id],
-  }),
-}));
-
-// ============================================================================
-// TYPE EXPORTS
-// ============================================================================
-
-export type SelectGrade = typeof grades.$inferSelect;
-export type InsertGrade = typeof grades.$inferInsert;
-
-export type SelectSeries = typeof series.$inferSelect;
-export type InsertSeries = typeof series.$inferInsert;
-
-export type SelectLevelSeries = typeof levelSeries.$inferSelect;
-export type InsertLevelSeries = typeof levelSeries.$inferInsert;
-
-export type SelectSubject = typeof subjects.$inferSelect;
-export type InsertSubject = typeof subjects.$inferInsert;
-
-export type SelectSubjectOffering = typeof subjectOfferings.$inferSelect;
-export type InsertSubjectOffering = typeof subjectOfferings.$inferInsert;
-
-export type SelectLesson = typeof lessons.$inferSelect;
-export type InsertLesson = typeof lessons.$inferInsert;
-
-export type SelectCard = typeof cards.$inferSelect;
-export type InsertCard = typeof cards.$inferInsert;
-
-export type SelectUserProfile = typeof userProfiles.$inferSelect;
-export type InsertUserProfile = typeof userProfiles.$inferInsert;
-
-export type SelectUserProgress = typeof userProgress.$inferSelect;
-export type InsertUserProgress = typeof userProgress.$inferInsert;
-
-export type SelectStudySession = typeof studySessions.$inferSelect;
-export type InsertStudySession = typeof studySessions.$inferInsert;
+export const levelSeries = pgTable("level_series", {
+	gradeId: integer("grade_id").notNull(),
+	seriesId: integer("series_id").notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.gradeId],
+			foreignColumns: [grades.id],
+			name: "level_series_grade_id_grades_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.seriesId],
+			foreignColumns: [series.id],
+			name: "level_series_series_id_series_id_fk"
+		}).onDelete("cascade"),
+	primaryKey({ columns: [table.gradeId, table.seriesId], name: "level_series_grade_id_series_id_pk"}),
+]);
