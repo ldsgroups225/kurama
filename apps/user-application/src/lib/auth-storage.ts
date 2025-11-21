@@ -241,14 +241,80 @@ export async function clearAuthState(userId: string): Promise<void> {
 }
 
 /**
- * Clear all authentication states (for complete logout)
+ * Clear user-specific authentication data (for logout)
+ *
+ * CLEARS (user-specific data):
+ * - IndexedDB: authState, mutationQueue (user's pending operations)
+ * - Jotai atoms: userProfile, onboarding status (via RESET)
+ * - Memory: session encryption keys
+ *
+ * PRESERVES (app-level data):
+ * - queryCache: Curriculum data, subjects, lessons (not user-specific)
+ * - appState: App configuration, feature flags
+ * - ui-theme: User's theme preference
+ * - pwa-install-dismissed: Don't spam install prompt
+ */
+export async function clearUserAuthData(): Promise<void> {
+  try {
+    // Clear user-specific IndexedDB data
+    await Promise.all([
+      db.authState.clear(), // Auth tokens
+      db.mutationQueue.clear(), // User's pending mutations
+      // Preserve queryCache - contains curriculum data that's not user-specific
+      // Preserve appState - contains app-level configuration
+    ])
+
+    // Clear session encryption keys
+    sessionKey = null
+    sessionSalt = null
+
+    // Reset Jotai atoms to their initial values (proper way)
+    if (typeof window !== 'undefined' && window.localStorage) {
+      // Reset user profile atom
+      localStorage.removeItem('kurama:userProfile')
+
+      // Reset onboarding status
+      localStorage.removeItem('kurama:hasCompletedOnboarding')
+
+      // Preserve theme preference - users expect this to persist
+      // Preserve PWA install dismissed - don't spam them
+    }
+  }
+  catch (error) {
+    console.error('Failed to clear user auth data:', error)
+    throw new Error('Failed to clear user authentication data')
+  }
+}
+
+/**
+ * Clear ALL data (for debugging or complete reset)
+ * Use this only when you need to completely reset the app
  */
 export async function clearAllAuthStates(): Promise<void> {
   try {
-    await db.authState.clear()
-    // Also clear session key
+    // Clear all IndexedDB tables
+    await Promise.all([
+      db.authState.clear(),
+      db.queryCache.clear(),
+      db.mutationQueue.clear(),
+      db.appState.clear(),
+    ])
+
+    // Clear session encryption keys
     sessionKey = null
     sessionSalt = null
+
+    // Clear all localStorage
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const keysToRemove: string[] = []
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i)
+        if (key?.startsWith('kurama:')) {
+          keysToRemove.push(key)
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key))
+    }
   }
   catch (error) {
     console.error('Failed to clear all auth states:', error)

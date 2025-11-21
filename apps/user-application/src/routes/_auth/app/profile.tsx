@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { useSession } from '@/lib/auth-client'
+import { signOut, useSession } from '@/lib/auth-client'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 
 export const Route = createFileRoute('/_auth/app/profile')({
@@ -31,6 +31,17 @@ function ProfilePage() {
     const endTracking = trackRouteLoad('app-profile')
     return endTracking
   }, [])
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      // Navigate to home page after sign out
+      navigate({ to: '/' })
+    }
+    catch (error) {
+      console.error('Failed to sign out:', error)
+    }
+  }
 
   const getUserInitials = () => {
     if (!session?.user?.name)
@@ -176,6 +187,7 @@ function ProfilePage() {
         {/* Logout Button */}
         <Button
           variant="outline"
+          onClick={handleSignOut}
           className={`
             w-full text-destructive
             hover:text-destructive
