@@ -139,8 +139,9 @@ export async function decryptToken(encryptedToken: string): Promise<string> {
     const decoder = new TextDecoder()
     return decoder.decode(decryptedBuffer)
   }
-  catch (error) {
-    console.error('Token decryption failed:', error)
+  catch {
+    // Silently handle decryption errors - likely due to session key mismatch
+    // This is expected when tokens were encrypted in a previous session
     throw new Error('Failed to decrypt authentication token')
   }
 }
@@ -218,9 +219,9 @@ export async function getAuthState(
       additionalData,
     }
   }
-  catch (error) {
-    console.error('Failed to retrieve auth state:', error)
-    // If decryption fails, clear the corrupted state
+  catch {
+    // Silently handle decryption errors - this is expected when session keys change
+    // Clear the corrupted/outdated state without logging errors
     await clearAuthState(userId).catch(() => { })
     return null
   }
