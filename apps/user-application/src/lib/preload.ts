@@ -187,11 +187,11 @@ export function preloadCriticalRoutes(currentPath: string): void {
 
   // App dashboard - preload common routes
   if (currentPath === '/app' || currentPath === '/app/') {
-    preloadRoutes(['/app/lessons', '/app/profile', '/app/progress'])
+    preloadRoutes(['/app/subjects', '/app/profile', '/app/progress'])
   }
 
-  // Lessons page - preload progress
-  if (currentPath === '/app/lessons') {
+  // Subjects page - preload progress
+  if (currentPath.startsWith('/app/subjects')) {
     preloadRoute('/app/progress')
   }
 }
@@ -274,7 +274,7 @@ export function initPreloading(currentPath: string): () => void {
   preloadCriticalRoutes(currentPath)
 
   // Preload common routes on idle
-  preloadOnIdle(['/app/lessons', '/app/groups', '/app/progress'])
+  preloadOnIdle(['/app/subjects', '/app/groups', '/app/progress'])
 
   // Return cleanup function
   return () => {
