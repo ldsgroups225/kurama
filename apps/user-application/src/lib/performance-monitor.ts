@@ -3,6 +3,8 @@
  * Implements requirements 6.1, 6.2, 6.3 from bundle-optimization spec
  */
 
+/* eslint-disable no-console */
+
 export interface CoreWebVitals {
   LCP: number // Largest Contentful Paint
   FID: number // First Input Delay (deprecated, using INP)
@@ -269,10 +271,9 @@ export function trackRouteLoad(routeName: string): () => void {
     const loadTime = performance.now() - startTime
     perfMonitor.recordRouteLoad(routeName, loadTime)
 
-    // Performance tracking in development
-
-    if (import.meta.env.DEV) {
-      console.error(`[Performance] Route "${routeName}" loaded in ${loadTime.toFixed(2)}ms`)
+    // Performance tracking in development (only log slow routes)
+    if (import.meta.env.DEV && loadTime > 100) {
+      console.log(`[Performance] Route "${routeName}" loaded in ${loadTime.toFixed(2)}ms`)
     }
   }
 }
@@ -297,10 +298,9 @@ export function trackBundleLoad(routeName: string, chunkSize?: number): () => vo
 
     perfMonitor.recordBundleMetrics(metrics)
 
-    // Performance tracking in development
-
-    if (import.meta.env.DEV) {
-      console.error(`[Performance] Bundle "${routeName}" loaded in ${loadTime.toFixed(2)}ms`)
+    // Performance tracking in development (only log slow bundles)
+    if (import.meta.env.DEV && loadTime > 100) {
+      console.log(`[Performance] Bundle "${routeName}" loaded in ${loadTime.toFixed(2)}ms`)
     }
   }
 }
@@ -311,13 +311,11 @@ export function trackBundleLoad(routeName: string, chunkSize?: number): () => vo
 export function logPerformanceMetrics(): void {
   if (import.meta.env.DEV) {
     const metrics = perfMonitor.getAllMetrics()
-    // eslint-disable-next-line no-console
     console.group('📊 Performance Metrics')
-    console.error('Core Web Vitals:', metrics.webVitals)
-    console.error('Route Metrics:', metrics.routeMetrics)
-    console.error('Bundle Metrics:', metrics.bundleMetrics)
-    console.error('Statistics:', metrics.stats)
-    // eslint-disable-next-line no-console
+    console.log('Core Web Vitals:', metrics.webVitals)
+    console.log('Route Metrics:', metrics.routeMetrics)
+    console.log('Bundle Metrics:', metrics.bundleMetrics)
+    console.log('Statistics:', metrics.stats)
     console.groupEnd()
   }
 }
