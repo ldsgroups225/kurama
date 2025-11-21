@@ -1,8 +1,9 @@
-import { createLazyFileRoute } from '@tanstack/react-router'
+import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
 import { useAtom } from 'jotai'
 import { Suspense, useEffect, useState } from 'react'
 import { FormSkeleton, PageSkeleton } from '@/components/skeletons'
 import { hasCompletedOnboardingAtom } from '@/lib/atoms'
+import { useSession } from '@/lib/auth-client'
 import { createLazyComponent } from '@/lib/lazy-helpers'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 
@@ -20,12 +21,21 @@ function LandingPage() {
     hasCompletedOnboardingAtom,
   )
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const { data: session } = useSession()
+  const navigate = useNavigate()
 
   // Track route load performance
   useEffect(() => {
     const endTracking = trackRouteLoad('landing')
     return endTracking
   }, [])
+
+  // Redirect authenticated users to app
+  useEffect(() => {
+    if (session) {
+      navigate({ to: '/app' })
+    }
+  }, [session, navigate])
 
   // Show welcome screen if first time user
   if (!hasCompletedOnboarding && !showOnboarding) {

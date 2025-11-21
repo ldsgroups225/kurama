@@ -70,6 +70,7 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
 
       // Success - redirect will happen automatically via session
       router.invalidate()
+      // Keep loading state while redirect happens
     }
     catch {
       setError('Une erreur s\'est produite. Veuillez réessayer.')
