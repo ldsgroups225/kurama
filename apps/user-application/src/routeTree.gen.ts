@@ -15,6 +15,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiMetricsRouteImport } from './routes/api/metrics'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AuthAppIndexRouteImport } from './routes/_auth/app/index'
+import { Route as ApiStudyStartRouteImport } from './routes/api/study/start'
+import { Route as ApiStudyProgressRouteImport } from './routes/api/study/progress'
+import { Route as ApiStudySessionIdRouteImport } from './routes/api/study/$sessionId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AuthAppProgressRouteImport } from './routes/_auth/app/progress'
 import { Route as AuthAppProfileRouteImport } from './routes/_auth/app/profile'
@@ -60,6 +63,21 @@ const AuthAppIndexRoute = AuthAppIndexRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_auth/app/index.lazy').then((d) => d.Route),
 )
+const ApiStudyStartRoute = ApiStudyStartRouteImport.update({
+  id: '/api/study/start',
+  path: '/api/study/start',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStudyProgressRoute = ApiStudyProgressRouteImport.update({
+  id: '/api/study/progress',
+  path: '/api/study/progress',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStudySessionIdRoute = ApiStudySessionIdRouteImport.update({
+  id: '/api/study/$sessionId',
+  path: '/api/study/$sessionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -141,6 +159,9 @@ export interface FileRoutesByFullPath {
   '/app/profile': typeof AuthAppProfileRoute
   '/app/progress': typeof AuthAppProgressRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/study/$sessionId': typeof ApiStudySessionIdRoute
+  '/api/study/progress': typeof ApiStudyProgressRoute
+  '/api/study/start': typeof ApiStudyStartRoute
   '/app': typeof AuthAppIndexRoute
   '/app/lesson-session/$lessonId': typeof AuthAppLessonSessionLessonIdRoute
   '/app/lesson-summary/$lessonId': typeof AuthAppLessonSummaryLessonIdRoute
@@ -161,6 +182,9 @@ export interface FileRoutesByTo {
   '/app/profile': typeof AuthAppProfileRoute
   '/app/progress': typeof AuthAppProgressRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/study/$sessionId': typeof ApiStudySessionIdRoute
+  '/api/study/progress': typeof ApiStudyProgressRoute
+  '/api/study/start': typeof ApiStudyStartRoute
   '/app': typeof AuthAppIndexRoute
   '/app/lesson-session/$lessonId': typeof AuthAppLessonSessionLessonIdRoute
   '/app/lesson-summary/$lessonId': typeof AuthAppLessonSummaryLessonIdRoute
@@ -183,6 +207,9 @@ export interface FileRoutesById {
   '/_auth/app/profile': typeof AuthAppProfileRoute
   '/_auth/app/progress': typeof AuthAppProgressRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/study/$sessionId': typeof ApiStudySessionIdRoute
+  '/api/study/progress': typeof ApiStudyProgressRoute
+  '/api/study/start': typeof ApiStudyStartRoute
   '/_auth/app/': typeof AuthAppIndexRoute
   '/_auth/app/lesson-session/$lessonId': typeof AuthAppLessonSessionLessonIdRoute
   '/_auth/app/lesson-summary/$lessonId': typeof AuthAppLessonSummaryLessonIdRoute
@@ -205,6 +232,9 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/progress'
     | '/api/auth/$'
+    | '/api/study/$sessionId'
+    | '/api/study/progress'
+    | '/api/study/start'
     | '/app'
     | '/app/lesson-session/$lessonId'
     | '/app/lesson-summary/$lessonId'
@@ -225,6 +255,9 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/progress'
     | '/api/auth/$'
+    | '/api/study/$sessionId'
+    | '/api/study/progress'
+    | '/api/study/start'
     | '/app'
     | '/app/lesson-session/$lessonId'
     | '/app/lesson-summary/$lessonId'
@@ -246,6 +279,9 @@ export interface FileRouteTypes {
     | '/_auth/app/profile'
     | '/_auth/app/progress'
     | '/api/auth/$'
+    | '/api/study/$sessionId'
+    | '/api/study/progress'
+    | '/api/study/start'
     | '/_auth/app/'
     | '/_auth/app/lesson-session/$lessonId'
     | '/_auth/app/lesson-summary/$lessonId'
@@ -265,6 +301,9 @@ export interface RootRouteChildren {
   ApiHealthRoute: typeof ApiHealthRoute
   ApiMetricsRoute: typeof ApiMetricsRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiStudySessionIdRoute: typeof ApiStudySessionIdRoute
+  ApiStudyProgressRoute: typeof ApiStudyProgressRoute
+  ApiStudyStartRoute: typeof ApiStudyStartRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -310,6 +349,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/app'
       preLoaderRoute: typeof AuthAppIndexRouteImport
       parentRoute: typeof AuthRouteRoute
+    }
+    '/api/study/start': {
+      id: '/api/study/start'
+      path: '/api/study/start'
+      fullPath: '/api/study/start'
+      preLoaderRoute: typeof ApiStudyStartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/study/progress': {
+      id: '/api/study/progress'
+      path: '/api/study/progress'
+      fullPath: '/api/study/progress'
+      preLoaderRoute: typeof ApiStudyProgressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/study/$sessionId': {
+      id: '/api/study/$sessionId'
+      path: '/api/study/$sessionId'
+      fullPath: '/api/study/$sessionId'
+      preLoaderRoute: typeof ApiStudySessionIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -448,6 +508,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHealthRoute: ApiHealthRoute,
   ApiMetricsRoute: ApiMetricsRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiStudySessionIdRoute: ApiStudySessionIdRoute,
+  ApiStudyProgressRoute: ApiStudyProgressRoute,
+  ApiStudyStartRoute: ApiStudyStartRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

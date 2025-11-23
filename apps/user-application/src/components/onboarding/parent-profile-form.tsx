@@ -31,9 +31,9 @@ function ProgressIndicator({ steps, currentStep }: { steps: Steps[], currentStep
             <div className={`
               flex h-8 w-8 items-center justify-center rounded-full
               ${index <= currentStep
-                ? 'bg-gradient-xp text-white'
-                : 'bg-muted text-muted-foreground'
-              }
+          ? 'bg-gradient-xp text-white'
+          : 'bg-muted text-muted-foreground'
+        }
             `}
             >
               {index + 1}
@@ -41,9 +41,9 @@ function ProgressIndicator({ steps, currentStep }: { steps: Steps[], currentStep
             <span className={`
               mt-1 text-xs
               ${index <= currentStep
-                ? 'text-xp'
-                : `text-muted-foreground`
-              }
+          ? 'text-xp'
+          : `text-muted-foreground`
+        }
             `}
             >
               {step.label}
@@ -53,9 +53,9 @@ function ProgressIndicator({ steps, currentStep }: { steps: Steps[], currentStep
             <div className={`
               h-0.5 flex-1
               ${index < currentStep
-                ? `bg-gradient-xp-horizontal`
-                : `bg-muted`
-              }
+              ? `bg-gradient-xp-horizontal`
+              : `bg-muted`
+            }
             `}
             />
           )}
@@ -384,14 +384,14 @@ export function ParentProfileForm({
                     >
                       {isSubmitting
                         ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Enregistrement...
-                          </>
-                        )
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Enregistrement...
+                            </>
+                          )
                         : (
-                          'Terminer'
-                        )}
+                            'Terminer'
+                          )}
                     </Button>
                   </div>
                 </>

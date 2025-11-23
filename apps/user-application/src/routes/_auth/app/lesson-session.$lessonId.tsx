@@ -3,8 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { Loader2, WifiOff } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Flashcard } from '@/components/learning/flashcard'
-import { Quiz } from '@/components/learning/quiz'
+import { CardFactory } from '@/components/learning/CardFactory'
 import { QuizSettingsSheet } from '@/components/learning/quiz-settings-sheet'
 import { SessionControls } from '@/components/learning/session-controls'
 import { SessionCounterBadge } from '@/components/learning/session-counter-badge'
@@ -440,16 +439,30 @@ function SessionPage() {
 
   // Render different components based on mode
   const renderLearningMode = () => {
+    // Common props for CardFactory
+    const commonProps = {
+      card: currentCard,
+      cardIndex: currentCardIndex,
+      totalCards: cards.length,
+      onAnswer: (isCorrect: boolean) => {
+        if (mode === 'exam') {
+          // Test mode handles answers differently (accumulates them)
+          // We might need to adapt Test component or handle it here
+          // For now, let's keep Test component separate if it's complex
+          // But for Quiz and Flashcards, we use CardFactory
+          handleResponse(isCorrect ? 'correct' : 'incorrect')
+        }
+        else {
+          handleResponse(isCorrect ? 'correct' : 'incorrect')
+        }
+      },
+    }
+
     switch (mode) {
       case 'quiz':
         return (
-          <Quiz
-            key={currentCardIndex}
-            card={currentCard}
-            cardIndex={currentCardIndex}
-            totalCards={cards.length}
-            questionType="multiple-choice"
-            onAnswer={isCorrect => handleResponse(isCorrect ? 'correct' : 'incorrect')}
+          <CardFactory
+            {...commonProps}
           />
         )
       case 'exam':
@@ -480,10 +493,9 @@ function SessionPage() {
       default:
         return (
           <>
-            <Flashcard
-              card={currentCard}
-              cardIndex={currentCardIndex}
-              isFlipped={isFlipped}
+            <CardFactory
+              {...commonProps}
+              // Flashcard specific props
               cardOrientation={cardOrientation}
               cardHeight={cardHeight}
               x={swipeAnimations.x}
@@ -491,6 +503,7 @@ function SessionPage() {
               opacity={swipeAnimations.opacity}
               backgroundColor={swipeAnimations.cardBackgroundColor}
               borderColor={swipeAnimations.cardBorderColor}
+              isFlipped={isFlipped}
               onFlip={handleFlip}
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
