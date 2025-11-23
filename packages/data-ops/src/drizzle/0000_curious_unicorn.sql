@@ -52,6 +52,13 @@ CREATE TABLE "cards" (
 	"front_content" text NOT NULL,
 	"back_content" text NOT NULL,
 	"card_type" text DEFAULT 'basic' NOT NULL,
+	"question" text,
+	"options" json,
+	"correct_answer" text,
+	"explanation" text,
+	"hints" json,
+	"time_limit" integer,
+	"points" integer DEFAULT 10,
 	"difficulty" integer DEFAULT 0,
 	"display_order" integer NOT NULL,
 	"metadata" json,
@@ -68,6 +75,16 @@ CREATE TABLE "grades" (
 	"display_order" integer NOT NULL,
 	CONSTRAINT "grades_name_unique" UNIQUE("name"),
 	CONSTRAINT "grades_slug_unique" UNIQUE("slug")
+);
+--> statement-breakpoint
+CREATE TABLE "learning_mode_configs" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"mode_name" text NOT NULL,
+	"supported_types" json,
+	"settings" json,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "learning_mode_configs_mode_name_unique" UNIQUE("mode_name")
 );
 --> statement-breakpoint
 CREATE TABLE "lessons" (
@@ -103,6 +120,7 @@ CREATE TABLE "study_sessions" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
 	"lesson_id" integer NOT NULL,
+	"mode" text NOT NULL,
 	"started_at" timestamp DEFAULT now() NOT NULL,
 	"ended_at" timestamp,
 	"cards_reviewed" integer DEFAULT 0 NOT NULL,

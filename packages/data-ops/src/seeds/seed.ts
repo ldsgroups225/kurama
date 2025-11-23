@@ -4,7 +4,7 @@ import type {
   InsertSubject,
   InsertLevelSeries,
   InsertSubjectOffering,
-} from "./schema";
+} from "../drizzle/schema";
 
 // ============================================================================
 // GRADES (Educational Levels)

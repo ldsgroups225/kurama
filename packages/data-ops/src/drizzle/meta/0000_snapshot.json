@@ -1,5 +1,5 @@
 {
-  "id": "6a5c7076-483c-46d8-9dfa-4dbdae5dcae5",
+  "id": "638f2ddb-2bf0-49eb-875d-c2aa6e10efba",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -346,6 +346,49 @@
           "notNull": true,
           "default": "'basic'"
         },
+        "question": {
+          "name": "question",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "options": {
+          "name": "options",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "correct_answer": {
+          "name": "correct_answer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "explanation": {
+          "name": "explanation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hints": {
+          "name": "hints",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "time_limit": {
+          "name": "time_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "points": {
+          "name": "points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 10
+        },
         "difficulty": {
           "name": "difficulty",
           "type": "integer",
@@ -460,6 +503,65 @@
           "nullsNotDistinct": false,
           "columns": [
             "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.learning_mode_configs": {
+      "name": "learning_mode_configs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "mode_name": {
+          "name": "mode_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "supported_types": {
+          "name": "supported_types",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "settings": {
+          "name": "settings",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "learning_mode_configs_mode_name_unique": {
+          "name": "learning_mode_configs_mode_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "mode_name"
           ]
         }
       },
@@ -707,6 +809,12 @@
         "lesson_id": {
           "name": "lesson_id",
           "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mode": {
+          "name": "mode",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },

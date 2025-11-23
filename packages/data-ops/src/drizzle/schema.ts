@@ -70,6 +70,13 @@ export const cards = pgTable("cards", {
 	frontContent: text("front_content").notNull(),
 	backContent: text("back_content").notNull(),
 	cardType: text("card_type").default('basic').notNull(),
+	question: text("question"),
+	options: json("options").$type<{ id: string; text: string; isCorrect: boolean }[]>(),
+	correctAnswer: text("correct_answer"),
+	explanation: text("explanation"),
+	hints: json("hints").$type<string[]>(),
+	timeLimit: integer("time_limit"),
+	points: integer("points").default(10),
 	difficulty: integer().default(0),
 	displayOrder: integer("display_order").notNull(),
 	metadata: json(),
@@ -82,6 +89,15 @@ export const cards = pgTable("cards", {
 		name: "cards_lesson_id_lessons_id_fk"
 	}).onDelete("cascade"),
 ]);
+
+export const learningModeConfigs = pgTable("learning_mode_configs", {
+	id: serial().primaryKey().notNull(),
+	modeName: text("mode_name").unique().notNull(),
+	supportedTypes: json("supported_types").$type<string[]>(),
+	settings: json("settings"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+});
 
 export const subjects = pgTable("subjects", {
 	id: serial().primaryKey().notNull(),
@@ -119,6 +135,7 @@ export const studySessions = pgTable("study_sessions", {
 	id: serial().primaryKey().notNull(),
 	userId: text("user_id").notNull(),
 	lessonId: integer("lesson_id").notNull(),
+	mode: text("mode").notNull(), // Added mode column
 	startedAt: timestamp("started_at", { mode: 'string' }).defaultNow().notNull(),
 	endedAt: timestamp("ended_at", { mode: 'string' }),
 	cardsReviewed: integer("cards_reviewed").default(0).notNull(),

@@ -8,7 +8,7 @@ import { resolve } from "path";
 
 config({ path: resolve(__dirname, "../../.env") });
 
-import { initDatabase } from "./setup";
+import { initDatabase } from "../database/setup";
 import { lessons, cards, subjects } from "@/drizzle/schema";
 import type { InsertLesson, InsertCard } from "@/drizzle/schema";
 

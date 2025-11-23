@@ -5,12 +5,12 @@
 
 import { config } from "dotenv";
 import { resolve } from "path";
+import { seedLesson } from "./utils";
 
 // Load environment variables
 config({ path: resolve(__dirname, "../../.env") });
 
-import { initDatabase } from "./setup";
-import { lessons, cards, subjects } from "@/drizzle/schema";
+import { initDatabase } from "../database/setup";
 
 // ============================================================================
 // LESSON DATA BY SUBJECT
@@ -395,6 +395,7 @@ export async function seedLessons() {
 
     let totalLessons = 0;
     let totalCards = 0;
+    let skippedLessons = 0;
 
     // Insert lessons and cards for each subject
     for (const [subjectAbbr, lessonsData] of Object.entries(lessonsBySubject)) {
@@ -408,38 +409,25 @@ export async function seedLessons() {
       console.log(`\n📚 Processing ${subjectAbbr}...`);
 
       for (const { lesson, cards: cardsData } of lessonsData) {
-        // Insert lesson
-        const [insertedLesson] = await db
-          .insert(lessons)
-          .values({
-            ...lesson,
-            subjectId,
-          })
-          .returning();
+        const result = await seedLesson(db, subjectId, lesson, cardsData);
 
-        if (!insertedLesson) {
-          throw new Error(`Failed to insert lesson: ${lesson.title}`);
+        if (result.created) {
+          console.log(`  ✅ Created lesson: ${lesson.title}`);
+          console.log(`     📝 Added ${result.cardsCount} flashcards`);
+          totalLessons++;
+          totalCards += result.cardsCount;
+        } else {
+          console.log(`  ℹ️  Skipped existing lesson: ${lesson.title}`);
+          skippedLessons++;
         }
-
-        console.log(`  ✅ Created lesson: ${lesson.title}`);
-        totalLessons++;
-
-        // Insert cards for this lesson
-        const cardsToInsert = cardsData.map((card) => ({
-          ...card,
-          lessonId: insertedLesson.id,
-        }));
-
-        await db.insert(cards).values(cardsToInsert);
-        console.log(`     📝 Added ${cardsToInsert.length} flashcards`);
-        totalCards += cardsToInsert.length;
       }
     }
 
     console.log("\n🎉 Lessons seeding completed successfully!");
     console.log(`📊 Summary:`);
-    console.log(`   - Total lessons: ${totalLessons}`);
-    console.log(`   - Total flashcards: ${totalCards}`);
+    console.log(`   - New lessons created: ${totalLessons}`);
+    console.log(`   - Existing lessons skipped: ${skippedLessons}`);
+    console.log(`   - New flashcards added: ${totalCards}`);
 
     return {
       success: true,
