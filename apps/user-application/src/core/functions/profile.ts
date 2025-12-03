@@ -110,35 +110,56 @@ export const submitProfile = createServerFn({ method: 'POST' })
       }
     }
 
+    // Prepare common fields
+    const commonFields = {
+      userId,
+      userType: validatedData.userType,
+      firstName: validatedData.firstName,
+      lastName: validatedData.lastName,
+      isCompleted: true,
+    }
+
+    // Prepare student-specific fields
+    const studentFields = validatedData.userType === 'student'
+      ? {
+        phone: validatedData.phone ?? null,
+        age: validatedData.age ?? null,
+        gender: validatedData.gender ?? null,
+        city: validatedData.city ?? null,
+        idNumber: validatedData.idNumber ?? null,
+        gradeId,
+        seriesId,
+        favoriteSubjects: validatedData.favoriteSubjects ?? null,
+        learningGoals: validatedData.learningGoals ?? null,
+        studyTime: validatedData.studyTime ?? null,
+        childrenMatricules: null,
+      }
+      : {
+        phone: null,
+        age: null,
+        gender: null,
+        city: null,
+        idNumber: null,
+        gradeId: null,
+        seriesId: null,
+        favoriteSubjects: null,
+        learningGoals: null,
+        studyTime: null,
+        childrenMatricules: validatedData.childrenMatricules ?? null,
+      }
+
     // Insert or update profile
     await db
       .insert(userProfiles)
       .values({
-        userId,
-        userType: validatedData.userType,
-        firstName: validatedData.firstName,
-        lastName: validatedData.lastName,
-        gradeId,
-        seriesId,
-        childrenMatricules:
-          validatedData.userType === 'parent'
-            ? validatedData.childrenMatricules ?? null
-            : null,
-        isCompleted: true,
+        ...commonFields,
+        ...studentFields,
       })
       .onConflictDoUpdate({
         target: userProfiles.userId,
         set: {
-          userType: validatedData.userType,
-          firstName: validatedData.firstName,
-          lastName: validatedData.lastName,
-          gradeId,
-          seriesId,
-          childrenMatricules:
-            validatedData.userType === 'parent'
-              ? validatedData.childrenMatricules ?? null
-              : null,
-          isCompleted: true,
+          ...commonFields,
+          ...studentFields,
           updatedAt: new Date().toISOString(),
         },
       })
