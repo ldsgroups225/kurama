@@ -43,6 +43,7 @@ function LandingPage() {
       <Suspense fallback={<PageSkeleton />}>
         <WelcomeScreen
           onGetStarted={() => setShowOnboarding(true)}
+          onSignIn={() => setHasCompletedOnboarding(true)}
         />
       </Suspense>
     )

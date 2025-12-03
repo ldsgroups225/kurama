@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 
 interface WelcomeScreenProps {
   onGetStarted: () => void
+  onSignIn: () => void
 }
 
 const containerVariants = {
@@ -75,7 +76,7 @@ const pulseVariants = {
   },
 }
 
-export function WelcomeScreen({ onGetStarted }: WelcomeScreenProps) {
+export function WelcomeScreen({ onGetStarted, onSignIn }: WelcomeScreenProps) {
   return (
     <div className={`
       flex min-h-screen flex-col bg-linear-to-br from-orange-50 via-purple-50
@@ -283,7 +284,7 @@ export function WelcomeScreen({ onGetStarted }: WelcomeScreenProps) {
           Déjà un compte?
           {' '}
           <motion.button
-            onClick={onGetStarted}
+            onClick={onSignIn}
             className={`
               font-semibold text-purple-600
               hover:text-purple-700
