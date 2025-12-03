@@ -140,17 +140,17 @@ export function MultipleChoiceView({ card, cardIndex, totalCards, onAnswer }: Le
               <div className="flex items-center gap-2">
                 {questionState === 'correct'
                   ? (
-                      <>
-                        <CheckCircle2 className="h-5 w-5 text-success" />
-                        <span className="font-semibold text-success">Correct !</span>
-                      </>
-                    )
+                    <>
+                      <CheckCircle2 className="h-5 w-5 text-success" />
+                      <span className="font-semibold text-success">Correct !</span>
+                    </>
+                  )
                   : (
-                      <>
-                        <XCircle className="h-5 w-5 text-error" />
-                        <span className="font-semibold text-error">Pas tout à fait...</span>
-                      </>
-                    )}
+                    <>
+                      <XCircle className="h-5 w-5 text-error" />
+                      <span className="font-semibold text-error">Pas tout à fait...</span>
+                    </>
+                  )}
               </div>
               {showAnswer && (
                 <div className="rounded-lg bg-background/50 p-3">

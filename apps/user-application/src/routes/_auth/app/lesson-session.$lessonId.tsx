@@ -56,7 +56,8 @@ function SessionPage() {
 
   // Quiz mode state
   const [showQuizSettings, setShowQuizSettings] = useState(mode === 'quiz')
-  // const [quizMode, setQuizMode] = useState<QuizMode | null>(null) // Reserved for spaced repetition
+  const [hasStartedQuiz, setHasStartedQuiz] = useState(false)
+  const [quizMode, setQuizMode] = useState<'memorize-all' | 'review-starred' | 'quick-review' | null>(null)
 
   // Test mode state
   const [showTestSettings, setShowTestSettings] = useState(mode === 'exam')
@@ -141,8 +142,90 @@ function SessionPage() {
 
   const cards = useMemo(() => (lesson as any)?.cards ?? [], [lesson])
   const currentCard = cards[currentCardIndex]
-  const progress = cards.length > 0 ? ((currentCardIndex + 1) / cards.length) * 100 : 0
-  const isLastCard = currentCardIndex === cards.length - 1
+
+  // Generate quiz questions based on mode (must be before activeCards calculation)
+  // eslint-disable react-hooks/purity
+  const quizQuestions = useMemo(() => {
+    if (!hasStartedQuiz || !quizMode)
+      return []
+
+    // Fisher-Yates shuffle for proper randomization
+    const shuffled = [...cards]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      // eslint-disable-next-line react-hooks/purity
+      const j = Math.floor(Math.random() * (i + 1))
+        ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+
+    // Generate quiz questions with options from flashcard data
+    return shuffled.map((card, index) => {
+      // eslint-disable-next-line react-hooks/purity
+      const questionType = Math.random() > 0.5 ? 'multichoice' : 'true_false'
+
+      if (questionType === 'multichoice') {
+        // Generate multiple choice options from other cards
+        const correctAnswer = card.backContent || card.back
+        const otherCards = shuffled.filter((_, i) => i !== index)
+
+        // Get 3 random wrong answers from other cards
+        const wrongAnswers = otherCards
+          .slice(0, 3)
+          .map(c => c.backContent || c.back)
+          .filter(Boolean)
+
+        // Create options array with correct answer and wrong answers
+        const allOptions = [
+          { id: 'correct', text: correctAnswer, isCorrect: true },
+          ...wrongAnswers.map((text, i) => ({ id: `wrong-${i}`, text, isCorrect: false })),
+        ]
+
+        // Shuffle options
+        for (let i = allOptions.length - 1; i > 0; i--) {
+          // eslint-disable-next-line react-hooks/purity
+          const j = Math.floor(Math.random() * (i + 1))
+          const temp = allOptions[i]
+          allOptions[i] = allOptions[j]!
+          allOptions[j] = temp!
+        }
+
+        return {
+          ...card,
+          cardType: 'multichoice' as const,
+          question: card.frontContent || card.front,
+          options: allOptions,
+        }
+      }
+      else {
+        // True/False question - randomly decide if statement is true or false
+        // eslint-disable-next-line react-hooks/purity
+        const isTrue = Math.random() > 0.5
+        const correctAnswer = card.backContent || card.back
+
+        // If true, show correct statement. If false, show a wrong answer from another card
+        let statement: string
+        if (isTrue) {
+          statement = `${card.frontContent || card.front} : ${correctAnswer}`
+        }
+        else {
+          const otherCard = shuffled.find((_, i) => i !== index)
+          const wrongAnswer = otherCard?.backContent || otherCard?.back || 'Réponse incorrecte'
+          statement = `${card.frontContent || card.front} : ${wrongAnswer}`
+        }
+
+        return {
+          ...card,
+          cardType: 'true_false' as const,
+          frontContent: statement,
+          correctAnswer: isTrue ? 'true' : 'false',
+        }
+      }
+    })
+  }, [hasStartedQuiz, quizMode, cards])
+
+  // Calculate progress based on mode
+  const activeCards = mode === 'quiz' && hasStartedQuiz ? quizQuestions : cards
+  const progress = activeCards.length > 0 ? ((currentCardIndex + 1) / activeCards.length) * 100 : 0
+  const isLastCard = currentCardIndex === activeCards.length - 1
 
   // Navigation handlers
   const navigateToLesson = useCallback(() => {
@@ -157,6 +240,7 @@ function SessionPage() {
       const duration = Math.floor((Date.now() - startTime) / 1000)
       const correct = finalCorrect ?? sessionStats.correct
       const incorrect = finalIncorrect ?? sessionStats.incorrect
+      const totalCards = activeCards.length
 
       // Queue XP and progress mutations if offline
       if (!isOnline) {
@@ -186,7 +270,7 @@ function SessionPage() {
           endpoint: `/api/progress/lesson/${lessonId}`,
           payload: {
             completed: true,
-            score: cards.length > 0 ? (correct / cards.length) * 100 : 0,
+            score: totalCards > 0 ? (correct / totalCards) * 100 : 0,
             duration,
           },
           optimisticData: null,
@@ -201,13 +285,13 @@ function SessionPage() {
         search: {
           correct,
           incorrect,
-          total: cards.length,
+          total: totalCards,
           duration,
           mode,
         },
       })
     },
-    [navigate, lessonId, startTime, sessionStats, cards.length, mode, isOnline],
+    [navigate, lessonId, startTime, sessionStats, activeCards.length, mode, isOnline],
   )
 
   // Card interaction handlers
@@ -299,10 +383,15 @@ function SessionPage() {
   })
 
   // Generate test questions based on settings
-  // eslint-disable react-hooks/purity
-  const testQuestions = useMemo(() => {
-    if (!testSettings || !hasStartedTest)
-      return []
+  // Use useState to store shuffled questions (only generated once when test starts)
+  const [testQuestions, setTestQuestions] = useState<Array<typeof cards[0] & { questionType: 'multiple-choice' | 'written' | 'true-false' }>>([])
+
+  // Generate questions when test starts
+  useEffect(() => {
+    if (!testSettings || !hasStartedTest) {
+      setTestQuestions([])
+      return
+    }
 
     const availableTypes: Array<'multiple-choice' | 'written' | 'true-false'> = []
     if (testSettings.multipleChoice)
@@ -312,34 +401,38 @@ function SessionPage() {
     if (testSettings.written)
       availableTypes.push('written')
 
-    if (availableTypes.length === 0)
-      return []
+    if (availableTypes.length === 0) {
+      setTestQuestions([])
+      return
+    }
 
     // Fisher-Yates shuffle for proper randomization
     const shuffled = [...cards]
     for (let i = shuffled.length - 1; i > 0; i--) {
-      // eslint-disable-next-line react-hooks/purity
       const j = Math.floor(Math.random() * (i + 1))
         ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
     }
     const selected = shuffled.slice(0, testSettings.questionCount)
 
     // Assign random question types
-    return selected.map((card) => {
-      // eslint-disable-next-line react-hooks/purity
+    const questions = selected.map((card) => {
       const randomType = availableTypes[Math.floor(Math.random() * availableTypes.length)]
       return {
         ...card,
         questionType: randomType,
       }
     })
+
+    setTestQuestions(questions)
   }, [testSettings, hasStartedTest, cards])
 
   // Handle quiz mode start - MUST be before any conditional returns
-  const handleStartQuiz = useCallback(() => {
-    // Reserved for spaced repetition algorithm
+  const handleStartQuiz = useCallback((selectedMode: 'memorize-all' | 'review-starred' | 'quick-review') => {
+    setQuizMode(selectedMode)
+    setHasStartedQuiz(true)
     setShowQuizSettings(false)
-  }, [])
+    setCurrentCardIndex(0)
+  }, [setCurrentCardIndex])
 
   // Handle test mode start
   const handleStartTest = useCallback((settings: TestSettings) => {
@@ -460,11 +553,22 @@ function SessionPage() {
 
     switch (mode) {
       case 'quiz':
-        return (
-          <CardFactory
-            {...commonProps}
-          />
-        )
+        // Show quiz questions after settings are configured
+        if (hasStartedQuiz && quizQuestions.length > 0) {
+          const currentQuestion = quizQuestions[currentCardIndex]
+          return (
+            <CardFactory
+              key={`quiz-${currentCardIndex}`}
+              card={currentQuestion}
+              cardIndex={currentCardIndex}
+              totalCards={quizQuestions.length}
+              onAnswer={(isCorrect: boolean) => {
+                handleResponse(isCorrect ? 'correct' : 'incorrect')
+              }}
+            />
+          )
+        }
+        return null
       case 'exam':
         // Show loading screen
         if (showTestLoading) {
@@ -524,7 +628,7 @@ function SessionPage() {
     <div className="min-h-screen bg-background">
       <SessionHeader
         currentIndex={currentCardIndex}
-        totalCards={cards.length}
+        totalCards={activeCards.length}
         progress={progress}
         onClose={navigateToLesson}
         onSettings={() => setShowSettings(true)}
@@ -548,7 +652,7 @@ function SessionPage() {
       )}
 
       <main className="mx-auto max-w-lg py-6 px-4">
-        {mode !== 'quiz' && (
+        {(mode !== 'quiz' || hasStartedQuiz) && (
           <div className="mb-6 flex items-center justify-between">
             <SessionCounterBadge
               count={sessionStats.incorrect}
