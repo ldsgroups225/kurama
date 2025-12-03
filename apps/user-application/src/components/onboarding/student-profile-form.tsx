@@ -50,7 +50,7 @@ const INITIAL_FORM_DATA: Partial<StudentProfile> = {
   lastName: '',
   phone: '',
   age: 14,
-  gender: undefined,
+  gender: undefined as any, // Will be converted to '' for ToggleGroup
   city: '',
   idNumber: '',
   gradeName: '',
@@ -335,10 +335,13 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                     <Label htmlFor="gender">Vous êtes</Label>
                     <ToggleGroup
                       type="single"
-                      value={formData.gender}
+                      value={formData.gender || ''}
                       onValueChange={(value) => {
                         if (value === 'male' || value === 'female') {
                           updateFormData({ gender: value })
+                        }
+                        else if (value === '') {
+                          updateFormData({ gender: undefined })
                         }
                       }}
                       disabled={submitMutation.isPending}
@@ -563,14 +566,14 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                   >
                     {submitMutation.isPending
                       ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Enregistrement...
-                          </>
-                        )
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Enregistrement...
+                        </>
+                      )
                       : (
-                          'Terminer'
-                        )}
+                        'Terminer'
+                      )}
                   </Button>
                 </>
               )}
