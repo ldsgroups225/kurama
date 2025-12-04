@@ -42,7 +42,7 @@ export function FlashcardFace({
         borderColor,
       }}
     >
-      <Card className="h-full border-0 bg-transparent shadow-none">
+      <Card className="h-full border-0 bg-card shadow-none">
         <div className={`
           pointer-events-none absolute top-4 right-4 left-4 z-10 flex
           items-center justify-between

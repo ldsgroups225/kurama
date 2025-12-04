@@ -66,6 +66,21 @@ function SessionPage() {
   const [testAnswers, setTestAnswers] = useState<TestAnswer[]>([])
   const [showTestLoading, setShowTestLoading] = useState(false)
 
+  // Reset mode-specific state when mode changes
+  useEffect(() => {
+    // Reset quiz state
+    setShowQuizSettings(mode === 'quiz')
+    setHasStartedQuiz(false)
+    setQuizMode(null)
+
+    // Reset test state
+    setShowTestSettings(mode === 'exam')
+    setTestSettings(null)
+    setHasStartedTest(false)
+    setTestAnswers([])
+    setShowTestLoading(false)
+  }, [mode])
+
   // Session state management
   const {
     currentCardIndex,
@@ -594,11 +609,14 @@ function SessionPage() {
 
         return null
       case 'flashcards':
-      default:
+      default: {
+        // Force cardType to 'basic' for flashcard mode to ensure flashcard UI is shown
+        const flashcardCard = { ...currentCard, cardType: 'basic' as const }
         return (
           <>
             <CardFactory
               {...commonProps}
+              card={flashcardCard}
               // Flashcard specific props
               cardOrientation={cardOrientation}
               cardHeight={cardHeight}
@@ -621,6 +639,7 @@ function SessionPage() {
             />
           </>
         )
+      }
     }
   }
 
