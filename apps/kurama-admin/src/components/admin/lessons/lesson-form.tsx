@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -19,6 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { createLessonSchema, type CreateLessonInput } from '@/lib/schemas'
+import { getGradesSimple, getSeriesSimple } from '@/core/functions/users'
 import { Loader2 } from 'lucide-react'
 
 interface Subject {
@@ -47,6 +49,8 @@ export function LessonForm({
   isLoading,
 }: LessonFormProps) {
   const [subjectId, setSubjectId] = useState<number>(0)
+  const [gradeId, setGradeId] = useState<number | undefined>()
+  const [seriesId, setSeriesId] = useState<number | undefined>()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [difficulty, setDifficulty] = useState<string>('')
@@ -55,9 +59,28 @@ export function LessonForm({
   const [displayOrder, setDisplayOrder] = useState(0)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  // Fetch grades and series
+  const { data: gradesData } = useQuery({
+    queryKey: ['grades-simple'],
+    queryFn: () => getGradesSimple(),
+    enabled: open,
+  })
+
+  const { data: seriesData } = useQuery({
+    queryKey: ['series-simple'],
+    queryFn: () => getSeriesSimple(),
+    enabled: open,
+  })
+
+  // Check if selected grade is Lycée (needs series)
+  const selectedGrade = gradesData?.find((g) => g.id === gradeId)
+  const isLycee = selectedGrade?.category === 'LYCEE'
+
   useEffect(() => {
     if (open && defaultValues) {
       setSubjectId(defaultValues.subjectId || 0)
+      setGradeId(defaultValues.gradeId)
+      setSeriesId(defaultValues.seriesId)
       setTitle(defaultValues.title || '')
       setDescription(defaultValues.description || '')
       setDifficulty(defaultValues.difficulty || '')
@@ -66,6 +89,8 @@ export function LessonForm({
       setDisplayOrder(defaultValues.displayOrder || 0)
     } else if (!open) {
       setSubjectId(0)
+      setGradeId(undefined)
+      setSeriesId(undefined)
       setTitle('')
       setDescription('')
       setDifficulty('')
@@ -76,12 +101,21 @@ export function LessonForm({
     }
   }, [open, defaultValues])
 
+  // Clear series when grade changes to non-Lycée
+  useEffect(() => {
+    if (!isLycee && seriesId) {
+      setSeriesId(undefined)
+    }
+  }, [isLycee, seriesId])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrors({})
 
     const data = {
       subjectId,
+      gradeId: gradeId || undefined,
+      seriesId: isLycee ? seriesId : undefined,
       title,
       description: description || undefined,
       difficulty: difficulty as 'easy' | 'medium' | 'hard' | undefined || undefined,
@@ -139,6 +173,50 @@ export function LessonForm({
               </SelectContent>
             </Select>
             {errors.subjectId && <p className="text-sm text-destructive">{errors.subjectId}</p>}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="gradeId">Niveau (optionnel)</Label>
+              <Select
+                value={gradeId?.toString() || 'none'}
+                onValueChange={(value) => setGradeId(value === 'none' ? undefined : parseInt(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner un niveau" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Aucun</SelectItem>
+                  {gradesData?.map((grade) => (
+                    <SelectItem key={grade.id} value={grade.id.toString()}>
+                      {grade.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {isLycee && (
+              <div className="space-y-2">
+                <Label htmlFor="seriesId">Série</Label>
+                <Select
+                  value={seriesId?.toString() || 'none'}
+                  onValueChange={(value) => setSeriesId(value === 'none' ? undefined : parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner une série" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Aucune</SelectItem>
+                    {seriesData?.map((s) => (
+                      <SelectItem key={s.id} value={s.id.toString()}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

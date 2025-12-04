@@ -250,9 +250,20 @@ export const userProgress = pgTable("user_progress", {
 	}).onDelete("cascade"),
 ]);
 
+// Type for teach plan metadata
+export type LessonTeachPlanMetadata = {
+	country?: string
+	grade?: string
+	language?: string
+	sources?: { uri: string; title: string }[]
+	generatedBy?: string
+}
+
 export const lessons = pgTable("lessons", {
 	id: serial().primaryKey().notNull(),
 	subjectId: integer("subject_id").notNull(),
+	gradeId: integer("grade_id"), // Grade this lesson is for (nullable for legacy data)
+	seriesId: integer("series_id"), // Series this lesson is for (nullable, only for Lycée)
 	title: text().notNull(),
 	description: text(),
 	authorId: text("author_id"),
@@ -263,12 +274,26 @@ export const lessons = pgTable("lessons", {
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 	displayOrder: integer("display_order").default(0).notNull(),
+	// AI-generated teach plan fields
+	teachPlan: text("teach_plan"),
+	teachPlanGeneratedAt: timestamp("teach_plan_generated_at", { mode: 'string' }),
+	teachPlanMetadata: json("teach_plan_metadata").$type<LessonTeachPlanMetadata>(),
 }, (table) => [
 	foreignKey({
 		columns: [table.subjectId],
 		foreignColumns: [subjects.id],
 		name: "lessons_subject_id_subjects_id_fk"
 	}).onDelete("cascade"),
+	foreignKey({
+		columns: [table.gradeId],
+		foreignColumns: [grades.id],
+		name: "lessons_grade_id_grades_id_fk"
+	}).onDelete("set null"),
+	foreignKey({
+		columns: [table.seriesId],
+		foreignColumns: [series.id],
+		name: "lessons_series_id_series_id_fk"
+	}).onDelete("set null"),
 	foreignKey({
 		columns: [table.authorId],
 		foreignColumns: [authUser.id],

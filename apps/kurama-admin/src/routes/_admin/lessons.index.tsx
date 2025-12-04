@@ -1,7 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, Trash2, FileText, Search, Eye, EyeOff } from 'lucide-react'
+import { Plus, Pencil, Trash2, FileText, Search, Eye, EyeOff, Sparkles, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -42,7 +42,12 @@ type Lesson = {
   subjectId: number
   subjectName: string | null
   subjectAbbreviation: string | null
+  gradeId: number | null
+  gradeName: string | null
+  seriesId: number | null
+  seriesName: string | null
   cardCount: number
+  hasTeachPlan: boolean
 }
 
 type Subject = {
@@ -135,15 +140,62 @@ function LessonsPage() {
 
   const columns = [
     {
+      key: 'displayOrder',
+      header: '#',
+      cell: (lesson: Lesson) => (
+        <span className="text-muted-foreground font-mono text-sm">{lesson.displayOrder}</span>
+      ),
+      className: 'w-12',
+    },
+    {
       key: 'title',
       header: 'Titre',
       cell: (lesson: Lesson) => (
         <div>
-          <div className="font-medium">{lesson.title}</div>
+          <Link
+            to="/lessons/$lessonId"
+            params={{ lessonId: lesson.id.toString() }}
+            className="font-medium hover:underline text-primary flex items-center gap-1"
+          >
+            {lesson.title}
+            <ExternalLink className="h-3 w-3" />
+          </Link>
           <div className="text-sm text-muted-foreground">
             {lesson.subjectName} ({lesson.subjectAbbreviation})
           </div>
         </div>
+      ),
+    },
+    {
+      key: 'grade',
+      header: 'Niveau',
+      cell: (lesson: Lesson) => (
+        <div className="text-sm">
+          {lesson.gradeName ? (
+            <div>
+              <span className="font-medium">{lesson.gradeName}</span>
+              {lesson.seriesName && (
+                <span className="text-muted-foreground ml-1">({lesson.seriesName})</span>
+              )}
+            </div>
+          ) : (
+            <span className="text-muted-foreground">-</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'teachPlan',
+      header: 'Plan IA',
+      cell: (lesson: Lesson) => (
+        lesson.hasTeachPlan ? (
+          <Badge variant="outline" className="gap-1 text-green-600 border-green-600">
+            <Sparkles className="h-3 w-3" />
+            Généré
+          </Badge>
+        ) : (
+          <span className="text-muted-foreground text-sm">-</span>
+        )
       ),
     },
     {
@@ -317,6 +369,8 @@ function LessonsPage() {
             title: editingLesson.title,
             description: editingLesson.description || '',
             subjectId: editingLesson.subjectId,
+            gradeId: editingLesson.gradeId || undefined,
+            seriesId: editingLesson.seriesId || undefined,
             difficulty: editingLesson.difficulty as 'easy' | 'medium' | 'hard' | undefined,
             estimatedDuration: editingLesson.estimatedDuration || undefined,
             isPublished: editingLesson.isPublished,

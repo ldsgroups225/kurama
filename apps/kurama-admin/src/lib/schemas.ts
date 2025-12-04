@@ -18,6 +18,8 @@ export type UpdateSubjectInput = z.infer<typeof updateSubjectSchema>
 // Lesson schemas
 export const createLessonSchema = z.object({
   subjectId: z.number().int().positive('La matière est requise'),
+  gradeId: z.number().int().positive().optional(),
+  seriesId: z.number().int().positive().optional(),
   title: z.string().min(1, 'Le titre est requis'),
   description: z.string().optional(),
   difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
@@ -103,3 +105,28 @@ export const userFiltersSchema = z.object({
 })
 
 export type UserFilters = z.infer<typeof userFiltersSchema>
+
+// AI Generation schemas
+export const generateTeachPlanSchema = z.object({
+  lessonId: z.number().int().positive(),
+  country: z.string().default("Côte d'Ivoire"),
+  grade: z.string(),
+  language: z.enum(['French', 'English']).default('French'),
+  schoolYear: z.string().default('2025-2026'),
+  customInstructions: z.string().optional(),
+})
+
+export const generateCardsSchema = z.object({
+  lessonId: z.number().int().positive(),
+  cardType: z.enum(['flashcard', 'quiz']),
+  amount: z.number().int().min(5).max(30).default(15),
+})
+
+export const saveGeneratedCardsSchema = z.object({
+  lessonId: z.number().int().positive(),
+  cards: z.array(createCardSchema),
+})
+
+export type GenerateTeachPlanInput = z.infer<typeof generateTeachPlanSchema>
+export type GenerateCardsInput = z.infer<typeof generateCardsSchema>
+export type SaveGeneratedCardsInput = z.infer<typeof saveGeneratedCardsSchema>

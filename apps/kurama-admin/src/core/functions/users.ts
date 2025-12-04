@@ -201,3 +201,21 @@ export const getGradesSimple = createServerFn({ method: 'GET' })
 
     return gradeList
   })
+
+// Get series for filter dropdown
+export const getSeriesSimple = createServerFn({ method: 'GET' })
+  .middleware([adminMiddleware])
+  .handler(async () => {
+    initAdminDb()
+    const db = getDb()
+
+    const seriesList = await db
+      .select({
+        id: series.id,
+        name: series.name,
+      })
+      .from(series)
+      .orderBy(series.displayOrder)
+
+    return seriesList
+  })

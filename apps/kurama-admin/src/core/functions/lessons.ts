@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { eq, like, sql, asc, and } from '@kurama/data-ops/database/drizzle-orm'
-import { lessons, subjects, cards } from '@kurama/data-ops/drizzle/schema'
+import { lessons, subjects, cards, grades, series } from '@kurama/data-ops/drizzle/schema'
 import { adminMiddleware } from '../middleware/admin-auth'
 import { initAdminDb, getDb } from '@/lib/db'
 import {
@@ -31,7 +31,8 @@ export const getLessons = createServerFn({ method: 'GET' })
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
-    // Get lessons with subject info and card count
+    // Get lessons with subject, grade, series info and card count
+    // Order by grade, then series, then displayOrder
     const lessonList = await db
       .select({
         id: lessons.id,
@@ -47,12 +48,19 @@ export const getLessons = createServerFn({ method: 'GET' })
         subjectId: lessons.subjectId,
         subjectName: subjects.name,
         subjectAbbreviation: subjects.abbreviation,
+        gradeId: lessons.gradeId,
+        gradeName: grades.name,
+        seriesId: lessons.seriesId,
+        seriesName: series.name,
         cardCount: sql<number>`(SELECT COUNT(*) FROM "cards" WHERE "cards"."lesson_id" = "lessons"."id")`,
+        hasTeachPlan: sql<boolean>`"lessons"."teach_plan" IS NOT NULL`,
       })
       .from(lessons)
       .leftJoin(subjects, eq(lessons.subjectId, subjects.id))
+      .leftJoin(grades, eq(lessons.gradeId, grades.id))
+      .leftJoin(series, eq(lessons.seriesId, series.id))
       .where(whereClause)
-      .orderBy(asc(subjects.displayOrder), asc(lessons.displayOrder))
+      .orderBy(asc(grades.displayOrder), asc(series.displayOrder), asc(lessons.displayOrder))
       .limit(limit)
       .offset(offset)
 
@@ -95,9 +103,18 @@ export const getLesson = createServerFn({ method: 'GET' })
         updatedAt: lessons.updatedAt,
         subjectId: lessons.subjectId,
         subjectName: subjects.name,
+        gradeId: lessons.gradeId,
+        gradeName: grades.name,
+        seriesId: lessons.seriesId,
+        seriesName: series.name,
+        teachPlan: lessons.teachPlan,
+        teachPlanGeneratedAt: lessons.teachPlanGeneratedAt,
+        teachPlanMetadata: lessons.teachPlanMetadata,
       })
       .from(lessons)
       .leftJoin(subjects, eq(lessons.subjectId, subjects.id))
+      .leftJoin(grades, eq(lessons.gradeId, grades.id))
+      .leftJoin(series, eq(lessons.seriesId, series.id))
       .where(eq(lessons.id, id))
       .limit(1)
 
@@ -129,6 +146,8 @@ export const createLesson = createServerFn({ method: 'POST' })
       .insert(lessons)
       .values({
         ...data,
+        gradeId: data.gradeId || null,
+        seriesId: data.seriesId || null,
         displayOrder: data.displayOrder || (Number(maxOrder) + 1),
         authorId: context.userId,
         publishedAt: data.isPublished ? new Date().toISOString() : null,

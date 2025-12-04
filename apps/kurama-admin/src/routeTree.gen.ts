@@ -17,6 +17,7 @@ import { Route as AdminSubjectsIndexRouteImport } from './routes/_admin/subjects
 import { Route as AdminLessonsIndexRouteImport } from './routes/_admin/lessons.index'
 import { Route as AdminCardsIndexRouteImport } from './routes/_admin/cards.index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as AdminLessonsLessonIdRouteImport } from './routes/_admin/lessons.$lessonId'
 
 const AdminRouteRoute = AdminRouteRouteImport.update({
   id: '/_admin',
@@ -57,10 +58,16 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLessonsLessonIdRoute = AdminLessonsLessonIdRouteImport.update({
+  id: '/lessons/$lessonId',
+  path: '/lessons/$lessonId',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AdminDashboardRoute
+  '/lessons/$lessonId': typeof AdminLessonsLessonIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/cards': typeof AdminCardsIndexRoute
   '/lessons': typeof AdminLessonsIndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AdminDashboardRoute
+  '/lessons/$lessonId': typeof AdminLessonsLessonIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/cards': typeof AdminCardsIndexRoute
   '/lessons': typeof AdminLessonsIndexRoute
@@ -81,6 +89,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_admin': typeof AdminRouteRouteWithChildren
   '/_admin/dashboard': typeof AdminDashboardRoute
+  '/_admin/lessons/$lessonId': typeof AdminLessonsLessonIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_admin/cards/': typeof AdminCardsIndexRoute
   '/_admin/lessons/': typeof AdminLessonsIndexRoute
@@ -92,6 +101,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/lessons/$lessonId'
     | '/api/auth/$'
     | '/cards'
     | '/lessons'
@@ -101,6 +111,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/dashboard'
+    | '/lessons/$lessonId'
     | '/api/auth/$'
     | '/cards'
     | '/lessons'
@@ -111,6 +122,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_admin'
     | '/_admin/dashboard'
+    | '/_admin/lessons/$lessonId'
     | '/api/auth/$'
     | '/_admin/cards/'
     | '/_admin/lessons/'
@@ -182,11 +194,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_admin/lessons/$lessonId': {
+      id: '/_admin/lessons/$lessonId'
+      path: '/lessons/$lessonId'
+      fullPath: '/lessons/$lessonId'
+      preLoaderRoute: typeof AdminLessonsLessonIdRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
   }
 }
 
 interface AdminRouteRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminLessonsLessonIdRoute: typeof AdminLessonsLessonIdRoute
   AdminCardsIndexRoute: typeof AdminCardsIndexRoute
   AdminLessonsIndexRoute: typeof AdminLessonsIndexRoute
   AdminSubjectsIndexRoute: typeof AdminSubjectsIndexRoute
@@ -195,6 +215,7 @@ interface AdminRouteRouteChildren {
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminLessonsLessonIdRoute: AdminLessonsLessonIdRoute,
   AdminCardsIndexRoute: AdminCardsIndexRoute,
   AdminLessonsIndexRoute: AdminLessonsIndexRoute,
   AdminSubjectsIndexRoute: AdminSubjectsIndexRoute,
