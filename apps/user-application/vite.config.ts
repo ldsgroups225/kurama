@@ -41,7 +41,7 @@ const config = defineConfig({
       srcDir: 'src',
       filename: 'sw.ts',
       devOptions: {
-        enabled: true,
+        enabled: false, // Disabled in dev to avoid TypeScript compilation issues
         type: 'module',
       },
       manifest: {
