@@ -13,7 +13,24 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getDashboardStats, getContentStats, getRecentActivity } from '@/core/functions/analytics'
+import {
+  getDashboardStats,
+  getContentStats,
+  getRecentActivity,
+  getUserGrowth,
+  getSessionGrowth,
+} from '@/core/functions/analytics'
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts'
 
 export const Route = createFileRoute('/_admin/dashboard')({
   component: DashboardPage,
@@ -111,6 +128,16 @@ function DashboardPage() {
     queryFn: () => getRecentActivity(),
   })
 
+  const { data: userGrowth, isLoading: userGrowthLoading } = useQuery({
+    queryKey: ['user-growth'],
+    queryFn: () => getUserGrowth(),
+  })
+
+  const { data: sessionGrowth, isLoading: sessionGrowthLoading } = useQuery({
+    queryKey: ['session-growth'],
+    queryFn: () => getSessionGrowth(),
+  })
+
   return (
     <div className="space-y-6">
       <div>
@@ -187,6 +214,112 @@ function DashboardPage() {
             />
           </>
         )}
+      </div>
+
+      {/* Charts */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* User Growth Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Croissance des utilisateurs</CardTitle>
+            <CardDescription>
+              Inscriptions des 30 derniers jours
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {userGrowthLoading ? (
+              <Skeleton className="h-[200px] w-full" />
+            ) : userGrowth && userGrowth.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={userGrowth}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis
+                    dataKey="date"
+                    tickFormatter={(value) =>
+                      new Date(value).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'short',
+                      })
+                    }
+                    className="text-xs"
+                  />
+                  <YAxis className="text-xs" />
+                  <Tooltip
+                    labelFormatter={(value) =>
+                      new Date(value).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })
+                    }
+                    formatter={(value: number) => [value, 'Inscriptions']}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="count"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                Aucune donnée disponible
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Session Activity Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Activité d'étude</CardTitle>
+            <CardDescription>
+              Sessions des 30 derniers jours
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {sessionGrowthLoading ? (
+              <Skeleton className="h-[200px] w-full" />
+            ) : sessionGrowth && sessionGrowth.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={sessionGrowth}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis
+                    dataKey="date"
+                    tickFormatter={(value) =>
+                      new Date(value).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'short',
+                      })
+                    }
+                    className="text-xs"
+                  />
+                  <YAxis className="text-xs" />
+                  <Tooltip
+                    labelFormatter={(value) =>
+                      new Date(value).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })
+                    }
+                    formatter={(value: number, name: string) => [
+                      value,
+                      name === 'count' ? 'Sessions' : 'Cartes révisées',
+                    ]}
+                  />
+                  <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                Aucune donnée disponible
+              </p>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

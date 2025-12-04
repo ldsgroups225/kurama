@@ -1,7 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Search, Download, GraduationCap, Users as UsersIcon } from 'lucide-react'
+import { Search, Download, GraduationCap, Users as UsersIcon, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -201,6 +201,17 @@ function UsersPage() {
             year: 'numeric',
           })}
         </span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: '',
+      cell: (user: UserData) => (
+        <Button variant="ghost" size="sm" asChild>
+          <Link to="/users/$userId" params={{ userId: user.id }}>
+            <Eye className="h-4 w-4" />
+          </Link>
+        </Button>
       ),
     },
   ]

@@ -219,3 +219,85 @@ export const getSeriesSimple = createServerFn({ method: 'GET' })
 
     return seriesList
   })
+
+
+// Get user detail (alias for getUser with profile info)
+export const getUserDetail = createServerFn({ method: 'GET' })
+  .middleware([adminMiddleware])
+  .inputValidator((id: string) => id)
+  .handler(async ({ data: id }) => {
+    initAdminDb()
+    const db = getDb()
+
+    const result = await db
+      .select({
+        id: authUser.id,
+        name: authUser.name,
+        email: authUser.email,
+        emailVerified: authUser.emailVerified,
+        image: authUser.image,
+        createdAt: authUser.createdAt,
+        updatedAt: authUser.updatedAt,
+        profile: {
+          userType: userProfiles.userType,
+          firstName: userProfiles.firstName,
+          lastName: userProfiles.lastName,
+          phone: userProfiles.phone,
+          age: userProfiles.age,
+          gender: userProfiles.gender,
+          city: userProfiles.city,
+          gradeId: userProfiles.gradeId,
+          seriesId: userProfiles.seriesId,
+          xp: userProfiles.xp,
+          isCompleted: userProfiles.isCompleted,
+          gradeName: grades.name,
+          seriesName: series.name,
+        },
+      })
+      .from(authUser)
+      .leftJoin(userProfiles, eq(authUser.id, userProfiles.userId))
+      .leftJoin(grades, eq(userProfiles.gradeId, grades.id))
+      .leftJoin(series, eq(userProfiles.seriesId, series.id))
+      .where(eq(authUser.id, id))
+      .limit(1)
+
+    const user = result[0]
+    if (!user) {
+      throw new Error('Utilisateur non trouvé')
+    }
+
+    return user
+  })
+
+// Get user study sessions
+export const getUserSessions = createServerFn({ method: 'GET' })
+  .middleware([adminMiddleware])
+  .inputValidator((data: { userId: string; limit?: number }) => data)
+  .handler(async ({ data }) => {
+    initAdminDb()
+    const db = getDb()
+    const { userId, limit = 10 } = data
+
+    // Import lessons for join
+    const { lessons } = await import('@kurama/data-ops/drizzle/schema')
+
+    const sessions = await db
+      .select({
+        id: studySessions.id,
+        lessonId: studySessions.lessonId,
+        lessonTitle: lessons.title,
+        mode: studySessions.mode,
+        cardsReviewed: studySessions.cardsReviewed,
+        cardsCorrect: studySessions.cardsCorrect,
+        duration: studySessions.duration,
+        startedAt: studySessions.startedAt,
+        endedAt: studySessions.endedAt,
+      })
+      .from(studySessions)
+      .leftJoin(lessons, eq(studySessions.lessonId, lessons.id))
+      .where(eq(studySessions.userId, userId))
+      .orderBy(desc(studySessions.startedAt))
+      .limit(limit)
+
+    return sessions
+  })

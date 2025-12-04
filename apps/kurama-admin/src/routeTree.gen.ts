@@ -18,6 +18,7 @@ import { Route as AdminLessonsIndexRouteImport } from './routes/_admin/lessons.i
 import { Route as AdminGradesIndexRouteImport } from './routes/_admin/grades.index'
 import { Route as AdminCardsIndexRouteImport } from './routes/_admin/cards.index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as AdminUsersUserIdRouteImport } from './routes/_admin/users.$userId'
 import { Route as AdminLessonsLessonIdRouteImport } from './routes/_admin/lessons.$lessonId'
 
 const AdminRouteRoute = AdminRouteRouteImport.update({
@@ -64,6 +65,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminUsersUserIdRoute = AdminUsersUserIdRouteImport.update({
+  id: '/users/$userId',
+  path: '/users/$userId',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminLessonsLessonIdRoute = AdminLessonsLessonIdRouteImport.update({
   id: '/lessons/$lessonId',
   path: '/lessons/$lessonId',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AdminDashboardRoute
   '/lessons/$lessonId': typeof AdminLessonsLessonIdRoute
+  '/users/$userId': typeof AdminUsersUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/cards': typeof AdminCardsIndexRoute
   '/grades': typeof AdminGradesIndexRoute
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AdminDashboardRoute
   '/lessons/$lessonId': typeof AdminLessonsLessonIdRoute
+  '/users/$userId': typeof AdminUsersUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/cards': typeof AdminCardsIndexRoute
   '/grades': typeof AdminGradesIndexRoute
@@ -98,6 +106,7 @@ export interface FileRoutesById {
   '/_admin': typeof AdminRouteRouteWithChildren
   '/_admin/dashboard': typeof AdminDashboardRoute
   '/_admin/lessons/$lessonId': typeof AdminLessonsLessonIdRoute
+  '/_admin/users/$userId': typeof AdminUsersUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_admin/cards/': typeof AdminCardsIndexRoute
   '/_admin/grades/': typeof AdminGradesIndexRoute
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/lessons/$lessonId'
+    | '/users/$userId'
     | '/api/auth/$'
     | '/cards'
     | '/grades'
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/lessons/$lessonId'
+    | '/users/$userId'
     | '/api/auth/$'
     | '/cards'
     | '/grades'
@@ -134,6 +145,7 @@ export interface FileRouteTypes {
     | '/_admin'
     | '/_admin/dashboard'
     | '/_admin/lessons/$lessonId'
+    | '/_admin/users/$userId'
     | '/api/auth/$'
     | '/_admin/cards/'
     | '/_admin/grades/'
@@ -213,6 +225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_admin/users/$userId': {
+      id: '/_admin/users/$userId'
+      path: '/users/$userId'
+      fullPath: '/users/$userId'
+      preLoaderRoute: typeof AdminUsersUserIdRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/_admin/lessons/$lessonId': {
       id: '/_admin/lessons/$lessonId'
       path: '/lessons/$lessonId'
@@ -226,6 +245,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminLessonsLessonIdRoute: typeof AdminLessonsLessonIdRoute
+  AdminUsersUserIdRoute: typeof AdminUsersUserIdRoute
   AdminCardsIndexRoute: typeof AdminCardsIndexRoute
   AdminGradesIndexRoute: typeof AdminGradesIndexRoute
   AdminLessonsIndexRoute: typeof AdminLessonsIndexRoute
@@ -236,6 +256,7 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
   AdminLessonsLessonIdRoute: AdminLessonsLessonIdRoute,
+  AdminUsersUserIdRoute: AdminUsersUserIdRoute,
   AdminCardsIndexRoute: AdminCardsIndexRoute,
   AdminGradesIndexRoute: AdminGradesIndexRoute,
   AdminLessonsIndexRoute: AdminLessonsIndexRoute,
