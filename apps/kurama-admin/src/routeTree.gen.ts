@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminDashboardRouteImport } from './routes/_admin/dashboard'
 import { Route as AdminSubjectsIndexRouteImport } from './routes/_admin/subjects.index'
 import { Route as AdminLessonsIndexRouteImport } from './routes/_admin/lessons.index'
+import { Route as AdminCardsIndexRouteImport } from './routes/_admin/cards.index'
 
 const AdminRouteRoute = AdminRouteRouteImport.update({
   id: '/_admin',
@@ -39,16 +40,23 @@ const AdminLessonsIndexRoute = AdminLessonsIndexRouteImport.update({
   path: '/lessons/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminCardsIndexRoute = AdminCardsIndexRouteImport.update({
+  id: '/cards/',
+  path: '/cards/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AdminDashboardRoute
+  '/cards': typeof AdminCardsIndexRoute
   '/lessons': typeof AdminLessonsIndexRoute
   '/subjects': typeof AdminSubjectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AdminDashboardRoute
+  '/cards': typeof AdminCardsIndexRoute
   '/lessons': typeof AdminLessonsIndexRoute
   '/subjects': typeof AdminSubjectsIndexRoute
 }
@@ -57,19 +65,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_admin': typeof AdminRouteRouteWithChildren
   '/_admin/dashboard': typeof AdminDashboardRoute
+  '/_admin/cards/': typeof AdminCardsIndexRoute
   '/_admin/lessons/': typeof AdminLessonsIndexRoute
   '/_admin/subjects/': typeof AdminSubjectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/lessons' | '/subjects'
+  fullPaths: '/' | '/dashboard' | '/cards' | '/lessons' | '/subjects'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/lessons' | '/subjects'
+  to: '/' | '/dashboard' | '/cards' | '/lessons' | '/subjects'
   id:
     | '__root__'
     | '/'
     | '/_admin'
     | '/_admin/dashboard'
+    | '/_admin/cards/'
     | '/_admin/lessons/'
     | '/_admin/subjects/'
   fileRoutesById: FileRoutesById
@@ -116,17 +126,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLessonsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/_admin/cards/': {
+      id: '/_admin/cards/'
+      path: '/cards'
+      fullPath: '/cards'
+      preLoaderRoute: typeof AdminCardsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
   }
 }
 
 interface AdminRouteRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminCardsIndexRoute: typeof AdminCardsIndexRoute
   AdminLessonsIndexRoute: typeof AdminLessonsIndexRoute
   AdminSubjectsIndexRoute: typeof AdminSubjectsIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminCardsIndexRoute: AdminCardsIndexRoute,
   AdminLessonsIndexRoute: AdminLessonsIndexRoute,
   AdminSubjectsIndexRoute: AdminSubjectsIndexRoute,
 }
