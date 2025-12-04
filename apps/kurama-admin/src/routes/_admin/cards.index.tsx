@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, Trash2, Copy, Search, Eye } from 'lucide-react'
+import { Plus, Pencil, Trash2, Copy, Search, Eye, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -19,7 +19,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { PageHeader, DataTable, ConfirmDialog } from '@/components/shared'
-import { CardForm, CardPreview } from '@/components/admin/cards'
+import { CardForm, CardPreview, BulkImportDialog } from '@/components/admin/cards'
 import {
   getCards,
   createCard,
@@ -27,6 +27,7 @@ import {
   deleteCard,
   duplicateCard,
   getLessonsSimple,
+  bulkCreateCards,
 } from '@/core/functions/cards'
 import type { CreateCardInput, UpdateCardInput, CardOption } from '@/lib/schemas'
 import { toast } from 'sonner'
@@ -78,6 +79,7 @@ function CardsPage() {
   const [editingCard, setEditingCard] = useState<Card | null>(null)
   const [deletingCard, setDeletingCard] = useState<Card | null>(null)
   const [previewCard, setPreviewCard] = useState<Card | null>(null)
+  const [importOpen, setImportOpen] = useState(false)
 
   const { data: lessonsData } = useQuery({
     queryKey: ['lessons-simple'],
@@ -142,6 +144,19 @@ function CardsPage() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Erreur lors de la suppression')
+    },
+  })
+
+  const bulkImportMutation = useMutation({
+    mutationFn: (data: { lessonId: number; cards: CreateCardInput[] }) =>
+      bulkCreateCards({ data }),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['cards'] })
+      setImportOpen(false)
+      toast.success(`${result.created} carte(s) importée(s) avec succès`)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erreur lors de l\'import')
     },
   })
 
@@ -241,10 +256,16 @@ function CardsPage() {
         title="Cartes"
         description="Gérer les cartes de révision"
         actions={
-          <Button onClick={() => setFormOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nouvelle carte
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setImportOpen(true)}>
+              <Upload className="mr-2 h-4 w-4" />
+              Import JSON
+            </Button>
+            <Button onClick={() => setFormOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nouvelle carte
+            </Button>
+          </div>
         }
       />
 
@@ -382,6 +403,41 @@ function CardsPage() {
           )}
         </SheetContent>
       </Sheet>
+
+      {/* Bulk Import Dialog */}
+      <BulkImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        lessonId={lessonFilter ? parseInt(lessonFilter) : 0}
+        onImport={async (cards) => {
+          if (!lessonFilter) {
+            toast.error('Veuillez sélectionner une leçon pour l\'import')
+            return
+          }
+          const lessonIdNum = parseInt(lessonFilter)
+          await bulkImportMutation.mutateAsync({
+            lessonId: lessonIdNum,
+            cards: cards.map((card) => ({
+              lessonId: lessonIdNum,
+              cardType: card.cardType,
+              frontContent: card.frontContent || '',
+              backContent: card.backContent || '',
+              question: card.question,
+              options: card.options?.map((opt, idx) => ({
+                id: idx.toString(),
+                text: opt,
+                isCorrect: card.correctAnswer === idx,
+              })),
+              correctAnswer: card.correctAnswer?.toString(),
+              explanation: card.explanation,
+              points: card.points || 10,
+              difficulty: card.difficulty === 'easy' ? 1 : card.difficulty === 'medium' ? 2 : card.difficulty === 'hard' ? 3 : 1,
+              displayOrder: 0,
+            })),
+          })
+        }}
+        isLoading={bulkImportMutation.isPending}
+      />
     </div>
   )
 }

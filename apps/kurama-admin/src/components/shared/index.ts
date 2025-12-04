@@ -1,5 +1,6 @@
 export { PageHeader } from './page-header'
 export { DataTable } from './data-table'
+export { SortableTable } from './sortable-table'
 export { ConfirmDialog } from './confirm-dialog'
 export { MarkdownRenderer } from './markdown-renderer'
 export { ErrorBoundary } from './error-boundary'
