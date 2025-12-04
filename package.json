@@ -9,6 +9,8 @@
     "deploy:kurama-frontend": "pnpm run build:data-ops && pnpm run --filter kurama-frontend deploy",
     "dev:kurama-backend": "pnpm run --filter kurama-backend dev",
     "deploy:kurama-backend": "pnpm run build:data-ops && pnpm run --filter kurama-backend deploy",
+    "dev:kurama-admin": "pnpm run --filter kurama-admin dev",
+    "deploy:kurama-admin": "pnpm run build:data-ops && pnpm run --filter kurama-admin deploy",
     "typecheck": "pnpm run --filter \"*\" typecheck || echo \"No typecheck script found\"",
     "lint": "pnpm run --filter \"*\" lint:fix || echo \"No lint script found\"",
     "test": "pnpm run --filter \"*\" test || echo \"No test script found\""

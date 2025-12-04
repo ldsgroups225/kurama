@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kurama-admin",
+  "compatibility_date": "2025-09-02",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "main": "./src/server.ts",
+  "vars": {
+    "MY_VAR": "Hello from Kurama Admin",
+    "DATABASE_HOST": "",
+    "DATABASE_USERNAME": "",
+    "DATABASE_PASSWORD": "",
+    "BETTER_AUTH_SECRET": "",
+    "GOOGLE_CLIENT_ID": "",
+    "GOOGLE_CLIENT_SECRET": ""
+  },
+  "workers_dev": true,
+  "preview_urls": true
+}
