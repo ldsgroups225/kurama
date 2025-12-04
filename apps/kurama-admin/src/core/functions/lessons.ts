@@ -1,0 +1,258 @@
+import { createServerFn } from '@tanstack/react-start'
+import { eq, like, sql, asc, and } from '@kurama/data-ops/database/drizzle-orm'
+import { lessons, subjects, cards } from '@kurama/data-ops/drizzle/schema'
+import { adminMiddleware } from '../middleware/admin-auth'
+import { initAdminDb, getDb } from '@/lib/db'
+import {
+  createLessonSchema,
+  updateLessonSchema,
+  lessonFiltersSchema,
+  type CreateLessonInput,
+  type UpdateLessonInput,
+  type LessonFilters,
+} from '@/lib/schemas'
+
+// Get lessons with filters
+export const getLessons = createServerFn({ method: 'GET' })
+  .middleware([adminMiddleware])
+  .inputValidator((data: LessonFilters) => lessonFiltersSchema.parse(data))
+  .handler(async ({ data }) => {
+    initAdminDb()
+    const db = getDb()
+    const { subjectId, isPublished, search, page, limit } = data
+
+    const offset = (page - 1) * limit
+
+    // Build where conditions
+    const conditions = []
+    if (subjectId) conditions.push(eq(lessons.subjectId, subjectId))
+    if (isPublished !== undefined) conditions.push(eq(lessons.isPublished, isPublished))
+    if (search) conditions.push(like(lessons.title, `%${search}%`))
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined
+
+    // Get lessons with subject info and card count
+    const lessonList = await db
+      .select({
+        id: lessons.id,
+        title: lessons.title,
+        description: lessons.description,
+        difficulty: lessons.difficulty,
+        estimatedDuration: lessons.estimatedDuration,
+        isPublished: lessons.isPublished,
+        publishedAt: lessons.publishedAt,
+        displayOrder: lessons.displayOrder,
+        createdAt: lessons.createdAt,
+        updatedAt: lessons.updatedAt,
+        subjectId: lessons.subjectId,
+        subjectName: subjects.name,
+        subjectAbbreviation: subjects.abbreviation,
+        cardCount: sql<number>`(SELECT COUNT(*) FROM "cards" WHERE "cards"."lesson_id" = "lessons"."id")`,
+      })
+      .from(lessons)
+      .leftJoin(subjects, eq(lessons.subjectId, subjects.id))
+      .where(whereClause)
+      .orderBy(asc(subjects.displayOrder), asc(lessons.displayOrder))
+      .limit(limit)
+      .offset(offset)
+
+    // Get total count
+    const countResult = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(lessons)
+      .where(whereClause)
+
+    const count = countResult[0]?.count ?? 0
+
+    return {
+      lessons: lessonList,
+      total: Number(count),
+      page,
+      limit,
+      totalPages: Math.ceil(Number(count) / limit),
+    }
+  })
+
+// Get single lesson
+export const getLesson = createServerFn({ method: 'GET' })
+  .middleware([adminMiddleware])
+  .inputValidator((id: number) => id)
+  .handler(async ({ data: id }) => {
+    initAdminDb()
+    const db = getDb()
+
+    const result = await db
+      .select({
+        id: lessons.id,
+        title: lessons.title,
+        description: lessons.description,
+        difficulty: lessons.difficulty,
+        estimatedDuration: lessons.estimatedDuration,
+        isPublished: lessons.isPublished,
+        publishedAt: lessons.publishedAt,
+        displayOrder: lessons.displayOrder,
+        createdAt: lessons.createdAt,
+        updatedAt: lessons.updatedAt,
+        subjectId: lessons.subjectId,
+        subjectName: subjects.name,
+      })
+      .from(lessons)
+      .leftJoin(subjects, eq(lessons.subjectId, subjects.id))
+      .where(eq(lessons.id, id))
+      .limit(1)
+
+    const lesson = result[0]
+    if (!lesson) {
+      throw new Error('Leçon non trouvée')
+    }
+
+    return lesson
+  })
+
+// Create lesson
+export const createLesson = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((data: CreateLessonInput) => createLessonSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    initAdminDb()
+    const db = getDb()
+
+    // Get max display order for this subject
+    const maxOrderResult = await db
+      .select({ max: sql<number>`COALESCE(MAX(${lessons.displayOrder}), 0)` })
+      .from(lessons)
+      .where(eq(lessons.subjectId, data.subjectId))
+
+    const maxOrder = maxOrderResult[0]?.max ?? 0
+
+    const result = await db
+      .insert(lessons)
+      .values({
+        ...data,
+        displayOrder: data.displayOrder || (Number(maxOrder) + 1),
+        authorId: context.userId,
+        publishedAt: data.isPublished ? new Date().toISOString() : null,
+      })
+      .returning()
+
+    const lesson = result[0]
+    if (!lesson) {
+      throw new Error('Erreur lors de la création')
+    }
+
+    console.log(`[AUDIT] Lesson created by ${context.email}:`, lesson.id)
+
+    return lesson
+  })
+
+// Update lesson
+export const updateLesson = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((data: UpdateLessonInput) => updateLessonSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    initAdminDb()
+    const db = getDb()
+
+    const { id, ...updateData } = data
+
+    // Get current lesson to check publish status change
+    const currentResult = await db
+      .select({ isPublished: lessons.isPublished })
+      .from(lessons)
+      .where(eq(lessons.id, id))
+
+    const current = currentResult[0]
+    const publishedAt = updateData.isPublished && !current?.isPublished
+      ? new Date().toISOString()
+      : undefined
+
+    const result = await db
+      .update(lessons)
+      .set({
+        ...updateData,
+        ...(publishedAt && { publishedAt }),
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(lessons.id, id))
+      .returning()
+
+    const lesson = result[0]
+    if (!lesson) {
+      throw new Error('Leçon non trouvée')
+    }
+
+    console.log(`[AUDIT] Lesson updated by ${context.email}:`, id)
+
+    return lesson
+  })
+
+// Toggle publish status
+export const toggleLessonPublish = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((id: number) => id)
+  .handler(async ({ data: id, context }) => {
+    initAdminDb()
+    const db = getDb()
+
+    // Get current status
+    const currentResult = await db
+      .select({ isPublished: lessons.isPublished })
+      .from(lessons)
+      .where(eq(lessons.id, id))
+
+    const current = currentResult[0]
+    if (!current) {
+      throw new Error('Leçon non trouvée')
+    }
+
+    const newStatus = !current.isPublished
+
+    const result = await db
+      .update(lessons)
+      .set({
+        isPublished: newStatus,
+        publishedAt: newStatus ? new Date().toISOString() : null,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(lessons.id, id))
+      .returning()
+
+    const lesson = result[0]
+    console.log(`[AUDIT] Lesson ${newStatus ? 'published' : 'unpublished'} by ${context.email}:`, id)
+
+    return lesson
+  })
+
+// Delete lesson
+export const deleteLesson = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((id: number) => id)
+  .handler(async ({ data: id, context }) => {
+    initAdminDb()
+    const db = getDb()
+
+    // Check if lesson has cards
+    const cardCountResult = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(cards)
+      .where(eq(cards.lessonId, id))
+
+    const cardCount = cardCountResult[0]?.count ?? 0
+    if (Number(cardCount) > 0) {
+      throw new Error('Impossible de supprimer une leçon avec des cartes')
+    }
+
+    const result = await db
+      .delete(lessons)
+      .where(eq(lessons.id, id))
+      .returning()
+
+    const deleted = result[0]
+    if (!deleted) {
+      throw new Error('Leçon non trouvée')
+    }
+
+    console.log(`[AUDIT] Lesson deleted by ${context.email}:`, id)
+
+    return { success: true }
+  })

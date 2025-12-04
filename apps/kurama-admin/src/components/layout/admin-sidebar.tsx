@@ -24,7 +24,7 @@ import {
 
 const navItems = [
   { href: '/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
-  { href: '/subjects', label: 'Sujets', icon: BookOpen },
+  { href: '/subjects', label: 'Matières', icon: BookOpen },
   { href: '/lessons', label: 'Leçons', icon: Layers },
   { href: '/cards', label: 'Cartes', icon: FileText },
   { href: '/users', label: 'Utilisateurs', icon: Users },

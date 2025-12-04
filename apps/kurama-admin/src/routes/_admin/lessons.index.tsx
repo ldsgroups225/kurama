@@ -1,0 +1,342 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Plus, Pencil, Trash2, FileText, Search, Eye, EyeOff } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { PageHeader, DataTable, ConfirmDialog } from '@/components/shared'
+import { LessonForm } from '@/components/admin/lessons'
+import {
+  getLessons,
+  createLesson,
+  updateLesson,
+  deleteLesson,
+  toggleLessonPublish,
+} from '@/core/functions/lessons'
+import { getSubjectsSimple } from '@/core/functions/subjects'
+import type { CreateLessonInput, UpdateLessonInput } from '@/lib/schemas'
+import { toast } from 'sonner'
+
+export const Route = createFileRoute('/_admin/lessons/')({
+  component: LessonsPage,
+})
+
+type Lesson = {
+  id: number
+  title: string
+  description: string | null
+  difficulty: string | null
+  estimatedDuration: number | null
+  isPublished: boolean
+  publishedAt: string | null
+  displayOrder: number
+  createdAt: string
+  subjectId: number
+  subjectName: string | null
+  subjectAbbreviation: string | null
+  cardCount: number
+}
+
+type Subject = {
+  id: number
+  name: string
+  abbreviation: string
+}
+
+function LessonsPage() {
+  const queryClient = useQueryClient()
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const [subjectFilter, setSubjectFilter] = useState<string>('')
+  const [publishedFilter, setPublishedFilter] = useState<string>('')
+  const [formOpen, setFormOpen] = useState(false)
+  const [editingLesson, setEditingLesson] = useState<Lesson | null>(null)
+  const [deletingLesson, setDeletingLesson] = useState<Lesson | null>(null)
+
+  const { data: subjectsData } = useQuery({
+    queryKey: ['subjects-simple'],
+    queryFn: () => getSubjectsSimple(),
+  })
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['lessons', { page, search, subjectFilter, publishedFilter }],
+    queryFn: () =>
+      getLessons({
+        data: {
+          page,
+          limit: 20,
+          search: search || undefined,
+          subjectId: subjectFilter ? parseInt(subjectFilter) : undefined,
+          isPublished: publishedFilter === '' ? undefined : publishedFilter === 'true',
+        },
+      }),
+  })
+
+  const createMutation = useMutation({
+    mutationFn: (input: CreateLessonInput) => createLesson({ data: input }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lessons'] })
+      setFormOpen(false)
+      toast.success('Leçon créée avec succès')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erreur lors de la création')
+    },
+  })
+
+  const updateMutation = useMutation({
+    mutationFn: (input: UpdateLessonInput) => updateLesson({ data: input }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lessons'] })
+      setEditingLesson(null)
+      toast.success('Leçon modifiée avec succès')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erreur lors de la modification')
+    },
+  })
+
+  const togglePublishMutation = useMutation({
+    mutationFn: (id: number) => toggleLessonPublish({ data: id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lessons'] })
+      toast.success('Statut de publication modifié')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erreur lors de la modification')
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteLesson({ data: id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lessons'] })
+      setDeletingLesson(null)
+      toast.success('Leçon supprimée avec succès')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erreur lors de la suppression')
+    },
+  })
+
+  const difficultyLabels: Record<string, string> = {
+    easy: 'Facile',
+    medium: 'Moyen',
+    hard: 'Difficile',
+  }
+
+  const columns = [
+    {
+      key: 'title',
+      header: 'Titre',
+      cell: (lesson: Lesson) => (
+        <div>
+          <div className="font-medium">{lesson.title}</div>
+          <div className="text-sm text-muted-foreground">
+            {lesson.subjectName} ({lesson.subjectAbbreviation})
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'difficulty',
+      header: 'Difficulté',
+      cell: (lesson: Lesson) =>
+        lesson.difficulty ? (
+          <Badge variant="outline">
+            {difficultyLabels[lesson.difficulty] || lesson.difficulty}
+          </Badge>
+        ) : (
+          '-'
+        ),
+    },
+    {
+      key: 'duration',
+      header: 'Durée',
+      cell: (lesson: Lesson) =>
+        lesson.estimatedDuration ? `${lesson.estimatedDuration} min` : '-',
+    },
+    {
+      key: 'cards',
+      header: 'Cartes',
+      cell: (lesson: Lesson) => (
+        <Badge variant="secondary" className="gap-1">
+          <FileText className="h-3 w-3" />
+          {lesson.cardCount}
+        </Badge>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Statut',
+      cell: (lesson: Lesson) => (
+        <Badge variant={lesson.isPublished ? 'default' : 'secondary'}>
+          {lesson.isPublished ? 'Publié' : 'Brouillon'}
+        </Badge>
+      ),
+    },
+    {
+      key: 'actions',
+      header: '',
+      cell: (lesson: Lesson) => (
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => togglePublishMutation.mutate(lesson.id)}
+            title={lesson.isPublished ? 'Dépublier' : 'Publier'}
+          >
+            {lesson.isPublished ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setEditingLesson(lesson)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setDeletingLesson(lesson)}
+            disabled={lesson.cardCount > 0}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+      className: 'w-32',
+    },
+  ]
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Leçons"
+        description="Gérer les leçons et leur contenu"
+        actions={
+          <Button onClick={() => setFormOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nouvelle leçon
+          </Button>
+        }
+      />
+
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setPage(1)
+            }}
+            className="pl-9"
+          />
+        </div>
+        <Select
+          value={subjectFilter || 'all'}
+          onValueChange={(value) => {
+            setSubjectFilter(value === 'all' ? '' : value)
+            setPage(1)
+          }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Toutes les matières" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toutes les matières</SelectItem>
+            {subjectsData?.map((subject: Subject) => (
+              <SelectItem key={subject.id} value={subject.id.toString()}>
+                {subject.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={publishedFilter || 'all'}
+          onValueChange={(value) => {
+            setPublishedFilter(value === 'all' ? '' : value)
+            setPage(1)
+          }}
+        >
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Tous les statuts" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous les statuts</SelectItem>
+            <SelectItem value="true">Publié</SelectItem>
+            <SelectItem value="false">Brouillon</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <DataTable
+        columns={columns}
+        data={data?.lessons || []}
+        page={page}
+        totalPages={data?.totalPages || 1}
+        total={data?.total || 0}
+        onPageChange={setPage}
+        isLoading={isLoading}
+        emptyMessage="Aucune leçon trouvée"
+      />
+
+      <LessonForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        onSubmit={async (data) => {
+          await createMutation.mutateAsync(data)
+        }}
+        subjects={subjectsData || []}
+        isLoading={createMutation.isPending}
+      />
+
+      {editingLesson && (
+        <LessonForm
+          open={!!editingLesson}
+          onOpenChange={(open) => !open && setEditingLesson(null)}
+          onSubmit={async (data) => {
+            await updateMutation.mutateAsync({ ...data, id: editingLesson.id })
+          }}
+          subjects={subjectsData || []}
+          defaultValues={{
+            title: editingLesson.title,
+            description: editingLesson.description || '',
+            subjectId: editingLesson.subjectId,
+            difficulty: editingLesson.difficulty as 'easy' | 'medium' | 'hard' | undefined,
+            estimatedDuration: editingLesson.estimatedDuration || undefined,
+            isPublished: editingLesson.isPublished,
+            displayOrder: editingLesson.displayOrder,
+          }}
+          isEditing
+          isLoading={updateMutation.isPending}
+        />
+      )}
+
+      <ConfirmDialog
+        open={!!deletingLesson}
+        onOpenChange={(open) => !open && setDeletingLesson(null)}
+        title="Supprimer la leçon"
+        description={`Êtes-vous sûr de vouloir supprimer "${deletingLesson?.title}" ? Cette action est irréversible.`}
+        confirmLabel="Supprimer"
+        onConfirm={() => deletingLesson && deleteMutation.mutate(deletingLesson.id)}
+        isLoading={deleteMutation.isPending}
+        variant="destructive"
+      />
+    </div>
+  )
+}
