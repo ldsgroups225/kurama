@@ -16,6 +16,7 @@ import { Route as AdminUsersIndexRouteImport } from './routes/_admin/users.index
 import { Route as AdminSubjectsIndexRouteImport } from './routes/_admin/subjects.index'
 import { Route as AdminLessonsIndexRouteImport } from './routes/_admin/lessons.index'
 import { Route as AdminCardsIndexRouteImport } from './routes/_admin/cards.index'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 
 const AdminRouteRoute = AdminRouteRouteImport.update({
   id: '/_admin',
@@ -51,10 +52,16 @@ const AdminCardsIndexRoute = AdminCardsIndexRouteImport.update({
   path: '/cards/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AdminDashboardRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/cards': typeof AdminCardsIndexRoute
   '/lessons': typeof AdminLessonsIndexRoute
   '/subjects': typeof AdminSubjectsIndexRoute
@@ -63,6 +70,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AdminDashboardRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/cards': typeof AdminCardsIndexRoute
   '/lessons': typeof AdminLessonsIndexRoute
   '/subjects': typeof AdminSubjectsIndexRoute
@@ -73,6 +81,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_admin': typeof AdminRouteRouteWithChildren
   '/_admin/dashboard': typeof AdminDashboardRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/_admin/cards/': typeof AdminCardsIndexRoute
   '/_admin/lessons/': typeof AdminLessonsIndexRoute
   '/_admin/subjects/': typeof AdminSubjectsIndexRoute
@@ -80,14 +89,29 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/cards' | '/lessons' | '/subjects' | '/users'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/api/auth/$'
+    | '/cards'
+    | '/lessons'
+    | '/subjects'
+    | '/users'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/cards' | '/lessons' | '/subjects' | '/users'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/api/auth/$'
+    | '/cards'
+    | '/lessons'
+    | '/subjects'
+    | '/users'
   id:
     | '__root__'
     | '/'
     | '/_admin'
     | '/_admin/dashboard'
+    | '/api/auth/$'
     | '/_admin/cards/'
     | '/_admin/lessons/'
     | '/_admin/subjects/'
@@ -97,6 +121,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -150,6 +175,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCardsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -176,6 +208,7 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
