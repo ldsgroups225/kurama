@@ -6,6 +6,7 @@ import {
   FileText,
   Users,
   LogOut,
+  GraduationCap,
 } from 'lucide-react'
 import { authClient } from '@/lib/auth'
 import {
@@ -25,6 +26,7 @@ import {
 const navItems = [
   { href: '/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
   { href: '/subjects', label: 'Matières', icon: BookOpen },
+  { href: '/grades', label: 'Niveau & Série', icon: GraduationCap },
   { href: '/lessons', label: 'Leçons', icon: Layers },
   { href: '/cards', label: 'Cartes', icon: FileText },
   { href: '/users', label: 'Utilisateurs', icon: Users },
