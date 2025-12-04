@@ -91,3 +91,15 @@ export const cardFiltersSchema = z.object({
 })
 
 export type CardFilters = z.infer<typeof cardFiltersSchema>
+
+// User schemas
+export const userFiltersSchema = z.object({
+  search: z.string().optional(),
+  userType: z.enum(['student', 'parent']).optional(),
+  gradeId: z.number().int().positive().optional(),
+  isCompleted: z.boolean().optional(),
+  page: z.number().int().min(1).default(1),
+  limit: z.number().int().min(1).max(100).default(20),
+})
+
+export type UserFilters = z.infer<typeof userFiltersSchema>
