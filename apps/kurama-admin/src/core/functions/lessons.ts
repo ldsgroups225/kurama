@@ -275,3 +275,83 @@ export const deleteLesson = createServerFn({ method: 'POST' })
 
     return { success: true }
   })
+
+
+// Reorder lessons
+export const reorderLessons = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((data: { lessonId: number; newOrder: number }) => data)
+  .handler(async ({ data, context }) => {
+    initAdminDb()
+    const db = getDb()
+
+    const { lessonId, newOrder } = data
+
+    // Get current lesson
+    const currentResult = await db
+      .select({
+        id: lessons.id,
+        displayOrder: lessons.displayOrder,
+        subjectId: lessons.subjectId,
+        gradeId: lessons.gradeId,
+      })
+      .from(lessons)
+      .where(eq(lessons.id, lessonId))
+
+    const current = currentResult[0]
+    if (!current) {
+      throw new Error('Leçon non trouvée')
+    }
+
+    const oldOrder = current.displayOrder
+
+    if (oldOrder === newOrder) {
+      return { success: true }
+    }
+
+    // Update orders for affected lessons
+    if (newOrder > oldOrder) {
+      // Moving down: decrease order of lessons between old and new position
+      await db
+        .update(lessons)
+        .set({
+          displayOrder: sql`${lessons.displayOrder} - 1`,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(
+          and(
+            eq(lessons.subjectId, current.subjectId),
+            sql`${lessons.displayOrder} > ${oldOrder}`,
+            sql`${lessons.displayOrder} <= ${newOrder}`
+          )
+        )
+    } else {
+      // Moving up: increase order of lessons between new and old position
+      await db
+        .update(lessons)
+        .set({
+          displayOrder: sql`${lessons.displayOrder} + 1`,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(
+          and(
+            eq(lessons.subjectId, current.subjectId),
+            sql`${lessons.displayOrder} >= ${newOrder}`,
+            sql`${lessons.displayOrder} < ${oldOrder}`
+          )
+        )
+    }
+
+    // Update the moved lesson
+    await db
+      .update(lessons)
+      .set({
+        displayOrder: newOrder,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(lessons.id, lessonId))
+
+    console.log(`[AUDIT] Lesson reordered by ${context.email}: ${lessonId} from ${oldOrder} to ${newOrder}`)
+
+    return { success: true }
+  })

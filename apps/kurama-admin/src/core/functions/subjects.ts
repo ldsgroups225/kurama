@@ -193,3 +193,25 @@ export const getSubjectsSimple = createServerFn({ method: 'GET' })
 
     return subjectList
   })
+
+
+// Reorder subjects
+export const reorderSubjects = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((data: { orderedIds: number[] }) => data)
+  .handler(async ({ data, context }) => {
+    initAdminDb()
+    const db = getDb()
+
+    // Update display order for each subject
+    for (let i = 0; i < data.orderedIds.length; i++) {
+      await db
+        .update(subjects)
+        .set({ displayOrder: i + 1 })
+        .where(eq(subjects.id, data.orderedIds[i]!))
+    }
+
+    console.log(`[AUDIT] Subjects reordered by ${context.email}:`, data.orderedIds)
+
+    return { success: true }
+  })

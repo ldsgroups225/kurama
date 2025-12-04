@@ -341,3 +341,43 @@ export const getLessonsSimple = createServerFn({ method: 'GET' })
 
     return lessonList
   })
+
+
+// Bulk create cards (for import)
+export const bulkCreateCards = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((data: { lessonId: number; cards: CreateCardInput[] }) => data)
+  .handler(async ({ data, context }) => {
+    initAdminDb()
+    const db = getDb()
+
+    const { lessonId, cards: cardsToCreate } = data
+
+    if (cardsToCreate.length === 0) {
+      return { created: 0 }
+    }
+
+    // Get max display order for this lesson
+    const maxOrderResult = await db
+      .select({ max: sql<number>`COALESCE(MAX(${cards.displayOrder}), 0)` })
+      .from(cards)
+      .where(eq(cards.lessonId, lessonId))
+
+    let currentOrder = Number(maxOrderResult[0]?.max ?? 0)
+
+    // Insert cards with incremental display order
+    const cardsWithOrder = cardsToCreate.map((card) => ({
+      ...card,
+      lessonId,
+      displayOrder: ++currentOrder,
+    }))
+
+    const result = await db
+      .insert(cards)
+      .values(cardsWithOrder)
+      .returning({ id: cards.id })
+
+    console.log(`[AUDIT] Bulk cards created by ${context.email}: ${result.length} cards for lesson ${lessonId}`)
+
+    return { created: result.length }
+  })
