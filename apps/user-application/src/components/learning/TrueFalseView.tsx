@@ -1,6 +1,7 @@
 import type { LearningCardProps } from './types'
 import { CheckCircle2, Volume2, XCircle } from 'lucide-react'
 import { useState } from 'react'
+import { MarkdownRenderer } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -48,9 +49,14 @@ export function TrueFalseView({ card, cardIndex, totalCards, onAnswer }: Learnin
       <Card className="border-2 border-primary/20">
         <CardContent className="p-6">
           <div className="mb-8 flex items-start justify-between">
-            <h3 className="flex-1 text-xl font-semibold text-center">
-              {card.frontContent}
-            </h3>
+            <div className="flex-1 text-xl font-semibold text-center">
+              <MarkdownRenderer
+                content={card.frontContent}
+                compact
+                centered
+                className="[&_p]:text-foreground [&_p]:my-0 [&_p]:text-xl [&_p]:font-semibold"
+              />
+            </div>
             <div className="absolute right-6 top-6 flex gap-2">
               <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
                 <Volume2 className="h-4 w-4" />
@@ -115,7 +121,13 @@ export function TrueFalseView({ card, cardIndex, totalCards, onAnswer }: Learnin
                 )}
             </div>
             {card.explanation && (
-              <p className="mt-2 text-sm text-muted-foreground px-7">{card.explanation}</p>
+              <div className="mt-2 text-sm text-muted-foreground px-7">
+                <MarkdownRenderer
+                  content={card.explanation}
+                  compact
+                  className="[&_p]:my-0 [&_p]:text-muted-foreground [&_p]:text-sm"
+                />
+              </div>
             )}
           </CardContent>
         </Card>

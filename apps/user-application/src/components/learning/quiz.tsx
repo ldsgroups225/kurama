@@ -1,5 +1,6 @@
 import { CheckCircle2, Star, Volume2, XCircle } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { MarkdownRenderer } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -144,7 +145,13 @@ export function Quiz({ card, cardIndex, totalCards, questionType = 'multiple-cho
                       ? <XCircle className="h-5 w-5" />
                       : String.fromCharCode(65 + optionIndex)}
                 </div>
-                <span className="flex-1 font-medium">{option}</span>
+                <span className="flex-1 font-medium">
+                  <MarkdownRenderer
+                    content={option}
+                    compact
+                    className="[&_p]:my-0 [&_p]:text-inherit"
+                  />
+                </span>
               </div>
             </button>
           )
@@ -228,30 +235,36 @@ export function Quiz({ card, cardIndex, totalCards, questionType = 'multiple-cho
             <div className="flex items-center gap-2">
               {questionState === 'correct'
                 ? (
-                    <>
-                      <CheckCircle2 className="h-5 w-5 text-success" />
-                      <span className="font-semibold text-success">Vous maîtrisez le sujet !</span>
-                    </>
-                  )
+                  <>
+                    <CheckCircle2 className="h-5 w-5 text-success" />
+                    <span className="font-semibold text-success">Vous maîtrisez le sujet !</span>
+                  </>
+                )
                 : questionState === 'learning'
                   ? (
-                      <>
-                        <span className="text-lg">📚</span>
-                        <span className="font-semibold text-warning">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
-                      </>
-                    )
+                    <>
+                      <span className="text-lg">📚</span>
+                      <span className="font-semibold text-warning">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
+                    </>
+                  )
                   : (
-                      <>
-                        <XCircle className="h-5 w-5 text-error" />
-                        <span className="font-semibold text-error">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
-                      </>
-                    )}
+                    <>
+                      <XCircle className="h-5 w-5 text-error" />
+                      <span className="font-semibold text-error">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
+                    </>
+                  )}
             </div>
 
             {showAnswer && (
               <div className="rounded-lg bg-background/50 p-3">
                 <p className="mb-1 text-xs font-medium text-muted-foreground">Réponse correcte :</p>
-                <p className="font-medium">{correctAnswer}</p>
+                <div className="font-medium">
+                  <MarkdownRenderer
+                    content={correctAnswer}
+                    compact
+                    className="[&_p]:my-0 [&_p]:text-foreground"
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -277,9 +290,13 @@ export function Quiz({ card, cardIndex, totalCards, questionType = 'multiple-cho
       <Card className="border-2 border-primary/20">
         <CardContent className="p-6">
           <div className="mb-6 flex items-start justify-between">
-            <h3 className="flex-1 text-xl font-semibold">
-              {card.frontContent || card.front}
-            </h3>
+            <div className="flex-1 text-xl font-semibold">
+              <MarkdownRenderer
+                content={card.frontContent || card.front || ''}
+                compact
+                className="[&_p]:text-foreground [&_p]:my-0 [&_p]:text-xl [&_p]:font-semibold"
+              />
+            </div>
             <div className="flex gap-2">
               <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
                 <Volume2 className="h-4 w-4" />

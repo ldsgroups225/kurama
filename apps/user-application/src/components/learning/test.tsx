@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
 import { useMemo, useState } from 'react'
+import { MarkdownRenderer } from '@/components/shared'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
@@ -143,7 +144,13 @@ export function Test({
               >
                 {String.fromCharCode(65 + optionIndex)}
               </div>
-              <span className="flex-1 font-medium">{option}</span>
+              <span className="flex-1 font-medium">
+                <MarkdownRenderer
+                  content={option}
+                  compact
+                  className="[&_p]:my-0 [&_p]:text-inherit"
+                />
+              </span>
             </div>
           </motion.button>
         )
@@ -246,13 +253,17 @@ export function Test({
       {/* Question Card */}
       <Card className="border-2">
         <CardContent className="p-6">
-          <motion.h3
+          <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 text-xl font-semibold"
           >
-            {question}
-          </motion.h3>
+            <MarkdownRenderer
+              content={question || ''}
+              compact
+              className="[&_p]:text-foreground [&_p]:my-0 [&_p]:text-xl [&_p]:font-semibold"
+            />
+          </motion.div>
 
           {questionType === 'multiple-choice' && renderMultipleChoice()}
           {questionType === 'true-false' && renderTrueFalse()}

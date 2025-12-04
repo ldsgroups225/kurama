@@ -3,6 +3,7 @@ import { CheckCircle2, Star, Volume2, XCircle } from 'lucide-react'
 
 import { useState } from 'react'
 
+import { MarkdownRenderer } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -65,9 +66,13 @@ export function MultipleChoiceView({ card, cardIndex, totalCards, onAnswer }: Le
       <Card className="border-2 border-primary/20">
         <CardContent className="p-6">
           <div className="mb-6 flex items-start justify-between">
-            <h3 className="flex-1 text-xl font-semibold">
-              {card.question || card.frontContent}
-            </h3>
+            <div className="flex-1 text-xl font-semibold">
+              <MarkdownRenderer
+                content={card.question || card.frontContent}
+                compact
+                className="[&_p]:text-foreground [&_p]:my-0 [&_p]:text-xl [&_p]:font-semibold"
+              />
+            </div>
             <div className="flex gap-2">
               <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
                 <Volume2 className="h-4 w-4" />
@@ -115,7 +120,13 @@ export function MultipleChoiceView({ card, cardIndex, totalCards, onAnswer }: Le
                           ? <XCircle className="h-5 w-5" />
                           : String.fromCharCode(65 + index)}
                     </div>
-                    <span className="flex-1 font-medium">{option.text}</span>
+                    <span className="flex-1 font-medium">
+                      <MarkdownRenderer
+                        content={option.text}
+                        compact
+                        className="[&_p]:my-0 [&_p]:text-inherit"
+                      />
+                    </span>
                   </div>
                 </button>
               )
@@ -155,9 +166,21 @@ export function MultipleChoiceView({ card, cardIndex, totalCards, onAnswer }: Le
               {showAnswer && (
                 <div className="rounded-lg bg-background/50 p-3">
                   <p className="mb-1 text-xs font-medium text-muted-foreground">Réponse correcte :</p>
-                  <p className="font-medium">{correctAnswer}</p>
+                  <div className="font-medium">
+                    <MarkdownRenderer
+                      content={correctAnswer}
+                      compact
+                      className="[&_p]:my-0 [&_p]:text-foreground"
+                    />
+                  </div>
                   {card.explanation && (
-                    <p className="mt-2 text-sm text-muted-foreground">{card.explanation}</p>
+                    <div className="mt-2 text-sm text-muted-foreground">
+                      <MarkdownRenderer
+                        content={card.explanation}
+                        compact
+                        className="[&_p]:my-0 [&_p]:text-muted-foreground [&_p]:text-sm"
+                      />
+                    </div>
                   )}
                 </div>
               )}

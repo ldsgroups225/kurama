@@ -1,6 +1,7 @@
 import type { LearningCardProps } from './types'
 import { CheckCircle2, XCircle } from 'lucide-react'
 import { useState } from 'react'
+import { MarkdownRenderer } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -104,23 +105,29 @@ export function FillBlankView({ card, cardIndex, totalCards, onAnswer }: Learnin
               <div className="flex items-center gap-2">
                 {questionState === 'correct'
                   ? (
-                      <>
-                        <CheckCircle2 className="h-5 w-5 text-success" />
-                        <span className="font-semibold text-success">Exactement !</span>
-                      </>
-                    )
+                    <>
+                      <CheckCircle2 className="h-5 w-5 text-success" />
+                      <span className="font-semibold text-success">Exactement !</span>
+                    </>
+                  )
                   : (
-                      <>
-                        <XCircle className="h-5 w-5 text-error" />
-                        <span className="font-semibold text-error">
-                          La réponse était :
-                          {card.correctAnswer}
-                        </span>
-                      </>
-                    )}
+                    <>
+                      <XCircle className="h-5 w-5 text-error" />
+                      <span className="font-semibold text-error">
+                        La réponse était :
+                        {card.correctAnswer}
+                      </span>
+                    </>
+                  )}
               </div>
               {card.explanation && (
-                <p className="text-sm text-muted-foreground px-7">{card.explanation}</p>
+                <div className="text-sm text-muted-foreground px-7">
+                  <MarkdownRenderer
+                    content={card.explanation}
+                    compact
+                    className="[&_p]:my-0 [&_p]:text-muted-foreground [&_p]:text-sm"
+                  />
+                </div>
               )}
             </div>
           </CardContent>

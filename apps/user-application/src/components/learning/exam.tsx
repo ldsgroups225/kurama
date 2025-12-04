@@ -1,4 +1,5 @@
 import { CheckCircle2, Clock, XCircle } from 'lucide-react'
+import { MarkdownRenderer } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -51,7 +52,13 @@ export function Exam({ card, cardIndex, totalCards, timeRemaining, onAnswer }: E
             </Badge>
           </div>
 
-          <h3 className="mb-6 text-xl font-semibold">{card.front}</h3>
+          <div className="mb-6 text-xl font-semibold">
+            <MarkdownRenderer
+              content={card.front || ''}
+              compact
+              className="[&_p]:text-foreground [&_p]:my-0 [&_p]:text-xl [&_p]:font-semibold"
+            />
+          </div>
 
           <div className="space-y-3">
             {/* For now, we'll show the answer as a single option */}
@@ -61,7 +68,13 @@ export function Exam({ card, cardIndex, totalCards, timeRemaining, onAnswer }: E
               className="w-full justify-start text-left h-auto py-4 px-4"
               onClick={() => onAnswer(true)}
             >
-              <span className="flex-1">{card.back}</span>
+              <span className="flex-1">
+                <MarkdownRenderer
+                  content={card.back || ''}
+                  compact
+                  className="[&_p]:my-0 [&_p]:text-inherit"
+                />
+              </span>
             </Button>
 
             <Button

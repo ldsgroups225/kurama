@@ -1,6 +1,7 @@
 import type { MotionValue } from 'motion/react'
 import { Star, Volume2 } from 'lucide-react'
 import { motion } from 'motion/react'
+import { MarkdownRenderer } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -76,13 +77,18 @@ export function FlashcardFace({
             >
               {label}
             </div>
-            <p className={`
+            <div className={`
               ${textSize}
               px-4 leading-relaxed font-medium
             `}
             >
-              {content}
-            </p>
+              <MarkdownRenderer
+                content={content}
+                compact
+                centered
+                className="[&_p]:text-foreground [&_p]:my-0"
+              />
+            </div>
           </div>
 
           {!isBack && (
