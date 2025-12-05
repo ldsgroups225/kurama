@@ -7,7 +7,8 @@
   ],
   "main": "./src/server.ts",
   "vars": {
-    "MY_VAR": "Hello from Cloudflare"
+    "DATABASE_HOST": "ep-late-lake-agik2cni-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+    "GOOGLE_CLIENT_ID": "18833168509-f0smil5qed52l0gpcj8nsmthmrervseb.apps.googleusercontent.com"
   },
   "workers_dev": true,
   "preview_urls": true

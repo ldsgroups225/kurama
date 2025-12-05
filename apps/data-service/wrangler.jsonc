@@ -10,6 +10,12 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  "vars": {
+    "ENVIRONMENT": "production",
+    "API_VERSION": "v1",
+    "CORS_ORIGIN": "https://kurama.yeko.workers.dev",
+    "LOG_LEVEL": "info"
+  },
   "observability": {
     "enabled": true
   },

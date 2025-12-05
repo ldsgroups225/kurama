@@ -67,9 +67,13 @@ deploy:backend:production:
     - .pnpm_cache
   stage: deploy
   script:
-    - cd apps/data-service
     - export CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID
     - export CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN
+    # Déployer les secrets avant le déploiement
+    - chmod +x scripts/deploy-secrets.sh
+    - ./scripts/deploy-secrets.sh backend production
+    # Déployer l'application
+    - cd apps/data-service
     - npx wrangler deploy
   environment:
     name: production/backend
@@ -86,9 +90,15 @@ deploy:frontend:production:
   needs:
     - build
   script:
+    - export CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID
+    - export CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN
+    # Déployer les secrets avant le déploiement
+    - chmod +x scripts/deploy-secrets.sh
+    - ./scripts/deploy-secrets.sh frontend production
+    # Déployer l'application
     - cd apps/user-application
     - pnpm run build
-    - CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN npx wrangler deploy
+    - npx wrangler deploy
   environment:
     name: production/frontend
     url: https://kurama.yeko.workers.dev
@@ -102,9 +112,13 @@ deploy:backend:preview:
     - .pnpm_cache
   stage: deploy
   script:
-    - cd apps/data-service
     - export CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID
     - export CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN
+    # Déployer les secrets pour preview
+    - chmod +x scripts/deploy-secrets.sh
+    - ./scripts/deploy-secrets.sh backend preview
+    # Déployer l'application
+    - cd apps/data-service
     - npx wrangler deploy --env preview
   environment:
     name: preview/backend-$CI_MERGE_REQUEST_IID
@@ -122,9 +136,15 @@ deploy:frontend:preview:
   needs:
     - build
   script:
+    - export CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID
+    - export CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN
+    # Déployer les secrets pour preview
+    - chmod +x scripts/deploy-secrets.sh
+    - ./scripts/deploy-secrets.sh frontend preview
+    # Déployer l'application
     - cd apps/user-application
     - pnpm run build
-    - CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN npx wrangler deploy --env preview
+    - npx wrangler deploy --env preview
   environment:
     name: preview/frontend-$CI_MERGE_REQUEST_IID
     url: https://preview.kurama.yeko.workers.dev
