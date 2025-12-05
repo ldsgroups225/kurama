@@ -1,7 +1,8 @@
 import type { LearningCardProps } from './types'
 import { CheckCircle2, Star, Volume2, XCircle } from 'lucide-react'
+import { animate } from 'motion'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { MarkdownRenderer } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
@@ -15,6 +16,31 @@ export function MultipleChoiceView({ card, cardIndex, totalCards, onAnswer }: Le
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [questionState, setQuestionState] = useState<QuestionState>('answering')
   const [showAnswer, setShowAnswer] = useState(false)
+  const scrollTargetRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to continue button when wrong answer is selected
+  useEffect(() => {
+    if ((questionState === 'incorrect' || questionState === 'learning') && scrollTargetRef.current) {
+      const timer = setTimeout(() => {
+        const element = scrollTargetRef.current
+        if (!element)
+          return
+
+        const elementRect = element.getBoundingClientRect()
+        const targetScrollY = window.scrollY + elementRect.bottom - window.innerHeight + 24
+
+        if (targetScrollY > window.scrollY) {
+          animate(window.scrollY, targetScrollY, {
+            duration: 0.6,
+            ease: [0.25, 0.1, 0.25, 1], // ease-out cubic for natural deceleration
+            onUpdate: value => window.scrollTo(0, value),
+          })
+        }
+      }, 300)
+
+      return () => clearTimeout(timer)
+    }
+  }, [questionState])
 
   const options = card.options || []
   const correctAnswer = card.options?.find(o => o.isCorrect)?.text || card.backContent
@@ -43,6 +69,8 @@ export function MultipleChoiceView({ card, cardIndex, totalCards, onAnswer }: Le
   }
 
   const handleContinue = () => {
+    // Scroll to top instantly before transitioning to next question
+    window.scrollTo({ top: 0, behavior: 'instant' })
     onAnswer(questionState === 'correct')
   }
 
@@ -191,9 +219,15 @@ export function MultipleChoiceView({ card, cardIndex, totalCards, onAnswer }: Le
 
       {/* Continue Button */}
       {(questionState === 'incorrect' || questionState === 'learning') && (
-        <Button size="lg" className="w-full bg-gradient-xp text-lg font-semibold" onClick={handleContinue}>
-          Continuer
-        </Button>
+        <div ref={scrollTargetRef} className="pb-6">
+          <Button
+            size="lg"
+            className="w-full bg-gradient-xp text-lg font-semibold"
+            onClick={handleContinue}
+          >
+            Continuer
+          </Button>
+        </div>
       )}
     </div>
   )

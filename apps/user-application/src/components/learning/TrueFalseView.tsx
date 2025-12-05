@@ -1,6 +1,7 @@
 import type { LearningCardProps } from './types'
 import { CheckCircle2, Volume2, XCircle } from 'lucide-react'
-import { useState } from 'react'
+import { animate } from 'motion'
+import { useEffect, useRef, useState } from 'react'
 import { MarkdownRenderer } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -12,6 +13,31 @@ type QuestionState = 'answering' | 'correct' | 'incorrect'
 export function TrueFalseView({ card, cardIndex, totalCards, onAnswer }: LearningCardProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<boolean | null>(null)
   const [questionState, setQuestionState] = useState<QuestionState>('answering')
+  const scrollTargetRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to continue button when wrong answer is selected
+  useEffect(() => {
+    if (questionState === 'incorrect' && scrollTargetRef.current) {
+      const timer = setTimeout(() => {
+        const element = scrollTargetRef.current
+        if (!element)
+          return
+
+        const elementRect = element.getBoundingClientRect()
+        const targetScrollY = window.scrollY + elementRect.bottom - window.innerHeight + 24
+
+        if (targetScrollY > window.scrollY) {
+          animate(window.scrollY, targetScrollY, {
+            duration: 0.6,
+            ease: [0.25, 0.1, 0.25, 1],
+            onUpdate: value => window.scrollTo(0, value),
+          })
+        }
+      }, 300)
+
+      return () => clearTimeout(timer)
+    }
+  }, [questionState])
 
   // Expect correctAnswer to be 'true' or 'false' string from DB
   const isTrueCorrect = card.correctAnswer === 'true'
@@ -33,6 +59,8 @@ export function TrueFalseView({ card, cardIndex, totalCards, onAnswer }: Learnin
   }
 
   const handleContinue = () => {
+    // Scroll to top instantly before transitioning to next question
+    window.scrollTo({ top: 0, behavior: 'instant' })
     onAnswer(questionState === 'correct')
   }
 
@@ -134,9 +162,11 @@ export function TrueFalseView({ card, cardIndex, totalCards, onAnswer }: Learnin
       )}
 
       {(questionState === 'incorrect') && (
-        <Button size="lg" className="w-full bg-gradient-xp text-lg font-semibold" onClick={handleContinue}>
-          Continuer
-        </Button>
+        <div ref={scrollTargetRef} className="pb-6">
+          <Button size="lg" className="w-full bg-gradient-xp text-lg font-semibold" onClick={handleContinue}>
+            Continuer
+          </Button>
+        </div>
       )}
     </div>
   )
