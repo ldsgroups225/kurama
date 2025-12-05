@@ -13,10 +13,11 @@ export function useCardSwipeAnimations() {
   const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0.5, 1, 1, 1, 0.5])
 
   // Background color transitions - use opaque background for backface-visibility to work
+  // Using transparent white/dark for neutral state (works in both light/dark themes)
   const cardBackgroundColor = useTransform(
     x,
     [-SWIPE_THRESHOLD, 0, SWIPE_THRESHOLD],
-    ['rgba(251, 146, 60, 0.15)', 'hsl(var(--card))', 'rgba(34, 197, 94, 0.15)'],
+    ['rgba(251, 146, 60, 0.15)', 'rgba(255, 255, 255, 0)', 'rgba(34, 197, 94, 0.15)'],
   )
 
   // Border color transitions
