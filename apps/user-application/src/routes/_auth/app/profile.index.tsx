@@ -19,7 +19,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { signOut, useSession } from '@/lib/auth-client'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 
-export const Route = createFileRoute('/_auth/app/profile')({
+export const Route = createFileRoute('/_auth/app/profile/')({
   component: ProfilePage,
 })
 

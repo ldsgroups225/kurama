@@ -20,12 +20,13 @@ import { Route as ApiStudyProgressRouteImport } from './routes/api/study/progres
 import { Route as ApiStudySessionIdRouteImport } from './routes/api/study/$sessionId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AuthAppProgressRouteImport } from './routes/_auth/app/progress'
-import { Route as AuthAppProfileRouteImport } from './routes/_auth/app/profile'
 import { Route as AuthAppGroupsRouteImport } from './routes/_auth/app/groups'
 import { Route as AuthAppDailyChallengeRouteImport } from './routes/_auth/app/daily-challenge'
 import { Route as AuthAppSubjectsIndexRouteImport } from './routes/_auth/app/subjects.index'
+import { Route as AuthAppProfileIndexRouteImport } from './routes/_auth/app/profile.index'
 import { Route as AuthAppTestSummaryLessonIdRouteImport } from './routes/_auth/app/test-summary.$lessonId'
 import { Route as AuthAppSubjectsSubjectIdRouteImport } from './routes/_auth/app/subjects.$subjectId'
+import { Route as AuthAppProfileEditRouteImport } from './routes/_auth/app/profile.edit'
 import { Route as AuthAppPolarSubscriptionsRouteImport } from './routes/_auth/app/polar/subscriptions'
 import { Route as AuthAppPolarPortalRouteImport } from './routes/_auth/app/polar/portal'
 import { Route as AuthAppLessonsLessonIdRouteImport } from './routes/_auth/app/lessons.$lessonId'
@@ -89,11 +90,6 @@ const AuthAppProgressRoute = AuthAppProgressRouteImport.update({
   path: '/app/progress',
   getParentRoute: () => AuthRouteRoute,
 } as any)
-const AuthAppProfileRoute = AuthAppProfileRouteImport.update({
-  id: '/app/profile',
-  path: '/app/profile',
-  getParentRoute: () => AuthRouteRoute,
-} as any)
 const AuthAppGroupsRoute = AuthAppGroupsRouteImport.update({
   id: '/app/groups',
   path: '/app/groups',
@@ -109,6 +105,11 @@ const AuthAppSubjectsIndexRoute = AuthAppSubjectsIndexRouteImport.update({
   path: '/app/subjects/',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const AuthAppProfileIndexRoute = AuthAppProfileIndexRouteImport.update({
+  id: '/app/profile/',
+  path: '/app/profile/',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
 const AuthAppTestSummaryLessonIdRoute =
   AuthAppTestSummaryLessonIdRouteImport.update({
     id: '/app/test-summary/$lessonId',
@@ -121,6 +122,11 @@ const AuthAppSubjectsSubjectIdRoute =
     path: '/app/subjects/$subjectId',
     getParentRoute: () => AuthRouteRoute,
   } as any)
+const AuthAppProfileEditRoute = AuthAppProfileEditRouteImport.update({
+  id: '/app/profile/edit',
+  path: '/app/profile/edit',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
 const AuthAppPolarSubscriptionsRoute =
   AuthAppPolarSubscriptionsRouteImport.update({
     id: '/app/polar/subscriptions',
@@ -163,7 +169,6 @@ export interface FileRoutesByFullPath {
   '/api/metrics': typeof ApiMetricsRoute
   '/app/daily-challenge': typeof AuthAppDailyChallengeRoute
   '/app/groups': typeof AuthAppGroupsRoute
-  '/app/profile': typeof AuthAppProfileRoute
   '/app/progress': typeof AuthAppProgressRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/study/$sessionId': typeof ApiStudySessionIdRoute
@@ -175,8 +180,10 @@ export interface FileRoutesByFullPath {
   '/app/lessons/$lessonId': typeof AuthAppLessonsLessonIdRoute
   '/app/polar/portal': typeof AuthAppPolarPortalRoute
   '/app/polar/subscriptions': typeof AuthAppPolarSubscriptionsRoute
+  '/app/profile/edit': typeof AuthAppProfileEditRoute
   '/app/subjects/$subjectId': typeof AuthAppSubjectsSubjectIdRoute
   '/app/test-summary/$lessonId': typeof AuthAppTestSummaryLessonIdRoute
+  '/app/profile': typeof AuthAppProfileIndexRoute
   '/app/subjects': typeof AuthAppSubjectsIndexRoute
   '/app/polar/checkout/success': typeof AuthAppPolarCheckoutSuccessRoute
 }
@@ -187,7 +194,6 @@ export interface FileRoutesByTo {
   '/api/metrics': typeof ApiMetricsRoute
   '/app/daily-challenge': typeof AuthAppDailyChallengeRoute
   '/app/groups': typeof AuthAppGroupsRoute
-  '/app/profile': typeof AuthAppProfileRoute
   '/app/progress': typeof AuthAppProgressRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/study/$sessionId': typeof ApiStudySessionIdRoute
@@ -199,8 +205,10 @@ export interface FileRoutesByTo {
   '/app/lessons/$lessonId': typeof AuthAppLessonsLessonIdRoute
   '/app/polar/portal': typeof AuthAppPolarPortalRoute
   '/app/polar/subscriptions': typeof AuthAppPolarSubscriptionsRoute
+  '/app/profile/edit': typeof AuthAppProfileEditRoute
   '/app/subjects/$subjectId': typeof AuthAppSubjectsSubjectIdRoute
   '/app/test-summary/$lessonId': typeof AuthAppTestSummaryLessonIdRoute
+  '/app/profile': typeof AuthAppProfileIndexRoute
   '/app/subjects': typeof AuthAppSubjectsIndexRoute
   '/app/polar/checkout/success': typeof AuthAppPolarCheckoutSuccessRoute
 }
@@ -213,7 +221,6 @@ export interface FileRoutesById {
   '/api/metrics': typeof ApiMetricsRoute
   '/_auth/app/daily-challenge': typeof AuthAppDailyChallengeRoute
   '/_auth/app/groups': typeof AuthAppGroupsRoute
-  '/_auth/app/profile': typeof AuthAppProfileRoute
   '/_auth/app/progress': typeof AuthAppProgressRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/study/$sessionId': typeof ApiStudySessionIdRoute
@@ -225,8 +232,10 @@ export interface FileRoutesById {
   '/_auth/app/lessons/$lessonId': typeof AuthAppLessonsLessonIdRoute
   '/_auth/app/polar/portal': typeof AuthAppPolarPortalRoute
   '/_auth/app/polar/subscriptions': typeof AuthAppPolarSubscriptionsRoute
+  '/_auth/app/profile/edit': typeof AuthAppProfileEditRoute
   '/_auth/app/subjects/$subjectId': typeof AuthAppSubjectsSubjectIdRoute
   '/_auth/app/test-summary/$lessonId': typeof AuthAppTestSummaryLessonIdRoute
+  '/_auth/app/profile/': typeof AuthAppProfileIndexRoute
   '/_auth/app/subjects/': typeof AuthAppSubjectsIndexRoute
   '/_auth/app/polar/checkout/success': typeof AuthAppPolarCheckoutSuccessRoute
 }
@@ -239,7 +248,6 @@ export interface FileRouteTypes {
     | '/api/metrics'
     | '/app/daily-challenge'
     | '/app/groups'
-    | '/app/profile'
     | '/app/progress'
     | '/api/auth/$'
     | '/api/study/$sessionId'
@@ -251,8 +259,10 @@ export interface FileRouteTypes {
     | '/app/lessons/$lessonId'
     | '/app/polar/portal'
     | '/app/polar/subscriptions'
+    | '/app/profile/edit'
     | '/app/subjects/$subjectId'
     | '/app/test-summary/$lessonId'
+    | '/app/profile'
     | '/app/subjects'
     | '/app/polar/checkout/success'
   fileRoutesByTo: FileRoutesByTo
@@ -263,7 +273,6 @@ export interface FileRouteTypes {
     | '/api/metrics'
     | '/app/daily-challenge'
     | '/app/groups'
-    | '/app/profile'
     | '/app/progress'
     | '/api/auth/$'
     | '/api/study/$sessionId'
@@ -275,8 +284,10 @@ export interface FileRouteTypes {
     | '/app/lessons/$lessonId'
     | '/app/polar/portal'
     | '/app/polar/subscriptions'
+    | '/app/profile/edit'
     | '/app/subjects/$subjectId'
     | '/app/test-summary/$lessonId'
+    | '/app/profile'
     | '/app/subjects'
     | '/app/polar/checkout/success'
   id:
@@ -288,7 +299,6 @@ export interface FileRouteTypes {
     | '/api/metrics'
     | '/_auth/app/daily-challenge'
     | '/_auth/app/groups'
-    | '/_auth/app/profile'
     | '/_auth/app/progress'
     | '/api/auth/$'
     | '/api/study/$sessionId'
@@ -300,8 +310,10 @@ export interface FileRouteTypes {
     | '/_auth/app/lessons/$lessonId'
     | '/_auth/app/polar/portal'
     | '/_auth/app/polar/subscriptions'
+    | '/_auth/app/profile/edit'
     | '/_auth/app/subjects/$subjectId'
     | '/_auth/app/test-summary/$lessonId'
+    | '/_auth/app/profile/'
     | '/_auth/app/subjects/'
     | '/_auth/app/polar/checkout/success'
   fileRoutesById: FileRoutesById
@@ -397,13 +409,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAppProgressRouteImport
       parentRoute: typeof AuthRouteRoute
     }
-    '/_auth/app/profile': {
-      id: '/_auth/app/profile'
-      path: '/app/profile'
-      fullPath: '/app/profile'
-      preLoaderRoute: typeof AuthAppProfileRouteImport
-      parentRoute: typeof AuthRouteRoute
-    }
     '/_auth/app/groups': {
       id: '/_auth/app/groups'
       path: '/app/groups'
@@ -425,6 +430,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAppSubjectsIndexRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_auth/app/profile/': {
+      id: '/_auth/app/profile/'
+      path: '/app/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AuthAppProfileIndexRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
     '/_auth/app/test-summary/$lessonId': {
       id: '/_auth/app/test-summary/$lessonId'
       path: '/app/test-summary/$lessonId'
@@ -437,6 +449,13 @@ declare module '@tanstack/react-router' {
       path: '/app/subjects/$subjectId'
       fullPath: '/app/subjects/$subjectId'
       preLoaderRoute: typeof AuthAppSubjectsSubjectIdRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/app/profile/edit': {
+      id: '/_auth/app/profile/edit'
+      path: '/app/profile/edit'
+      fullPath: '/app/profile/edit'
+      preLoaderRoute: typeof AuthAppProfileEditRouteImport
       parentRoute: typeof AuthRouteRoute
     }
     '/_auth/app/polar/subscriptions': {
@@ -487,7 +506,6 @@ declare module '@tanstack/react-router' {
 interface AuthRouteRouteChildren {
   AuthAppDailyChallengeRoute: typeof AuthAppDailyChallengeRoute
   AuthAppGroupsRoute: typeof AuthAppGroupsRoute
-  AuthAppProfileRoute: typeof AuthAppProfileRoute
   AuthAppProgressRoute: typeof AuthAppProgressRoute
   AuthAppIndexRoute: typeof AuthAppIndexRoute
   AuthAppLessonSessionLessonIdRoute: typeof AuthAppLessonSessionLessonIdRoute
@@ -495,8 +513,10 @@ interface AuthRouteRouteChildren {
   AuthAppLessonsLessonIdRoute: typeof AuthAppLessonsLessonIdRoute
   AuthAppPolarPortalRoute: typeof AuthAppPolarPortalRoute
   AuthAppPolarSubscriptionsRoute: typeof AuthAppPolarSubscriptionsRoute
+  AuthAppProfileEditRoute: typeof AuthAppProfileEditRoute
   AuthAppSubjectsSubjectIdRoute: typeof AuthAppSubjectsSubjectIdRoute
   AuthAppTestSummaryLessonIdRoute: typeof AuthAppTestSummaryLessonIdRoute
+  AuthAppProfileIndexRoute: typeof AuthAppProfileIndexRoute
   AuthAppSubjectsIndexRoute: typeof AuthAppSubjectsIndexRoute
   AuthAppPolarCheckoutSuccessRoute: typeof AuthAppPolarCheckoutSuccessRoute
 }
@@ -504,7 +524,6 @@ interface AuthRouteRouteChildren {
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
   AuthAppDailyChallengeRoute: AuthAppDailyChallengeRoute,
   AuthAppGroupsRoute: AuthAppGroupsRoute,
-  AuthAppProfileRoute: AuthAppProfileRoute,
   AuthAppProgressRoute: AuthAppProgressRoute,
   AuthAppIndexRoute: AuthAppIndexRoute,
   AuthAppLessonSessionLessonIdRoute: AuthAppLessonSessionLessonIdRoute,
@@ -512,8 +531,10 @@ const AuthRouteRouteChildren: AuthRouteRouteChildren = {
   AuthAppLessonsLessonIdRoute: AuthAppLessonsLessonIdRoute,
   AuthAppPolarPortalRoute: AuthAppPolarPortalRoute,
   AuthAppPolarSubscriptionsRoute: AuthAppPolarSubscriptionsRoute,
+  AuthAppProfileEditRoute: AuthAppProfileEditRoute,
   AuthAppSubjectsSubjectIdRoute: AuthAppSubjectsSubjectIdRoute,
   AuthAppTestSummaryLessonIdRoute: AuthAppTestSummaryLessonIdRoute,
+  AuthAppProfileIndexRoute: AuthAppProfileIndexRoute,
   AuthAppSubjectsIndexRoute: AuthAppSubjectsIndexRoute,
   AuthAppPolarCheckoutSuccessRoute: AuthAppPolarCheckoutSuccessRoute,
 }
