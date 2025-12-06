@@ -131,22 +131,22 @@ export function TrueFalseView({ card, cardIndex, totalCards, onAnswer }: Learnin
             <div className="flex items-center gap-2">
               {questionState === 'correct'
                 ? (
-                  <>
-                    <CheckCircle2 className="h-5 w-5 text-success" />
-                    <span className="font-semibold text-success">Correct !</span>
-                  </>
-                )
+                    <>
+                      <CheckCircle2 className="h-5 w-5 text-success" />
+                      <span className="font-semibold text-success">Correct !</span>
+                    </>
+                  )
                 : (
-                  <>
-                    <XCircle className="h-5 w-5 text-error" />
-                    <span className="font-semibold text-error">
-                      Faux. La réponse était
-                      {' '}
-                      {isTrueCorrect ? 'Vrai' : 'Faux'}
-                      .
-                    </span>
-                  </>
-                )}
+                    <>
+                      <XCircle className="h-5 w-5 text-error" />
+                      <span className="font-semibold text-error">
+                        Faux. La réponse était
+                        {' '}
+                        {isTrueCorrect ? 'Vrai' : 'Faux'}
+                        .
+                      </span>
+                    </>
+                  )}
             </div>
             {card.explanation && (
               <div className="mt-2 text-sm text-muted-foreground px-7">

@@ -235,24 +235,24 @@ export function Quiz({ card, cardIndex, totalCards, questionType = 'multiple-cho
             <div className="flex items-center gap-2">
               {questionState === 'correct'
                 ? (
-                  <>
-                    <CheckCircle2 className="h-5 w-5 text-success" />
-                    <span className="font-semibold text-success">Vous maîtrisez le sujet !</span>
-                  </>
-                )
-                : questionState === 'learning'
-                  ? (
                     <>
-                      <span className="text-lg">📚</span>
-                      <span className="font-semibold text-warning">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
+                      <CheckCircle2 className="h-5 w-5 text-success" />
+                      <span className="font-semibold text-success">Vous maîtrisez le sujet !</span>
                     </>
                   )
+                : questionState === 'learning'
+                  ? (
+                      <>
+                        <span className="text-lg">📚</span>
+                        <span className="font-semibold text-warning">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
+                      </>
+                    )
                   : (
-                    <>
-                      <XCircle className="h-5 w-5 text-error" />
-                      <span className="font-semibold text-error">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
-                    </>
-                  )}
+                      <>
+                        <XCircle className="h-5 w-5 text-error" />
+                        <span className="font-semibold text-error">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
+                      </>
+                    )}
             </div>
 
             {showAnswer && (

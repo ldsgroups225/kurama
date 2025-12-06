@@ -55,10 +55,10 @@ function OnboardingPage() {
 
     // Invalidate profile-related queries to ensure fresh data
     await queryClient.invalidateQueries({
-      queryKey: ['profile-status', session.data?.user?.id]
+      queryKey: ['profile-status', session.data?.user?.id],
     })
     await queryClient.invalidateQueries({
-      queryKey: ['user-profile', session.data?.user?.id]
+      queryKey: ['user-profile', session.data?.user?.id],
     })
 
     // Redirect to main app after successful profile completion

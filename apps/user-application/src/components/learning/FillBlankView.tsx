@@ -105,20 +105,20 @@ export function FillBlankView({ card, cardIndex, totalCards, onAnswer }: Learnin
               <div className="flex items-center gap-2">
                 {questionState === 'correct'
                   ? (
-                    <>
-                      <CheckCircle2 className="h-5 w-5 text-success" />
-                      <span className="font-semibold text-success">Exactement !</span>
-                    </>
-                  )
+                      <>
+                        <CheckCircle2 className="h-5 w-5 text-success" />
+                        <span className="font-semibold text-success">Exactement !</span>
+                      </>
+                    )
                   : (
-                    <>
-                      <XCircle className="h-5 w-5 text-error" />
-                      <span className="font-semibold text-error">
-                        La réponse était :
-                        {card.correctAnswer}
-                      </span>
-                    </>
-                  )}
+                      <>
+                        <XCircle className="h-5 w-5 text-error" />
+                        <span className="font-semibold text-error">
+                          La réponse était :
+                          {card.correctAnswer}
+                        </span>
+                      </>
+                    )}
               </div>
               {card.explanation && (
                 <div className="text-sm text-muted-foreground px-7">

@@ -104,22 +104,22 @@ export function MarkdownRenderer({
             const isCodeBlock = /language-\w+/.test(codeClassName || '')
             return !isCodeBlock
               ? (
-                <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
-                  {children}
-                </code>
-              )
+                  <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+                    {children}
+                  </code>
+                )
               : (
-                <code
-                  className={cn(
-                    'block bg-muted rounded-lg overflow-x-auto text-sm font-mono',
-                    compact ? 'p-2' : 'p-4',
-                    codeClassName,
-                  )}
-                  {...props}
-                >
-                  {children}
-                </code>
-              )
+                  <code
+                    className={cn(
+                      'block bg-muted rounded-lg overflow-x-auto text-sm font-mono',
+                      compact ? 'p-2' : 'p-4',
+                      codeClassName,
+                    )}
+                    {...props}
+                  >
+                    {children}
+                  </code>
+                )
           },
           blockquote: ({ children }) => (
             <blockquote className={cn(
