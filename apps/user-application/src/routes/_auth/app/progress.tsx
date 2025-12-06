@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   Award,
@@ -12,12 +13,28 @@ import {
 import { useEffect } from 'react'
 import { AppHeader, BottomNav, StatsGrid } from '@/components/main'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getProgressStats } from '@/core/functions/progress'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { generateUUID } from '@/utils/generateUUID'
+
+function Skeleton({ className }: { className?: string }) {
+  return <div className={`animate-pulse rounded-md bg-muted ${className ?? ''}`} />
+}
 
 export const Route = createFileRoute('/_auth/app/progress')({
   component: ProgressPage,
 })
+
+// Icon mapping for achievements
+const iconMap: Record<string, typeof Award> = {
+  Award,
+  Flame,
+  Target,
+  TrendingUp,
+  Calendar,
+  Trophy,
+  BookOpen,
+}
 
 function ProgressPage() {
   // Track route load performance
@@ -26,50 +43,89 @@ function ProgressPage() {
     return endTracking
   }, [])
 
+  const { data, isLoading } = useQuery({
+    queryKey: ['progress-stats'],
+    queryFn: () => getProgressStats(),
+  })
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background pb-24">
+        <AppHeader title="Mes Progrès" showAvatar={false} />
+        <main className="mx-auto max-w-lg space-y-6 px-4 py-6">
+          <section>
+            <Skeleton className="mb-4 h-6 w-32" />
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map(i => (
+                <Skeleton key={i} className="h-24 rounded-xl" />
+              ))}
+            </div>
+          </section>
+          <section>
+            <Skeleton className="h-48 rounded-xl" />
+          </section>
+          <section>
+            <Skeleton className="mb-4 h-6 w-40" />
+            <div className="grid grid-cols-4 gap-3">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                <Skeleton key={i} className="h-24 rounded-xl" />
+              ))}
+            </div>
+          </section>
+        </main>
+        <BottomNav />
+      </div>
+    )
+  }
+
+  const cardsProgress = data?.totalCardsAvailable
+    ? Math.round((data.totalCardsStudied / data.totalCardsAvailable) * 100)
+    : 0
+
+  const streakProgress = data?.longestStreak
+    ? Math.round((data.currentStreak / data.longestStreak) * 100)
+    : 0
+
   const stats = [
     {
       icon: BookOpen,
       label: 'Total Cartes',
-      value: '1,247',
-      subValue: 'Sur 5,000',
+      value: data?.totalCardsStudied.toLocaleString() ?? '0',
+      subValue: `Sur ${data?.totalCardsAvailable.toLocaleString() ?? '0'}`,
       color: 'text-xp',
-      progress: 25,
+      progress: cardsProgress,
     },
     {
       icon: Trophy,
       label: 'Points',
-      value: '8,450',
-      subValue: 'Top 15%',
+      value: data?.totalXP.toLocaleString() ?? '0',
+      subValue: `Top ${100 - (data?.rankPercentage ?? 0)}%`,
       color: 'text-level',
-      progress: 85,
+      progress: Math.min((data?.totalXP ?? 0) / 100, 100),
     },
     {
       icon: Flame,
       label: 'Série',
-      value: '12 jours',
-      subValue: 'Record: 28',
+      value: `${data?.currentStreak ?? 0} jours`,
+      subValue: `Record: ${data?.longestStreak ?? 0}`,
       color: 'text-streak',
-      progress: 43,
+      progress: streakProgress,
     },
     {
       icon: Clock,
       label: 'Temps Total',
-      value: '24h',
+      value: `${data?.totalStudyTimeHours ?? 0}h`,
       subValue: 'Ce mois',
       color: 'text-success',
-      progress: 60,
+      progress: Math.min((data?.totalStudyTimeHours ?? 0) / 24 * 100, 100),
     },
   ]
 
-  const weeklyData = [
-    { day: 'L', value: 85 },
-    { day: 'M', value: 92 },
-    { day: 'M', value: 78 },
-    { day: 'J', value: 95 },
-    { day: 'V', value: 88 },
-    { day: 'S', value: 70 },
-    { day: 'D', value: 65 },
-  ]
+  // Calculate max value for weekly chart scaling
+  const maxWeeklyValue = Math.max(
+    ...((data?.weeklyActivity ?? []).map(d => d.cardsStudied)),
+    1,
+  )
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -90,28 +146,35 @@ function ProgressPage() {
             </CardHeader>
             <CardContent>
               <div className="flex h-32 items-end justify-between gap-2">
-                {weeklyData.map(data => (
-                  <div
-                    key={generateUUID()}
-                    className="flex flex-1 flex-col items-center gap-2"
-                  >
-                    <div className={`
-                      relative w-full overflow-hidden rounded-t-lg bg-muted
-                    `}
+                {(data?.weeklyActivity ?? []).map((dayData) => {
+                  const height = maxWeeklyValue > 0
+                    ? Math.max((dayData.cardsStudied / maxWeeklyValue) * 100, 4)
+                    : 4
+
+                  return (
+                    <div
+                      key={`${dayData.date}-${generateUUID()}`}
+                      className="flex flex-1 flex-col items-center gap-2"
                     >
-                      <div
-                        className={`
-                          w-full rounded-t-lg bg-primary transition-all
-                          duration-500
-                        `}
-                        style={{ height: `${data.value}px` }}
-                      />
+                      <div className="relative w-full overflow-hidden rounded-t-lg bg-muted h-24 flex items-end">
+                        <div
+                          className="w-full rounded-t-lg bg-primary transition-all duration-500"
+                          style={{ height: `${height}%` }}
+                        />
+                      </div>
+                      <div className="text-center">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {dayData.day}
+                        </span>
+                        {dayData.cardsStudied > 0 && (
+                          <div className="text-[10px] text-primary font-medium">
+                            {dayData.cardsStudied}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <span className="text-xs font-medium text-muted-foreground">
-                      {data.day}
-                    </span>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </CardContent>
           </Card>
@@ -121,53 +184,77 @@ function ProgressPage() {
         <section>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-bold text-foreground">Badges Débloqués</h2>
-            <span className="text-sm text-muted-foreground">5/20</span>
+            <span className="text-sm text-muted-foreground">
+              {data?.unlockedCount ?? 0}
+              /
+              {data?.totalAchievements ?? 0}
+            </span>
           </div>
 
           <div className="grid grid-cols-4 gap-3">
-            {[
-              { icon: Award, label: 'Débutant', unlocked: true, color: 'text-level' },
-              { icon: Flame, label: 'Série 7j', unlocked: true, color: 'text-streak' },
-              { icon: Target, label: '100 Cartes', unlocked: true, color: 'text-xp' },
-              { icon: TrendingUp, label: 'Progrès', unlocked: true, color: 'text-success' },
-              { icon: Calendar, label: 'Régulier', unlocked: true, color: 'text-epic' },
-              { icon: Trophy, label: 'Expert', unlocked: false, color: 'text-muted-foreground' },
-              { icon: BookOpen, label: 'Lecteur', unlocked: false, color: 'text-muted-foreground' },
-              { icon: Award, label: 'Champion', unlocked: false, color: 'text-muted-foreground' },
-            ].map((badge) => {
-              const Icon = badge.icon
+            {(data?.achievements ?? []).map((badge) => {
+              const Icon = iconMap[badge.icon] ?? Award
+              const colorClass = badge.unlocked
+                ? badge.icon === 'Flame'
+                  ? 'text-streak'
+                  : badge.icon === 'Target'
+                    ? 'text-xp'
+                    : badge.icon === 'TrendingUp'
+                      ? 'text-success'
+                      : badge.icon === 'Calendar'
+                        ? 'text-epic'
+                        : badge.icon === 'Trophy'
+                          ? 'text-level'
+                          : 'text-level'
+                : 'text-muted-foreground'
+
               return (
                 <div
-                  key={generateUUID()}
+                  key={badge.id}
                   className={`
                     flex flex-col items-center gap-2 rounded-xl p-3
-                    ${badge.unlocked
-                  ? `bg-muted`
-                  : `bg-muted/30`
-                }
+                    ${badge.unlocked ? 'bg-muted' : 'bg-muted/30'}
                   `}
+                  title={badge.description}
                 >
-                  <div className={`
-                    flex h-12 w-12 items-center justify-center rounded-full
-                    ${badge.unlocked
-                  ? `bg-background`
-                  : `bg-muted`
-                }
-                    ${badge.color}
-                  `}
+                  <div
+                    className={`
+                      flex h-12 w-12 items-center justify-center rounded-full
+                      ${badge.unlocked ? 'bg-background' : 'bg-muted'}
+                      ${colorClass}
+                    `}
                   >
                     <Icon className="h-6 w-6" />
                   </div>
-                  <span className={`
-                    text-center text-xs font-medium text-muted-foreground
-                  `}
-                  >
-                    {badge.label}
+                  <span className="text-center text-xs font-medium text-muted-foreground">
+                    {badge.name}
                   </span>
                 </div>
               )
             })}
           </div>
+        </section>
+
+        {/* Additional Stats */}
+        <section>
+          <Card>
+            <CardContent className="p-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">
+                    {data?.lessonsCompleted ?? 0}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Leçons maîtrisées</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">
+                    {data?.weeklyActivity?.reduce((acc, d) => acc + d.cardsStudied, 0) ?? 0}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Cartes cette semaine</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </section>
       </main>
 
