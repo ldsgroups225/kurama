@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 import { AppHeader } from '@/components/main'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { submitTestResult } from '@/core/functions/learning'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
 
@@ -22,6 +21,11 @@ interface SearchParams {
   incorrect?: number
   total?: number
   answers?: string // JSON stringified array of TestAnswer
+  xpEarned?: number
+  masteryCount?: number
+  isLessonCompleted?: string
+  nextLessonUnlocked?: string
+  nextLessonTitle?: string
 }
 
 export const Route = createFileRoute('/_auth/app/test-summary/$lessonId')({
@@ -32,13 +36,28 @@ export const Route = createFileRoute('/_auth/app/test-summary/$lessonId')({
       incorrect: Number(search.incorrect) || 0,
       total: Number(search.total) || 0,
       answers: (search.answers as string) || '[]',
+      xpEarned: search.xpEarned ? Number(search.xpEarned) : undefined,
+      masteryCount: search.masteryCount ? Number(search.masteryCount) : undefined,
+      isLessonCompleted: search.isLessonCompleted as string | undefined,
+      nextLessonUnlocked: search.nextLessonUnlocked as string | undefined,
+      nextLessonTitle: search.nextLessonTitle as string | undefined,
     }
   },
 })
 
 function TestSummaryPage() {
   const { lessonId } = useParams({ from: '/_auth/app/test-summary/$lessonId' })
-  const { correct, incorrect, total, answers: answersJson } = useSearch({
+  const {
+    correct,
+    incorrect,
+    total,
+    answers: answersJson,
+    xpEarned,
+    masteryCount: masteryCountParam,
+    isLessonCompleted: isLessonCompletedParam,
+    nextLessonUnlocked: nextLessonUnlockedParam,
+    nextLessonTitle: nextLessonTitleParam,
+  } = useSearch({
     from: '/_auth/app/test-summary/$lessonId',
   })
   const navigate = useNavigate()
@@ -53,44 +72,18 @@ function TestSummaryPage() {
   const answers: TestAnswer[] = JSON.parse(answersJson || '[]')
   const score = (total ?? 0) > 0 ? Math.round(((correct ?? 0) / (total ?? 1)) * 100) : 0
   const incorrectCount = incorrect ?? 0
+  const actualXpEarned = xpEarned ?? (correct ?? 0) * 10
 
-  // Mastery tracking state
-  const [masteryResult, setMasteryResult] = useState<{
-    masteryCount: number
-    masteryRequired: number
-    isCompleted: boolean
-    nextLessonUnlocked: boolean
-    nextLessonTitle: string | null
-  } | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  // Submit test result on mount
-  useEffect(() => {
-    const submitResult = async () => {
-      if (isSubmitting)
-        return
-      setIsSubmitting(true)
-
-      try {
-        const result = await submitTestResult({
-          data: {
-            lessonId: Number(lessonId),
-            correctCount: correct ?? 0,
-            totalCount: total ?? 1,
-          },
-        })
-        setMasteryResult(result)
+  // Mastery result from search params (passed from session page via updateSessionStats)
+  const masteryResult = masteryCountParam !== undefined
+    ? {
+        masteryCount: masteryCountParam,
+        masteryRequired: 2,
+        isCompleted: isLessonCompletedParam === 'true',
+        nextLessonUnlocked: nextLessonUnlockedParam === 'true',
+        nextLessonTitle: nextLessonTitleParam ?? null,
       }
-      catch (error) {
-        console.error('Failed to submit test result:', error)
-      }
-      finally {
-        setIsSubmitting(false)
-      }
-    }
-
-    submitResult()
-  }, [lessonId, correct, total, isSubmitting])
+    : null
 
   // Determine performance message
   let performanceMessage = ''
@@ -238,6 +231,30 @@ function TestSummaryPage() {
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* XP Earned Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.22, type: 'spring' }}
+        >
+          <Card className="overflow-hidden border-2 border-xp bg-gradient-xp-horizontal shadow-xl">
+            <CardContent className="px-6 py-6 text-center">
+              <motion.div
+                initial={{ scale: 1 }}
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="mb-1 text-4xl font-bold text-white"
+              >
+                +
+                {actualXpEarned}
+                {' '}
+                XP
+              </motion.div>
+              <div className="text-sm text-white/90">Points d'expérience gagnés 🎉</div>
             </CardContent>
           </Card>
         </motion.div>

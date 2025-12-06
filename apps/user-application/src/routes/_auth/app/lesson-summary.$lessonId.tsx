@@ -25,6 +25,9 @@ interface SearchParams {
   total?: number
   duration?: number
   mode?: string
+  xpEarned?: number
+  leveledUp?: string
+  newLevel?: number
 }
 
 export const Route = createFileRoute('/_auth/app/lesson-summary/$lessonId')({
@@ -36,16 +39,23 @@ export const Route = createFileRoute('/_auth/app/lesson-summary/$lessonId')({
       total: Number(search.total) || 0,
       duration: Number(search.duration) || 0,
       mode: (search.mode as string) || 'flashcards',
+      xpEarned: search.xpEarned ? Number(search.xpEarned) : undefined,
+      leveledUp: search.leveledUp as string | undefined,
+      newLevel: search.newLevel ? Number(search.newLevel) : undefined,
     }
   },
 })
 
 function SummaryPage() {
   const { lessonId } = useParams({ from: '/_auth/app/lesson-summary/$lessonId' })
-  const { correct, incorrect, total, duration, mode } = useSearch({
+  const { correct, incorrect, total, duration, mode, xpEarned, leveledUp, newLevel } = useSearch({
     from: '/_auth/app/lesson-summary/$lessonId',
   })
   const navigate = useNavigate()
+
+  // Calculate actual XP (use server-provided value or fallback to estimate)
+  const actualXpEarned = xpEarned ?? (correct ?? 0) * 10
+  const didLevelUp = leveledUp === 'true'
 
   // Offline support
   const { isOnline } = useOnlineStatus()
@@ -227,11 +237,25 @@ function SummaryPage() {
                 className="mb-2 text-5xl font-bold text-white"
               >
                 +
-                {(correct ?? 0) * 10}
+                {actualXpEarned}
                 {' '}
                 XP
               </motion.div>
               <div className="text-base text-white/90">Points d'expérience gagnés 🎉</div>
+              {didLevelUp && newLevel && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 }}
+                  className="mt-3 rounded-full bg-white/20 px-4 py-2 text-sm font-semibold text-white"
+                >
+                  🎉 Niveau
+                  {' '}
+                  {newLevel}
+                  {' '}
+                  atteint !
+                </motion.div>
+              )}
             </CardContent>
           </Card>
         </motion.div>

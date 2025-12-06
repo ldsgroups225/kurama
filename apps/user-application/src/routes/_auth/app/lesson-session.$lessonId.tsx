@@ -1,8 +1,10 @@
+import type { Reward } from '@/components/gamification'
 import type { TestSettings } from '@/components/learning/test-settings-sheet'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { Loader2, WifiOff } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { RewardAnimation } from '@/components/gamification'
 import { CardFactory } from '@/components/learning/CardFactory'
 import { QuizSettingsSheet } from '@/components/learning/quiz-settings-sheet'
 import { SessionControls } from '@/components/learning/session-controls'
@@ -19,6 +21,7 @@ import { useCardHeight } from '@/hooks/use-card-height'
 import { useCardSwipeAnimations } from '@/hooks/use-card-swipe-animations'
 import { useOnlineStatus } from '@/hooks/use-online-status'
 import { useSessionState } from '@/hooks/use-session-state'
+import { useStatsUpdate } from '@/hooks/use-stats-update'
 import { createSwipeHandlers } from '@/hooks/use-swipe-handler'
 import { useViewportHeight } from '@/hooks/use-viewport-height'
 import { db } from '@/lib/db'
@@ -66,20 +69,49 @@ function SessionPage() {
   const [testAnswers, setTestAnswers] = useState<TestAnswer[]>([])
   const [showTestLoading, setShowTestLoading] = useState(false)
 
-  // Reset mode-specific state when mode changes
-  useEffect(() => {
+  // Stats update and reward animation state
+  const [showReward, setShowReward] = useState(false)
+  const [currentReward, setCurrentReward] = useState<Reward | null>(null)
+
+  // Stats update hook with callbacks for level-up and achievements
+  const { updateStats } = useStatsUpdate({
+    onLevelUp: (newLevel) => {
+      setCurrentReward({
+        type: 'level_up',
+        title: `Niveau ${newLevel} !`,
+        description: 'Félicitations ! Tu as atteint un nouveau niveau !',
+        value: newLevel,
+      })
+      setShowReward(true)
+    },
+    onAchievementUnlocked: (achievements) => {
+      if (achievements.length > 0) {
+        // Show first achievement (can queue others)
+        setCurrentReward({
+          type: 'achievement',
+          title: 'Nouveau badge !',
+          description: `Tu as débloqué : ${achievements[0]}`,
+        })
+        setShowReward(true)
+      }
+    },
+  })
+
+  // Reset mode-specific state when mode changes (using ref to track previous mode)
+  const previousModeRef = useRef(mode)
+  if (previousModeRef.current !== mode) {
+    previousModeRef.current = mode
     // Reset quiz state
     setShowQuizSettings(mode === 'quiz')
     setHasStartedQuiz(false)
     setQuizMode(null)
-
     // Reset test state
     setShowTestSettings(mode === 'exam')
     setTestSettings(null)
     setHasStartedTest(false)
     setTestAnswers([])
     setShowTestLoading(false)
-  }, [mode])
+  }
 
   // Session state management
   const {
@@ -257,43 +289,16 @@ function SessionPage() {
       const incorrect = finalIncorrect ?? sessionStats.incorrect
       const totalCards = activeCards.length
 
-      // Queue XP and progress mutations if offline
-      if (!isOnline) {
-        const queueManager = getMutationQueueManager()
+      // Update stats via server function (handles offline queueing internally)
+      const result = await updateStats({
+        lessonId: Number(lessonId),
+        correctCount: correct,
+        totalCount: totalCards,
+        duration,
+        mode: mode as 'flashcards' | 'quiz' | 'exam',
+      })
 
-        // Queue XP update mutation
-        await queueManager.enqueue({
-          type: 'create',
-          endpoint: '/api/progress/xp',
-          payload: {
-            lessonId: Number(lessonId),
-            correct,
-            incorrect,
-            duration,
-            mode,
-          },
-          optimisticData: {
-            xpGained: correct * 10, // Assume 10 XP per correct answer
-          },
-          userId: 'current-user', // TODO: Get from auth context
-          dependencies: [],
-        })
-
-        // Queue progress update mutation
-        await queueManager.enqueue({
-          type: 'update',
-          endpoint: `/api/progress/lesson/${lessonId}`,
-          payload: {
-            completed: true,
-            score: totalCards > 0 ? (correct / totalCards) * 100 : 0,
-            duration,
-          },
-          optimisticData: null,
-          userId: 'current-user', // TODO: Get from auth context
-          dependencies: [],
-        })
-      }
-
+      // Navigate to summary with stats result
       navigate({
         to: '/app/lesson-summary/$lessonId',
         params: { lessonId },
@@ -303,10 +308,14 @@ function SessionPage() {
           total: totalCards,
           duration,
           mode,
+          // Pass XP earned for display
+          xpEarned: result?.xpEarned ?? correct * 10,
+          leveledUp: result?.leveledUp ? 'true' : undefined,
+          newLevel: result?.currentLevel,
         },
       })
     },
-    [navigate, lessonId, startTime, sessionStats, activeCards.length, mode, isOnline],
+    [navigate, lessonId, startTime, sessionStats, activeCards.length, mode, updateStats],
   )
 
   // Card interaction handlers
@@ -397,49 +406,8 @@ function SessionPage() {
     onDragEnd: () => setIsDragging(false),
   })
 
-  // Generate test questions based on settings
-  // Use useState to store shuffled questions (only generated once when test starts)
+  // Store test questions in state - generated in handleStartTest callback
   const [testQuestions, setTestQuestions] = useState<Array<typeof cards[0] & { questionType: 'multiple-choice' | 'written' | 'true-false' }>>([])
-
-  // Generate questions when test starts
-  useEffect(() => {
-    if (!testSettings || !hasStartedTest) {
-      setTestQuestions([])
-      return
-    }
-
-    const availableTypes: Array<'multiple-choice' | 'written' | 'true-false'> = []
-    if (testSettings.multipleChoice)
-      availableTypes.push('multiple-choice')
-    if (testSettings.trueFalse)
-      availableTypes.push('true-false')
-    if (testSettings.written)
-      availableTypes.push('written')
-
-    if (availableTypes.length === 0) {
-      setTestQuestions([])
-      return
-    }
-
-    // Fisher-Yates shuffle for proper randomization
-    const shuffled = [...cards]
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-        ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-    }
-    const selected = shuffled.slice(0, testSettings.questionCount)
-
-    // Assign random question types
-    const questions = selected.map((card) => {
-      const randomType = availableTypes[Math.floor(Math.random() * availableTypes.length)]
-      return {
-        ...card,
-        questionType: randomType,
-      }
-    })
-
-    setTestQuestions(questions)
-  }, [testSettings, hasStartedTest, cards])
 
   // Handle quiz mode start - MUST be before any conditional returns
   const handleStartQuiz = useCallback((selectedMode: 'memorize-all' | 'review-starred' | 'quick-review') => {
@@ -449,14 +417,43 @@ function SessionPage() {
     setCurrentCardIndex(0)
   }, [setCurrentCardIndex])
 
-  // Handle test mode start
+  // Handle test mode start - generates questions here to avoid impure render
   const handleStartTest = useCallback((settings: TestSettings) => {
+    // Generate test questions based on settings
+    const availableTypes: Array<'multiple-choice' | 'written' | 'true-false'> = []
+    if (settings.multipleChoice)
+      availableTypes.push('multiple-choice')
+    if (settings.trueFalse)
+      availableTypes.push('true-false')
+    if (settings.written)
+      availableTypes.push('written')
+
+    if (availableTypes.length > 0) {
+      // Fisher-Yates shuffle for proper randomization
+      const shuffled = [...cards]
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+          ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+      }
+      const selected = shuffled.slice(0, settings.questionCount)
+
+      // Assign random question types
+      const questions = selected.map((card) => {
+        const randomType = availableTypes[Math.floor(Math.random() * availableTypes.length)]
+        return {
+          ...card,
+          questionType: randomType,
+        }
+      })
+      setTestQuestions(questions)
+    }
+
     setTestSettings(settings)
     setHasStartedTest(true)
     setShowTestSettings(false)
     setTestAnswers([])
     setCurrentCardIndex(0)
-  }, [setCurrentCardIndex])
+  }, [cards, setCurrentCardIndex])
 
   // Handle test answer
   const handleTestAnswer = useCallback((isCorrect: boolean, userAnswer: string) => {
@@ -486,9 +483,19 @@ function SessionPage() {
       setShowTestLoading(true)
 
       // Navigate to summary after 2 seconds
-      setTimeout(() => {
+      setTimeout(async () => {
         const finalCorrect = isCorrect ? sessionStats.correct + 1 : sessionStats.correct
         const finalIncorrect = !isCorrect ? sessionStats.incorrect + 1 : sessionStats.incorrect
+        const duration = Math.floor((Date.now() - startTime) / 1000)
+
+        // Update stats via server function
+        const result = await updateStats({
+          lessonId: Number(lessonId),
+          correctCount: finalCorrect,
+          totalCount: testQuestions.length,
+          duration,
+          mode: 'exam',
+        })
 
         navigate({
           to: '/app/test-summary/$lessonId',
@@ -498,6 +505,11 @@ function SessionPage() {
             incorrect: finalIncorrect,
             total: testQuestions.length,
             answers: JSON.stringify([...testAnswers, newAnswer]),
+            xpEarned: result?.xpEarned,
+            masteryCount: result?.masteryCount,
+            isLessonCompleted: result?.isLessonCompleted ? 'true' : undefined,
+            nextLessonUnlocked: result?.nextLessonUnlocked ? 'true' : undefined,
+            nextLessonTitle: result?.nextLessonTitle ?? undefined,
           },
         })
       }, 2000)
@@ -505,7 +517,7 @@ function SessionPage() {
     else {
       setCurrentCardIndex(prev => prev + 1)
     }
-  }, [currentCardIndex, testQuestions, testSettings, sessionStats, navigate, lessonId, testAnswers, incrementStat, setCurrentCardIndex])
+  }, [currentCardIndex, testQuestions, testSettings, sessionStats, navigate, lessonId, testAnswers, incrementStat, setCurrentCardIndex, startTime, updateStats])
 
   // Show quiz/test settings based on mode - state is initialized correctly above
   // No need for useEffect since state is initialized with the correct value
@@ -721,6 +733,18 @@ function SessionPage() {
           totalCards={cards.length}
           onOpenChange={setShowTestSettings}
           onStartTest={handleStartTest}
+        />
+      )}
+
+      {/* Reward Animation for level-ups and achievements */}
+      {currentReward && (
+        <RewardAnimation
+          reward={currentReward}
+          show={showReward}
+          onClose={() => {
+            setShowReward(false)
+            setCurrentReward(null)
+          }}
         />
       )}
     </div>

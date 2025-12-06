@@ -1,6 +1,6 @@
-import { and, asc, eq, inArray, sql } from '@kurama/data-ops/database/drizzle-orm'
+import { and, asc, eq, inArray } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
-import { cards, lessons, subjects, userLessonMastery, userProfiles } from '@kurama/data-ops/drizzle/schema'
+import { cards, lessons, subjects, userLessonMastery } from '@kurama/data-ops/drizzle/schema'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
 
@@ -149,13 +149,7 @@ export const submitTestResult = createServerFn({ method: 'POST' })
     // Calculate percentage
     const percentage = Math.round((correctCount / totalCount) * 100)
     const isPassing = percentage >= 80
-    if (isPassing) {
-      // Award XP for passing the test (100 XP)
-      await db
-        .update(userProfiles)
-        .set({ xp: sql`${userProfiles.xp} + 100` })
-        .where(eq(userProfiles.userId, userId))
-    }
+    // Note: XP is now awarded via updateSessionStats in stats.ts for comprehensive tracking
 
     // Get or create mastery record
     const existingMastery = await db.query.userLessonMastery.findFirst({
