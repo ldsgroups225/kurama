@@ -1,6 +1,6 @@
 import type { Achievement } from '@/components/gamification'
 import { useQuery } from '@tanstack/react-query'
-import { createLazyFileRoute } from '@tanstack/react-router'
+import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   BookOpen,
   Brain,
@@ -22,6 +22,7 @@ import {
 } from '@/components/gamification'
 import { AppHeader, BottomNav, ChallengeCard, QuickActions, StatsGrid } from '@/components/main'
 import { Badge } from '@/components/ui/badge'
+import { getDailyChallengeStatus } from '@/core/functions/daily-challenge'
 import { getDashboardStats } from '@/core/functions/dashboard'
 import { getLeaderboard } from '@/core/functions/gamification'
 import { Rocket, Star, Trophy } from '@/lib/icons'
@@ -32,6 +33,8 @@ export const Route = createLazyFileRoute('/_auth/app/')({
 })
 
 function AppHome() {
+  const navigate = useNavigate()
+
   // Track route load performance
   useEffect(() => {
     const endTracking = trackRouteLoad('app-dashboard')
@@ -47,6 +50,12 @@ function AppHome() {
   const { data: leaderboardData } = useQuery({
     queryKey: ['leaderboard'],
     queryFn: () => getLeaderboard(),
+  })
+
+  // Fetch daily challenge status
+  const { data: dailyChallengeData, isLoading: isDailyChallengeLoading } = useQuery({
+    queryKey: ['daily-challenge-status'],
+    queryFn: () => getDailyChallengeStatus(),
   })
 
   // Mock data - Replace with real data from your backend
@@ -212,16 +221,31 @@ function AppHome() {
         <section>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-bold text-foreground">Défi du Jour</h2>
-            <Badge variant="secondary" className="gap-1">
-              <Clock className="h-3 w-3" />
-              23h 45m
-            </Badge>
+            {dailyChallengeData && !dailyChallengeData.isCompleted && (
+              <Badge variant="secondary" className="gap-1">
+                <Clock className="h-3 w-3" />
+                {Math.floor(dailyChallengeData.timeUntilReset / 3600)}
+                h
+                {Math.floor((dailyChallengeData.timeUntilReset % 3600) / 60)}
+                m
+              </Badge>
+            )}
           </div>
           <ChallengeCard
-            title="Révision Mathématiques"
-            description="Complétez 25 cartes de géométrie et algèbre"
-            duration="15-20 min"
+            title="Défi du Jour"
+            description={dailyChallengeData?.isCompleted
+              ? 'Revenez demain pour un nouveau défi'
+              : `Complétez ${dailyChallengeData?.totalCards ?? 10} cartes variées`}
+            duration={`${dailyChallengeData?.estimatedMinutes ?? 7} min`}
             icon={<GraduationCap className="h-6 w-6 text-primary" />}
+            onStart={() => navigate({ to: '/app/daily-challenge' })}
+            isLoading={isDailyChallengeLoading}
+            isCompleted={dailyChallengeData?.isCompleted}
+            isInProgress={dailyChallengeData?.isInProgress}
+            score={dailyChallengeData?.score}
+            xpEarned={dailyChallengeData?.xpEarned}
+            consecutiveDays={dailyChallengeData?.consecutiveDays}
+            timeUntilReset={dailyChallengeData?.timeUntilReset}
           />
         </section>
 

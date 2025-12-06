@@ -22,6 +22,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AuthAppProgressRouteImport } from './routes/_auth/app/progress'
 import { Route as AuthAppProfileRouteImport } from './routes/_auth/app/profile'
 import { Route as AuthAppGroupsRouteImport } from './routes/_auth/app/groups'
+import { Route as AuthAppDailyChallengeRouteImport } from './routes/_auth/app/daily-challenge'
 import { Route as AuthAppSubjectsIndexRouteImport } from './routes/_auth/app/subjects.index'
 import { Route as AuthAppTestSummaryLessonIdRouteImport } from './routes/_auth/app/test-summary.$lessonId'
 import { Route as AuthAppSubjectsSubjectIdRouteImport } from './routes/_auth/app/subjects.$subjectId'
@@ -98,6 +99,11 @@ const AuthAppGroupsRoute = AuthAppGroupsRouteImport.update({
   path: '/app/groups',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const AuthAppDailyChallengeRoute = AuthAppDailyChallengeRouteImport.update({
+  id: '/app/daily-challenge',
+  path: '/app/daily-challenge',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
 const AuthAppSubjectsIndexRoute = AuthAppSubjectsIndexRouteImport.update({
   id: '/app/subjects/',
   path: '/app/subjects/',
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/api/health': typeof ApiHealthRoute
   '/api/metrics': typeof ApiMetricsRoute
+  '/app/daily-challenge': typeof AuthAppDailyChallengeRoute
   '/app/groups': typeof AuthAppGroupsRoute
   '/app/profile': typeof AuthAppProfileRoute
   '/app/progress': typeof AuthAppProgressRoute
@@ -178,6 +185,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/api/health': typeof ApiHealthRoute
   '/api/metrics': typeof ApiMetricsRoute
+  '/app/daily-challenge': typeof AuthAppDailyChallengeRoute
   '/app/groups': typeof AuthAppGroupsRoute
   '/app/profile': typeof AuthAppProfileRoute
   '/app/progress': typeof AuthAppProgressRoute
@@ -203,6 +211,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/api/health': typeof ApiHealthRoute
   '/api/metrics': typeof ApiMetricsRoute
+  '/_auth/app/daily-challenge': typeof AuthAppDailyChallengeRoute
   '/_auth/app/groups': typeof AuthAppGroupsRoute
   '/_auth/app/profile': typeof AuthAppProfileRoute
   '/_auth/app/progress': typeof AuthAppProgressRoute
@@ -228,6 +237,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/api/health'
     | '/api/metrics'
+    | '/app/daily-challenge'
     | '/app/groups'
     | '/app/profile'
     | '/app/progress'
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/api/health'
     | '/api/metrics'
+    | '/app/daily-challenge'
     | '/app/groups'
     | '/app/profile'
     | '/app/progress'
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/api/health'
     | '/api/metrics'
+    | '/_auth/app/daily-challenge'
     | '/_auth/app/groups'
     | '/_auth/app/profile'
     | '/_auth/app/progress'
@@ -399,6 +411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAppGroupsRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_auth/app/daily-challenge': {
+      id: '/_auth/app/daily-challenge'
+      path: '/app/daily-challenge'
+      fullPath: '/app/daily-challenge'
+      preLoaderRoute: typeof AuthAppDailyChallengeRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
     '/_auth/app/subjects/': {
       id: '/_auth/app/subjects/'
       path: '/app/subjects'
@@ -466,6 +485,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthRouteRouteChildren {
+  AuthAppDailyChallengeRoute: typeof AuthAppDailyChallengeRoute
   AuthAppGroupsRoute: typeof AuthAppGroupsRoute
   AuthAppProfileRoute: typeof AuthAppProfileRoute
   AuthAppProgressRoute: typeof AuthAppProgressRoute
@@ -482,6 +502,7 @@ interface AuthRouteRouteChildren {
 }
 
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthAppDailyChallengeRoute: AuthAppDailyChallengeRoute,
   AuthAppGroupsRoute: AuthAppGroupsRoute,
   AuthAppProfileRoute: AuthAppProfileRoute,
   AuthAppProgressRoute: AuthAppProgressRoute,
