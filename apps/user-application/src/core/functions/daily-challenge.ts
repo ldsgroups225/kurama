@@ -315,10 +315,19 @@ export const startDailyChallenge = createServerFn({ method: 'POST' })
       return { sessionId: existingSession.id, resumed: true }
     }
 
-    // Create new session with a placeholder lessonId (0 for daily challenge)
+    // Get challenge cards to find a valid lessonId
+    const challengeCards = await generateChallengeCards(db, userId, todayDate)
+    if (challengeCards.length === 0) {
+      throw new Error('No cards available for daily challenge')
+    }
+
+    // Use the first card's lessonId as the session's lessonId
+    const firstLessonId = challengeCards[0]!.lessonId
+
+    // Create new session with a valid lessonId from the challenge cards
     const result = await db.insert(studySessions).values({
       userId,
-      lessonId: 0, // Special value for daily challenge
+      lessonId: firstLessonId,
       mode: 'daily_challenge',
       startedAt: new Date().toISOString(),
       cardsReviewed: 0,

@@ -1,25 +1,30 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Check, Clock, Flame, Loader2, Play, Trophy, X, Zap } from 'lucide-react'
+import { Check, Clock, Flame, Loader2, Play, Timer, Trophy, X, Zap } from 'lucide-react'
 import { motion } from 'motion/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { RewardAnimation } from '@/components/gamification'
+import { Test } from '@/components/learning/test'
+import { TestLoading } from '@/components/learning/test-loading'
 import { AppHeader } from '@/components/main'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import {
   completeDailyChallenge,
   getDailyChallengeStatus,
   startDailyChallenge,
 } from '@/core/functions/daily-challenge'
 import { trackRouteLoad } from '@/lib/performance-monitor'
-import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/_auth/app/daily-challenge')({
   component: DailyChallengePage,
 })
 
 type ChallengePhase = 'preview' | 'active' | 'completed'
+
+// Time limit in seconds (10 minutes)
+const TIME_LIMIT = 10 * 60
 
 function DailyChallengePage() {
   const navigate = useNavigate()
@@ -30,8 +35,10 @@ function DailyChallengePage() {
   const [correctCount, setCorrectCount] = useState(0)
   const [startTime, setStartTime] = useState<number>(0)
   const [sessionId, setSessionId] = useState<number | null>(null)
-  const [isFlipped, setIsFlipped] = useState(false)
   const [showReward, setShowReward] = useState(false)
+  const [showLoading, setShowLoading] = useState(false)
+  const [timeRemaining, setTimeRemaining] = useState(TIME_LIMIT)
+  const timeUpHandledRef = useRef(false)
 
   useEffect(() => {
     const endTracking = trackRouteLoad('daily-challenge')
@@ -48,6 +55,7 @@ function DailyChallengePage() {
     onSuccess: (result) => {
       setSessionId(result.sessionId ?? null)
       setStartTime(Date.now())
+      setTimeRemaining(TIME_LIMIT)
       setPhase('active')
       if (result.resumed && challengeStatus?.progressCount) {
         setCurrentCardIndex(challengeStatus.progressCount)
@@ -66,13 +74,115 @@ function DailyChallengePage() {
     },
   })
 
-  const cards = challengeStatus?.cards ?? []
-  const currentCard = cards[currentCardIndex]
+  const cards = useMemo(() => challengeStatus?.cards ?? [], [challengeStatus?.cards])
   const totalCards = cards.length
 
+  // Store generated test questions
+  const [testQuestions, setTestQuestions] = useState<Array<{
+    id: number
+    frontContent: string
+    backContent: string
+    cardType: string
+    difficulty: number
+    lessonId: number
+    questionType: 'multiple-choice' | 'true-false'
+    question?: string
+    options?: Array<{ id: string, text: string, isCorrect: boolean }>
+    correctAnswer?: string
+  }>>([])
+
+  const currentQuestion = testQuestions[currentCardIndex]
+
+  // Generate test questions (called on start)
+  const generateTestQuestions = useCallback(() => {
+    if (cards.length === 0)
+      return []
+
+    return cards.map((card, index) => {
+      const questionType: 'multiple-choice' | 'true-false' = index % 2 === 0 ? 'multiple-choice' : 'true-false'
+
+      if (questionType === 'multiple-choice') {
+        const correctAnswer = card.backContent
+        const otherCards = cards.filter((_, i) => i !== index)
+        const shuffledOthers = [...otherCards].sort((a, b) => {
+          const hashA = (a.id * 31 + index) % 1000
+          const hashB = (b.id * 31 + index) % 1000
+          return hashA - hashB
+        })
+        const wrongAnswers = shuffledOthers.slice(0, 3).map(c => c.backContent)
+
+        const options = [
+          { id: 'correct', text: correctAnswer, isCorrect: true },
+          ...wrongAnswers.map((text, i) => ({ id: `wrong-${i}`, text, isCorrect: false })),
+        ].sort((a, b) => {
+          const hashA = (a.id.charCodeAt(0) * 31 + index) % 1000
+          const hashB = (b.id.charCodeAt(0) * 31 + index) % 1000
+          return hashA - hashB
+        })
+
+        return { ...card, questionType: 'multiple-choice' as const, question: card.frontContent, options }
+      }
+      else {
+        const isTrue = index % 3 !== 0
+        const correctAnswer = card.backContent
+        let statement: string
+        if (isTrue) {
+          statement = `${card.frontContent} : ${correctAnswer}`
+        }
+        else {
+          const otherCard = cards.find((_, i) => i !== index)
+          const wrongAnswer = otherCard?.backContent || 'Réponse incorrecte'
+          statement = `${card.frontContent} : ${wrongAnswer}`
+        }
+        return { ...card, questionType: 'true-false' as const, frontContent: statement, correctAnswer: isTrue ? 'true' : 'false' }
+      }
+    })
+  }, [cards])
+
   const handleStart = useCallback(() => {
+    const questions = generateTestQuestions()
+    setTestQuestions(questions)
     startMutation.mutate()
-  }, [startMutation])
+  }, [startMutation, generateTestQuestions])
+
+  const handleTimeUp = useCallback(() => {
+    if (sessionId) {
+      setShowLoading(true)
+      setTimeout(() => {
+        completeMutation.mutate({ sessionId, correctCount, totalCount: totalCards, duration: TIME_LIMIT })
+        setPhase('completed')
+        setShowLoading(false)
+      }, 2000)
+    }
+  }, [sessionId, correctCount, totalCards, completeMutation])
+
+  // Timer countdown
+  useEffect(() => {
+    if (phase !== 'active')
+      return
+    const interval = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [phase])
+
+  // Handle time up
+  useEffect(() => {
+    if (timeRemaining === 0 && phase === 'active' && !timeUpHandledRef.current) {
+      timeUpHandledRef.current = true
+      const timeoutId = setTimeout(() => handleTimeUp(), 0)
+      return () => clearTimeout(timeoutId)
+    }
+    if (phase !== 'active') {
+      timeUpHandledRef.current = false
+    }
+  }, [timeRemaining, phase, handleTimeUp])
 
   const handleAnswer = useCallback((isCorrect: boolean) => {
     if (isCorrect) {
@@ -80,29 +190,32 @@ function DailyChallengePage() {
     }
 
     if (currentCardIndex === totalCards - 1) {
-      // Complete the challenge
       const duration = Math.floor((Date.now() - startTime) / 1000)
-      if (sessionId) {
-        completeMutation.mutate({
-          sessionId,
-          correctCount: isCorrect ? correctCount + 1 : correctCount,
-          totalCount: totalCards,
-          duration,
-        })
-      }
-      setPhase('completed')
+      setShowLoading(true)
+      setTimeout(() => {
+        if (sessionId) {
+          completeMutation.mutate({
+            sessionId,
+            correctCount: isCorrect ? correctCount + 1 : correctCount,
+            totalCount: totalCards,
+            duration,
+          })
+        }
+        setPhase('completed')
+        setShowLoading(false)
+      }, 2000)
     }
     else {
       setCurrentCardIndex(prev => prev + 1)
-      setIsFlipped(false)
     }
   }, [currentCardIndex, totalCards, startTime, sessionId, correctCount, completeMutation])
 
-  const handleFlip = useCallback(() => {
-    setIsFlipped(prev => !prev)
-  }, [])
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
-  // Format time until reset
   const formatTimeUntilReset = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
@@ -126,18 +239,13 @@ function DailyChallengePage() {
       <div className="min-h-screen bg-background">
         <AppHeader title="Défi du Jour" showAvatar={false} />
         <main className="mx-auto max-w-lg space-y-6 px-4 py-8">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="text-center"
-          >
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-center">
             <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-success">
               <Check className="h-12 w-12 text-white" />
             </div>
             <h2 className="mb-2 text-2xl font-bold">Défi Complété !</h2>
             <p className="text-muted-foreground">Revenez demain pour un nouveau défi</p>
           </motion.div>
-
           <Card className="border-2">
             <CardContent className="p-6 text-center">
               <div className="mb-4 text-4xl font-bold text-primary">
@@ -165,19 +273,13 @@ function DailyChallengePage() {
               )}
             </CardContent>
           </Card>
-
           <div className="text-center text-sm text-muted-foreground">
             <Clock className="mr-1 inline h-4 w-4" />
             Prochain défi dans
             {' '}
             {formatTimeUntilReset(challengeStatus.timeUntilReset)}
           </div>
-
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => navigate({ to: '/app' })}
-          >
+          <Button variant="outline" className="w-full" onClick={() => navigate({ to: '/app' })}>
             Retour à l'accueil
           </Button>
         </main>
@@ -191,11 +293,7 @@ function DailyChallengePage() {
       <div className="min-h-screen bg-background">
         <AppHeader title="Défi du Jour" showAvatar={false} />
         <main className="mx-auto max-w-lg space-y-6 px-4 py-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
             <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-level">
               <Trophy className="h-10 w-10 text-white" />
             </div>
@@ -204,23 +302,24 @@ function DailyChallengePage() {
               {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>
           </motion.div>
-
           <Card className="border-2 border-primary/20">
             <CardContent className="p-6">
-              <div className="grid grid-cols-2 gap-4 text-center">
+              <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <div className="text-3xl font-bold text-primary">{totalCards}</div>
-                  <div className="text-sm text-muted-foreground">Cartes</div>
+                  <div className="text-sm text-muted-foreground">Questions</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-primary">
-                    ~
-                    {challengeStatus?.estimatedMinutes}
-                  </div>
+                  <div className="text-3xl font-bold text-primary">10</div>
                   <div className="text-sm text-muted-foreground">Minutes</div>
                 </div>
+                <div>
+                  <div className="flex items-center justify-center text-3xl font-bold text-primary">
+                    <Timer className="h-6 w-6" />
+                  </div>
+                  <div className="text-sm text-muted-foreground">Chronométré</div>
+                </div>
               </div>
-
               <div className="mt-6 space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Zap className="h-4 w-4 text-xp" />
@@ -229,6 +328,10 @@ function DailyChallengePage() {
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Flame className="h-4 w-4 text-streak" />
                   <span>Bonus série : +25 XP</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Timer className="h-4 w-4 text-warning" />
+                  <span>Mode examen chronométré</span>
                 </div>
                 {challengeStatus?.consecutiveDays && challengeStatus.consecutiveDays > 0 && (
                   <div className="flex items-center gap-2 text-sm font-medium text-streak">
@@ -244,28 +347,11 @@ function DailyChallengePage() {
               </div>
             </CardContent>
           </Card>
-
-          <Button
-            size="lg"
-            className="w-full bg-gradient-level text-lg font-semibold"
-            onClick={handleStart}
-            disabled={startMutation.isPending}
-          >
-            {startMutation.isPending
-              ? (
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                )
-              : (
-                  <Play className="mr-2 h-5 w-5" />
-                )}
-            {challengeStatus?.isInProgress ? 'Reprendre' : 'Commencer'}
+          <Button size="lg" className="w-full bg-gradient-level text-lg font-semibold" onClick={handleStart} disabled={startMutation.isPending}>
+            {startMutation.isPending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Play className="mr-2 h-5 w-5" />}
+            {challengeStatus?.isInProgress ? 'Reprendre' : 'Commencer l\'examen'}
           </Button>
-
-          <Button
-            variant="ghost"
-            className="w-full"
-            onClick={() => navigate({ to: '/app' })}
-          >
+          <Button variant="ghost" className="w-full" onClick={() => navigate({ to: '/app' })}>
             Plus tard
           </Button>
         </main>
@@ -273,86 +359,48 @@ function DailyChallengePage() {
     )
   }
 
-  // Active phase - exam mode
-  if (phase === 'active' && currentCard) {
+  // Show loading screen
+  if (showLoading) {
+    return <TestLoading />
+  }
+
+  // Active phase - timed exam mode
+  if (phase === 'active' && currentQuestion) {
     const progress = ((currentCardIndex + 1) / totalCards) * 100
+    const timeProgress = (timeRemaining / TIME_LIMIT) * 100
+    const isLowTime = timeRemaining < 60
 
     return (
       <div className="min-h-screen bg-background">
-        <AppHeader title={`${currentCardIndex + 1}/${totalCards}`} showAvatar={false} />
-
+        <AppHeader title={`Question ${currentCardIndex + 1}/${totalCards}`} showAvatar={false} />
         <main className="mx-auto max-w-lg px-4 py-6">
-          {/* Progress bar */}
-          <div className="mb-6 h-2 w-full overflow-hidden rounded-full bg-muted">
-            <motion.div
-              className="h-full bg-gradient-level"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.3 }}
-            />
+          <div className="mb-6 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className={`flex items-center gap-2 text-lg font-bold ${isLowTime ? 'text-error animate-pulse' : 'text-foreground'}`}>
+                <Timer className="h-5 w-5" />
+                {formatTime(timeRemaining)}
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Check className="h-4 w-4 text-success" />
+                {correctCount}
+                {' '}
+                /
+                {currentCardIndex}
+              </div>
+            </div>
+            <Progress value={timeProgress} className={`h-2 ${isLowTime ? '[&>div]:bg-error' : '[&>div]:bg-primary'}`} />
+            <Progress value={progress} className="h-1" />
           </div>
-
-          {/* Card */}
-          <div className="perspective-1000 mb-6">
-            <motion.div
-              className="relative h-64 cursor-pointer"
-              onClick={handleFlip}
-              animate={{ rotateY: isFlipped ? 180 : 0 }}
-              transition={{ duration: 0.6 }}
-              style={{ transformStyle: 'preserve-3d' }}
-            >
-              {/* Front */}
-              <Card
-                className={cn(
-                  'absolute inset-0 flex items-center justify-center border-2 p-6',
-                  isFlipped && 'invisible',
-                )}
-                style={{ backfaceVisibility: 'hidden' }}
-              >
-                <CardContent className="text-center">
-                  <p className="text-lg font-medium">{currentCard.frontContent}</p>
-                  <p className="mt-4 text-sm text-muted-foreground">Touchez pour retourner</p>
-                </CardContent>
-              </Card>
-
-              {/* Back */}
-              <Card
-                className="absolute inset-0 flex items-center justify-center border-2 p-6"
-                style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
-              >
-                <CardContent className="text-center">
-                  <p className="text-lg font-medium">{currentCard.backContent}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-
-          {/* Answer buttons */}
-          {isFlipped && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-2 gap-4"
-            >
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-2 border-error text-error hover:bg-error hover:text-white"
-                onClick={() => handleAnswer(false)}
-              >
-                <X className="mr-2 h-5 w-5" />
-                Incorrect
-              </Button>
-              <Button
-                size="lg"
-                className="bg-gradient-success"
-                onClick={() => handleAnswer(true)}
-              >
-                <Check className="mr-2 h-5 w-5" />
-                Correct
-              </Button>
-            </motion.div>
-          )}
+          <Test
+            key={currentCardIndex}
+            card={currentQuestion}
+            cardIndex={currentCardIndex}
+            totalCards={totalCards}
+            questionType={currentQuestion.questionType}
+            answerWith="definition"
+            cardSide="term"
+            onAnswer={handleAnswer}
+          />
         </main>
       </div>
     )
@@ -370,17 +418,12 @@ function DailyChallengePage() {
       <div className="min-h-screen bg-background">
         <AppHeader title="Résultats" showAvatar={false} />
         <main className="mx-auto max-w-lg space-y-6 px-4 py-8">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="text-center"
-          >
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-center">
             <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-level">
               <Trophy className="h-12 w-12 text-white" />
             </div>
             <h2 className="mb-2 text-2xl font-bold">Défi Terminé !</h2>
           </motion.div>
-
           <Card className="overflow-hidden border-2">
             <CardContent className="p-0">
               <div className="bg-gradient-level p-6 text-center text-white">
@@ -410,7 +453,6 @@ function DailyChallengePage() {
               </div>
             </CardContent>
           </Card>
-
           <Card className="border-2 border-xp bg-gradient-xp-horizontal">
             <CardContent className="p-6 text-center text-white">
               <div className="mb-2 text-4xl font-bold">
@@ -443,25 +485,14 @@ function DailyChallengePage() {
               </div>
             </CardContent>
           </Card>
-
-          <Button
-            size="lg"
-            className="w-full"
-            onClick={() => navigate({ to: '/app' })}
-          >
+          <Button size="lg" className="w-full" onClick={() => navigate({ to: '/app' })}>
             Retour à l'accueil
           </Button>
         </main>
-
         {showReward && completeMutation.data && (
           <RewardAnimation
             show={showReward}
-            reward={{
-              type: 'xp',
-              title: 'Défi Complété !',
-              description: `Vous avez gagné ${completeMutation.data.xpEarned} XP`,
-              value: completeMutation.data.xpEarned,
-            }}
+            reward={{ type: 'xp', title: 'Défi Complété !', description: `Vous avez gagné ${completeMutation.data.xpEarned} XP`, value: completeMutation.data.xpEarned }}
             onClose={() => setShowReward(false)}
           />
         )}
