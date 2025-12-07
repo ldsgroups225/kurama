@@ -7,7 +7,7 @@
 import { config } from "dotenv";
 import { resolve } from "path";
 
-config({ path: resolve(__dirname, "../../.env") });
+config({ path: resolve(__dirname, "../../.env.development") });
 
 import { initDatabase } from "../database/setup";
 import { lessons, cards } from "@/drizzle/schema";

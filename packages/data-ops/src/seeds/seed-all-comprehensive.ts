@@ -7,7 +7,7 @@
 import { config } from "dotenv";
 import { resolve } from "path";
 
-config({ path: resolve(__dirname, "../../.env") });
+config({ path: resolve(__dirname, "../../.env.development") });
 
 // Import all seed functions
 import { seedDatabase } from "./seed-db";

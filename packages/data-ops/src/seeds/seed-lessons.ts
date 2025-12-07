@@ -8,7 +8,7 @@ import { resolve } from "path";
 import { seedLesson } from "./utils";
 
 // Load environment variables
-config({ path: resolve(__dirname, "../../.env") });
+config({ path: resolve(__dirname, "../../.env.development") });
 
 import { initDatabase } from "../database/setup";
 

@@ -7,7 +7,7 @@ import { config } from "dotenv";
 import { resolve } from "path";
 
 // Load environment variables from .env file
-config({ path: resolve(__dirname, "../../.env") });
+config({ path: resolve(__dirname, "../../.env.development") });
 
 import { initDatabase } from "../database/setup";
 import { seedLearningStyles } from "./seed-learning-styles";
