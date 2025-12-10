@@ -40,7 +40,7 @@ function LandingPage() {
     if (!session.isPending) {
       syncSessionCache(session)
     }
-  }, [session.isPending, session.data])
+  }, [session])
 
   // Redirect authenticated users to app
   useEffect(() => {

@@ -34,7 +34,7 @@ function RouteComponent() {
     if (!session.isPending) {
       syncSessionCache(session)
     }
-  }, [session.isPending, session.data])
+  }, [session])
 
   // Enable auth token persistence
   useAuthPersistence()

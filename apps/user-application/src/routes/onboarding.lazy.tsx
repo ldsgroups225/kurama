@@ -45,7 +45,7 @@ function OnboardingPage() {
     if (!session.isPending) {
       syncSessionCache(session)
     }
-  }, [session.isPending, session.data])
+  }, [session])
 
   // Show loading state while checking auth to prevent flash
   // If we have a cached session, keep loading until Better Auth confirms
