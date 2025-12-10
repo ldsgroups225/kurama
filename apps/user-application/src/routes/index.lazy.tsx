@@ -3,7 +3,8 @@ import { useAtom } from 'jotai'
 import { Suspense, useEffect, useState } from 'react'
 import { FormSkeleton, PageSkeleton } from '@/components/skeletons'
 import { hasCompletedOnboardingAtom } from '@/lib/atoms'
-import { useSession } from '@/lib/auth-client'
+import { authClient, syncSessionCache } from '@/lib/auth-client'
+import { hasCachedAuthenticatedSession } from '@/lib/auth-session-cache'
 import { createLazyComponent } from '@/lib/lazy-helpers'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 
@@ -21,8 +22,11 @@ function LandingPage() {
     hasCompletedOnboardingAtom,
   )
   const [showOnboarding, setShowOnboarding] = useState(false)
-  const { data: session } = useSession()
+  const session = authClient.useSession()
   const navigate = useNavigate()
+
+  // Check if we have a cached authenticated session for instant redirect
+  const [hasCachedSession] = useState(() => hasCachedAuthenticatedSession())
 
   // Track route load performance
   useEffect(() => {
@@ -30,12 +34,34 @@ function LandingPage() {
     return endTracking
   }, [])
 
+  // Sync session state to cache whenever it changes
+  useEffect(() => {
+    if (!session.isPending) {
+      syncSessionCache(session)
+    }
+  }, [session.isPending, session.data])
+
   // Redirect authenticated users to app
   useEffect(() => {
-    if (session) {
+    if (session.data) {
       navigate({ to: '/app' })
     }
-  }, [session, navigate])
+  }, [session.data, navigate])
+
+  // Show loading state while checking auth to prevent flash
+  // Key insight: if we have a cached session, keep showing loading until Better Auth
+  // confirms the session status (prevents auth screen flash on reload)
+  const isCheckingAuth = session.isPending
+  const hasConfirmedSession = !session.isPending && session.data
+  const hasCachedButPending = hasCachedSession && session.isPending
+
+  if (isCheckingAuth || hasCachedButPending || hasConfirmedSession) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+      </div>
+    )
+  }
 
   // Show welcome screen if first time user
   if (!hasCompletedOnboarding && !showOnboarding) {

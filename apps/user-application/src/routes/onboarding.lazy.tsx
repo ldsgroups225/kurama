@@ -4,11 +4,13 @@ import { useQueryClient } from '@tanstack/react-query'
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
 import { useSetAtom } from 'jotai'
 import { useEffect, useState } from 'react'
+import { GoogleLogin } from '@/components/auth/google-login'
 import { ParentProfileForm } from '@/components/onboarding/parent-profile-form'
 import { StudentProfileForm } from '@/components/onboarding/student-profile-form'
 import { UserTypeSelection } from '@/components/onboarding/user-type-selection'
 import { hasCompletedOnboardingAtom, userProfileAtom } from '@/lib/atoms'
-import { authClient } from '@/lib/auth-client'
+import { authClient, syncSessionCache } from '@/lib/auth-client'
+import { hasCachedAuthenticatedSession } from '@/lib/auth-session-cache'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 
 export const Route = createLazyFileRoute('/onboarding')({
@@ -28,11 +30,41 @@ function OnboardingPage() {
     null,
   )
 
+  // Check if we have a cached authenticated session
+  const [hasCachedSession] = useState(() => hasCachedAuthenticatedSession())
+
   // Track route load performance
   useEffect(() => {
     const endTracking = trackRouteLoad('onboarding')
     return endTracking
   }, [])
+
+  // Sync session state to cache whenever it changes
+  useEffect(() => {
+    if (!session.isPending) {
+      syncSessionCache(session)
+    }
+  }, [session.isPending, session.data])
+
+  // Show loading state while checking auth to prevent flash
+  // If we have a cached session, keep loading until Better Auth confirms
+  if (session.isPending || (hasCachedSession && session.isPending)) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+      </div>
+    )
+  }
+
+  // Not authenticated - show login (only if no cached session or session confirmed as null)
+  if (!session.data && !hasCachedSession) {
+    return <GoogleLogin />
+  }
+
+  // Edge case: cached session but Better Auth says no session - show login
+  if (!session.data && hasCachedSession && !session.isPending) {
+    return <GoogleLogin />
+  }
 
   const handleUserTypeSelect = (userType: UserType) => {
     setSelectedUserType(userType)

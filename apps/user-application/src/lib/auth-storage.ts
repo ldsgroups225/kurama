@@ -1,3 +1,4 @@
+import { clearCachedSessionState } from './auth-session-cache'
 import { db } from './db'
 
 /**
@@ -248,6 +249,7 @@ export async function clearAuthState(userId: string): Promise<void> {
  * - IndexedDB: authState, mutationQueue (user's pending operations)
  * - Jotai atoms: userProfile, onboarding status (via RESET)
  * - Memory: session encryption keys
+ * - Session cache: Cached auth state for instant UI decisions
  *
  * PRESERVES (app-level data):
  * - queryCache: Curriculum data, subjects, lessons (not user-specific)
@@ -257,6 +259,9 @@ export async function clearAuthState(userId: string): Promise<void> {
  */
 export async function clearUserAuthData(): Promise<void> {
   try {
+    // Clear session cache immediately for instant UI feedback
+    clearCachedSessionState()
+
     // Clear user-specific IndexedDB data
     await Promise.all([
       db.authState.clear(), // Auth tokens
