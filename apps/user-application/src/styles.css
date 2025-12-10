@@ -256,6 +256,7 @@
 }
 
 @layer base {
+
   /* NATIVE APP GLOBAL RESET */
   :root {
     /* App-like sizing */
@@ -341,6 +342,7 @@
 }
 
 @layer utilities {
+
   /* XP System Gradients */
   .bg-gradient-xp {
     background: linear-gradient(to bottom right, var(--xp-from), var(--xp-to));
@@ -567,6 +569,60 @@
 
   .bg-subject-philosophy {
     background-color: oklch(0.97 0.03 330);
+  }
+
+  /* SVT - Sciences de la Vie et de la Terre (Green/Nature) */
+  .text-subject-svt {
+    color: var(--success-to);
+  }
+
+  .bg-subject-svt {
+    background-color: var(--success-bg);
+  }
+
+  /* ECM - Éducation Civique et Morale (Blue/Justice) */
+  .text-subject-ecm {
+    color: var(--info-to);
+  }
+
+  .bg-subject-ecm {
+    background-color: var(--info-bg);
+  }
+
+  /* Espagnol (Warm Orange) */
+  .text-subject-spanish {
+    color: oklch(0.65 0.2 45);
+  }
+
+  .bg-subject-spanish {
+    background-color: oklch(0.97 0.03 45);
+  }
+
+  /* Allemand (Dark Blue) */
+  .text-subject-german {
+    color: oklch(0.45 0.15 250);
+  }
+
+  .bg-subject-german {
+    background-color: oklch(0.95 0.02 250);
+  }
+
+  /* Économie (Green/Growth) */
+  .text-subject-economics {
+    color: var(--streak-to);
+  }
+
+  .bg-subject-economics {
+    background-color: var(--streak-bg);
+  }
+
+  /* Comptabilité (Teal/Finance) */
+  .text-subject-accounting {
+    color: oklch(0.55 0.15 195);
+  }
+
+  .bg-subject-accounting {
+    background-color: oklch(0.95 0.02 195);
   }
 }
 
