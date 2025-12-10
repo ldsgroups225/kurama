@@ -19,7 +19,7 @@ export function OfflineBanner() {
 
     // Transition from online to offline
     if (wasOnline && !isOnline) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks-extra/no-direct-set-state-in-use-effect
+      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
       setBannerState('offline')
     }
     // Transition from offline to online

@@ -17,11 +17,13 @@ export interface CachedSessionState {
  * Returns null if cache is expired or invalid
  */
 export function getCachedSessionState(): CachedSessionState | null {
-  if (typeof window === 'undefined') return null
+  if (typeof window === 'undefined')
+    return null
 
   try {
     const cached = localStorage.getItem(SESSION_CACHE_KEY)
-    if (!cached) return null
+    if (!cached)
+      return null
 
     const state: CachedSessionState = JSON.parse(cached)
 
@@ -32,7 +34,8 @@ export function getCachedSessionState(): CachedSessionState | null {
     }
 
     return state
-  } catch {
+  }
+  catch {
     clearCachedSessionState()
     return null
   }
@@ -42,7 +45,8 @@ export function getCachedSessionState(): CachedSessionState | null {
  * Cache session state in localStorage
  */
 export function setCachedSessionState(isAuthenticated: boolean, userId: string | null): void {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined')
+    return
 
   try {
     const state: CachedSessionState = {
@@ -51,7 +55,8 @@ export function setCachedSessionState(isAuthenticated: boolean, userId: string |
       timestamp: Date.now(),
     }
     localStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(state))
-  } catch {
+  }
+  catch {
     // Silently fail - localStorage might be full or disabled
   }
 }
@@ -60,11 +65,13 @@ export function setCachedSessionState(isAuthenticated: boolean, userId: string |
  * Clear cached session state
  */
 export function clearCachedSessionState(): void {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined')
+    return
 
   try {
     localStorage.removeItem(SESSION_CACHE_KEY)
-  } catch {
+  }
+  catch {
     // Silently fail
   }
 }

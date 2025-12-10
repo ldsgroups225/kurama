@@ -125,21 +125,21 @@ export function ChallengeCard({
         >
           {isLoading
             ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Chargement...
-              </>
-            )
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Chargement...
+                </>
+              )
             : (
-              <>
-                {isInProgress ? 'Reprendre' : 'Commencer'}
-                <ArrowRight className={`
+                <>
+                  {isInProgress ? 'Reprendre' : 'Commencer'}
+                  <ArrowRight className={`
                 ml-2 h-4 w-4 transition-transform
                 group-hover:translate-x-1
               `}
-                />
-              </>
-            )}
+                  />
+                </>
+              )}
         </Button>
       </CardContent>
     </Card>

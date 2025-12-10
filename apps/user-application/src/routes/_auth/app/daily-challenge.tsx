@@ -388,11 +388,11 @@ function DailyChallengePage() {
           >
             {startMutation.isPending
               ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              )
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                )
               : (
-                <Play className="mr-2 h-5 w-5" />
-              )}
+                  <Play className="mr-2 h-5 w-5" />
+                )}
             {challengeStatus?.isInProgress ? 'Reprendre' : 'Commencer l\'examen'}
           </Button>
           <Button variant="ghost" className="w-full" onClick={() => navigate({ to: '/app' })}>

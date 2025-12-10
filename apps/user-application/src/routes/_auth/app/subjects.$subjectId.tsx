@@ -197,18 +197,18 @@ function LessonsPage() {
             // Wrap in Link only if not locked
             return isLocked
               ? (
-                <div key={lesson.id}>{LessonCard}</div>
-              )
+                  <div key={lesson.id}>{LessonCard}</div>
+                )
               : (
-                <Link
-                  key={lesson.id}
-                  to="/app/lessons/$lessonId"
-                  params={{ lessonId: String(lesson.id) }}
-                  aria-label={`Leçon ${index + 1}: ${lesson.title}`}
-                >
-                  {LessonCard}
-                </Link>
-              )
+                  <Link
+                    key={lesson.id}
+                    to="/app/lessons/$lessonId"
+                    params={{ lessonId: String(lesson.id) }}
+                    aria-label={`Leçon ${index + 1}: ${lesson.title}`}
+                  >
+                    {LessonCard}
+                  </Link>
+                )
           })}
         </div>
       </main>

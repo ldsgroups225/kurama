@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Flame, Trophy } from '@/lib/icons'
 import { cn } from '@/lib/utils'
+import { generateUUID } from '@/utils/generateUUID'
 
 interface StreakDay {
   date: Date
@@ -110,9 +111,9 @@ export function StreakCalendar({
         <div className="space-y-3">
           {/* Week day labels */}
           <div className="grid grid-cols-7 gap-2">
-            {weekDays.map((day, index) => (
+            {weekDays.map(day => (
               <div
-                key={`weekday-${index}`}
+                key={`weekday-${generateUUID()}`}
                 className="text-center text-xs font-medium text-muted-foreground"
               >
                 {day}
@@ -121,15 +122,15 @@ export function StreakCalendar({
           </div>
 
           {/* Week rows: top = last week, bottom = current week */}
-          {weekGrids.map((week, weekIndex) => (
-            <div key={`week-${weekIndex}`} className="grid grid-cols-7 gap-2">
-              {week.map((day, dayIndex) => {
+          {weekGrids.map(week => (
+            <div key={`week-${generateUUID()}`} className="grid grid-cols-7 gap-2">
+              {week.map((day) => {
                 const isToday = day?.date.toDateString() === new Date().toDateString()
                 const isCompleted = day?.completed ?? false
 
                 return (
                   <div
-                    key={`day-${weekIndex}-${dayIndex}`}
+                    key={`day-${generateUUID()}-${generateUUID()}`}
                     className={cn(
                       'flex aspect-square items-center justify-center rounded-lg transition-all',
                       isCompleted

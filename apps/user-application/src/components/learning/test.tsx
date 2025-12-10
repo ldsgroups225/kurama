@@ -48,7 +48,6 @@ export function Test({
 
     // Fisher-Yates shuffle for proper randomization
     for (let i = opts.length - 1; i > 0; i--) {
-      // eslint-disable-next-line react-hooks/purity
       const j = Math.floor(Math.random() * (i + 1))
         ;[opts[i], opts[j]] = [opts[j], opts[i]]
     }

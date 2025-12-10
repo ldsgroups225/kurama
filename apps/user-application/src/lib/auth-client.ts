@@ -17,7 +17,8 @@ export const { useSession } = authClient
 export function syncSessionCache(session: { data: { user?: { id: string } } | null }): void {
   if (session.data?.user) {
     setCachedSessionState(true, session.data.user.id)
-  } else if (session.data === null) {
+  }
+  else if (session.data === null) {
     // Only clear when we're certain there's no session (not during loading)
     clearCachedSessionState()
   }

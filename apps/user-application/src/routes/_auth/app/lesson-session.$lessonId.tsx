@@ -199,14 +199,12 @@ function SessionPage() {
     // Fisher-Yates shuffle for proper randomization
     const shuffled = [...cards]
     for (let i = shuffled.length - 1; i > 0; i--) {
-      // eslint-disable-next-line react-hooks/purity
       const j = Math.floor(Math.random() * (i + 1))
         ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
     }
 
     // Generate quiz questions with options from flashcard data
     return shuffled.map((card, index) => {
-      // eslint-disable-next-line react-hooks/purity
       const questionType = Math.random() > 0.5 ? 'multichoice' : 'true_false'
 
       if (questionType === 'multichoice') {
@@ -228,7 +226,6 @@ function SessionPage() {
 
         // Shuffle options
         for (let i = allOptions.length - 1; i > 0; i--) {
-          // eslint-disable-next-line react-hooks/purity
           const j = Math.floor(Math.random() * (i + 1))
           const temp = allOptions[i]
           allOptions[i] = allOptions[j]!
@@ -244,7 +241,7 @@ function SessionPage() {
       }
       else {
         // True/False question - randomly decide if statement is true or false
-        // eslint-disable-next-line react-hooks/purity
+
         const isTrue = Math.random() > 0.5
         const correctAnswer = card.backContent || card.back
 
