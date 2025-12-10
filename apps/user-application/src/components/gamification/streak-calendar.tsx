@@ -2,7 +2,6 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Flame, Trophy } from '@/lib/icons'
 import { cn } from '@/lib/utils'
-import { generateUUID } from '@/utils/generateUUID'
 
 interface StreakDay {
   date: Date
@@ -17,6 +16,61 @@ interface StreakCalendarProps {
   className?: string
 }
 
+/**
+ * Get the day of week index (0 = Monday, 6 = Sunday)
+ * JavaScript's getDay() returns 0 for Sunday, so we convert it
+ */
+function getDayIndex(date: Date): number {
+  const jsDay = date.getDay()
+  return jsDay === 0 ? 6 : jsDay - 1
+}
+
+/**
+ * Build a 2-week grid where:
+ * - Top row = last week (Mon-Sun)
+ * - Bottom row = current week (Mon-Sun)
+ * Each cell is either a StreakDay or null (empty placeholder)
+ */
+function buildWeekGrids(streakHistory: StreakDay[]): (StreakDay | null)[][] {
+  const today = new Date()
+  const todayDayIndex = getDayIndex(today)
+
+  // Calculate the start of current week (Monday)
+  const currentWeekStart = new Date(today)
+  currentWeekStart.setDate(today.getDate() - todayDayIndex)
+  currentWeekStart.setHours(0, 0, 0, 0)
+
+  // Calculate the start of last week (Monday)
+  const lastWeekStart = new Date(currentWeekStart)
+  lastWeekStart.setDate(currentWeekStart.getDate() - 7)
+
+  // Initialize both weeks with nulls
+  const lastWeek: (StreakDay | null)[] = Array.from({ length: 7 }, () => null)
+  const currentWeek: (StreakDay | null)[] = Array.from({ length: 7 }, () => null)
+
+  // Place each streak day in the correct position
+  for (const day of streakHistory) {
+    const dayDate = new Date(day.date)
+    dayDate.setHours(0, 0, 0, 0)
+    const dayIndex = getDayIndex(dayDate)
+
+    // Check if day belongs to last week
+    const lastWeekEnd = new Date(lastWeekStart)
+    lastWeekEnd.setDate(lastWeekStart.getDate() + 6)
+
+    if (dayDate >= lastWeekStart && dayDate <= lastWeekEnd) {
+      lastWeek[dayIndex] = day
+    }
+    // Check if day belongs to current week
+    else if (dayDate >= currentWeekStart) {
+      currentWeek[dayIndex] = day
+    }
+  }
+
+  // Return: top row = last week, bottom row = current week
+  return [lastWeek, currentWeek]
+}
+
 export function StreakCalendar({
   currentStreak,
   longestStreak,
@@ -24,9 +78,7 @@ export function StreakCalendar({
   className,
 }: StreakCalendarProps) {
   const weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
-
-  // Get last 14 days for display
-  const displayDays = streakHistory.slice(-14)
+  const weekGrids = buildWeekGrids(streakHistory)
 
   return (
     <Card className={cn('overflow-hidden py-0', className)}>
@@ -34,11 +86,7 @@ export function StreakCalendar({
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={`
-              bg-gradient-streak flex h-12 w-12 items-center justify-center
-              rounded-full shadow-lg
-            `}
-            >
+            <div className="bg-gradient-streak flex h-12 w-12 items-center justify-center rounded-full shadow-lg">
               <Flame className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -62,59 +110,46 @@ export function StreakCalendar({
         <div className="space-y-3">
           {/* Week day labels */}
           <div className="grid grid-cols-7 gap-2">
-            {weekDays.map(day => (
+            {weekDays.map((day, index) => (
               <div
-                key={generateUUID()}
-                className={`
-                  text-center text-xs font-medium text-muted-foreground
-                `}
+                key={`weekday-${index}`}
+                className="text-center text-xs font-medium text-muted-foreground"
               >
                 {day}
               </div>
             ))}
           </div>
 
-          {/* Streak days */}
-          <div className="grid grid-cols-7 gap-2">
-            {displayDays.map((day) => {
-              const isToday = day.date.toDateString() === new Date().toDateString()
-              const isCompleted = day.completed
+          {/* Week rows: top = last week, bottom = current week */}
+          {weekGrids.map((week, weekIndex) => (
+            <div key={`week-${weekIndex}`} className="grid grid-cols-7 gap-2">
+              {week.map((day, dayIndex) => {
+                const isToday = day?.date.toDateString() === new Date().toDateString()
+                const isCompleted = day?.completed ?? false
 
-              return (
-                <div
-                  key={generateUUID()}
-                  className={cn(
-                    `
-                      flex aspect-square items-center justify-center rounded-lg
-                      transition-all
-                    `,
-                    isCompleted
-                      ? 'bg-gradient-streak shadow-md'
-                      : 'bg-muted',
-                    isToday && 'ring-2 ring-primary ring-offset-2',
-                  )}
-                >
-                  {isCompleted
-                    ? (
-                      <Flame
-                        className={cn(
-                          'h-4 w-4',
-                          isCompleted
-                            ? 'text-white'
-                            : `text-muted-foreground/30`,
-                        )}
-                      />
-                    )
-                    : (
-                      <div className={`
-                          h-2 w-2 rounded-full bg-muted-foreground/20
-                        `}
-                      />
+                return (
+                  <div
+                    key={`day-${weekIndex}-${dayIndex}`}
+                    className={cn(
+                      'flex aspect-square items-center justify-center rounded-lg transition-all',
+                      isCompleted
+                        ? 'bg-gradient-streak shadow-md'
+                        : 'bg-muted',
+                      isToday && 'ring-2 ring-primary ring-offset-2',
                     )}
-                </div>
-              )
-            })}
-          </div>
+                  >
+                    {isCompleted
+                      ? (
+                        <Flame className="h-4 w-4 text-white" />
+                      )
+                      : (
+                        <div className="h-2 w-2 rounded-full bg-muted-foreground/20" />
+                      )}
+                  </div>
+                )
+              })}
+            </div>
+          ))}
         </div>
 
         {/* Motivation Message */}
