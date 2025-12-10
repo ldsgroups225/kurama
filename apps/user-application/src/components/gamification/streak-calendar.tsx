@@ -29,7 +29,7 @@ export function StreakCalendar({
   const displayDays = streakHistory.slice(-14)
 
   return (
-    <Card className={cn('overflow-hidden', className)}>
+    <Card className={cn('overflow-hidden py-0', className)}>
       <CardContent className="p-6">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
@@ -96,21 +96,21 @@ export function StreakCalendar({
                 >
                   {isCompleted
                     ? (
-                        <Flame
-                          className={cn(
-                            'h-4 w-4',
-                            isCompleted
-                              ? 'text-white'
-                              : `text-muted-foreground/30`,
-                          )}
-                        />
-                      )
+                      <Flame
+                        className={cn(
+                          'h-4 w-4',
+                          isCompleted
+                            ? 'text-white'
+                            : `text-muted-foreground/30`,
+                        )}
+                      />
+                    )
                     : (
-                        <div className={`
+                      <div className={`
                           h-2 w-2 rounded-full bg-muted-foreground/20
                         `}
-                        />
-                      )}
+                      />
+                    )}
                 </div>
               )
             })}

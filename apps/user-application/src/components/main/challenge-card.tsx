@@ -42,7 +42,7 @@ export function ChallengeCard({
   // Completed state
   if (isCompleted) {
     return (
-      <Card className="overflow-hidden border-success/30 bg-linear-to-br from-success/10 via-success/5 to-background">
+      <Card className="overflow-hidden py-0 border-success/30 bg-linear-to-br from-success/10 via-success/5 to-background">
         <CardContent className="p-6">
           <div className="mb-4 flex items-start justify-between">
             <div className="flex items-center gap-2">
@@ -96,7 +96,7 @@ export function ChallengeCard({
   return (
     <Card className={`
       overflow-hidden border-primary/20 bg-linear-to-br from-primary/10
-      via-primary/5 to-background
+      via-primary/5 to-background py-0
     `}
     >
       <CardContent className="p-6">
@@ -125,21 +125,21 @@ export function ChallengeCard({
         >
           {isLoading
             ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Chargement...
-                </>
-              )
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Chargement...
+              </>
+            )
             : (
-                <>
-                  {isInProgress ? 'Reprendre' : 'Commencer'}
-                  <ArrowRight className={`
+              <>
+                {isInProgress ? 'Reprendre' : 'Commencer'}
+                <ArrowRight className={`
                 ml-2 h-4 w-4 transition-transform
                 group-hover:translate-x-1
               `}
-                  />
-                </>
-              )}
+                />
+              </>
+            )}
         </Button>
       </CardContent>
     </Card>

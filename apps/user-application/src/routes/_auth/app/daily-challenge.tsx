@@ -64,8 +64,12 @@ function DailyChallengePage() {
   })
 
   const completeMutation = useMutation({
-    mutationFn: (data: { sessionId: number, correctCount: number, totalCount: number, duration: number }) =>
-      completeDailyChallenge({ data }),
+    mutationFn: (data: {
+      sessionId: number
+      correctCount: number
+      totalCount: number
+      duration: number
+    }) => completeDailyChallenge({ data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['daily-challenge-status'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
@@ -78,18 +82,20 @@ function DailyChallengePage() {
   const totalCards = cards.length
 
   // Store generated test questions
-  const [testQuestions, setTestQuestions] = useState<Array<{
-    id: number
-    frontContent: string
-    backContent: string
-    cardType: string
-    difficulty: number
-    lessonId: number
-    questionType: 'multiple-choice' | 'true-false'
-    question?: string
-    options?: Array<{ id: string, text: string, isCorrect: boolean }>
-    correctAnswer?: string
-  }>>([])
+  const [testQuestions, setTestQuestions] = useState<
+    Array<{
+      id: number
+      frontContent: string
+      backContent: string
+      cardType: string
+      difficulty: number
+      lessonId: number
+      questionType: 'multiple-choice' | 'true-false'
+      question?: string
+      options?: Array<{ id: string, text: string, isCorrect: boolean }>
+      correctAnswer?: string
+    }>
+  >([])
 
   const currentQuestion = testQuestions[currentCardIndex]
 
@@ -99,7 +105,8 @@ function DailyChallengePage() {
       return []
 
     return cards.map((card, index) => {
-      const questionType: 'multiple-choice' | 'true-false' = index % 2 === 0 ? 'multiple-choice' : 'true-false'
+      const questionType: 'multiple-choice' | 'true-false'
+        = index % 2 === 0 ? 'multiple-choice' : 'true-false'
 
       if (questionType === 'multiple-choice') {
         const correctAnswer = card.backContent
@@ -120,7 +127,12 @@ function DailyChallengePage() {
           return hashA - hashB
         })
 
-        return { ...card, questionType: 'multiple-choice' as const, question: card.frontContent, options }
+        return {
+          ...card,
+          questionType: 'multiple-choice' as const,
+          question: card.frontContent,
+          options,
+        }
       }
       else {
         const isTrue = index % 3 !== 0
@@ -134,7 +146,12 @@ function DailyChallengePage() {
           const wrongAnswer = otherCard?.backContent || 'Réponse incorrecte'
           statement = `${card.frontContent} : ${wrongAnswer}`
         }
-        return { ...card, questionType: 'true-false' as const, frontContent: statement, correctAnswer: isTrue ? 'true' : 'false' }
+        return {
+          ...card,
+          questionType: 'true-false' as const,
+          frontContent: statement,
+          correctAnswer: isTrue ? 'true' : 'false',
+        }
       }
     })
   }, [cards])
@@ -149,7 +166,12 @@ function DailyChallengePage() {
     if (sessionId) {
       setShowLoading(true)
       setTimeout(() => {
-        completeMutation.mutate({ sessionId, correctCount, totalCount: totalCards, duration: TIME_LIMIT })
+        completeMutation.mutate({
+          sessionId,
+          correctCount,
+          totalCount: totalCards,
+          duration: TIME_LIMIT,
+        })
         setPhase('completed')
         setShowLoading(false)
       }, 2000)
@@ -184,31 +206,34 @@ function DailyChallengePage() {
     }
   }, [timeRemaining, phase, handleTimeUp])
 
-  const handleAnswer = useCallback((isCorrect: boolean) => {
-    if (isCorrect) {
-      setCorrectCount(prev => prev + 1)
-    }
+  const handleAnswer = useCallback(
+    (isCorrect: boolean) => {
+      if (isCorrect) {
+        setCorrectCount(prev => prev + 1)
+      }
 
-    if (currentCardIndex === totalCards - 1) {
-      const duration = Math.floor((Date.now() - startTime) / 1000)
-      setShowLoading(true)
-      setTimeout(() => {
-        if (sessionId) {
-          completeMutation.mutate({
-            sessionId,
-            correctCount: isCorrect ? correctCount + 1 : correctCount,
-            totalCount: totalCards,
-            duration,
-          })
-        }
-        setPhase('completed')
-        setShowLoading(false)
-      }, 2000)
-    }
-    else {
-      setCurrentCardIndex(prev => prev + 1)
-    }
-  }, [currentCardIndex, totalCards, startTime, sessionId, correctCount, completeMutation])
+      if (currentCardIndex === totalCards - 1) {
+        const duration = Math.floor((Date.now() - startTime) / 1000)
+        setShowLoading(true)
+        setTimeout(() => {
+          if (sessionId) {
+            completeMutation.mutate({
+              sessionId,
+              correctCount: isCorrect ? correctCount + 1 : correctCount,
+              totalCount: totalCards,
+              duration,
+            })
+          }
+          setPhase('completed')
+          setShowLoading(false)
+        }, 2000)
+      }
+      else {
+        setCurrentCardIndex(prev => prev + 1)
+      }
+    },
+    [currentCardIndex, totalCards, startTime, sessionId, correctCount, completeMutation],
+  )
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -293,13 +318,21 @@ function DailyChallengePage() {
       <div className="min-h-screen bg-background">
         <AppHeader title="Défi du Jour" showAvatar={false} />
         <main className="mx-auto max-w-lg space-y-6 px-4 py-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center"
+          >
             <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-level">
               <Trophy className="h-10 w-10 text-white" />
             </div>
             <h2 className="mb-2 text-2xl font-bold">Défi du Jour</h2>
             <p className="text-muted-foreground">
-              {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+              {new Date().toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+              })}
             </p>
           </motion.div>
           <Card className="border-2 border-primary/20">
@@ -347,8 +380,19 @@ function DailyChallengePage() {
               </div>
             </CardContent>
           </Card>
-          <Button size="lg" className="w-full bg-gradient-level text-lg font-semibold" onClick={handleStart} disabled={startMutation.isPending}>
-            {startMutation.isPending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Play className="mr-2 h-5 w-5" />}
+          <Button
+            size="lg"
+            className="w-full bg-gradient-level text-lg font-semibold"
+            onClick={handleStart}
+            disabled={startMutation.isPending}
+          >
+            {startMutation.isPending
+              ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              )
+              : (
+                <Play className="mr-2 h-5 w-5" />
+              )}
             {challengeStatus?.isInProgress ? 'Reprendre' : 'Commencer l\'examen'}
           </Button>
           <Button variant="ghost" className="w-full" onClick={() => navigate({ to: '/app' })}>
@@ -376,7 +420,9 @@ function DailyChallengePage() {
         <main className="mx-auto max-w-lg px-4 py-6">
           <div className="mb-6 space-y-3">
             <div className="flex items-center justify-between">
-              <div className={`flex items-center gap-2 text-lg font-bold ${isLowTime ? 'text-error animate-pulse' : 'text-foreground'}`}>
+              <div
+                className={`flex items-center gap-2 text-lg font-bold ${isLowTime ? 'text-error animate-pulse' : 'text-foreground'}`}
+              >
                 <Timer className="h-5 w-5" />
                 {formatTime(timeRemaining)}
               </div>
@@ -388,7 +434,10 @@ function DailyChallengePage() {
                 {currentCardIndex}
               </div>
             </div>
-            <Progress value={timeProgress} className={`h-2 ${isLowTime ? '[&>div]:bg-error' : '[&>div]:bg-primary'}`} />
+            <Progress
+              value={timeProgress}
+              className={`h-2 ${isLowTime ? '[&>div]:bg-error' : '[&>div]:bg-primary'}`}
+            />
             <Progress value={progress} className="h-1" />
           </div>
           <Test
@@ -492,7 +541,12 @@ function DailyChallengePage() {
         {showReward && completeMutation.data && (
           <RewardAnimation
             show={showReward}
-            reward={{ type: 'xp', title: 'Défi Complété !', description: `Vous avez gagné ${completeMutation.data.xpEarned} XP`, value: completeMutation.data.xpEarned }}
+            reward={{
+              type: 'xp',
+              title: 'Défi Complété !',
+              description: `Vous avez gagné ${completeMutation.data.xpEarned} XP`,
+              value: completeMutation.data.xpEarned,
+            }}
             onClose={() => setShowReward(false)}
           />
         )}

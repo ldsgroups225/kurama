@@ -65,7 +65,7 @@ export function LevelBadge({
   }
 
   return (
-    <Card className={cn('overflow-hidden', className)}>
+    <Card className={cn('overflow-hidden py-0', className)}>
       <div className="bg-level p-4">
         <div className="flex items-center gap-4">
           <div className="relative">

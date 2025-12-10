@@ -81,7 +81,7 @@ export function LeaderboardWidget({
   }
 
   return (
-    <Card className={cn('overflow-hidden', className)}>
+    <Card className={cn('overflow-hidden py-0', className)}>
       <CardContent className="p-6">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">

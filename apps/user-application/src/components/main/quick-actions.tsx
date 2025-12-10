@@ -37,7 +37,7 @@ interface QuickActionsProps {
 
 export function QuickActions({ actions }: QuickActionsProps) {
   return (
-    <Card>
+    <Card className="py-0">
       <CardContent className="p-4">
         <div className="grid grid-cols-4 gap-2">
           {actions.map(action => (

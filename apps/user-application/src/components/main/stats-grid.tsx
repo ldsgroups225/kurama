@@ -22,7 +22,7 @@ export function StatCard({
   return (
     <Card className={`
       overflow-hidden transition-shadow
-      hover:shadow-md
+      hover:shadow-md py-0
     `}
     >
       <CardContent className="p-4">
@@ -35,7 +35,7 @@ export function StatCard({
             <Icon className="h-5 w-5" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">{label}</p>
+            <p className="text-xs text-muted-foreground truncate">{label}</p>
             <p className="text-2xl font-bold text-foreground">{value}</p>
           </div>
         </div>
