@@ -1,4 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   Bell,
@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { getProfileStats } from '@/core/functions/profile'
 import { signOut, useSession } from '@/lib/auth-client'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 
@@ -34,6 +35,12 @@ function ProfilePage() {
     const endTracking = trackRouteLoad('app-profile')
     return endTracking
   }, [])
+
+  // Fetch real profile stats
+  const { data: stats } = useQuery({
+    queryKey: ['profile-stats'],
+    queryFn: () => getProfileStats(),
+  })
 
   const handleSignOut = async () => {
     setIsSigningOut(true)
@@ -118,11 +125,15 @@ function ProfilePage() {
               <div className="flex items-center gap-2">
                 <Badge variant="secondary" className="gap-1">
                   <Shield className="h-3 w-3" />
-                  Niveau 5
+                  Niveau
+                  {' '}
+                  {stats?.level ?? 1}
                 </Badge>
-                <Badge variant="outline">
-                  BAC 2024
-                </Badge>
+                {stats?.gradeName && (
+                  <Badge variant="outline">
+                    {stats.gradeName}
+                  </Badge>
+                )}
               </div>
             </div>
           </CardContent>
@@ -130,18 +141,31 @@ function ProfilePage() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: 'Cartes', value: '1,247' },
-            { label: 'Points', value: '8,450' },
-            { label: 'Série', value: '12j' },
-          ].map(stat => (
-            <Card key={stat.label}>
-              <CardContent className="p-4 text-center">
-                <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                <p className="text-xs text-muted-foreground">{stat.label}</p>
-              </CardContent>
-            </Card>
-          ))}
+          <Card>
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-foreground">
+                {stats?.totalCardsStudied?.toLocaleString() ?? '0'}
+              </p>
+              <p className="text-xs text-muted-foreground">Cartes</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-foreground">
+                {stats?.totalXP?.toLocaleString() ?? '0'}
+              </p>
+              <p className="text-xs text-muted-foreground">Points</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-foreground">
+                {stats?.currentStreak ?? 0}
+                j
+              </p>
+              <p className="text-xs text-muted-foreground">Série</p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Menu Items */}

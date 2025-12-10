@@ -186,3 +186,116 @@ export const getUserProfile = createServerFn()
 
     return profile
   })
+
+/**
+ * Get profile stats for display (XP, level, streak, cards studied)
+ */
+export const getProfileStats = createServerFn()
+  .middleware([protectedFunctionMiddleware])
+  .handler(async ({ context }) => {
+    const { getDb: getDatabase } = await import('@kurama/data-ops/database/setup')
+    const { userProfiles, userProgress, studySessions } = await import('@kurama/data-ops/drizzle/schema')
+    const { eq, desc, sql } = await import('@kurama/data-ops/database/drizzle-orm')
+
+    const db = getDatabase()
+    const { userId } = context
+
+    // Get user profile with grade
+    const profile = await db.query.userProfiles.findFirst({
+      where: eq(userProfiles.userId, userId),
+      with: {
+        grade: true,
+      },
+    })
+
+    const totalXP = profile?.xp ?? 0
+
+    // Calculate level from XP
+    const LEVEL_THRESHOLDS = [
+      0,
+      100,
+      250,
+      500,
+      800,
+      1200,
+      1700,
+      2300,
+      3000,
+      3800,
+      4700,
+      5700,
+      6800,
+      8000,
+      9300,
+      10700,
+      12200,
+      13800,
+      15500,
+      17300,
+    ]
+
+    let level = 1
+    for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
+      if (totalXP >= (LEVEL_THRESHOLDS[i] ?? 0)) {
+        level = i + 1
+        break
+      }
+    }
+
+    // Get total cards studied by user
+    const cardsStudiedResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(userProgress)
+      .where(eq(userProgress.userId, userId))
+
+    const totalCardsStudied = Number(cardsStudiedResult[0]?.count ?? 0)
+
+    // Calculate current streak
+    const sessionsResult = await db
+      .select({ startedAt: studySessions.startedAt })
+      .from(studySessions)
+      .where(eq(studySessions.userId, userId))
+      .orderBy(desc(studySessions.startedAt))
+
+    const uniqueDates = Array.from(new Set(
+      sessionsResult.map((s) => {
+        const d = new Date(s.startedAt)
+        return d.toISOString().split('T')[0]
+      }),
+    ))
+
+    let currentStreak = 0
+    if (uniqueDates.length > 0) {
+      const today = new Date().toISOString().split('T')[0]
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+
+      if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
+        currentStreak = 1
+        for (let i = 1; i < uniqueDates.length; i++) {
+          const prevDateStr = uniqueDates[i - 1]
+          const currDateStr = uniqueDates[i]
+          if (!prevDateStr || !currDateStr)
+            continue
+
+          const prevDate = new Date(prevDateStr)
+          const currDate = new Date(currDateStr)
+          const diffDays = Math.round(Math.abs(prevDate.getTime() - currDate.getTime()) / (1000 * 60 * 60 * 24))
+
+          if (diffDays === 1) {
+            currentStreak++
+          }
+          else {
+            break
+          }
+        }
+      }
+    }
+
+    return {
+      totalXP,
+      level,
+      totalCardsStudied,
+      currentStreak,
+      gradeName: profile?.grade?.name ?? null,
+    }
+  })
