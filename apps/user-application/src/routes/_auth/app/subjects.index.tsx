@@ -9,7 +9,6 @@ import {
   ChevronRight,
   Dna,
   Languages,
-  Loader2,
   Map,
   Megaphone,
   Pi,
@@ -19,6 +18,7 @@ import {
 import { useEffect } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { LogoLoader } from '@/components/ui/logo-loader'
 import { getSubjects } from '@/core/functions/learning'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 
@@ -104,7 +104,7 @@ function SubjectsPage() {
 
         {isLoading && (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <LogoLoader size="md" />
           </div>
         )}
 

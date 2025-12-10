@@ -9,6 +9,7 @@ import {
   OfflineBanner,
   UpdatePrompt,
 } from '@/components/pwa'
+import { FullScreenLoader } from '@/components/ui/logo-loader'
 import { getProfileStatus, getUserProfile } from '@/core/functions/profile'
 import { useAuthPersistence } from '@/hooks'
 import { userProfileAtom } from '@/lib/atoms'
@@ -119,11 +120,7 @@ function RouteComponent() {
     || isAuthenticatedButLoadingUserProfile
 
   if (shouldShowLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
-      </div>
-    )
+    return <FullScreenLoader />
   }
 
   // Not authenticated - show login

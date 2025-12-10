@@ -8,6 +8,7 @@ import { GoogleLogin } from '@/components/auth/google-login'
 import { ParentProfileForm } from '@/components/onboarding/parent-profile-form'
 import { StudentProfileForm } from '@/components/onboarding/student-profile-form'
 import { UserTypeSelection } from '@/components/onboarding/user-type-selection'
+import { FullScreenLoader } from '@/components/ui/logo-loader'
 import { hasCompletedOnboardingAtom, userProfileAtom } from '@/lib/atoms'
 import { authClient, syncSessionCache } from '@/lib/auth-client'
 import { hasCachedAuthenticatedSession } from '@/lib/auth-session-cache'
@@ -49,11 +50,7 @@ function OnboardingPage() {
   // Show loading state while checking auth to prevent flash
   // If we have a cached session, keep loading until Better Auth confirms
   if (session.isPending || (hasCachedSession && session.isPending)) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
-      </div>
-    )
+    return <FullScreenLoader />
   }
 
   // Not authenticated - show login (only if no cached session or session confirmed as null)

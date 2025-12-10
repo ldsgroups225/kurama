@@ -141,11 +141,11 @@ export function StreakCalendar({
                   >
                     {isCompleted
                       ? (
-                        <Flame className="h-4 w-4 text-white" />
-                      )
+                          <Flame className="h-4 w-4 text-white" />
+                        )
                       : (
-                        <div className="h-2 w-2 rounded-full bg-muted-foreground/20" />
-                      )}
+                          <div className="h-2 w-2 rounded-full bg-muted-foreground/20" />
+                        )}
                   </div>
                 )
               })}

@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
+import { AlertCircle, CheckCircle2 } from 'lucide-react'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
+import { LogoLoader } from '@/components/ui/logo-loader'
 import { collectSubscription, validPayment } from '@/core/functions/payments'
 import { authClient } from '@/lib/auth-client'
 
@@ -92,7 +93,7 @@ function RouteComponent() {
       case 'error':
         return <AlertCircle className="h-16 w-16 text-destructive" />
       default:
-        return <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        return <LogoLoader size="lg" />
     }
   }
 

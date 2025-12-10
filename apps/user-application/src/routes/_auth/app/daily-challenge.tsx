@@ -9,6 +9,7 @@ import { TestLoading } from '@/components/learning/test-loading'
 import { AppHeader } from '@/components/main'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { LogoLoader } from '@/components/ui/logo-loader'
 import { Progress } from '@/components/ui/progress'
 import {
   completeDailyChallenge,
@@ -252,7 +253,7 @@ function DailyChallengePage() {
       <div className="min-h-screen bg-background">
         <AppHeader title="Défi du Jour" showAvatar={false} />
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <LogoLoader size="md" />
         </div>
       </div>
     )

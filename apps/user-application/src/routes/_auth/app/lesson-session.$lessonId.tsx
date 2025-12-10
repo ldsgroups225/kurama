@@ -2,8 +2,8 @@ import type { Reward } from '@/components/gamification'
 import type { TestSettings } from '@/components/learning/test-settings-sheet'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router'
-import { Loader2, WifiOff } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { WifiOff } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { RewardAnimation } from '@/components/gamification'
 import { CardFactory } from '@/components/learning/CardFactory'
 import { QuizSettingsSheet } from '@/components/learning/quiz-settings-sheet'
@@ -15,6 +15,7 @@ import { Test } from '@/components/learning/test'
 import { TestLoading } from '@/components/learning/test-loading'
 import { TestSettingsSheet } from '@/components/learning/test-settings-sheet'
 import { AppHeader } from '@/components/main'
+import { LogoLoader } from '@/components/ui/logo-loader'
 import { getLessonDetails } from '@/core/functions/learning'
 import { useAutoplay } from '@/hooks/use-autoplay'
 import { useCardHeight } from '@/hooks/use-card-height'
@@ -60,7 +61,8 @@ function SessionPage() {
   // Quiz mode state
   const [showQuizSettings, setShowQuizSettings] = useState(mode === 'quiz')
   const [hasStartedQuiz, setHasStartedQuiz] = useState(false)
-  const [quizMode, setQuizMode] = useState<'memorize-all' | 'review-starred' | 'quick-review' | null>(null)
+  // Quiz mode setter for future spaced repetition features (value not currently read)
+  const [, setQuizMode] = useState<'memorize-all' | 'review-starred' | 'quick-review' | null>(null)
 
   // Test mode state
   const [showTestSettings, setShowTestSettings] = useState(mode === 'exam')
@@ -97,21 +99,8 @@ function SessionPage() {
     },
   })
 
-  // Reset mode-specific state when mode changes (using ref to track previous mode)
-  const previousModeRef = useRef(mode)
-  if (previousModeRef.current !== mode) {
-    previousModeRef.current = mode
-    // Reset quiz state
-    setShowQuizSettings(mode === 'quiz')
-    setHasStartedQuiz(false)
-    setQuizMode(null)
-    // Reset test state
-    setShowTestSettings(mode === 'exam')
-    setTestSettings(null)
-    setHasStartedTest(false)
-    setTestAnswers([])
-    setShowTestLoading(false)
-  }
+  // No need for mode reset effect - state is initialized based on mode prop
+  // and the component will re-render with correct initial values when mode changes via URL
 
   // Session state management
   const {
@@ -190,81 +179,15 @@ function SessionPage() {
   const cards = useMemo(() => (lesson as any)?.cards ?? [], [lesson])
   const currentCard = cards[currentCardIndex]
 
-  // Generate quiz questions based on mode (must be before activeCards calculation)
-  // eslint-disable react-hooks/purity
-  const quizQuestions = useMemo(() => {
-    if (!hasStartedQuiz || !quizMode)
-      return []
-
-    // Fisher-Yates shuffle for proper randomization
-    const shuffled = [...cards]
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-        ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-    }
-
-    // Generate quiz questions with options from flashcard data
-    return shuffled.map((card, index) => {
-      const questionType = Math.random() > 0.5 ? 'multichoice' : 'true_false'
-
-      if (questionType === 'multichoice') {
-        // Generate multiple choice options from other cards
-        const correctAnswer = card.backContent || card.back
-        const otherCards = shuffled.filter((_, i) => i !== index)
-
-        // Get 3 random wrong answers from other cards
-        const wrongAnswers = otherCards
-          .slice(0, 3)
-          .map(c => c.backContent || c.back)
-          .filter(Boolean)
-
-        // Create options array with correct answer and wrong answers
-        const allOptions = [
-          { id: 'correct', text: correctAnswer, isCorrect: true },
-          ...wrongAnswers.map((text, i) => ({ id: `wrong-${i}`, text, isCorrect: false })),
-        ]
-
-        // Shuffle options
-        for (let i = allOptions.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1))
-          const temp = allOptions[i]
-          allOptions[i] = allOptions[j]!
-          allOptions[j] = temp!
-        }
-
-        return {
-          ...card,
-          cardType: 'multichoice' as const,
-          question: card.frontContent || card.front,
-          options: allOptions,
-        }
-      }
-      else {
-        // True/False question - randomly decide if statement is true or false
-
-        const isTrue = Math.random() > 0.5
-        const correctAnswer = card.backContent || card.back
-
-        // If true, show correct statement. If false, show a wrong answer from another card
-        let statement: string
-        if (isTrue) {
-          statement = `${card.frontContent || card.front} : ${correctAnswer}`
-        }
-        else {
-          const otherCard = shuffled.find((_, i) => i !== index)
-          const wrongAnswer = otherCard?.backContent || otherCard?.back || 'Réponse incorrecte'
-          statement = `${card.frontContent || card.front} : ${wrongAnswer}`
-        }
-
-        return {
-          ...card,
-          cardType: 'true_false' as const,
-          frontContent: statement,
-          correctAnswer: isTrue ? 'true' : 'false',
-        }
-      }
-    })
-  }, [hasStartedQuiz, quizMode, cards])
+  // Store quiz questions in state - generated in handleStartQuiz callback
+  const [quizQuestions, setQuizQuestions] = useState<Array<{
+    cardType: 'multichoice' | 'true_false'
+    question?: string
+    options?: Array<{ id: string, text: string, isCorrect: boolean }>
+    frontContent?: string
+    correctAnswer?: string
+    [key: string]: unknown
+  }>>([])
 
   // Calculate progress based on mode
   const activeCards = mode === 'quiz' && hasStartedQuiz ? quizQuestions : cards
@@ -406,13 +329,79 @@ function SessionPage() {
   // Store test questions in state - generated in handleStartTest callback
   const [testQuestions, setTestQuestions] = useState<Array<typeof cards[0] & { questionType: 'multiple-choice' | 'written' | 'true-false' }>>([])
 
-  // Handle quiz mode start - MUST be before any conditional returns
+  // Handle quiz mode start - generates questions here to avoid impure render
   const handleStartQuiz = useCallback((selectedMode: 'memorize-all' | 'review-starred' | 'quick-review') => {
+    // Generate quiz questions in event handler (Math.random is safe here)
+    if (cards.length > 0) {
+      // Fisher-Yates shuffle for proper randomization
+      const shuffled = [...cards]
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+          ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+      }
+
+      // Generate quiz questions with options from flashcard data
+      const questions = shuffled.map((card, index) => {
+        const questionType = Math.random() > 0.5 ? 'multichoice' : 'true_false'
+
+        if (questionType === 'multichoice') {
+          const correctAnswer = card.backContent || card.back
+          const otherCards = shuffled.filter((_, i) => i !== index)
+          const wrongAnswers = otherCards
+            .slice(0, 3)
+            .map(c => c.backContent || c.back)
+            .filter(Boolean)
+
+          const allOptions = [
+            { id: 'correct', text: correctAnswer, isCorrect: true },
+            ...wrongAnswers.map((text, i) => ({ id: `wrong-${i}`, text, isCorrect: false })),
+          ]
+
+          // Shuffle options
+          for (let i = allOptions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1))
+            const temp = allOptions[i]
+            allOptions[i] = allOptions[j]!
+            allOptions[j] = temp!
+          }
+
+          return {
+            ...card,
+            cardType: 'multichoice' as const,
+            question: card.frontContent || card.front,
+            options: allOptions,
+          }
+        }
+        else {
+          const isTrue = Math.random() > 0.5
+          const correctAnswer = card.backContent || card.back
+          let statement: string
+          if (isTrue) {
+            statement = `${card.frontContent || card.front} : ${correctAnswer}`
+          }
+          else {
+            const otherCard = shuffled.find((_, i) => i !== index)
+            const wrongAnswer = otherCard?.backContent || otherCard?.back || 'Réponse incorrecte'
+            statement = `${card.frontContent || card.front} : ${wrongAnswer}`
+          }
+
+          return {
+            ...card,
+            cardType: 'true_false' as const,
+            frontContent: statement,
+            correctAnswer: isTrue ? 'true' : 'false',
+          }
+        }
+      })
+
+      setQuizQuestions(questions)
+    }
+
     setQuizMode(selectedMode)
     setHasStartedQuiz(true)
     setShowQuizSettings(false)
     setCurrentCardIndex(0)
-  }, [setCurrentCardIndex])
+  }, [setCurrentCardIndex, cards])
 
   // Handle test mode start - generates questions here to avoid impure render
   const handleStartTest = useCallback((settings: TestSettings) => {
@@ -536,7 +525,7 @@ function SessionPage() {
       <div className="min-h-screen bg-background">
         <AppHeader title="Session" showAvatar={false} />
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <LogoLoader size="md" />
         </div>
       </div>
     )
@@ -580,10 +569,12 @@ function SessionPage() {
         // Show quiz questions after settings are configured
         if (hasStartedQuiz && quizQuestions.length > 0) {
           const currentQuestion = quizQuestions[currentCardIndex]
+          if (!currentQuestion)
+            return null
           return (
             <CardFactory
               key={`quiz-${currentCardIndex}`}
-              card={currentQuestion}
+              card={currentQuestion as unknown as Parameters<typeof CardFactory>[0]['card']}
               cardIndex={currentCardIndex}
               totalCards={quizQuestions.length}
               onAnswer={(isCorrect: boolean) => {

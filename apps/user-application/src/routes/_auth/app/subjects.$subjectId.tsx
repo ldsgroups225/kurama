@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate, useParams } from '@tanstack/react-router'
-import { BookOpen, CheckCircle2, ChevronRight, Clock, Loader2, Lock } from 'lucide-react'
+import { BookOpen, CheckCircle2, ChevronRight, Clock, Lock } from 'lucide-react'
 import { useEffect } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { LogoLoader } from '@/components/ui/logo-loader'
 import { getLessonsBySubject } from '@/core/functions/learning'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 
@@ -66,7 +67,7 @@ function LessonsPage() {
 
         {isLoading && (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <LogoLoader size="md" />
           </div>
         )}
 

@@ -256,7 +256,6 @@
 }
 
 @layer base {
-
   /* NATIVE APP GLOBAL RESET */
   :root {
     /* App-like sizing */
@@ -342,7 +341,6 @@
 }
 
 @layer utilities {
-
   /* XP System Gradients */
   .bg-gradient-xp {
     background: linear-gradient(to bottom right, var(--xp-from), var(--xp-to));

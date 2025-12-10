@@ -7,12 +7,12 @@ import {
   CreditCard,
   FileText,
   ListChecks,
-  Loader2,
 } from 'lucide-react'
 import { useEffect } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { LogoLoader } from '@/components/ui/logo-loader'
 import { getLessonDetails } from '@/core/functions/learning'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 
@@ -75,7 +75,7 @@ function LessonModePage() {
       <div className="min-h-screen bg-background pb-24">
         <AppHeader title="Leçon" showAvatar={false} />
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <LogoLoader size="md" />
         </div>
         <BottomNav />
       </div>

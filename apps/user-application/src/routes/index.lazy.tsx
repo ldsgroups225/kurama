@@ -2,6 +2,7 @@ import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
 import { useAtom } from 'jotai'
 import { Suspense, useEffect, useState } from 'react'
 import { FormSkeleton, PageSkeleton } from '@/components/skeletons'
+import { FullScreenLoader } from '@/components/ui/logo-loader'
 import { hasCompletedOnboardingAtom } from '@/lib/atoms'
 import { authClient, syncSessionCache } from '@/lib/auth-client'
 import { hasCachedAuthenticatedSession } from '@/lib/auth-session-cache'
@@ -56,11 +57,7 @@ function LandingPage() {
   const hasCachedButPending = hasCachedSession && session.isPending
 
   if (isCheckingAuth || hasCachedButPending || hasConfirmedSession) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
-      </div>
-    )
+    return <FullScreenLoader />
   }
 
   // Show welcome screen if first time user
