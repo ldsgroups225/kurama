@@ -110,16 +110,6 @@ function LessonsPage() {
                   </div>
                 )}
 
-                {/* Lesson Number Badge */}
-                <div className={`
-                  absolute top-3 left-3 flex h-8 w-8 items-center justify-center
-                  rounded-full text-sm font-bold shadow-sm z-20
-                  ${isCompleted ? 'bg-success/20 text-success' : 'bg-primary/10 text-primary'}
-                `}
-                >
-                  {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : index + 1}
-                </div>
-
                 <CardHeader className="relative pb-2">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
@@ -146,48 +136,59 @@ function LessonsPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {/* Mastery Progress */}
-                    {!isLocked && masteryCount < 2 && (
-                      <Badge variant="secondary" className="bg-primary/10 text-primary text-xs font-medium">
-                        🎯 Maîtrise:
-                        {' '}
-                        {masteryCount}
-                        /2
-                      </Badge>
-                    )}
-                    {isCompleted && (
-                      <Badge variant="secondary" className="bg-success/10 text-success text-xs font-medium">
-                        ✅ Maîtrisé
-                      </Badge>
-                    )}
-                    {lesson.difficulty && (
-                      <Badge
-                        variant="secondary"
-                        className={`
-                          ${difficultyColors[lesson.difficulty] || ''}
-                          text-xs font-medium
-                        `}
-                      >
-                        {difficultyEmojis[lesson.difficulty]}
-                        {' '}
-                        {difficultyLabels[lesson.difficulty] || lesson.difficulty}
-                      </Badge>
-                    )}
-                    {lesson.estimatedDuration && (
-                      <div className={`
-                        flex items-center gap-1 rounded-full bg-muted/50 px-2.5
-                        py-1 text-xs text-muted-foreground
-                      `}
-                      >
-                        <Clock className="h-3.5 w-3.5" />
-                        <span className="font-medium">
-                          {lesson.estimatedDuration}
+                  <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2 flex-1">
+                      {/* Mastery Progress */}
+                      {!isLocked && masteryCount < 2 && (
+                        <Badge variant="secondary" className="bg-primary/10 text-primary text-xs font-medium">
+                          🎯 Maîtrise:
                           {' '}
-                          min
-                        </span>
-                      </div>
-                    )}
+                          {masteryCount}
+                          /2
+                        </Badge>
+                      )}
+                      {isCompleted && (
+                        <Badge variant="secondary" className="bg-success/10 text-success text-xs font-medium">
+                          ✅ Maîtrisé
+                        </Badge>
+                      )}
+                      {lesson.difficulty && (
+                        <Badge
+                          variant="secondary"
+                          className={`
+                            ${difficultyColors[lesson.difficulty] || ''}
+                            text-xs font-medium
+                          `}
+                        >
+                          {difficultyEmojis[lesson.difficulty]}
+                          {' '}
+                          {difficultyLabels[lesson.difficulty] || lesson.difficulty}
+                        </Badge>
+                      )}
+                      {lesson.estimatedDuration && (
+                        <div className={`
+                          flex items-center gap-1 rounded-full bg-muted/50 px-2.5
+                          py-1 text-xs text-muted-foreground
+                        `}
+                        >
+                          <Clock className="h-3.5 w-3.5" />
+                          <span className="font-medium">
+                            {lesson.estimatedDuration}
+                            {' '}
+                            min
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    {/* Lesson Number Badge */}
+                    <div className={`
+                      flex h-8 w-8 items-center justify-center shrink-0
+                      rounded-full text-sm font-bold shadow-sm
+                      ${isCompleted ? 'bg-success/20 text-success' : 'bg-primary/10 text-primary'}
+                    `}
+                    >
+                      {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : index + 1}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -196,18 +197,18 @@ function LessonsPage() {
             // Wrap in Link only if not locked
             return isLocked
               ? (
-                  <div key={lesson.id}>{LessonCard}</div>
-                )
+                <div key={lesson.id}>{LessonCard}</div>
+              )
               : (
-                  <Link
-                    key={lesson.id}
-                    to="/app/lessons/$lessonId"
-                    params={{ lessonId: String(lesson.id) }}
-                    aria-label={`Leçon ${index + 1}: ${lesson.title}`}
-                  >
-                    {LessonCard}
-                  </Link>
-                )
+                <Link
+                  key={lesson.id}
+                  to="/app/lessons/$lessonId"
+                  params={{ lessonId: String(lesson.id) }}
+                  aria-label={`Leçon ${index + 1}: ${lesson.title}`}
+                >
+                  {LessonCard}
+                </Link>
+              )
           })}
         </div>
       </main>
