@@ -39,6 +39,35 @@ interface LessonFormProps {
   isLoading?: boolean
 }
 
+const STORAGE_KEY = 'kurama-admin-lesson-form'
+
+interface StoredFormData {
+  subjectId: number
+  gradeId?: number
+  seriesId?: number
+  difficulty: string
+  estimatedDuration?: number
+  isPublished: boolean
+  displayOrder: number
+}
+
+function loadStoredFormData(): StoredFormData | null {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    return stored ? JSON.parse(stored) : null
+  } catch {
+    return null
+  }
+}
+
+function saveFormData(data: StoredFormData) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export function LessonForm({
   open,
   onOpenChange,
@@ -78,6 +107,7 @@ export function LessonForm({
 
   useEffect(() => {
     if (open && defaultValues) {
+      // Editing mode: use provided values
       setSubjectId(defaultValues.subjectId || 0)
       setGradeId(defaultValues.gradeId)
       setSeriesId(defaultValues.seriesId)
@@ -87,6 +117,20 @@ export function LessonForm({
       setEstimatedDuration(defaultValues.estimatedDuration)
       setIsPublished(defaultValues.isPublished || false)
       setDisplayOrder(defaultValues.displayOrder || 0)
+    } else if (open && !isEditing) {
+      // Creating mode: restore from localStorage (except title/description)
+      const stored = loadStoredFormData()
+      if (stored) {
+        setSubjectId(stored.subjectId || 0)
+        setGradeId(stored.gradeId)
+        setSeriesId(stored.seriesId)
+        setDifficulty(stored.difficulty || '')
+        setEstimatedDuration(stored.estimatedDuration)
+        setIsPublished(stored.isPublished || false)
+        setDisplayOrder(stored.displayOrder || 0)
+      }
+      setTitle('')
+      setDescription('')
     } else if (!open) {
       setSubjectId(0)
       setGradeId(undefined)
@@ -99,7 +143,7 @@ export function LessonForm({
       setDisplayOrder(0)
       setErrors({})
     }
-  }, [open, defaultValues])
+  }, [open, defaultValues, isEditing])
 
   // Clear series when grade changes to non-Lycée
   useEffect(() => {
@@ -137,6 +181,17 @@ export function LessonForm({
       setErrors(fieldErrors)
       return
     }
+
+    // Save form data to localStorage (excluding title/description)
+    saveFormData({
+      subjectId,
+      gradeId,
+      seriesId: isLycee ? seriesId : undefined,
+      difficulty,
+      estimatedDuration,
+      isPublished,
+      displayOrder,
+    })
 
     await onSubmit(result.data)
   }
