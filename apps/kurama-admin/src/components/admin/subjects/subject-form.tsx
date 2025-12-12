@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { createSubjectSchema, type CreateSubjectInput } from '@/lib/schemas'
 import { Loader2 } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 interface SubjectFormProps {
   open: boolean
@@ -79,9 +80,22 @@ export function SubjectForm({
     await onSubmit(result.data)
   }
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  }
+
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-h-[85vh] overflow-y-auto border-border/50 bg-background/80 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? 'Modifier la matière' : 'Nouvelle matière'}
@@ -92,8 +106,14 @@ export function SubjectForm({
               : 'Remplissez les informations pour créer une nouvelle matière.'}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
+        <motion.form
+          onSubmit={handleSubmit}
+          className="space-y-4"
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div variants={item} className="space-y-2">
             <Label htmlFor="name">Nom</Label>
             <Input
               id="name"
@@ -102,8 +122,8 @@ export function SubjectForm({
               onChange={(e) => setName(e.target.value)}
             />
             {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
-          </div>
-          <div className="space-y-2">
+          </motion.div>
+          <motion.div variants={item} className="space-y-2">
             <Label htmlFor="abbreviation">Abréviation</Label>
             <Input
               id="abbreviation"
@@ -112,8 +132,8 @@ export function SubjectForm({
               onChange={(e) => setAbbreviation(e.target.value)}
             />
             {errors.abbreviation && <p className="text-sm text-destructive">{errors.abbreviation}</p>}
-          </div>
-          <div className="space-y-2">
+          </motion.div>
+          <motion.div variants={item} className="space-y-2">
             <Label htmlFor="description">Description (optionnel)</Label>
             <Textarea
               id="description"
@@ -121,8 +141,8 @@ export function SubjectForm({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
-          </div>
-          <div className="space-y-2">
+          </motion.div>
+          <motion.div variants={item} className="space-y-2">
             <Label htmlFor="displayOrder">Ordre d'affichage</Label>
             <Input
               id="displayOrder"
@@ -131,8 +151,8 @@ export function SubjectForm({
               value={displayOrder}
               onChange={(e) => setDisplayOrder(parseInt(e.target.value) || 0)}
             />
-          </div>
-          <div className="flex justify-end gap-2 pt-4">
+          </motion.div>
+          <motion.div variants={item} className="flex justify-end gap-2 pt-4">
             <Button
               type="button"
               variant="outline"
@@ -145,8 +165,8 @@ export function SubjectForm({
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isEditing ? 'Enregistrer' : 'Créer'}
             </Button>
-          </div>
-        </form>
+          </motion.div>
+        </motion.form>
       </DialogContent>
     </Dialog>
   )

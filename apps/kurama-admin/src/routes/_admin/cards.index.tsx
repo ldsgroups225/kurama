@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
 import { Plus, Pencil, Trash2, Copy, Search, Eye, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -267,7 +268,12 @@ function CardsPage() {
   ]
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <PageHeader
         title="Cartes"
         description="Gérer les cartes de révision"
@@ -494,6 +500,6 @@ function CardsPage() {
         isLoading={bulkDeleteMutation.isPending}
         variant="destructive"
       />
-    </div>
+    </motion.div>
   )
 }

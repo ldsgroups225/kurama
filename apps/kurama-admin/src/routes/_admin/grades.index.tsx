@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
 import { Check, X, Pencil, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -151,7 +152,12 @@ function GradesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <PageHeader
         title="Niveau & Série"
         description="Gérer les niveaux scolaires et les séries du Lycée"
@@ -358,7 +364,7 @@ function GradesPage() {
         onSave={(data) => updateSeriesMutation.mutate(data)}
         isLoading={updateSeriesMutation.isPending}
       />
-    </div>
+    </motion.div>
   )
 }
 

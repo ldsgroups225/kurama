@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Upload, FileJson, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Dialog,
   DialogContent,
@@ -155,9 +156,22 @@ export function BulkImportDialog({
     setParsedCards(null)
   }
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  }
+
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-border/50 bg-background/80 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Upload className="h-5 w-5" />
@@ -168,26 +182,33 @@ export function BulkImportDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
+        <motion.div
+          className="space-y-4"
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div variants={item} className="flex items-center justify-between">
             <Label htmlFor="json-input">Données JSON</Label>
             <Button variant="outline" size="sm" onClick={loadExample}>
               <FileJson className="mr-2 h-4 w-4" />
               Charger exemple
             </Button>
-          </div>
+          </motion.div>
 
-          <Textarea
-            id="json-input"
-            placeholder="Collez votre JSON ici..."
-            value={jsonInput}
-            onChange={(e) => {
-              setJsonInput(e.target.value)
-              setError(null)
-              setParsedCards(null)
-            }}
-            className="font-mono text-sm min-h-[200px]"
-          />
+          <motion.div variants={item}>
+            <Textarea
+              id="json-input"
+              placeholder="Collez votre JSON ici..."
+              value={jsonInput}
+              onChange={(e) => {
+                setJsonInput(e.target.value)
+                setError(null)
+                setParsedCards(null)
+              }}
+              className="font-mono text-sm min-h-[200px]"
+            />
+          </motion.div>
 
           {error && (
             <Alert variant="destructive">
@@ -217,7 +238,7 @@ export function BulkImportDialog({
             </Alert>
           )}
 
-          <div className="text-xs text-muted-foreground space-y-1">
+          <motion.div variants={item} className="text-xs text-muted-foreground space-y-1">
             <p><strong>Types de cartes supportés:</strong></p>
             <ul className="list-disc list-inside space-y-0.5">
               <li><code>basic</code>: frontContent, backContent</li>
@@ -225,8 +246,8 @@ export function BulkImportDialog({
               <li><code>true_false</code>: question, correctAnswer (true/false)</li>
               <li><code>fill_blank</code>: question, correctAnswer (texte)</li>
             </ul>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>

@@ -22,6 +22,7 @@ import {
 import { createLessonSchema, type CreateLessonInput } from '@/lib/schemas'
 import { getGradesSimple, getSeriesSimple } from '@/core/functions/users'
 import { Loader2 } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 interface Subject {
   id: number
@@ -196,9 +197,22 @@ export function LessonForm({
     await onSubmit(result.data)
   }
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  }
+
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto border-border/50 bg-background/80 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? 'Modifier la leçon' : 'Nouvelle leçon'}
@@ -209,8 +223,14 @@ export function LessonForm({
               : 'Remplissez les informations pour créer une nouvelle leçon.'}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
+        <motion.form
+          onSubmit={handleSubmit}
+          className="space-y-4"
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div variants={item} className="space-y-2">
             <Label htmlFor="subjectId">Matière</Label>
             <Select
               value={subjectId?.toString() || ''}
@@ -228,9 +248,9 @@ export function LessonForm({
               </SelectContent>
             </Select>
             {errors.subjectId && <p className="text-sm text-destructive">{errors.subjectId}</p>}
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <motion.div variants={item} className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="gradeId">Niveau (optionnel)</Label>
               <Select
@@ -272,9 +292,9 @@ export function LessonForm({
                 </Select>
               </div>
             )}
-          </div>
+          </motion.div>
 
-          <div className="space-y-2">
+          <motion.div variants={item} className="space-y-2">
             <Label htmlFor="title">Titre</Label>
             <Input
               id="title"
@@ -283,9 +303,9 @@ export function LessonForm({
               onChange={(e) => setTitle(e.target.value)}
             />
             {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
-          </div>
+          </motion.div>
 
-          <div className="space-y-2">
+          <motion.div variants={item} className="space-y-2">
             <Label htmlFor="description">Description (optionnel)</Label>
             <Textarea
               id="description"
@@ -293,9 +313,9 @@ export function LessonForm({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <motion.div variants={item} className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="difficulty">Difficulté</Label>
               <Select value={difficulty} onValueChange={setDifficulty}>
@@ -321,9 +341,9 @@ export function LessonForm({
                 onChange={(e) => setEstimatedDuration(e.target.value ? parseInt(e.target.value) : undefined)}
               />
             </div>
-          </div>
+          </motion.div>
 
-          <div className="flex flex-row items-center justify-between rounded-lg border p-3">
+          <motion.div variants={item} className="flex flex-row items-center justify-between rounded-lg border border-border/50 bg-background/50 p-3">
             <div className="space-y-0.5">
               <Label>Publier</Label>
               <p className="text-sm text-muted-foreground">
@@ -334,9 +354,9 @@ export function LessonForm({
               checked={isPublished}
               onCheckedChange={setIsPublished}
             />
-          </div>
+          </motion.div>
 
-          <div className="flex justify-end gap-2 pt-4">
+          <motion.div variants={item} className="flex justify-end gap-2 pt-4">
             <Button
               type="button"
               variant="outline"
@@ -349,8 +369,8 @@ export function LessonForm({
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isEditing ? 'Enregistrer' : 'Créer'}
             </Button>
-          </div>
-        </form>
+          </motion.div>
+        </motion.form>
       </DialogContent>
     </Dialog>
   )

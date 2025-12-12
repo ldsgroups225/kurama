@@ -77,69 +77,71 @@ export function DataTable<T>({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {selectable && (
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={allSelected}
-                    onCheckedChange={handleSelectAll}
-                    aria-label="Sélectionner tout"
-                    {...(someSelected && !allSelected ? { 'data-state': 'indeterminate' } : {})}
-                  />
-                </TableHead>
+      <div className="rounded-md border overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {selectable && (
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={allSelected}
+                      onCheckedChange={handleSelectAll}
+                      aria-label="Sélectionner tout"
+                      {...(someSelected && !allSelected ? { 'data-state': 'indeterminate' } : {})}
+                    />
+                  </TableHead>
+                )}
+                {columns.map((column) => (
+                  <TableHead key={column.key} className={column.className}>
+                    {column.header}
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={colSpan} className="h-24 text-center">
+                    Chargement...
+                  </TableCell>
+                </TableRow>
+              ) : data.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={colSpan} className="h-24 text-center">
+                    {emptyMessage}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                data.map((item, index) => {
+                  const rowId = getRowId?.(item)
+                  const isSelected = rowId !== undefined && selectedIds.has(rowId)
+                  return (
+                    <TableRow key={index} data-state={isSelected ? 'selected' : undefined}>
+                      {selectable && rowId !== undefined && (
+                        <TableCell className="w-12">
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={(checked) => handleSelectRow(rowId, !!checked)}
+                            aria-label="Sélectionner la ligne"
+                          />
+                        </TableCell>
+                      )}
+                      {columns.map((column) => (
+                        <TableCell key={column.key} className={column.className}>
+                          {column.cell(item)}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  )
+                })
               )}
-              {columns.map((column) => (
-                <TableHead key={column.key} className={column.className}>
-                  {column.header}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={colSpan} className="h-24 text-center">
-                  Chargement...
-                </TableCell>
-              </TableRow>
-            ) : data.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={colSpan} className="h-24 text-center">
-                  {emptyMessage}
-                </TableCell>
-              </TableRow>
-            ) : (
-              data.map((item, index) => {
-                const rowId = getRowId?.(item)
-                const isSelected = rowId !== undefined && selectedIds.has(rowId)
-                return (
-                  <TableRow key={index} data-state={isSelected ? 'selected' : undefined}>
-                    {selectable && rowId !== undefined && (
-                      <TableCell className="w-12">
-                        <Checkbox
-                          checked={isSelected}
-                          onCheckedChange={(checked) => handleSelectRow(rowId, !!checked)}
-                          aria-label="Sélectionner la ligne"
-                        />
-                      </TableCell>
-                    )}
-                    {columns.map((column) => (
-                      <TableCell key={column.key} className={column.className}>
-                        {column.cell(item)}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                )
-              })
-            )}
-          </TableBody>
-        </Table>
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-sm text-muted-foreground">
           {selectable && selectedIds.size > 0 ? (
             <span>{selectedIds.size} sélectionné{selectedIds.size > 1 ? 's' : ''} · </span>

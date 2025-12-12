@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
 import { Plus, Pencil, Trash2, BookOpen, FileText, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -148,7 +149,12 @@ function SubjectsPage() {
   ]
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <PageHeader
         title="Matières"
         description="Gérer les matières du programme"
@@ -177,7 +183,14 @@ function SubjectsPage() {
 
       <DataTable
         columns={columns}
-        data={data?.subjects || []}
+        data={data?.subjects.map((subject) => {
+          // if description is too long, show in ellipsis
+          const description = subject.description || ''
+          if (description.length > 110) {
+            return { ...subject, id: subject.id, description: description.substring(0, 110) + '...' }
+          }
+          return { ...subject, id: subject.id }
+        }) || []}
         page={page}
         totalPages={data?.totalPages || 1}
         total={data?.total || 0}
@@ -223,6 +236,6 @@ function SubjectsPage() {
         isLoading={deleteMutation.isPending}
         variant="destructive"
       />
-    </div>
+    </motion.div>
   )
 }

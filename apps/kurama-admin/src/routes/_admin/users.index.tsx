@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
 import { Search, Download, GraduationCap, Users as UsersIcon, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -217,7 +218,12 @@ function UsersPage() {
   ]
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <PageHeader
         title="Utilisateurs"
         description="Gérer les utilisateurs de la plateforme"
@@ -305,6 +311,6 @@ function UsersPage() {
         isLoading={isLoading}
         emptyMessage="Aucun utilisateur trouvé"
       />
-    </div>
+    </motion.div>
   )
 }

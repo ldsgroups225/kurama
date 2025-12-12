@@ -23,7 +23,7 @@ function AdminLayout() {
       <AdminSidebar />
       <SidebarInset>
         <AdminHeader user={user} />
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-linear-to-br from-background to-muted/20">
           <Outlet />
         </main>
       </SidebarInset>

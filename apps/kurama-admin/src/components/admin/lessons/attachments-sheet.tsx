@@ -12,6 +12,7 @@ import {
   X,
   Trash2,
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -205,6 +206,19 @@ export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
     embeddingsMutation.mutate(id)
   }
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  }
+
+  const item = {
+    hidden: { opacity: 0, x: 20 },
+    show: { opacity: 1, x: 0 }
+  }
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -213,7 +227,7 @@ export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
           Pièces jointes
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:max-w-md">
+      <SheetContent side="right" className="w-full sm:max-w-md border-border/50 bg-background/80 backdrop-blur-xl">
         <SheetHeader>
           <SheetTitle>Pièces jointes</SheetTitle>
           <SheetDescription>
@@ -221,7 +235,12 @@ export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex flex-col gap-4 py-4">
+        <motion.div
+          className="flex flex-col gap-4 py-4"
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
           {/* File input */}
           <input
             ref={fileInputRef}
@@ -233,7 +252,7 @@ export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
 
           {/* Upload section */}
           {selectedFile ? (
-            <div className="space-y-3 p-4 border rounded-lg bg-muted/30">
+            <motion.div variants={item} className="space-y-3 p-4 border rounded-lg bg-muted/30 border-border/50">
               {/* Preview */}
               <div className="flex items-start gap-3">
                 {previewUrl ? (
@@ -301,10 +320,10 @@ export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
                   </>
                 )}
               </Button>
-            </div>
+            </motion.div>
           ) : (
             <Button
-              className="w-full"
+              className="w-full backdrop-blur-sm"
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
             >
@@ -327,9 +346,10 @@ export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
                 const isProcessing = processingId === attachment.id
 
                 return (
-                  <div
+                  <motion.div
                     key={attachment.id}
-                    className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                    variants={item}
+                    className="flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-card/50 hover:bg-accent/50 transition-colors backdrop-blur-sm"
                   >
                     <div className="shrink-0">
                       <Icon className="h-5 w-5 text-muted-foreground" />
@@ -385,7 +405,7 @@ export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                  </div>
+                  </motion.div>
                 )
               })
             ) : (
@@ -395,8 +415,9 @@ export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
               </div>
             )}
           </div>
-        </div>
-      </SheetContent>
-    </Sheet>
+
+        </motion.div>
+      </SheetContent >
+    </Sheet >
   )
 }

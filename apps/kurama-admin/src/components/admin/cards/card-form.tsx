@@ -20,6 +20,7 @@ import {
 import { createCardSchema, type CreateCardInput, type CardOption } from '@/lib/schemas'
 import { Loader2, Plus, Trash2 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
+import { motion } from 'framer-motion'
 
 interface Lesson {
   id: number
@@ -146,9 +147,27 @@ export function CardForm({
     )
   }
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  }
+
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 }
+  }
+
+  const fadeIn = {
+    hidden: { opacity: 0, height: 0, overflow: 'hidden' },
+    show: { opacity: 1, height: 'auto', transition: { duration: 0.3 } }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto border-border/50 bg-background/80 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? 'Modifier la carte' : 'Nouvelle carte'}
@@ -159,8 +178,14 @@ export function CardForm({
               : 'Remplissez les informations pour créer une nouvelle carte.'}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <motion.form
+          onSubmit={handleSubmit}
+          className="space-y-4"
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div variants={item} className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="lessonId">Leçon</Label>
               <Select
@@ -199,9 +224,9 @@ export function CardForm({
                 </SelectContent>
               </Select>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="space-y-2">
+          <motion.div variants={item} className="space-y-2">
             <Label htmlFor="frontContent">Contenu recto</Label>
             <Textarea
               id="frontContent"
@@ -211,9 +236,9 @@ export function CardForm({
               rows={3}
             />
             {errors.frontContent && <p className="text-sm text-destructive">{errors.frontContent}</p>}
-          </div>
+          </motion.div>
 
-          <div className="space-y-2">
+          <motion.div variants={item} className="space-y-2">
             <Label htmlFor="backContent">Contenu verso</Label>
             <Textarea
               id="backContent"
@@ -223,10 +248,10 @@ export function CardForm({
               rows={3}
             />
             {errors.backContent && <p className="text-sm text-destructive">{errors.backContent}</p>}
-          </div>
+          </motion.div>
 
           {cardType === 'multichoice' && (
-            <div className="space-y-2">
+            <motion.div variants={fadeIn} initial="hidden" animate="show" className="space-y-2">
               <Label>Options</Label>
               <div className="space-y-2">
                 {options.map((option) => (
@@ -258,11 +283,11 @@ export function CardForm({
                   Ajouter une option
                 </Button>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {cardType === 'true_false' && (
-            <div className="space-y-2">
+            <motion.div variants={fadeIn} initial="hidden" animate="show" className="space-y-2">
               <Label htmlFor="correctAnswer">Réponse correcte</Label>
               <Select value={correctAnswer} onValueChange={setCorrectAnswer}>
                 <SelectTrigger>
@@ -273,11 +298,11 @@ export function CardForm({
                   <SelectItem value="false">Faux</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+            </motion.div>
           )}
 
           {cardType === 'fill_blank' && (
-            <div className="space-y-2">
+            <motion.div variants={fadeIn} initial="hidden" animate="show" className="space-y-2">
               <Label htmlFor="correctAnswer">Réponse attendue</Label>
               <Input
                 id="correctAnswer"
@@ -288,10 +313,10 @@ export function CardForm({
               <p className="text-xs text-muted-foreground">
                 Utilisez ___ dans le contenu recto pour indiquer le blanc à remplir.
               </p>
-            </div>
+            </motion.div>
           )}
 
-          <div className="space-y-2">
+          <motion.div variants={item} className="space-y-2">
             <Label htmlFor="explanation">Explication (optionnel)</Label>
             <Textarea
               id="explanation"
@@ -300,9 +325,9 @@ export function CardForm({
               onChange={(e) => setExplanation(e.target.value)}
               rows={2}
             />
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <motion.div variants={item} className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="points">Points</Label>
               <Input
@@ -324,9 +349,9 @@ export function CardForm({
                 onChange={(e) => setDifficulty(parseInt(e.target.value) || 0)}
               />
             </div>
-          </div>
+          </motion.div>
 
-          <div className="flex justify-end gap-2 pt-4">
+          <motion.div variants={item} className="flex justify-end gap-2 pt-4">
             <Button
               type="button"
               variant="outline"
@@ -339,8 +364,8 @@ export function CardForm({
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isEditing ? 'Enregistrer' : 'Créer'}
             </Button>
-          </div>
-        </form>
+          </motion.div>
+        </motion.form>
       </DialogContent>
     </Dialog>
   )

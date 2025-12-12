@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
 import { Plus, Pencil, Trash2, FileText, Search, Eye, EyeOff, Sparkles, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -155,7 +156,7 @@ function LessonsPage() {
           <Link
             to="/lessons/$lessonId"
             params={{ lessonId: lesson.id.toString() }}
-            className="font-medium hover:underline text-primary flex items-center gap-1"
+            className="font-medium hover:underline flex items-center gap-1"
           >
             {lesson.title}
             <ExternalLink className="h-3 w-3" />
@@ -274,7 +275,12 @@ function LessonsPage() {
   ]
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <PageHeader
         title="Leçons"
         description="Gérer les leçons et leur contenu"
@@ -391,6 +397,6 @@ function LessonsPage() {
         isLoading={deleteMutation.isPending}
         variant="destructive"
       />
-    </div>
+    </motion.div>
   )
 }

@@ -14,6 +14,7 @@ import {
   Loader2,
   GraduationCap,
 } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
@@ -65,6 +66,19 @@ const defaultGrades = [
   '6ème', '5ème', '4ème', '3ème',
   'Seconde', 'Première', 'Terminale',
 ]
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+}
 
 function LessonDetailPage() {
   const { lessonId } = Route.useParams()
@@ -248,7 +262,12 @@ function LessonDetailPage() {
   const metadata = lesson.teachPlanMetadata as LessonTeachPlanMetadata | null
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="space-y-6"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
       <PageHeader
         title={lesson.title}
         description={lesson.description || 'Aucune description'}
@@ -266,155 +285,162 @@ function LessonDetailPage() {
       />
 
       {/* Lesson metadata */}
-      <div className="flex flex-wrap gap-4">
-        <Badge variant="outline" className="gap-1">
-          <BookOpen className="h-3 w-3" />
+      <motion.div variants={item} className="p-4 rounded-xl border border-border/50 bg-background/50 backdrop-blur-md flex flex-wrap gap-4 items-center">
+        <Badge variant="outline" className="gap-2 px-3 py-1.5 text-base border-primary/20 bg-primary/5">
+          <BookOpen className="h-4 w-4 text-primary" />
           {lesson.subjectName}
         </Badge>
         {lesson.difficulty && (
-          <Badge variant="secondary">
+          <Badge variant="secondary" className="px-3 py-1.5 text-base">
             {difficultyLabels[lesson.difficulty] || lesson.difficulty}
           </Badge>
         )}
         {lesson.estimatedDuration && (
-          <Badge variant="outline" className="gap-1">
-            <Clock className="h-3 w-3" />
+          <Badge variant="outline" className="gap-2 px-3 py-1.5 text-base border-primary/20 bg-primary/5">
+            <Clock className="h-4 w-4 text-primary" />
             {lesson.estimatedDuration} min
           </Badge>
         )}
-        <Badge variant={lesson.isPublished ? 'default' : 'secondary'}>
+        <Badge
+          variant={lesson.isPublished ? 'default' : 'secondary'}
+          className="px-3 py-1.5 text-base"
+        >
           {lesson.isPublished ? 'Publié' : 'Brouillon'}
         </Badge>
-        <Badge variant="outline" className="gap-1">
-          <FileText className="h-3 w-3" />
+        <Badge variant="outline" className="gap-2 px-3 py-1.5 text-base border-primary/20 bg-primary/5">
+          <FileText className="h-4 w-4 text-primary" />
           {cardsData?.total || 0} cartes
         </Badge>
-      </div>
+      </motion.div>
 
       {/* Teach Plan Section */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5" />
-              Plan d'enseignement
-            </CardTitle>
-            <CardDescription>
-              {lesson.teachPlanGeneratedAt
-                ? `Généré le ${new Date(lesson.teachPlanGeneratedAt).toLocaleDateString('fr-FR')}`
-                : 'Aucun plan généré'}
-            </CardDescription>
-          </div>
-          <div className="flex gap-2">
-            {lesson.teachPlan && !isEditing && (
-              <>
-                <Button variant="outline" size="sm" onClick={handleStartEdit}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Modifier
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCardGenerateDialogOpen(true)}
-                >
-                  <FileText className="mr-2 h-4 w-4" />
-                  Générer des cartes
-                </Button>
-              </>
-            )}
-            <Button
-              size="sm"
-              onClick={() => {
-                // Auto-fill from previous metadata if available
-                const prevMetadata = lesson.teachPlanMetadata as LessonTeachPlanMetadata | null
-                if (prevMetadata) {
-                  setGenerationParams({
-                    country: prevMetadata.country || "Côte d'Ivoire",
-                    grade: prevMetadata.grade || grades[0] || '3ème',
-                    language: (prevMetadata.language as 'French' | 'English') || 'French',
-                    schoolYear: '2025-2026',
-                    customInstructions: '',
-                  })
-                } else {
-                  // Set default grade to first available
-                  setGenerationParams((prev) => ({
-                    ...prev,
-                    grade: grades[0] || '3ème',
-                  }))
-                }
-                setGenerateDialogOpen(true)
-              }}
-              disabled={generatePlanMutation.isPending}
-            >
-              <Sparkles className="mr-2 h-4 w-4" />
-              {lesson.teachPlan ? 'Régénérer' : 'Générer avec IA'}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isEditing ? (
-            <div className="space-y-4">
-              <Textarea
-                value={editedTeachPlan}
-                onChange={(e) => setEditedTeachPlan(e.target.value)}
-                className="min-h-[400px] font-mono text-sm"
-                placeholder="Contenu Markdown du plan de leçon..."
-              />
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={handleCancelEdit}>
-                  <X className="mr-2 h-4 w-4" />
-                  Annuler
-                </Button>
-                <Button
-                  onClick={() => updatePlanMutation.mutate()}
-                  disabled={updatePlanMutation.isPending}
-                >
-                  {updatePlanMutation.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="mr-2 h-4 w-4" />
-                  )}
-                  Enregistrer
-                </Button>
-              </div>
-            </div>
-          ) : lesson.teachPlan ? (
-            <div className="space-y-6">
-              <MarkdownRenderer content={lesson.teachPlan} />
-
-              {/* Sources */}
-              {metadata?.sources && metadata.sources.length > 0 && (
-                <div className="border-t pt-6">
-                  <h4 className="text-sm font-semibold mb-3">Sources</h4>
-                  <ul className="space-y-2">
-                    {metadata.sources.map((source, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <ExternalLink className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
-                        <a
-                          href={source.uri}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-primary hover:underline break-all"
-                        >
-                          {source.title || source.uri}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+      <motion.div variants={item}>
+        <Card className="border-border/50 bg-background/50 backdrop-blur-xl shadow-lg">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6 border-b border-border/50">
+            <div>
+              <CardTitle className="flex items-center gap-3 text-xl">
+                <div className="bg-primary/10 p-2 rounded-lg">
+                  <GraduationCap className="h-6 w-6 text-primary" />
                 </div>
+                Plan d'enseignement
+              </CardTitle>
+              <CardDescription className="mt-2 text-base">
+                {lesson.teachPlanGeneratedAt
+                  ? `Généré le ${new Date(lesson.teachPlanGeneratedAt).toLocaleDateString('fr-FR')}`
+                  : 'Aucun plan généré'}
+              </CardDescription>
+            </div>
+            <div className="flex gap-2">
+              {lesson.teachPlan && !isEditing && (
+                <>
+                  <Button variant="outline" size="sm" onClick={handleStartEdit}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Modifier
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCardGenerateDialogOpen(true)}
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Générer des cartes
+                  </Button>
+                </>
               )}
+              <Button
+                size="sm"
+                onClick={() => {
+                  // Auto-fill from previous metadata if available
+                  const prevMetadata = lesson.teachPlanMetadata as LessonTeachPlanMetadata | null
+                  if (prevMetadata) {
+                    setGenerationParams({
+                      country: prevMetadata.country || "Côte d'Ivoire",
+                      grade: prevMetadata.grade || grades[0] || '3ème',
+                      language: (prevMetadata.language as 'French' | 'English') || 'French',
+                      schoolYear: '2025-2026',
+                      customInstructions: '',
+                    })
+                  } else {
+                    // Set default grade to first available
+                    setGenerationParams((prev) => ({
+                      ...prev,
+                      grade: grades[0] || '3ème',
+                    }))
+                  }
+                  setGenerateDialogOpen(true)
+                }}
+                disabled={generatePlanMutation.isPending}
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                {lesson.teachPlan ? 'Régénérer' : 'Générer avec IA'}
+              </Button>
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <Sparkles className="mx-auto h-12 w-12 text-muted-foreground/50" />
-              <h3 className="mt-4 text-lg font-semibold">Aucun plan d'enseignement</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Cliquez sur "Générer avec IA" pour créer un plan de leçon basé sur le curriculum ivoirien.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            {isEditing ? (
+              <div className="space-y-4">
+                <Textarea
+                  value={editedTeachPlan}
+                  onChange={(e) => setEditedTeachPlan(e.target.value)}
+                  className="min-h-[400px] font-mono text-sm"
+                  placeholder="Contenu Markdown du plan de leçon..."
+                />
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={handleCancelEdit}>
+                    <X className="mr-2 h-4 w-4" />
+                    Annuler
+                  </Button>
+                  <Button
+                    onClick={() => updatePlanMutation.mutate()}
+                    disabled={updatePlanMutation.isPending}
+                  >
+                    {updatePlanMutation.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="mr-2 h-4 w-4" />
+                    )}
+                    Enregistrer
+                  </Button>
+                </div>
+              </div>
+            ) : lesson.teachPlan ? (
+              <div className="space-y-6">
+                <MarkdownRenderer content={lesson.teachPlan} />
+
+                {/* Sources */}
+                {metadata?.sources && metadata.sources.length > 0 && (
+                  <div className="border-t pt-6">
+                    <h4 className="text-sm font-semibold mb-3">Sources</h4>
+                    <ul className="space-y-2">
+                      {metadata.sources.map((source, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <ExternalLink className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                          <a
+                            href={source.uri}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-primary hover:underline break-all"
+                          >
+                            {source.title || source.uri}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Sparkles className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                <h3 className="mt-4 text-lg font-semibold">Aucun plan d'enseignement</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Cliquez sur "Générer avec IA" pour créer un plan de leçon basé sur le curriculum ivoirien.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Generate Plan Dialog */}
       <Dialog open={generateDialogOpen} onOpenChange={setGenerateDialogOpen}>
@@ -656,6 +682,6 @@ function LessonDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   )
 }
