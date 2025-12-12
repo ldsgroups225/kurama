@@ -119,7 +119,7 @@ Génère un tableau JSON avec cette structure pour chaque carte:
 
 
 /**
- * Generate the prompt for RAG-enhanced card generation
+ * Generate the prompt for RAG card generation
  * Combines lesson plan with document chunks for grounded generation
  */
 export function getRAGCardPrompt(context: RAGContext, amount: number): string {

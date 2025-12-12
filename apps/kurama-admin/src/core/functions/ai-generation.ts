@@ -298,7 +298,7 @@ export const generateTeachPlan = createServerFn({ method: 'POST' })
 const VECTOR_SEARCH_THRESHOLD = 10
 const ADVANCED_SEARCH_THRESHOLD = 30
 
-// Generate complete cards from teach plan with RAG enhancement
+// Generate complete cards from teach plan with RAG
 export const generateCardsFromPlan = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])
   .inputValidator((data: GenerateCardsInput) => generateCardsSchema.parse(data))

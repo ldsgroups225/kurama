@@ -25,7 +25,7 @@ export function syncSessionCache(session: { data: { user?: { id: string } } | nu
 }
 
 /**
- * Enhanced sign out that clears user-specific auth state
+ * Sign out that clears user-specific auth state
  * Preserves app-level cache and preferences
  *
  * @param queryClient - Optional TanStack Query client to clear user-specific queries

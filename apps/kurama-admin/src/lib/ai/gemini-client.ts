@@ -30,7 +30,7 @@ export interface CompleteCardResult {
   bloomsLevel?: string
 }
 
-// RAG context for enhanced card generation
+// RAG context for card generation
 export interface RAGContext {
   lessonPlan: string
   attachmentChunks: { text: string; source: string; pageNumber?: number | null }[]
@@ -97,8 +97,8 @@ export async function generateLessonPlan(
   }
 }
 
-// Enhanced card schema with additional metadata (per Gemini best practices)
-const enhancedCardSchema = {
+// Card schema with additional metadata (per Gemini best practices)
+const cardSchema = {
   type: Type.OBJECT,
   properties: {
     title: {
@@ -166,7 +166,7 @@ const enhancedCardSchema = {
 
 /**
  * Generate complete cards (flashcard + quiz) from lesson content using Gemini AI
- * Legacy function - use generateCardsWithRAG for enhanced generation
+ * Legacy function - use generateCardsWithRAG for generation
  */
 export async function generateCompleteCards(
   apiKey: string,
@@ -185,7 +185,7 @@ export async function generateCompleteCards(
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.ARRAY,
-          items: enhancedCardSchema,
+          items: cardSchema,
         },
       },
     })
@@ -221,7 +221,7 @@ export async function generateCardsWithRAG(
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.ARRAY,
-          items: enhancedCardSchema,
+          items: cardSchema,
         },
       },
     })

@@ -1,5 +1,5 @@
 /**
- * Vector search and embedding queries for RAG-enhanced card generation
+ * Vector search and embedding queries for RAG card generation
  * Phase 4: Advanced vector search with hybrid retrieval
  */
 import { eq, desc, sql, and, or, ilike } from 'drizzle-orm'
@@ -181,7 +181,7 @@ function calculateTextOverlap(text1: string, text2: string): number {
 }
 
 // ============================================================================
-// Phase 4: Advanced Vector Search Enhancement
+// Phase 4: Advanced Vector Search
 // ============================================================================
 
 /**

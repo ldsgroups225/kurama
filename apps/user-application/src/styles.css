@@ -256,6 +256,7 @@
 }
 
 @layer base {
+
   /* NATIVE APP GLOBAL RESET */
   :root {
     /* App-like sizing */
@@ -299,7 +300,7 @@
     @apply text-[17px] leading-relaxed tracking-tight;
   }
 
-  /* Re-enable text selection for inputs and enhance touch targets */
+  /* Re-enable text selection for inputs and touch targets */
   input,
   textarea,
   [contenteditable] {
@@ -341,6 +342,7 @@
 }
 
 @layer utilities {
+
   /* XP System Gradients */
   .bg-gradient-xp {
     background: linear-gradient(to bottom right, var(--xp-from), var(--xp-to));

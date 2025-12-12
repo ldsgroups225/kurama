@@ -69,7 +69,7 @@ async function checkConnectivity(): Promise<boolean> {
 }
 
 /**
- * Custom hook for tracking online/offline status with enhanced connectivity checks
+ * Custom hook for tracking online/offline status with connectivity checks
  *
  * Features:
  * - Uses useSyncExternalStore for robust subscription to browser events

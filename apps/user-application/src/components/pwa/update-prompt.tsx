@@ -7,7 +7,7 @@ import { setupUpdateStrategy, skipWaiting } from '@/lib/sw-update-strategy'
 /**
  * Update Prompt Component
  * Shows a prompt when a new service worker version is available
- * Uses the enhanced update strategy with periodic checks every hour
+ * Uses the update strategy with periodic checks every hour
  */
 export function UpdatePrompt() {
   const [showPrompt, setShowPrompt] = useState(false)
