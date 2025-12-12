@@ -49,7 +49,6 @@ interface StoredFormData {
   difficulty: string
   estimatedDuration?: number
   isPublished: boolean
-  displayOrder: number
 }
 
 function loadStoredFormData(): StoredFormData | null {
@@ -128,7 +127,6 @@ export function LessonForm({
         setDifficulty(stored.difficulty || '')
         setEstimatedDuration(stored.estimatedDuration)
         setIsPublished(stored.isPublished || false)
-        setDisplayOrder(stored.displayOrder || 0)
       }
       setTitle('')
       setDescription('')
@@ -183,7 +181,7 @@ export function LessonForm({
       return
     }
 
-    // Save form data to localStorage (excluding title/description)
+    // Save form data to localStorage (excluding title/description/displayOrder)
     saveFormData({
       subjectId,
       gradeId,
@@ -191,7 +189,6 @@ export function LessonForm({
       difficulty,
       estimatedDuration,
       isPublished,
-      displayOrder,
     })
 
     await onSubmit(result.data)
@@ -341,6 +338,21 @@ export function LessonForm({
                 onChange={(e) => setEstimatedDuration(e.target.value ? parseInt(e.target.value) : undefined)}
               />
             </div>
+          </motion.div>
+
+          <motion.div variants={item} className="space-y-2">
+            <Label htmlFor="displayOrder">Ordre d'affichage</Label>
+            <Input
+              id="displayOrder"
+              type="number"
+              min={0}
+              placeholder="0"
+              value={displayOrder || ''}
+              onChange={(e) => setDisplayOrder(e.target.value ? parseInt(e.target.value) : 0)}
+            />
+            <p className="text-sm text-muted-foreground">
+              Position de la leçon dans la liste (0 = premier)
+            </p>
           </motion.div>
 
           <motion.div variants={item} className="flex flex-row items-center justify-between rounded-lg border border-border/50 bg-background/50 p-3">
