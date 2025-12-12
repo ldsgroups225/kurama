@@ -117,6 +117,7 @@ catalogs:
 
   # Database & backend
   backend:
+    aws4fetch: ^1.0.20
     hono: ^4.10.8
     drizzle-orm: ^0.45.1
     drizzle-kit: ^0.31.8

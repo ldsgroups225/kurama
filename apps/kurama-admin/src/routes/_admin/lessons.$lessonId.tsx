@@ -43,6 +43,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { PageHeader, MarkdownRenderer } from '@/components/shared'
+import { AttachmentsSheet } from '@/components/admin/lessons/attachments-sheet'
 import { getLesson } from '@/core/functions/lessons'
 import { getCards } from '@/core/functions/cards'
 import { getGradesSimple } from '@/core/functions/users'
@@ -250,12 +251,15 @@ function LessonDetailPage() {
         title={lesson.title}
         description={lesson.description || 'Aucune description'}
         actions={
-          <Button variant="outline" asChild>
-            <Link to="/lessons">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Retour
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <AttachmentsSheet lessonId={lessonIdNum} />
+            <Button variant="outline" asChild>
+              <Link to="/lessons">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Retour
+              </Link>
+            </Button>
+          </div>
         }
       />
 

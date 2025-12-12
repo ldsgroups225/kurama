@@ -22,14 +22,18 @@
     "./queries/*": {
       "default": "./dist/queries/*.js",
       "types": "./dist/queries/*.d.ts"
+    },
+    "./storage": {
+      "default": "./dist/storage/index.js",
+      "types": "./dist/storage/index.d.ts"
     }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json --outDir ./dist && tsc-alias",
     "better-auth:generate": "mkdir -p src/drizzle && npx @better-auth/cli@latest generate --config ./config/auth.ts --output ./src/drizzle/auth-schema.ts",
-    "drizzle:generate": "drizzle-kit generate --config drizzle.config.ts",
-    "drizzle:migrate": "drizzle-kit migrate --config drizzle.config.ts",
-    "drizzle:pull": "drizzle-kit pull --config drizzle.config.ts",
+    "drizzle:generate": "npx dotenv-cli -e .env.development -- drizzle-kit generate --config drizzle.config.ts",
+    "drizzle:migrate": "npx dotenv-cli -e .env.development -- drizzle-kit migrate --config drizzle.config.ts",
+    "drizzle:pull": "npx dotenv-cli -e .env.development -- drizzle-kit pull --config drizzle.config.ts",
     "seed": "tsx src/seeds/seed-db.ts",
     "seed:lessons": "tsx src/seeds/seed-all-comprehensive.ts",
     "typecheck": "tsc --noEmit"
@@ -43,6 +47,7 @@
     "@planetscale/database": "catalog:backend",
     "@polar-sh/better-auth": "catalog:integrations",
     "@polar-sh/sdk": "catalog:integrations",
+    "aws4fetch": "catalog:backend",
     "better-auth": "catalog:frontend",
     "better-sqlite3": "catalog:backend",
     "drizzle-orm": "catalog:backend",
@@ -52,6 +57,7 @@
     "@cloudflare/workers-types": "catalog:backend",
     "@types/better-sqlite3": "catalog:dev",
     "dotenv": "catalog:dev",
+    "dotenv-cli": "^11.0.0",
     "drizzle-kit": "catalog:backend",
     "mysql2": "catalog:backend",
     "postgres": "catalog:backend",
