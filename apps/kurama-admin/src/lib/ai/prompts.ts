@@ -15,6 +15,18 @@ export interface CardGenerationPromptParams {
   amount: number
 }
 
+export interface RAGContext {
+  lessonPlan: string
+  attachmentChunks: { text: string; source: string; pageNumber?: number | null }[]
+  metadata: {
+    subject: string
+    grade?: string
+    series?: string
+    difficulty?: string
+    lessonTitle?: string
+  }
+}
+
 /**
  * Generate the prompt for lesson plan generation
  */
@@ -103,4 +115,81 @@ Génère un tableau JSON avec cette structure pour chaque carte:
   }
 ]
 `
+}
+
+
+/**
+ * Generate the prompt for RAG-enhanced card generation
+ * Combines lesson plan with document chunks for grounded generation
+ */
+export function getRAGCardPrompt(context: RAGContext, amount: number): string {
+  const { lessonPlan, attachmentChunks, metadata } = context
+
+  let prompt = `Tu es un expert en création de contenu éducatif pour le système scolaire ivoirien.
+Tu dois créer des cartes d'étude PRÉCISES et FACTUELLES basées uniquement sur les informations fournies.
+
+## Contexte de la leçon
+- **Matière:** ${metadata.subject}
+${metadata.lessonTitle ? `- **Titre:** ${metadata.lessonTitle}` : ''}
+${metadata.grade ? `- **Niveau:** ${metadata.grade}` : ''}
+${metadata.series ? `- **Série:** ${metadata.series}` : ''}
+${metadata.difficulty ? `- **Difficulté:** ${metadata.difficulty}` : ''}
+
+## Plan de leçon
+${lessonPlan}
+`
+
+  // Add RAG context if available
+  if (attachmentChunks.length > 0) {
+    prompt += `
+## Documents de référence (IMPORTANT: utilise ces informations pour créer des cartes précises)
+Ces extraits proviennent des documents attachés à la leçon. Base tes cartes sur ces informations RÉELLES.
+`
+    for (const chunk of attachmentChunks) {
+      const pageInfo = chunk.pageNumber ? ` (page ${chunk.pageNumber})` : ''
+      prompt += `
+### Source: ${chunk.source}${pageInfo}
+\`\`\`
+${chunk.text}
+\`\`\`
+`
+    }
+  }
+
+  prompt += `
+## Instructions de génération
+Génère exactement **${amount} cartes d'étude** complètes basées sur le contenu ci-dessus.
+
+### Règles CRITIQUES:
+1. **FACTUEL**: Chaque carte doit être basée sur des informations RÉELLES du plan ou des documents
+2. **PAS D'INVENTION**: Ne PAS inventer de faits, dates, noms ou données non présents dans les sources
+3. **VARIÉTÉ**: Varier les niveaux de difficulté (0=facile, 1=moyen, 2=difficile)
+4. **QUIZ PLAUSIBLE**: Les 4 options de quiz doivent être plausibles mais une seule correcte
+5. **INDICES PROGRESSIFS**: Les hints doivent être progressifs (du plus vague au plus précis)
+6. **RÉFÉRENCER**: Utilise sourceReference pour indiquer d'où vient l'information
+7. **BLOOM**: Assigne un niveau de Bloom approprié (remember, understand, apply, analyze)
+8. **FRANÇAIS IVOIRIEN**: Utilise un français approprié au niveau scolaire ivoirien
+
+### Format de sortie
+JSON array de ${amount} cartes avec cette structure:
+{
+  "title": "Titre concis (max 60 car.)",
+  "frontContent": "Question/terme en Markdown",
+  "backContent": "Réponse/définition en Markdown",
+  "question": "Question quiz reformulée",
+  "options": [
+    { "id": "A", "text": "Option A", "isCorrect": false },
+    { "id": "B", "text": "Option B", "isCorrect": true },
+    { "id": "C", "text": "Option C", "isCorrect": false },
+    { "id": "D", "text": "Option D", "isCorrect": false }
+  ],
+  "explanation": "Explication détaillée",
+  "hints": ["Indice 1 (vague)", "Indice 2 (plus précis)"],
+  "difficulty": 0|1|2,
+  "sourceReference": "Nom du document ou section",
+  "bloomsLevel": "remember|understand|apply|analyze"
+}
+`
+
+  return prompt
 }

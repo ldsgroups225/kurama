@@ -740,13 +740,7 @@ export async function generateCardsWithFunctionCalling(
     },
   ]
 
-  // Initial conversation
-  const contents: { role: string; parts: { text?: string; functionCall?: unknown; functionResponse?: unknown }[] }[] = [
-    {
-      role: 'user',
-      parts: [
-        {
-          text: `Tu es un expert en création de contenu éducatif pour le système scolaire ivoirien.
+  const initialPrompt = `Tu es un expert en création de contenu éducatif pour le système scolaire ivoirien.
 
 ## Plan de leçon
 ${lessonPlan}
@@ -771,12 +765,10 @@ Tu as accès à des fonctions pour:
 Quand tu as terminé tes recherches, génère un JSON array avec ${amount} cartes.
 Chaque carte: title, frontContent, backContent, question, options (4), explanation, hints, difficulty (0-2), sourceReference, bloomsLevel.
 
-Commence par explorer le contexte avec les fonctions disponibles.`,
-        },
-      ],
-    },
-  ]
+Commence par explorer le contexte avec les fonctions disponibles.`
 
+  // Track conversation as simple string for context
+  let conversationContext = initialPrompt
   const functionCallsLog: string[] = []
   const maxIterations = 15
   let iteration = 0
@@ -787,7 +779,7 @@ Commence par explorer le contexte avec les fonctions disponibles.`,
     try {
       const response = await ai.models.generateContent({
         model,
-        contents,
+        contents: conversationContext,
         config: { tools },
       })
 
@@ -796,7 +788,8 @@ Commence par explorer le contexte avec les fonctions disponibles.`,
       if (functionCalls && functionCalls.length > 0) {
         // Process each function call
         for (const fc of functionCalls) {
-          const { name, args } = fc
+          const name = fc.name || 'unknown'
+          const args = fc.args || {}
           console.log(`[FunctionCall] ${name}(${JSON.stringify(args)})`)
           functionCallsLog.push(`${name}(${JSON.stringify(args)})`)
 
@@ -804,23 +797,12 @@ Commence par explorer le contexte avec les fonctions disponibles.`,
           const result = await executeFunctionCall(name, args as Record<string, unknown>, ctx)
           console.log(`[FunctionResult] ${name}:`, JSON.stringify(result.result).slice(0, 200))
 
-          // Add function call and response to conversation
-          contents.push({
-            role: 'model',
-            parts: [{ functionCall: fc }],
-          })
-          contents.push({
-            role: 'user',
-            parts: [
-              {
-                functionResponse: {
-                  name,
-                  response: { result: result.result },
-                },
-              },
-            ],
-          })
+          // Add to conversation context
+          conversationContext += `\n\n[Résultat de ${name}]: ${JSON.stringify(result.result)}`
         }
+
+        // Ask model to continue
+        conversationContext += `\n\nContinue avec les informations obtenues. Si tu as assez d'informations, génère les ${amount} cartes en JSON.`
       } else {
         // No more function calls - try to parse the final response
         const text = response.text || ''
@@ -834,33 +816,11 @@ Commence par explorer le contexte avec les fonctions disponibles.`,
             return { cards, functionCalls: functionCallsLog }
           } catch {
             // JSON parsing failed, ask model to format correctly
-            contents.push({
-              role: 'model',
-              parts: [{ text }],
-            })
-            contents.push({
-              role: 'user',
-              parts: [
-                {
-                  text: `Le JSON n'est pas valide. Génère uniquement un JSON array valide avec ${amount} cartes, sans texte supplémentaire.`,
-                },
-              ],
-            })
+            conversationContext += `\n\n${text}\n\nLe JSON n'est pas valide. Génère uniquement un JSON array valide avec ${amount} cartes, sans texte supplémentaire.`
           }
         } else {
           // No JSON found, prompt for final output
-          contents.push({
-            role: 'model',
-            parts: [{ text }],
-          })
-          contents.push({
-            role: 'user',
-            parts: [
-              {
-                text: `Maintenant génère le JSON array final avec ${amount} cartes basées sur les informations collectées.`,
-              },
-            ],
-          })
+          conversationContext += `\n\n${text}\n\nMaintenant génère le JSON array final avec ${amount} cartes basées sur les informations collectées.`
         }
       }
     } catch (error) {
