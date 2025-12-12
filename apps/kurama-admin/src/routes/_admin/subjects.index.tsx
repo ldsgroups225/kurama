@@ -90,15 +90,17 @@ function SubjectsPage() {
           <div className="text-sm text-muted-foreground">{subject.abbreviation}</div>
         </div>
       ),
+      className: 'w-32 min-w-32',
     },
     {
       key: 'description',
       header: 'Description',
       cell: (subject: Subject) => (
-        <span className="text-muted-foreground line-clamp-1">
+        <span className="text-muted-foreground block truncate" title={subject.description || undefined}>
           {subject.description || '-'}
         </span>
       ),
+      className: 'max-w-xs',
     },
     {
       key: 'stats',
@@ -115,6 +117,7 @@ function SubjectsPage() {
           </Badge>
         </div>
       ),
+      className: 'w-36',
     },
     {
       key: 'order',
@@ -183,14 +186,7 @@ function SubjectsPage() {
 
       <DataTable
         columns={columns}
-        data={data?.subjects.map((subject) => {
-          // if description is too long, show in ellipsis
-          const description = subject.description || ''
-          if (description.length > 110) {
-            return { ...subject, id: subject.id, description: description.substring(0, 110) + '...' }
-          }
-          return { ...subject, id: subject.id }
-        }) || []}
+        data={data?.subjects || []}
         page={page}
         totalPages={data?.totalPages || 1}
         total={data?.total || 0}
