@@ -129,6 +129,7 @@ function LessonDetailPage() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lesson', lessonIdNum] })
+      queryClient.invalidateQueries({ queryKey: ['lessons'] })
       setGenerateDialogOpen(false)
       toast.success('Plan de leçon généré avec succès')
     },
@@ -181,6 +182,7 @@ function LessonDetailPage() {
     onSuccess: (result) => {
       const data = result as { success: boolean; savedCount: number }
       queryClient.invalidateQueries({ queryKey: ['cards', { lessonId: lessonIdNum }] })
+      queryClient.invalidateQueries({ queryKey: ['lessons'] })
       setPreviewDialogOpen(false)
       setGeneratedCards([])
       toast.success(`${data.savedCount} cartes enregistrées`)
