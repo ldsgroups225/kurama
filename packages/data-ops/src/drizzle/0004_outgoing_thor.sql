@@ -1,0 +1,1 @@
+ALTER TABLE "lessons_content_file" ALTER COLUMN "embedding" SET DATA TYPE vector(768);

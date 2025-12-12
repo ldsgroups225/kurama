@@ -1,5 +1,21 @@
-import { pgTable, text, timestamp, unique, boolean, foreignKey, serial, integer, json, primaryKey } from "drizzle-orm/pg-core"
+import { pgTable, text, timestamp, unique, boolean, foreignKey, serial, integer, json, primaryKey, customType, index } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
+
+// Custom type for pgvector
+const vector = customType<{ data: number[]; driverData: string; config: { dimensions: number } }>({
+	dataType(config) {
+		return config?.dimensions ? `vector(${config.dimensions})` : 'vector'
+	},
+	toDriver(value: number[]): string {
+		return `[${value.join(',')}]`
+	},
+	fromDriver(value: string): number[] {
+		return value
+			.slice(1, -1)
+			.split(',')
+			.map((v) => parseFloat(v))
+	},
+})
 
 
 
@@ -342,6 +358,49 @@ export const levelSeries = pgTable("level_series", {
 	primaryKey({ columns: [table.gradeId, table.seriesId], name: "level_series_grade_id_series_id_pk" }),
 ]);
 
+// Lesson content files - Parent table for uploaded attachments
+export const lessonsContentFile = pgTable("lessons_content_file", {
+	id: serial().primaryKey().notNull(),
+	lessonId: integer("lesson_id").notNull(),
+	fileUrl: text("file_url").notNull(),
+	fileName: text("file_name").notNull(),
+	fileTitle: text("file_title"), // User-provided title
+	fileType: text("file_type").default('pdf').notNull(),
+	fileSize: integer("file_size"), // Size in bytes
+	hasEmbeddings: boolean("has_embeddings").default(false).notNull(),
+	totalChunks: integer("total_chunks").default(0),
+	extractedText: text("extracted_text"), // Full extracted text for reference
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+		columns: [table.lessonId],
+		foreignColumns: [lessons.id],
+		name: "lessons_content_file_lesson_id_lessons_id_fk"
+	}).onDelete("cascade"),
+	index("idx_lessons_content_lesson_id").on(table.lessonId),
+	index("idx_lessons_content_created_at").on(table.createdAt),
+]);
+
+// Lesson content chunks - Child table for embedding vectors (RAG)
+export const lessonsContentChunks = pgTable("lessons_content_chunks", {
+	id: serial().primaryKey().notNull(),
+	fileId: integer("file_id").notNull(),
+	chunkText: text("chunk_text").notNull(),
+	chunkIndex: integer("chunk_index").notNull(),
+	pageNumber: integer("page_number"),
+	embedding: vector("embedding", { dimensions: 768 }),
+	metadata: json("metadata").$type<Record<string, unknown>>().default({}),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+		columns: [table.fileId],
+		foreignColumns: [lessonsContentFile.id],
+		name: "lessons_content_chunks_file_id_fk"
+	}).onDelete("cascade"),
+	index("idx_lessons_content_chunks_file_id").on(table.fileId),
+]);
+
 // Insert types
 export type InsertGrade = typeof grades.$inferInsert;
 export type InsertSeries = typeof series.$inferInsert;
@@ -350,11 +409,15 @@ export type InsertLevelSeries = typeof levelSeries.$inferInsert;
 export type InsertSubjectOffering = typeof subjectOfferings.$inferInsert;
 export type InsertLesson = typeof lessons.$inferInsert;
 export type InsertCard = typeof cards.$inferInsert;
+export type InsertLessonsContentFile = typeof lessonsContentFile.$inferInsert;
+export type InsertLessonsContentChunk = typeof lessonsContentChunks.$inferInsert;
 
 // Select types
 export type SelectUserProfile = typeof userProfiles.$inferSelect;
 export type SelectGrade = typeof grades.$inferSelect;
 export type SelectSeries = typeof series.$inferSelect;
+export type SelectLessonsContentFile = typeof lessonsContentFile.$inferSelect;
+export type SelectLessonsContentChunk = typeof lessonsContentChunks.$inferSelect;
 
 // Complex types with relations
 export type UserProfileWithRelations = SelectUserProfile & {

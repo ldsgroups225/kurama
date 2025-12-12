@@ -22,6 +22,27 @@
       "when": 1764871383591,
       "tag": "0002_even_klaw",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1765474170674,
+      "tag": "0003_lame_sleeper",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1765481099245,
+      "tag": "0004_outgoing_thor",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1765482342113,
+      "tag": "0005_fluffy_magik",
+      "breakpoints": true
     }
   ]
 }
