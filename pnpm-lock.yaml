@@ -139,6 +139,9 @@ catalogs:
     '@polar-sh/better-auth':
       specifier: ^1.6.1
       version: 1.6.1
+    '@polar-sh/hono':
+      specifier: ^0.5.1
+      version: 0.5.1
     '@polar-sh/sdk':
       specifier: ^0.41.5
       version: 0.41.5
@@ -419,6 +422,12 @@ importers:
       '@kurama/data-ops':
         specifier: workspace:*
         version: link:../../packages/data-ops
+      '@polar-sh/hono':
+        specifier: catalog:integrations
+        version: 0.5.1(hono@4.10.8)
+      '@polar-sh/sdk':
+        specifier: catalog:integrations
+        version: 0.41.5
       hono:
         specifier: catalog:backend
         version: 4.10.8
@@ -2813,6 +2822,12 @@ packages:
       '@stripe/react-stripe-js': ^3.6.0 || ^4.0.2
       '@stripe/stripe-js': ^7.1.0
       react: ^18 || ^19
+
+  '@polar-sh/hono@0.5.1':
+    resolution: {integrity: sha512-HeTqC+rv8S6fDEkhVmh12Abq7SJuvv5X+eFv/uJupuw7mcyRYA1FeY8BsAk6yv8edS8YJY3U1IEaU0e+pfMj1A==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      hono: ^4.6.16
 
   '@polar-sh/sdk@0.39.1':
     resolution: {integrity: sha512-PSWnp2EX+guVxtLyUwk2hCgsV/FTOXf+nI33xXwAGHyakACEmJOIeHMxlja++t4YVHf+5GZouT9iYE1yxnmIjQ==}
@@ -9976,6 +9991,12 @@ snapshots:
       - react-dom
       - react-is
       - redux
+
+  '@polar-sh/hono@0.5.1(hono@4.10.8)':
+    dependencies:
+      '@polar-sh/adapter-utils': 0.4.1
+      '@polar-sh/sdk': 0.41.5
+      hono: 4.10.8
 
   '@polar-sh/sdk@0.39.1':
     dependencies:

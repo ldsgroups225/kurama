@@ -16,6 +16,11 @@
     "CORS_ORIGIN": "https://kurama.yeko.workers.dev",
     "LOG_LEVEL": "info"
   },
+  // Secrets (set via wrangler secret put):
+  // - POLAR_WEBHOOK_SECRET: Polar webhook signing secret
+  // - DATABASE_HOST: Neon database host
+  // - DATABASE_USERNAME: Neon database username
+  // - DATABASE_PASSWORD: Neon database password
   "observability": {
     "enabled": true
   },

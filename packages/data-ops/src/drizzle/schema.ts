@@ -214,6 +214,11 @@ export const userProfiles = pgTable("user_profiles", {
 	childrenMatricules: json("children_matricules").$type<string[]>(),
 	xp: integer("xp").default(0).notNull(),
 	isCompleted: boolean("is_completed").default(false).notNull(),
+	// Subscription fields
+	subscriptionTier: text("subscription_tier").$type<'free' | 'monthly' | 'quarterly' | 'annual'>().default('free').notNull(),
+	subscriptionExpiresAt: timestamp("subscription_expires_at", { mode: 'string' }),
+	referralCode: text("referral_code"),
+	referredBy: text("referred_by"), // Referral code used at signup
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
@@ -232,6 +237,7 @@ export const userProfiles = pgTable("user_profiles", {
 		foreignColumns: [series.id],
 		name: "user_profiles_series_id_series_id_fk"
 	}).onDelete("set null"),
+	unique("user_profiles_referral_code_unique").on(table.referralCode),
 ]);
 
 export const userProgress = pgTable("user_progress", {
@@ -422,6 +428,144 @@ export const lessonsContentChunks = pgTable("lessons_content_chunks", {
 	index("idx_lessons_content_chunks_file_id").on(table.fileId),
 ]);
 
+// ============================================
+// PAYMENT & SUBSCRIPTION TABLES (Polar SDK)
+// ============================================
+
+// Subscription status type
+export type SubscriptionStatus =
+	| 'incomplete'
+	| 'incomplete_expired'
+	| 'trialing'
+	| 'active'
+	| 'past_due'
+	| 'canceled'
+	| 'unpaid'
+	| 'paused';
+
+// Subscription tier type
+export type SubscriptionTier = 'free' | 'monthly' | 'quarterly' | 'annual';
+
+// Order status type
+export type OrderStatus = 'pending' | 'paid' | 'refunded' | 'failed';
+
+// Billing reason type
+export type BillingReason =
+	| 'purchase'
+	| 'subscription_create'
+	| 'subscription_cycle'
+	| 'subscription_update';
+
+// Referral status type
+export type ReferralStatus = 'pending' | 'completed' | 'expired' | 'rewarded';
+
+// Subscriptions table - Track active subscriptions
+export const subscriptions = pgTable("subscriptions", {
+	id: text("id").primaryKey().notNull(), // Polar subscription ID
+	userId: text("user_id").notNull(),
+	productId: text("product_id").notNull(),
+	priceId: text("price_id"),
+	status: text("status").$type<SubscriptionStatus>().notNull(),
+	currentPeriodStart: timestamp("current_period_start", { mode: 'string' }),
+	currentPeriodEnd: timestamp("current_period_end", { mode: 'string' }),
+	cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false).notNull(),
+	canceledAt: timestamp("canceled_at", { mode: 'string' }),
+	trialStart: timestamp("trial_start", { mode: 'string' }),
+	trialEnd: timestamp("trial_end", { mode: 'string' }),
+	metadata: json("metadata").$type<Record<string, unknown>>(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+		columns: [table.userId],
+		foreignColumns: [authUser.id],
+		name: "subscriptions_user_id_auth_user_id_fk"
+	}).onDelete("cascade"),
+	index("idx_subscriptions_user_id").on(table.userId),
+	index("idx_subscriptions_status").on(table.status),
+]);
+
+// Orders table - Track all payment transactions
+export const orders = pgTable("orders", {
+	id: text("id").primaryKey().notNull(), // Polar order ID
+	userId: text("user_id").notNull(),
+	subscriptionId: text("subscription_id"),
+	productId: text("product_id").notNull(),
+	amount: integer("amount").notNull(), // In cents
+	currency: text("currency").default("usd").notNull(),
+	status: text("status").$type<OrderStatus>().notNull(),
+	checkoutId: text("checkout_id"),
+	billingReason: text("billing_reason").$type<BillingReason>(),
+	paidAt: timestamp("paid_at", { mode: 'string' }),
+	refundedAt: timestamp("refunded_at", { mode: 'string' }),
+	metadata: json("metadata").$type<Record<string, unknown>>(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+		columns: [table.userId],
+		foreignColumns: [authUser.id],
+		name: "orders_user_id_auth_user_id_fk"
+	}).onDelete("cascade"),
+	foreignKey({
+		columns: [table.subscriptionId],
+		foreignColumns: [subscriptions.id],
+		name: "orders_subscription_id_subscriptions_id_fk"
+	}).onDelete("set null"),
+	index("idx_orders_user_id").on(table.userId),
+	index("idx_orders_subscription_id").on(table.subscriptionId),
+	index("idx_orders_status").on(table.status),
+]);
+
+// Referrals table - Track referral program
+export const referrals = pgTable("referrals", {
+	id: serial("id").primaryKey().notNull(),
+	referrerUserId: text("referrer_user_id").notNull(),
+	referredUserId: text("referred_user_id"),
+	referralCode: text("referral_code").notNull(),
+	status: text("status").$type<ReferralStatus>().default('pending').notNull(),
+	rewardAmount: integer("reward_amount").default(300).notNull(), // $3.00 in cents
+	completedAt: timestamp("completed_at", { mode: 'string' }),
+	rewardedAt: timestamp("rewarded_at", { mode: 'string' }),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+		columns: [table.referrerUserId],
+		foreignColumns: [authUser.id],
+		name: "referrals_referrer_user_id_auth_user_id_fk"
+	}).onDelete("cascade"),
+	foreignKey({
+		columns: [table.referredUserId],
+		foreignColumns: [authUser.id],
+		name: "referrals_referred_user_id_auth_user_id_fk"
+	}).onDelete("set null"),
+	index("idx_referrals_referrer").on(table.referrerUserId),
+	index("idx_referrals_code").on(table.referralCode),
+	unique("referrals_referral_code_unique").on(table.referralCode),
+]);
+
+// Discount usage table - Track coupon usage
+export const discountUsage = pgTable("discount_usage", {
+	id: serial("id").primaryKey().notNull(),
+	userId: text("user_id").notNull(),
+	discountCode: text("discount_code").notNull(),
+	orderId: text("order_id"),
+	discountAmount: integer("discount_amount").notNull(), // In cents
+	usedAt: timestamp("used_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+		columns: [table.userId],
+		foreignColumns: [authUser.id],
+		name: "discount_usage_user_id_auth_user_id_fk"
+	}).onDelete("cascade"),
+	foreignKey({
+		columns: [table.orderId],
+		foreignColumns: [orders.id],
+		name: "discount_usage_order_id_orders_id_fk"
+	}).onDelete("set null"),
+	index("idx_discount_usage_user").on(table.userId),
+	unique("discount_usage_user_code_unique").on(table.userId, table.discountCode),
+]);
+
 // Insert types
 export type InsertGrade = typeof grades.$inferInsert;
 export type InsertSeries = typeof series.$inferInsert;
@@ -432,6 +576,10 @@ export type InsertLesson = typeof lessons.$inferInsert;
 export type InsertCard = typeof cards.$inferInsert;
 export type InsertLessonsContentFile = typeof lessonsContentFile.$inferInsert;
 export type InsertLessonsContentChunk = typeof lessonsContentChunks.$inferInsert;
+export type InsertSubscription = typeof subscriptions.$inferInsert;
+export type InsertOrder = typeof orders.$inferInsert;
+export type InsertReferral = typeof referrals.$inferInsert;
+export type InsertDiscountUsage = typeof discountUsage.$inferInsert;
 
 // Select types
 export type SelectUserProfile = typeof userProfiles.$inferSelect;
@@ -439,9 +587,18 @@ export type SelectGrade = typeof grades.$inferSelect;
 export type SelectSeries = typeof series.$inferSelect;
 export type SelectLessonsContentFile = typeof lessonsContentFile.$inferSelect;
 export type SelectLessonsContentChunk = typeof lessonsContentChunks.$inferSelect;
+export type SelectSubscription = typeof subscriptions.$inferSelect;
+export type SelectOrder = typeof orders.$inferSelect;
+export type SelectReferral = typeof referrals.$inferSelect;
+export type SelectDiscountUsage = typeof discountUsage.$inferSelect;
 
 // Complex types with relations
 export type UserProfileWithRelations = SelectUserProfile & {
 	grade: SelectGrade | null;
 	series: SelectSeries | null;
+};
+
+// Subscription with user info
+export type SubscriptionWithUser = SelectSubscription & {
+	user?: { id: string; email: string; name: string } | null;
 };
