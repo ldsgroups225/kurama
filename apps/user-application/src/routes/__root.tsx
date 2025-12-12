@@ -12,6 +12,7 @@ import * as React from 'react'
 import { DefaultCatchBoundary } from '@/components/default-catch-boundary'
 import { NotFound } from '@/components/not-found'
 import { ThemeProvider } from '@/components/theme'
+import { updateCurrencyRate } from '@/lib/currency'
 import { initPerformanceMonitoring } from '@/lib/performance-monitor'
 import { initPreloading } from '@/lib/preload'
 import appCss from '@/styles.css?url'
@@ -31,7 +32,7 @@ export const Route = createRootRouteWithContext<{
           'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover',
       },
       {
-        name: 'apple-mobile-web-app-capable',
+        name: 'mobile-web-app-capable',
         content: 'yes',
       },
       {
@@ -93,6 +94,7 @@ function RootComponent() {
   // Initialize performance monitoring on mount
   React.useEffect(() => {
     initPerformanceMonitoring()
+    void updateCurrencyRate()
   }, [])
 
   // Initialize intelligent preloading based on current route

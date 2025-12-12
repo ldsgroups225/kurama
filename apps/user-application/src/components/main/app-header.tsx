@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { userProfileAtom } from '@/lib/atoms'
 import { useSession } from '@/lib/auth-client'
 import { ArrowLeft, Bell } from '@/lib/icons'
+import { cn } from '@/lib/utils'
 
 interface AppHeaderProps {
   title?: string
@@ -18,6 +19,7 @@ interface AppHeaderProps {
     currentXP: number
     nextLevelXP: number
   }
+  className?: string
 }
 
 export function AppHeader({
@@ -28,6 +30,7 @@ export function AppHeader({
   showBackButton = false,
   onBackClick,
   userLevel,
+  className,
 }: AppHeaderProps) {
   // Use cached profile data from localStorage for instant access
   const [userProfile] = useAtom(userProfileAtom)
@@ -70,10 +73,10 @@ export function AppHeader({
   }
 
   return (
-    <header className={`
+    <header className={cn(`
       sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm
       supports-backdrop-filter:bg-background/60
-    `}
+    `, className)}
     >
       <div className="mx-auto max-w-lg px-4 py-4">
         <div className="flex items-center justify-between">
@@ -102,16 +105,16 @@ export function AppHeader({
             <div>
               {title
                 ? (
-                    <h1 className="text-xl font-bold text-foreground">{title}</h1>
-                  )
+                  <h1 className="text-xl font-bold text-foreground">{title}</h1>
+                )
                 : (
-                    <>
-                      <p className="text-sm text-muted-foreground">{getGreeting()}</p>
-                      <h1 className="text-lg font-bold text-foreground">
-                        {getUserDisplayName()}
-                      </h1>
-                    </>
-                  )}
+                  <>
+                    <p className="text-sm text-muted-foreground">{getGreeting()}</p>
+                    <h1 className="text-lg font-bold text-foreground">
+                      {getUserDisplayName()}
+                    </h1>
+                  </>
+                )}
             </div>
           </div>
 

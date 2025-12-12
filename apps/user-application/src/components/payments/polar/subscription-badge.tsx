@@ -1,13 +1,13 @@
 /**
  * Subscription Badge Component
- * 
+ *
  * A compact badge showing the user's subscription tier.
  */
 
+import type { SubscriptionTier } from '@kurama/data-ops/drizzle/schema'
 import { Crown, Sparkles, Star, Zap } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import type { SubscriptionTier } from '@kurama/data-ops/drizzle/schema'
 
 interface SubscriptionBadgeProps {
   tier: SubscriptionTier
@@ -59,7 +59,7 @@ export function SubscriptionBadge({
   tier,
   size = 'md',
   showIcon = true,
-  className
+  className,
 }: SubscriptionBadgeProps) {
   const config = TIER_CONFIG[tier]
   const Icon = config.icon
@@ -71,7 +71,7 @@ export function SubscriptionBadge({
         'font-medium gap-1',
         SIZE_CLASSES[size],
         config.className,
-        className
+        className,
       )}
     >
       {showIcon && <Icon className={ICON_SIZES[size]} />}
@@ -85,12 +85,13 @@ export function SubscriptionBadge({
  */
 export function SubscriptionIndicator({
   tier,
-  className
+  className,
 }: {
   tier: SubscriptionTier
   className?: string
 }) {
-  if (tier === 'free') return null
+  if (tier === 'free')
+    return null
 
   const config = TIER_CONFIG[tier]
   const Icon = config.icon

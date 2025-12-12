@@ -1,4 +1,5 @@
 export { PricingCard } from './pricing-card'
+export { PricingCarousel } from './pricing-carousel'
 export { PricingGrid } from './pricing-grid'
 export { SubscriptionBadge, SubscriptionIndicator } from './subscription-badge'
 export { SubscriptionStatus } from './subscription-status'

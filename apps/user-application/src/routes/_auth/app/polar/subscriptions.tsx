@@ -1,7 +1,16 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowLeft, Crown, Gift, Shield, Sparkles, Zap } from 'lucide-react'
-import { PricingGrid, SubscriptionStatus, useCheckout } from '@/components/payments/polar'
+import {
+  ArrowLeft,
+  BookOpen,
+  Crown,
+  Flame,
+  Gift,
+  Trophy,
+  Wifi,
+} from 'lucide-react'
+import { motion } from 'motion/react'
+import { PricingCarousel, SubscriptionStatus, useCheckout } from '@/components/payments/polar'
 import { Button } from '@/components/ui/button'
 import { collectSubscription, getProducts, getSubscriptionTier } from '@/core/functions/payments'
 import { authClient } from '@/lib/auth-client'
@@ -28,24 +37,32 @@ export const Route = createFileRoute('/_auth/app/polar/subscriptions')({
 
 const PREMIUM_FEATURES = [
   {
-    icon: Zap,
+    icon: BookOpen,
     title: 'Leçons illimitées',
-    description: 'Accède à toutes les leçons sans restriction',
+    description: 'Accède à tout le contenu disponible sur la plateforme sans aucune restriction.',
+    gradient: 'from-blue-500 to-cyan-500',
+    delay: 0.1,
   },
   {
-    icon: Shield,
+    icon: Wifi,
     title: 'Mode hors-ligne',
-    description: 'Étudie même sans connexion internet',
+    description: 'Télécharges tes cours préférés et continue d\'apprendre même sans internet.',
+    gradient: 'from-green-500 to-emerald-500',
+    delay: 0.2,
   },
   {
-    icon: Sparkles,
+    icon: Trophy,
     title: 'Mode examen',
-    description: 'Simule les conditions réelles du BEPC/BAC',
+    description: 'Prépare tes examens avec des simulations réalistes du BEPC et BAC.',
+    gradient: 'from-purple-500 to-pink-500',
+    delay: 0.3,
   },
   {
-    icon: Crown,
-    title: 'Statistiques avancées',
-    description: 'Suis ta progression en détail',
+    icon: Flame,
+    title: 'Bonus XP',
+    description: 'Gagne deux fois plus d\'expérience et monte plus vite dans le classement.',
+    gradient: 'from-orange-500 to-red-500',
+    delay: 0.4,
   },
 ]
 
@@ -70,87 +87,157 @@ function RouteComponent() {
   })
 
   const { redirectToCheckout, isCheckoutPending } = useCheckout()
-
   const isPremium = tier !== 'free'
 
   return (
-    <div className="container mx-auto max-w-5xl px-4 py-8">
-      {/* Back button */}
-      <Button variant="ghost" size="sm" className="mb-6" asChild>
-        <Link to="/app">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Retour
-        </Link>
-      </Button>
-
-      {/* Header */}
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-level">
-          <Crown className="h-8 w-8 text-white" />
-        </div>
-        <h1 className="mb-2 text-3xl font-bold">
-          {isPremium ? 'Gérer mon abonnement' : 'Passer à Premium'}
-        </h1>
-        <p className="text-muted-foreground">
-          {isPremium
-            ? 'Merci de soutenir Kurama ! Voici les détails de ton abonnement.'
-            : 'Débloquez toutes les fonctionnalités pour réussir vos examens'}
-        </p>
+    <div className="relative min-h-screen bg-black pb-12 text-white">
+      {/* Aurora Background */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="absolute -left-[20%] -top-[10%] h-[70vw] w-[70vw] rounded-full bg-orange-600/10 blur-[120px]" />
+        <div className="absolute -right-[20%] top-[20%] h-[60vw] w-[60vw] rounded-full bg-purple-600/10 blur-[120px]" />
+        <div className="absolute bottom-[10%] left-[30%] h-[50vw] w-[50vw] rounded-full bg-blue-600/10 blur-[120px]" />
       </div>
 
-      {/* Current subscription status (if premium) */}
-      {isPremium && (
-        <div className="mb-8">
-          <SubscriptionStatus showManageButton />
-        </div>
-      )}
-
-      {/* Features grid (if not premium) */}
-      {!isPremium && (
-        <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {PREMIUM_FEATURES.map(feature => (
-            <div
-              key={feature.title}
-              className="rounded-lg border bg-card p-4 text-center"
-            >
-              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-level">
-                <feature.icon className="h-5 w-5 text-white" />
-              </div>
-              <h3 className="mb-1 font-medium">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground">{feature.description}</p>
+      <div className="relative z-10 mx-auto max-w-md px-4 pt-6">
+        {/* Nav */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 flex items-center justify-between"
+        >
+          <Button variant="ghost" size="sm" className="h-9 gap-2 rounded-full border border-white/5 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white" asChild>
+            <Link to="/app/profile">
+              <ArrowLeft className="h-4 w-4" />
+              Retour
+            </Link>
+          </Button>
+          {isPremium && (
+            <div className="rounded-full bg-linear-to-r from-amber-500/20 to-orange-500/20 px-3 py-1">
+              <span className="bg-linear-to-r from-amber-400 to-orange-400 bg-clip-text text-xs font-bold text-transparent">
+                PREMIUM ACTIF
+              </span>
             </div>
-          ))}
-        </div>
-      )}
+          )}
+        </motion.div>
 
-      {/* Trial info banner */}
-      {!isPremium && (
-        <div className="mb-8 rounded-lg bg-linear-to-r from-level/10 to-rare/10 p-4 text-center">
-          <p className="font-medium">
-            🎉 Essai gratuit de 7 jours sur tous les abonnements !
+        {/* Hero */}
+        <motion.div
+          className="relative mb-12 text-center"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+        >
+          <motion.div
+            className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-linear-to-br from-amber-400 via-orange-500 to-red-600 shadow-[0_0_40px_-5px_rgba(249,115,22,0.4)]"
+            initial={{ rotate: -10 }}
+            animate={{ rotate: 0 }}
+            transition={{ type: 'spring', bounce: 0.5, duration: 1.5 }}
+          >
+            <Crown className="h-12 w-12 text-white drop-shadow-md" />
+          </motion.div>
+
+          <h1 className="mb-3 text-4xl font-black tracking-tight">
+            {isPremium
+              ? (
+                <span className="bg-linear-to-br from-white to-zinc-400 bg-clip-text text-transparent">
+                  L'élite de Kurama
+                </span>
+              )
+              : (
+                <span>
+                  Deviens
+                  {' '}
+                  <span className="bg-linear-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+                    Premium
+                  </span>
+                </span>
+              )}
+          </h1>
+          <p className="mx-auto max-w-[280px] text-lg font-medium text-zinc-400">
+            {isPremium
+              ? 'Profite de ton apprentissage sans limites.'
+              : 'Débloque tout le potentiel et apprends 3x plus vite.'}
           </p>
-          <p className="text-sm text-muted-foreground">
-            Annulez à tout moment pendant la période d'essai
+        </motion.div>
+
+        {/* Current Subs */}
+        {isPremium && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-10 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl"
+          >
+            <SubscriptionStatus showManageButton />
+          </motion.div>
+        )}
+
+        {/* Features Grid */}
+        {!isPremium && (
+          <div className="mb-12 grid grid-cols-1 gap-4">
+            {PREMIUM_FEATURES.map(feature => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: feature.delay }}
+                className="group relative overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/40 p-1 backdrop-blur-md transition-colors hover:bg-zinc-900/60"
+              >
+                <div className="flex items-center gap-4 p-3">
+                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br ${feature.gradient} shadow-lg`}>
+                    <feature.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white group-hover:text-amber-400 transition-colors">{feature.title}</h3>
+                    <p className="text-sm font-medium text-zinc-500 leading-snug">{feature.description}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {/* Pricing Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="relative min-h-[400px]"
+        >
+          {/* Trial Banner */}
+          {!isPremium && !subscription && (
+            <div className="mb-6 flex items-center justify-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 py-1.5 text-center text-xs font-bold text-amber-500">
+              <Gift className="h-3 w-3" />
+              7 JOURS D'ESSAI GRATUIT
+            </div>
+          )}
+
+          <PricingCarousel
+            products={products}
+            subscription={subscription}
+            onCheckout={redirectToCheckout}
+            isCheckoutPending={isCheckoutPending}
+          />
+
+          <p className="mt-8 text-center text-xs text-zinc-600">
+            Paiement sécurisé • Annulation à tout moment
           </p>
-        </div>
-      )}
+        </motion.div>
 
-      {/* Pricing grid */}
-      <PricingGrid
-        products={products}
-        subscription={subscription}
-        onCheckout={redirectToCheckout}
-        isCheckoutPending={isCheckoutPending}
-      />
-
-      {/* Referral link */}
-      <div className="mt-8 text-center">
-        <Button variant="outline" asChild>
-          <Link to="/app/referrals">
-            <Gift className="mr-2 h-4 w-4" />
-            Parrainez un ami et gagnez 3€
+        {/* Referral */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="mt-12 text-center"
+        >
+          <Link
+            to="/app/referrals"
+            className="inline-flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-white transition-colors"
+          >
+            <Gift className="h-4 w-4" />
+            Parraine un ami et gagne 3€
           </Link>
-        </Button>
+        </motion.div>
       </div>
     </div>
   )
