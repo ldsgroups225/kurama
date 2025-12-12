@@ -4,7 +4,7 @@
  * Displays the user's current subscription status with management options.
  */
 
-import type { SubscriptionTier } from '@kurama/data-ops/drizzle/schema'
+import type { SelectSubscription, SubscriptionTier } from '@kurama/data-ops/drizzle/schema'
 import { useQuery } from '@tanstack/react-query'
 import { Calendar, CreditCard, Crown, ExternalLink, Loader2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -38,7 +38,7 @@ const TIER_COLORS: Record<SubscriptionTier, string> = {
 }
 
 export function SubscriptionStatus({ className, showManageButton = true }: SubscriptionStatusProps) {
-  const { data: subscription, isLoading: isLoadingSubscription } = useQuery({
+  const { data: subscription, isLoading: isLoadingSubscription } = useQuery<SelectSubscription | null>({
     queryKey: ['subscription'],
     queryFn: () => getSubscription(),
   })

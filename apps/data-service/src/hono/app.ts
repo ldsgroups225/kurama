@@ -4,12 +4,14 @@ import { logger } from 'hono/logger'
 import { polarWebhooks } from './webhooks'
 
 // Extended Env type for the app
-interface AppEnv extends Env {
-  POLAR_WEBHOOK_SECRET: string;
-  DATABASE_HOST: string;
-  DATABASE_USERNAME: string;
-  DATABASE_PASSWORD: string;
-  CORS_ORIGIN?: string;
+interface AppEnv {
+  POLAR_WEBHOOK_SECRET: string
+  DATABASE_HOST: string
+  DATABASE_USERNAME: string
+  DATABASE_PASSWORD: string
+  CORS_ORIGIN?: string
+  API_VERSION?: string
+  ENVIRONMENT?: string
 }
 
 export const app = new Hono<{ Bindings: AppEnv }>()
@@ -18,8 +20,8 @@ export const app = new Hono<{ Bindings: AppEnv }>()
 app.use('*', logger())
 app.use('/api/*', cors({
   origin: (origin, c) => {
-    const allowedOrigin = c.env.CORS_ORIGIN || 'https://kurama.yeko.workers.dev';
-    return origin === allowedOrigin ? origin : allowedOrigin;
+    const allowedOrigin = c.env.CORS_ORIGIN || 'https://kurama.yeko.workers.dev'
+    return origin === allowedOrigin ? origin : allowedOrigin
   },
   credentials: true,
 }))

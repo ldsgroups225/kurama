@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { AlertCircle, CheckCircle2 } from 'lucide-react'
+import { AlertCircle, Crown, PartyPopper } from 'lucide-react'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { LogoLoader } from '@/components/ui/logo-loader'
@@ -28,22 +28,16 @@ export const Route = createFileRoute('/_auth/app/polar/checkout/success')({
   },
   errorComponent: ({ error }) => {
     return (
-      <div className={`
-        h-ful flex flex-col items-center justify-center bg-background px-6 py-12
-      `}
-      >
+      <div className="flex h-full flex-col items-center justify-center bg-background px-6 py-12">
         <div className="w-full max-w-lg space-y-8 text-center">
           <div className="flex justify-center">
             <AlertCircle className="h-16 w-16 text-destructive" />
           </div>
 
           <div className="space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight">Payment Error</h1>
-            <p className={`
-              mx-auto max-w-md text-lg leading-relaxed text-muted-foreground
-            `}
-            >
-              An error occurred while processing your payment.
+            <h1 className="text-4xl font-bold tracking-tight">Erreur de paiement</h1>
+            <p className="mx-auto max-w-md text-lg leading-relaxed text-muted-foreground">
+              Une erreur s'est produite lors du traitement de votre paiement.
             </p>
           </div>
 
@@ -89,7 +83,14 @@ function RouteComponent() {
   const getStatusIcon = () => {
     switch (status) {
       case 'success':
-        return <CheckCircle2 className="h-16 w-16 text-primary" />
+        return (
+          <div className="relative">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-level">
+              <Crown className="h-10 w-10 text-white" />
+            </div>
+            <PartyPopper className="absolute -right-2 -top-2 h-8 w-8 text-level" />
+          </div>
+        )
       case 'error':
         return <AlertCircle className="h-16 w-16 text-destructive" />
       default:
@@ -101,20 +102,18 @@ function RouteComponent() {
     switch (status) {
       case 'success':
         return {
-          title: 'Payment Successful!',
-          description: 'Your subscription has been activated successfully.',
+          title: 'Bienvenue dans Premium ! 🎉',
+          description: 'Ton abonnement a été activé avec succès. Tu as maintenant accès à toutes les fonctionnalités premium.',
         }
       case 'error':
         return {
-          title: 'Payment Processing Error',
-          description:
-            'There was an issue processing your payment. Please contact support.',
+          title: 'Erreur de traitement',
+          description: 'Un problème est survenu lors du traitement de ton paiement. Contacte le support si le problème persiste.',
         }
       default:
         return {
-          title: 'Processing Your Payment',
-          description:
-            'We\'re verifying your payment details. This may take a few moments...',
+          title: 'Traitement en cours...',
+          description: 'Nous vérifions ton paiement. Cela peut prendre quelques instants...',
         }
     }
   }
@@ -122,54 +121,54 @@ function RouteComponent() {
   const { title, description } = getStatusMessage()
 
   return (
-    <div className={`
-      flex h-full flex-col items-center justify-center bg-background px-6 py-12
-    `}
-    >
+    <div className="flex h-full flex-col items-center justify-center bg-background px-6 py-12">
       <div className="w-full max-w-lg space-y-8 text-center">
         <div className="flex justify-center">{getStatusIcon()}</div>
 
         <div className="space-y-4">
           <h1 className="text-4xl font-bold tracking-tight">{title}</h1>
-          <p className={`
-            mx-auto max-w-md text-lg leading-relaxed text-muted-foreground
-          `}
-          >
+          <p className="mx-auto max-w-md text-lg leading-relaxed text-muted-foreground">
             {description}
           </p>
         </div>
 
         <div className="space-y-6">
           {status === 'success' && (
-            <Button
-              onClick={() => nav({ to: '/app' })}
-              size="lg"
-              className="px-8 py-3"
-            >
-              Continue to Dashboard
-            </Button>
+            <div className="space-y-4">
+              {/* Premium features unlocked */}
+              <div className="rounded-lg bg-linear-to-r from-level/10 to-rare/10 p-4">
+                <p className="text-sm font-medium">
+                  ✨ Leçons illimitées • Mode hors-ligne • Mode examen • Stats avancées
+                </p>
+              </div>
+
+              <Button
+                onClick={() => nav({ to: '/app' })}
+                size="lg"
+                className="bg-gradient-level px-8 py-3 hover:opacity-90"
+              >
+                <Crown className="mr-2 h-4 w-4" />
+                Commencer à étudier
+              </Button>
+            </div>
           )}
 
           {status === 'error' && (
-            <div className={`
-              flex flex-col justify-center gap-3
-              sm:flex-row
-            `}
-            >
+            <div className="flex flex-col justify-center gap-3 sm:flex-row">
               <Button
                 onClick={() => window.location.reload()}
                 variant="outline"
                 size="lg"
                 className="px-6"
               >
-                Try Again
+                Réessayer
               </Button>
               <Button
                 onClick={() => nav({ to: '/app/polar/subscriptions' })}
                 size="lg"
                 className="px-6"
               >
-                Back to Plans
+                Retour aux offres
               </Button>
             </div>
           )}
@@ -177,7 +176,7 @@ function RouteComponent() {
 
         <div className="pt-8">
           <p className="text-sm text-muted-foreground">
-            Transaction ID:
+            ID de transaction :
             {' '}
             <span className="font-mono text-foreground">
               {loaderData.checkoutId.slice(-8)}

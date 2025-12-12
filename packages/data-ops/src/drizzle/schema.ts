@@ -472,7 +472,7 @@ export const subscriptions = pgTable("subscriptions", {
 	canceledAt: timestamp("canceled_at", { mode: 'string' }),
 	trialStart: timestamp("trial_start", { mode: 'string' }),
 	trialEnd: timestamp("trial_end", { mode: 'string' }),
-	metadata: json("metadata").$type<Record<string, unknown>>(),
+	metadata: json("metadata").$type<Record<string, string | number | boolean | null>>(),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
@@ -498,7 +498,7 @@ export const orders = pgTable("orders", {
 	billingReason: text("billing_reason").$type<BillingReason>(),
 	paidAt: timestamp("paid_at", { mode: 'string' }),
 	refundedAt: timestamp("refunded_at", { mode: 'string' }),
-	metadata: json("metadata").$type<Record<string, unknown>>(),
+	metadata: json("metadata").$type<Record<string, string | number | boolean | null>>(),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	foreignKey({

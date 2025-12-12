@@ -1,14 +1,4 @@
-import { createServerFn } from '@tanstack/react-start'
-import { getRequestIP } from '@tanstack/react-start/server'
-import z from 'zod'
-import { protectedFunctionMiddleware } from '@/core/middleware/auth'
-import { polarMiddleware } from '@/core/middleware/polar'
-import {
-  getActiveSubscription,
-  getUserSubscriptions,
-  getUserSubscriptionTier,
-  hasActiveSubscription,
-} from '@kurama/data-ops/queries/subscriptions'
+import process from 'node:process'
 import {
   getUserOrders,
   getUserTotalSpent,
@@ -19,6 +9,17 @@ import {
   getReferralStats,
   trackReferredBy,
 } from '@kurama/data-ops/queries/referrals'
+import {
+  getActiveSubscription,
+  getUserSubscriptions,
+  getUserSubscriptionTier,
+  hasActiveSubscription,
+} from '@kurama/data-ops/queries/subscriptions'
+import { createServerFn } from '@tanstack/react-start'
+import { getRequestIP } from '@tanstack/react-start/server'
+import z from 'zod'
+import { protectedFunctionMiddleware } from '@/core/middleware/auth'
+import { polarMiddleware } from '@/core/middleware/polar'
 
 export const baseFunction = createServerFn().middleware([
   protectedFunctionMiddleware,
@@ -62,7 +63,8 @@ export const createPaymentLink = baseFunction
     if (referralCode) {
       try {
         await trackReferredBy(ctx.context.userId, referralCode)
-      } catch (error) {
+      }
+      catch (error) {
         console.error('Error tracking referral:', error)
       }
     }
@@ -72,16 +74,20 @@ export const createPaymentLink = baseFunction
       ? 'https://kurama.yeko.workers.dev'
       : 'http://localhost:3000'
 
+    const metadata: Record<string, string> = {
+      userId: ctx.context.userId,
+    }
+    if (referralCode) {
+      metadata.referralCode = referralCode
+    }
+
     const checkout = await ctx.context.polar.checkouts.create({
       products: [productId],
       externalCustomerId: ctx.context.userId,
       successUrl: `${baseUrl}/app/polar/checkout/success?checkout_id={CHECKOUT_ID}`,
       customerIpAddress: ip,
       customerEmail: ctx.context.email,
-      metadata: {
-        userId: ctx.context.userId,
-        referralCode: referralCode || undefined,
-      },
+      metadata,
       ...(discountCode && { discountCode }),
     })
 
@@ -207,7 +213,8 @@ export const getCustomerPortalUrl = baseFunction.handler(async (ctx) => {
     })
 
     return portal.customerPortalUrl
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error getting customer portal URL:', error)
     return null
   }
@@ -215,6 +222,7 @@ export const getCustomerPortalUrl = baseFunction.handler(async (ctx) => {
 
 /**
  * Cancel subscription via Polar
+ * Note: TcancelAtPeriodEnd to true, user keeps access until period ends
  */
 const CancelSubscriptionSchema = z.object({
   subscriptionId: z.string(),
@@ -226,11 +234,16 @@ export const cancelSubscription = baseFunction
   })
   .handler(async (ctx) => {
     try {
-      await ctx.context.polar.subscriptions.cancel({
+      // Use update to set cancelAtPeriodEnd - Polar SDK doesn't have a direct cancel method
+      await ctx.context.polar.subscriptions.update({
         id: ctx.data.subscriptionId,
+        subscriptionUpdate: {
+          cancelAtPeriodEnd: true,
+        },
       })
       return { success: true }
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error canceling subscription:', error)
       return { success: false, error: 'Failed to cancel subscription' }
     }

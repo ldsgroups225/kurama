@@ -19,6 +19,7 @@ import { Route as ApiStudyStartRouteImport } from './routes/api/study/start'
 import { Route as ApiStudyProgressRouteImport } from './routes/api/study/progress'
 import { Route as ApiStudySessionIdRouteImport } from './routes/api/study/$sessionId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as AuthAppReferralsRouteImport } from './routes/_auth/app/referrals'
 import { Route as AuthAppProgressRouteImport } from './routes/_auth/app/progress'
 import { Route as AuthAppGroupsRouteImport } from './routes/_auth/app/groups'
 import { Route as AuthAppDailyChallengeRouteImport } from './routes/_auth/app/daily-challenge'
@@ -84,6 +85,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthAppReferralsRoute = AuthAppReferralsRouteImport.update({
+  id: '/app/referrals',
+  path: '/app/referrals',
+  getParentRoute: () => AuthRouteRoute,
 } as any)
 const AuthAppProgressRoute = AuthAppProgressRouteImport.update({
   id: '/app/progress',
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/app/daily-challenge': typeof AuthAppDailyChallengeRoute
   '/app/groups': typeof AuthAppGroupsRoute
   '/app/progress': typeof AuthAppProgressRoute
+  '/app/referrals': typeof AuthAppReferralsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/study/$sessionId': typeof ApiStudySessionIdRoute
   '/api/study/progress': typeof ApiStudyProgressRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/app/daily-challenge': typeof AuthAppDailyChallengeRoute
   '/app/groups': typeof AuthAppGroupsRoute
   '/app/progress': typeof AuthAppProgressRoute
+  '/app/referrals': typeof AuthAppReferralsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/study/$sessionId': typeof ApiStudySessionIdRoute
   '/api/study/progress': typeof ApiStudyProgressRoute
@@ -222,6 +230,7 @@ export interface FileRoutesById {
   '/_auth/app/daily-challenge': typeof AuthAppDailyChallengeRoute
   '/_auth/app/groups': typeof AuthAppGroupsRoute
   '/_auth/app/progress': typeof AuthAppProgressRoute
+  '/_auth/app/referrals': typeof AuthAppReferralsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/study/$sessionId': typeof ApiStudySessionIdRoute
   '/api/study/progress': typeof ApiStudyProgressRoute
@@ -249,6 +258,7 @@ export interface FileRouteTypes {
     | '/app/daily-challenge'
     | '/app/groups'
     | '/app/progress'
+    | '/app/referrals'
     | '/api/auth/$'
     | '/api/study/$sessionId'
     | '/api/study/progress'
@@ -274,6 +284,7 @@ export interface FileRouteTypes {
     | '/app/daily-challenge'
     | '/app/groups'
     | '/app/progress'
+    | '/app/referrals'
     | '/api/auth/$'
     | '/api/study/$sessionId'
     | '/api/study/progress'
@@ -300,6 +311,7 @@ export interface FileRouteTypes {
     | '/_auth/app/daily-challenge'
     | '/_auth/app/groups'
     | '/_auth/app/progress'
+    | '/_auth/app/referrals'
     | '/api/auth/$'
     | '/api/study/$sessionId'
     | '/api/study/progress'
@@ -401,6 +413,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_auth/app/referrals': {
+      id: '/_auth/app/referrals'
+      path: '/app/referrals'
+      fullPath: '/app/referrals'
+      preLoaderRoute: typeof AuthAppReferralsRouteImport
+      parentRoute: typeof AuthRouteRoute
     }
     '/_auth/app/progress': {
       id: '/_auth/app/progress'
@@ -507,6 +526,7 @@ interface AuthRouteRouteChildren {
   AuthAppDailyChallengeRoute: typeof AuthAppDailyChallengeRoute
   AuthAppGroupsRoute: typeof AuthAppGroupsRoute
   AuthAppProgressRoute: typeof AuthAppProgressRoute
+  AuthAppReferralsRoute: typeof AuthAppReferralsRoute
   AuthAppIndexRoute: typeof AuthAppIndexRoute
   AuthAppLessonSessionLessonIdRoute: typeof AuthAppLessonSessionLessonIdRoute
   AuthAppLessonSummaryLessonIdRoute: typeof AuthAppLessonSummaryLessonIdRoute
@@ -525,6 +545,7 @@ const AuthRouteRouteChildren: AuthRouteRouteChildren = {
   AuthAppDailyChallengeRoute: AuthAppDailyChallengeRoute,
   AuthAppGroupsRoute: AuthAppGroupsRoute,
   AuthAppProgressRoute: AuthAppProgressRoute,
+  AuthAppReferralsRoute: AuthAppReferralsRoute,
   AuthAppIndexRoute: AuthAppIndexRoute,
   AuthAppLessonSessionLessonIdRoute: AuthAppLessonSessionLessonIdRoute,
   AuthAppLessonSummaryLessonIdRoute: AuthAppLessonSummaryLessonIdRoute,

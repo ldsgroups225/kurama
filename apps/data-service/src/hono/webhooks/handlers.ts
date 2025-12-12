@@ -16,12 +16,10 @@ import {
 } from '@kurama/data-ops/queries/orders'
 import { processReferralReward } from '@kurama/data-ops/queries/referrals'
 import {
-  downgradeUserToFree,
   updateSubscriptionStatus,
   updateUserSubscriptionTier,
   upsertSubscription,
 } from '@kurama/data-ops/queries/subscriptions'
-import { getSubscriptionTier } from '@kurama/data-ops/zod-schema/polar'
 
 // Database connection config type
 interface DbConfig {
@@ -29,6 +27,9 @@ interface DbConfig {
   username: string
   password: string
 }
+
+// Metadata type for our database
+type SafeMetadata = Record<string, string | number | boolean | null>
 
 // Polar webhook payload types (simplified)
 interface PolarSubscriptionData {
@@ -59,6 +60,31 @@ interface PolarOrderData {
   metadata?: Record<string, unknown>
 }
 
+/**
+ * Convert Polar metadata to our safe metadata type
+ */
+function toSafeMetadata(metadata?: Record<string, unknown>): SafeMetadata | undefined {
+  if (!metadata)
+    return undefined
+
+  const safe: SafeMetadata = {}
+  for (const [key, value] of Object.entries(metadata)) {
+    if (
+      typeof value === 'string'
+      || typeof value === 'number'
+      || typeof value === 'boolean'
+      || value === null
+    ) {
+      safe[key] = value
+    }
+    else {
+      // Convert other types to string
+      safe[key] = String(value)
+    }
+  }
+  return safe
+}
+
 interface PolarWebhookPayload {
   type: string
   data: PolarSubscriptionData | PolarOrderData | Record<string, unknown>
@@ -74,7 +100,7 @@ export async function handleWebhookEvent(
   // Initialize database
   initDatabase(dbConfig)
 
-  console.log(`Processing webhook event: ${payload.type}`)
+  console.warn(`Processing webhook event: ${payload.type}`)
 
   switch (payload.type) {
     // Subscription events
@@ -109,7 +135,7 @@ export async function handleWebhookEvent(
     // Checkout events (logging only)
     case 'checkout.created':
     case 'checkout.updated':
-      console.log(`Checkout event: ${payload.type}`, (payload.data as Record<string, unknown>).id)
+      console.warn(`Checkout event: ${payload.type}`, (payload.data as Record<string, unknown>).id)
       break
 
     // Customer events (logging only)
@@ -117,11 +143,11 @@ export async function handleWebhookEvent(
     case 'customer.updated':
     case 'customer.deleted':
     case 'customer.state_changed':
-      console.log(`Customer event: ${payload.type}`, (payload.data as Record<string, unknown>).id)
+      console.warn(`Customer event: ${payload.type}`, (payload.data as Record<string, unknown>).id)
       break
 
     default:
-      console.log(`Unhandled webhook event type: ${payload.type}`)
+      console.warn(`Unhandled webhook event type: ${payload.type}`)
   }
 }
 
@@ -152,7 +178,7 @@ async function handleSubscriptionUpdate(data: PolarSubscriptionData): Promise<vo
     cancelAtPeriodEnd: data.cancel_at_period_end ?? false,
     trialStart: data.trial_start,
     trialEnd: data.trial_end,
-    metadata: data.metadata,
+    metadata: toSafeMetadata(data.metadata),
   })
 
   // Update user profile subscription tier if subscription is active
@@ -164,7 +190,7 @@ async function handleSubscriptionUpdate(data: PolarSubscriptionData): Promise<vo
     )
   }
 
-  console.log(`Subscription ${data.id} updated for user ${userId} with status ${status}`)
+  console.warn(`Subscription ${data.id} updated for user ${userId} with status ${status}`)
 }
 
 /**
@@ -180,7 +206,7 @@ async function handleSubscriptionCanceled(data: PolarSubscriptionData): Promise<
 
   // Note: Don't downgrade immediately - user keeps access until period ends
   // A scheduled job should handle downgrade based on currentPeriodEnd
-  console.log(`Subscription ${data.id} canceled. User ${userId} keeps access until period end.`)
+  console.warn(`Subscription ${data.id} canceled. User ${userId} keeps access until period end.`)
 }
 
 /**
@@ -194,7 +220,7 @@ async function handleSubscriptionUncanceled(data: PolarSubscriptionData): Promis
     cancelAtPeriodEnd: false,
   })
 
-  console.log(`Subscription ${data.id} uncanceled`)
+  console.warn(`Subscription ${data.id} uncanceled`)
 }
 
 /**
@@ -218,10 +244,10 @@ async function handleOrderCreated(data: PolarOrderData): Promise<void> {
     status: 'pending',
     checkoutId: data.checkout_id,
     billingReason: mapBillingReason(data.billing_reason),
-    metadata: data.metadata,
+    metadata: toSafeMetadata(data.metadata),
   })
 
-  console.log(`Order ${data.id} created for user ${userId}`)
+  console.warn(`Order ${data.id} created for user ${userId}`)
 }
 
 /**
@@ -246,7 +272,7 @@ async function handleOrderPaid(data: PolarOrderData): Promise<void> {
       checkoutId: data.checkout_id,
       billingReason: mapBillingReason(data.billing_reason),
       paidAt: new Date().toISOString(),
-      metadata: data.metadata,
+      metadata: toSafeMetadata(data.metadata),
     })
   }
 
@@ -260,7 +286,7 @@ async function handleOrderPaid(data: PolarOrderData): Promise<void> {
     }
   }
 
-  console.log(`Order ${data.id} marked as paid`)
+  console.warn(`Order ${data.id} marked as paid`)
 }
 
 /**
@@ -272,7 +298,7 @@ async function handleOrderRefunded(data: PolarOrderData): Promise<void> {
   // If this was a subscription order, we might need to handle subscription status
   // This depends on business logic - partial refunds vs full refunds
 
-  console.log(`Order ${data.id} refunded`)
+  console.warn(`Order ${data.id} refunded`)
 }
 
 /**
