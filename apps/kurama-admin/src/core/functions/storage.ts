@@ -1,6 +1,6 @@
 import process from 'node:process'
 
-import { eq, desc } from '@kurama/data-ops/database/drizzle-orm'
+import { eq, desc, and, sql } from '@kurama/data-ops/database/drizzle-orm'
 import { lessonsContentFile, lessonsContentChunks } from '@kurama/data-ops/drizzle/schema'
 import {
   generatePresignedUploadUrl,
@@ -107,15 +107,26 @@ export const checkStorageConfigured = createServerFn({ method: 'GET' })
     return { configured: isR2Configured() }
   })
 
-// Get attachments for a lesson
+// Input type for getLessonAttachments
+const GetLessonAttachmentsSchema = z.object({
+  lessonId: z.number(),
+  subjectId: z.number().optional(),
+  gradeId: z.number().optional(),
+  seriesId: z.number().optional().nullable(),
+})
+
+type GetLessonAttachmentsInput = z.infer<typeof GetLessonAttachmentsSchema>
+
+// Get attachments for a lesson (including subject-wide attachments)
 export const getLessonAttachments = createServerFn({ method: 'GET' })
   .middleware([adminMiddleware])
-  .inputValidator((lessonId: number) => lessonId)
-  .handler(async ({ data: lessonId }) => {
+  .inputValidator((data: GetLessonAttachmentsInput) => GetLessonAttachmentsSchema.parse(data))
+  .handler(async ({ data }) => {
     initAdminDb()
     const db = getDb()
 
-    const attachments = await db
+    // Get direct lesson attachments
+    const directAttachments = await db
       .select({
         id: lessonsContentFile.id,
         fileUrl: lessonsContentFile.fileUrl,
@@ -124,14 +135,66 @@ export const getLessonAttachments = createServerFn({ method: 'GET' })
         fileType: lessonsContentFile.fileType,
         fileSize: lessonsContentFile.fileSize,
         hasEmbeddings: lessonsContentFile.hasEmbeddings,
+        isSubjectWide: lessonsContentFile.isSubjectWide,
         createdAt: lessonsContentFile.createdAt,
         updatedAt: lessonsContentFile.updatedAt,
       })
       .from(lessonsContentFile)
-      .where(eq(lessonsContentFile.lessonId, lessonId))
+      .where(eq(lessonsContentFile.lessonId, data.lessonId))
       .orderBy(desc(lessonsContentFile.createdAt))
 
-    return attachments
+    // Get subject-wide attachments if subject info is provided
+    let subjectWideAttachments: typeof directAttachments = []
+    if (data.subjectId && data.gradeId) {
+      const conditions = [
+        eq(lessonsContentFile.isSubjectWide, true),
+        eq(lessonsContentFile.subjectId, data.subjectId),
+        eq(lessonsContentFile.gradeId, data.gradeId),
+      ]
+
+      // Match series if provided, or get attachments with no series (applies to all)
+      if (data.seriesId) {
+        subjectWideAttachments = await db
+          .select({
+            id: lessonsContentFile.id,
+            fileUrl: lessonsContentFile.fileUrl,
+            fileName: lessonsContentFile.fileName,
+            fileTitle: lessonsContentFile.fileTitle,
+            fileType: lessonsContentFile.fileType,
+            fileSize: lessonsContentFile.fileSize,
+            hasEmbeddings: lessonsContentFile.hasEmbeddings,
+            isSubjectWide: lessonsContentFile.isSubjectWide,
+            createdAt: lessonsContentFile.createdAt,
+            updatedAt: lessonsContentFile.updatedAt,
+          })
+          .from(lessonsContentFile)
+          .where(sql`${lessonsContentFile.isSubjectWide} = true 
+            AND ${lessonsContentFile.subjectId} = ${data.subjectId} 
+            AND ${lessonsContentFile.gradeId} = ${data.gradeId}
+            AND (${lessonsContentFile.seriesId} = ${data.seriesId} OR ${lessonsContentFile.seriesId} IS NULL)`)
+          .orderBy(desc(lessonsContentFile.createdAt))
+      } else {
+        subjectWideAttachments = await db
+          .select({
+            id: lessonsContentFile.id,
+            fileUrl: lessonsContentFile.fileUrl,
+            fileName: lessonsContentFile.fileName,
+            fileTitle: lessonsContentFile.fileTitle,
+            fileType: lessonsContentFile.fileType,
+            fileSize: lessonsContentFile.fileSize,
+            hasEmbeddings: lessonsContentFile.hasEmbeddings,
+            isSubjectWide: lessonsContentFile.isSubjectWide,
+            createdAt: lessonsContentFile.createdAt,
+            updatedAt: lessonsContentFile.updatedAt,
+          })
+          .from(lessonsContentFile)
+          .where(and(...conditions))
+          .orderBy(desc(lessonsContentFile.createdAt))
+      }
+    }
+
+    // Combine and return, subject-wide first
+    return [...subjectWideAttachments, ...directAttachments]
   })
 
 // Create attachment record after upload
@@ -142,6 +205,11 @@ const CreateAttachmentSchema = z.object({
   fileTitle: z.string().optional(),
   fileType: z.string(),
   fileSize: z.number(),
+  // Subject-wide attachment fields
+  attachToAllSubjectLessons: z.boolean().default(false),
+  subjectId: z.number().optional(),
+  gradeId: z.number().optional(),
+  seriesId: z.number().optional().nullable(),
 })
 
 type CreateAttachmentInput = z.infer<typeof CreateAttachmentSchema>
@@ -153,6 +221,29 @@ export const createAttachment = createServerFn({ method: 'POST' })
     initAdminDb()
     const db = getDb()
 
+    if (data.attachToAllSubjectLessons && data.subjectId && data.gradeId) {
+      // Create subject-wide attachment
+      const [attachment] = await db
+        .insert(lessonsContentFile)
+        .values({
+          lessonId: null, // No specific lesson
+          fileUrl: data.fileUrl,
+          fileName: data.fileName,
+          fileTitle: data.fileTitle || data.fileName,
+          fileType: data.fileType,
+          fileSize: data.fileSize,
+          hasEmbeddings: false,
+          isSubjectWide: true,
+          subjectId: data.subjectId,
+          gradeId: data.gradeId,
+          seriesId: data.seriesId ?? null,
+        })
+        .returning({ id: lessonsContentFile.id })
+
+      return { id: attachment?.id, success: true, isSubjectWide: true }
+    }
+
+    // Create single-lesson attachment (existing behavior)
     const [attachment] = await db
       .insert(lessonsContentFile)
       .values({
@@ -163,10 +254,11 @@ export const createAttachment = createServerFn({ method: 'POST' })
         fileType: data.fileType,
         fileSize: data.fileSize,
         hasEmbeddings: false,
+        isSubjectWide: false,
       })
       .returning({ id: lessonsContentFile.id })
 
-    return { id: attachment?.id, success: true }
+    return { id: attachment?.id, success: true, isSubjectWide: false }
   })
 
 // Delete attachment
@@ -180,6 +272,126 @@ export const deleteAttachment = createServerFn({ method: 'POST' })
     await db.delete(lessonsContentFile).where(eq(lessonsContentFile.id, id))
 
     return { success: true }
+  })
+
+// Promote attachment to subject-wide
+const PromoteAttachmentSchema = z.object({
+  attachmentId: z.number(),
+  subjectId: z.number(),
+  gradeId: z.number(),
+  seriesId: z.number().optional().nullable(),
+})
+
+type PromoteAttachmentInput = z.infer<typeof PromoteAttachmentSchema>
+
+export const promoteToSubjectWide = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((data: PromoteAttachmentInput) => PromoteAttachmentSchema.parse(data))
+  .handler(async ({ data }) => {
+    initAdminDb()
+    const db = getDb()
+
+    // Update the attachment to be subject-wide
+    const [updated] = await db
+      .update(lessonsContentFile)
+      .set({
+        isSubjectWide: true,
+        subjectId: data.subjectId,
+        gradeId: data.gradeId,
+        seriesId: data.seriesId ?? null,
+        lessonId: null, // Remove specific lesson association
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(lessonsContentFile.id, data.attachmentId))
+      .returning({ id: lessonsContentFile.id })
+
+    if (!updated) {
+      throw new Error('Pièce jointe non trouvée')
+    }
+
+    return { success: true, id: updated.id }
+  })
+
+// Demote subject-wide attachment to single lesson
+const DemoteAttachmentSchema = z.object({
+  attachmentId: z.number(),
+  lessonId: z.number(),
+})
+
+type DemoteAttachmentInput = z.infer<typeof DemoteAttachmentSchema>
+
+export const demoteToLesson = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((data: DemoteAttachmentInput) => DemoteAttachmentSchema.parse(data))
+  .handler(async ({ data }) => {
+    initAdminDb()
+    const db = getDb()
+
+    // Update the attachment to be lesson-specific
+    const [updated] = await db
+      .update(lessonsContentFile)
+      .set({
+        isSubjectWide: false,
+        subjectId: null,
+        gradeId: null,
+        seriesId: null,
+        lessonId: data.lessonId,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(lessonsContentFile.id, data.attachmentId))
+      .returning({ id: lessonsContentFile.id })
+
+    if (!updated) {
+      throw new Error('Pièce jointe non trouvée')
+    }
+
+    return { success: true, id: updated.id }
+  })
+
+// Get available subject-wide attachments that can be linked to a lesson
+const GetAvailableAttachmentsSchema = z.object({
+  subjectId: z.number(),
+  gradeId: z.number(),
+  seriesId: z.number().optional().nullable(),
+  excludeLessonId: z.number().optional(), // Exclude attachments already linked to this lesson
+})
+
+type GetAvailableAttachmentsInput = z.infer<typeof GetAvailableAttachmentsSchema>
+
+export const getAvailableSubjectAttachments = createServerFn({ method: 'GET' })
+  .middleware([adminMiddleware])
+  .inputValidator((data: GetAvailableAttachmentsInput) => GetAvailableAttachmentsSchema.parse(data))
+  .handler(async ({ data }) => {
+    initAdminDb()
+    const db = getDb()
+
+    // Get subject-wide attachments for this subject/grade
+    const attachments = await db
+      .select({
+        id: lessonsContentFile.id,
+        fileUrl: lessonsContentFile.fileUrl,
+        fileName: lessonsContentFile.fileName,
+        fileTitle: lessonsContentFile.fileTitle,
+        fileType: lessonsContentFile.fileType,
+        hasEmbeddings: lessonsContentFile.hasEmbeddings,
+        createdAt: lessonsContentFile.createdAt,
+      })
+      .from(lessonsContentFile)
+      .where(
+        data.seriesId
+          ? sql`${lessonsContentFile.isSubjectWide} = true 
+              AND ${lessonsContentFile.subjectId} = ${data.subjectId} 
+              AND ${lessonsContentFile.gradeId} = ${data.gradeId}
+              AND (${lessonsContentFile.seriesId} = ${data.seriesId} OR ${lessonsContentFile.seriesId} IS NULL)`
+          : and(
+            eq(lessonsContentFile.isSubjectWide, true),
+            eq(lessonsContentFile.subjectId, data.subjectId),
+            eq(lessonsContentFile.gradeId, data.gradeId)
+          )
+      )
+      .orderBy(desc(lessonsContentFile.createdAt))
+
+    return attachments
   })
 
 // Generate embeddings for an attachment

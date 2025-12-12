@@ -343,7 +343,7 @@ catalogs:
       specifier: ^1.1.11
       version: 1.1.11
     '@radix-ui/react-tooltip':
-      specifier: ^1.2.8
+      specifier: 1.2.8
       version: 1.2.8
     '@tailwindcss/typography':
       specifier: ^0.5.19

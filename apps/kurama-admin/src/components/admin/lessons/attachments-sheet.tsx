@@ -11,8 +11,11 @@ import {
   Upload,
   X,
   Trash2,
+  Globe,
+  ArrowUpCircle,
+  ArrowDownCircle,
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -26,6 +29,13 @@ import { Progress } from '@/components/ui/progress'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import {
   getAttachmentUploadUrl,
@@ -33,6 +43,8 @@ import {
   createAttachment,
   deleteAttachment,
   generateAttachmentEmbeddings,
+  promoteToSubjectWide,
+  demoteToLesson,
 } from '@/core/functions/storage'
 import { toast } from 'sonner'
 
@@ -61,9 +73,13 @@ function getFileTypeFromMime(contentType: string): 'pdf' | 'excel' | 'image' {
 
 interface AttachmentsSheetProps {
   lessonId: number
+  subjectId: number
+  subjectName?: string
+  gradeId?: number
+  seriesId?: number | null
 }
 
-export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
+export function AttachmentsSheet({ lessonId, subjectId, subjectName, gradeId, seriesId }: AttachmentsSheetProps) {
   const queryClient = useQueryClient()
   const [processingId, setProcessingId] = useState<number | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -71,12 +87,20 @@ export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
+  const [attachToAllLessons, setAttachToAllLessons] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Fetch attachments
+  // Fetch attachments (including subject-wide)
   const { data: attachments = [], isLoading } = useQuery({
-    queryKey: ['lesson-attachments', lessonId],
-    queryFn: () => getLessonAttachments({ data: lessonId }),
+    queryKey: ['lesson-attachments', lessonId, subjectId, gradeId, seriesId],
+    queryFn: () => getLessonAttachments({
+      data: {
+        lessonId,
+        subjectId,
+        gradeId,
+        seriesId
+      }
+    }),
   })
 
   // Delete mutation
@@ -105,6 +129,44 @@ export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
     },
   })
 
+  // Promote to subject-wide mutation
+  const promoteMutation = useMutation({
+    mutationFn: (attachmentId: number) =>
+      promoteToSubjectWide({
+        data: {
+          attachmentId,
+          subjectId,
+          gradeId: gradeId!,
+          seriesId,
+        },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lesson-attachments', lessonId, subjectId, gradeId, seriesId] })
+      toast.success('Fichier promu en fichier matière')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erreur lors de la promotion')
+    },
+  })
+
+  // Demote to single lesson mutation
+  const demoteMutation = useMutation({
+    mutationFn: (attachmentId: number) =>
+      demoteToLesson({
+        data: {
+          attachmentId,
+          lessonId,
+        },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lesson-attachments', lessonId, subjectId, gradeId, seriesId] })
+      toast.success('Fichier relégué à cette leçon uniquement')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erreur lors de la relégation')
+    },
+  })
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -124,6 +186,7 @@ export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
   const handleCancelSelection = () => {
     setSelectedFile(null)
     setFileTitle('')
+    setAttachToAllLessons(false)
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl)
       setPreviewUrl(null)
@@ -186,13 +249,20 @@ export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
           fileTitle: fileTitle || selectedFile.name,
           fileType: getFileTypeFromMime(selectedFile.type),
           fileSize: selectedFile.size,
+          attachToAllSubjectLessons: attachToAllLessons,
+          subjectId: attachToAllLessons ? subjectId : undefined,
+          gradeId: attachToAllLessons ? gradeId : undefined,
+          seriesId: attachToAllLessons ? seriesId : undefined,
         },
       })
 
       // Refresh list
-      queryClient.invalidateQueries({ queryKey: ['lesson-attachments', lessonId] })
+      queryClient.invalidateQueries({ queryKey: ['lesson-attachments', lessonId, subjectId, gradeId, seriesId] })
 
-      toast.success('Fichier uploadé avec succès')
+      toast.success(attachToAllLessons
+        ? 'Fichier attaché à toutes les leçons de la matière'
+        : 'Fichier uploadé avec succès'
+      )
       handleCancelSelection()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Erreur lors de l'upload")
@@ -298,6 +368,29 @@ export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
                 />
               </div>
 
+              {/* Subject-wide attachment checkbox */}
+              {gradeId && (
+                <div className="flex items-start space-x-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
+                  <Checkbox
+                    id="attach-all"
+                    checked={attachToAllLessons}
+                    onCheckedChange={(checked) => setAttachToAllLessons(checked === true)}
+                    disabled={isUploading}
+                  />
+                  <div className="space-y-1">
+                    <Label
+                      htmlFor="attach-all"
+                      className="text-sm font-medium cursor-pointer"
+                    >
+                      Attacher à toutes les leçons de la matière
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Ce fichier sera disponible pour toutes les leçons de {subjectName || 'cette matière'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Progress */}
               {isUploading && (
                 <div className="space-y-1">
@@ -356,9 +449,17 @@ export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {attachment.fileTitle || attachment.fileName}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium truncate">
+                          {attachment.fileTitle || attachment.fileName}
+                        </p>
+                        {attachment.isSubjectWide && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-primary/10 text-primary">
+                            <Globe className="h-3 w-3" />
+                            Matière
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span>{typeLabels[fileType]}</span>
                         <span>•</span>
@@ -379,32 +480,97 @@ export function AttachmentsSheet({ lessonId }: AttachmentsSheetProps) {
                       </div>
                     </div>
 
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="shrink-0"
-                        onClick={() => handleGenerateEmbeddings(attachment.id)}
-                        disabled={isProcessing}
-                      >
-                        {isProcessing ? (
-                          <RefreshCw className="h-4 w-4 animate-spin" />
-                        ) : attachment.hasEmbeddings ? (
-                          <RefreshCw className="h-4 w-4" />
-                        ) : (
-                          <Play className="h-4 w-4" />
+                    <TooltipProvider delayDuration={300}>
+                      <div className="flex gap-1">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="shrink-0"
+                              onClick={() => handleGenerateEmbeddings(attachment.id)}
+                              disabled={isProcessing}
+                            >
+                              {isProcessing ? (
+                                <RefreshCw className="h-4 w-4 animate-spin" />
+                              ) : attachment.hasEmbeddings ? (
+                                <RefreshCw className="h-4 w-4" />
+                              ) : (
+                                <Play className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom">
+                            {attachment.hasEmbeddings ? 'Régénérer embeddings' : 'Générer embeddings'}
+                          </TooltipContent>
+                        </Tooltip>
+
+                        {/* Promote to subject-wide */}
+                        {!attachment.isSubjectWide && gradeId && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="shrink-0 text-primary hover:text-primary"
+                                onClick={() => promoteMutation.mutate(attachment.id)}
+                                disabled={promoteMutation.isPending}
+                              >
+                                {promoteMutation.isPending ? (
+                                  <RefreshCw className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <ArrowUpCircle className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom">
+                              Promouvoir en fichier matière
+                            </TooltipContent>
+                          </Tooltip>
                         )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="shrink-0 text-destructive hover:text-destructive"
-                        onClick={() => deleteMutation.mutate(attachment.id)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+
+                        {/* Demote to single lesson */}
+                        {attachment.isSubjectWide && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="shrink-0 text-amber-600 hover:text-amber-600"
+                                onClick={() => demoteMutation.mutate(attachment.id)}
+                                disabled={demoteMutation.isPending}
+                              >
+                                {demoteMutation.isPending ? (
+                                  <RefreshCw className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <ArrowDownCircle className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom">
+                              Reléguer à cette leçon
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="shrink-0 text-destructive hover:text-destructive"
+                              onClick={() => deleteMutation.mutate(attachment.id)}
+                              disabled={deleteMutation.isPending}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom">
+                            {attachment.isSubjectWide ? 'Supprimer de toutes les leçons' : 'Supprimer'}
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </TooltipProvider>
                   </motion.div>
                 )
               })

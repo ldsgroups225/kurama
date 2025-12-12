@@ -22,8 +22,6 @@ import {
   getSessionGrowth,
 } from '@/core/functions/analytics'
 import {
-  LineChart,
-  Line,
   BarChart,
   Bar,
   XAxis,
@@ -169,7 +167,7 @@ function DashboardPage() {
       animate="show"
     >
       <motion.div variants={item}>
-        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent w-fit">
+        <h1 className="text-3xl font-bold tracking-tight bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent w-fit">
           Tableau de bord
         </h1>
         <p className="text-muted-foreground mt-1">
