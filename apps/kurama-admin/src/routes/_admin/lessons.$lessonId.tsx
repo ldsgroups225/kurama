@@ -273,7 +273,13 @@ function LessonDetailPage() {
         description={lesson.description || 'Aucune description'}
         actions={
           <div className="flex gap-2">
-            <AttachmentsSheet lessonId={lessonIdNum} />
+            <AttachmentsSheet
+              lessonId={lessonIdNum}
+              subjectId={lesson.subjectId}
+              subjectName={lesson.subjectName ?? undefined}
+              gradeId={lesson.gradeId ?? undefined}
+              seriesId={lesson.seriesId ?? undefined}
+            />
             <Button variant="outline" asChild>
               <Link to="/lessons">
                 <ArrowLeft className="mr-2 h-4 w-4" />

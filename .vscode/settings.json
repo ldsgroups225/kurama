@@ -1,4 +1,7 @@
 {
+  "workbench.colorTheme": "Vitesse Dark",
+  "workbench.preferredLightColorTheme": "Vitesse Light",
+  "workbench.preferredDarkColorTheme": "Vitesse Dark",
   "cSpell.words": [
     "BEPC",
     "dexie",

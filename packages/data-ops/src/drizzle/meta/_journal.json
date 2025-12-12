@@ -43,6 +43,13 @@
       "when": 1765482342113,
       "tag": "0005_fluffy_magik",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1765538104125,
+      "tag": "0006_marvelous_joseph",
+      "breakpoints": true
     }
   ]
 }

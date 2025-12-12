@@ -361,7 +361,7 @@ export const levelSeries = pgTable("level_series", {
 // Lesson content files - Parent table for uploaded attachments
 export const lessonsContentFile = pgTable("lessons_content_file", {
 	id: serial().primaryKey().notNull(),
-	lessonId: integer("lesson_id").notNull(),
+	lessonId: integer("lesson_id"), // Nullable for subject-wide files
 	fileUrl: text("file_url").notNull(),
 	fileName: text("file_name").notNull(),
 	fileTitle: text("file_title"), // User-provided title
@@ -370,6 +370,11 @@ export const lessonsContentFile = pgTable("lessons_content_file", {
 	hasEmbeddings: boolean("has_embeddings").default(false).notNull(),
 	totalChunks: integer("total_chunks").default(0),
 	extractedText: text("extracted_text"), // Full extracted text for reference
+	// Subject-wide attachment fields
+	isSubjectWide: boolean("is_subject_wide").default(false).notNull(),
+	subjectId: integer("subject_id"), // For subject-wide files
+	gradeId: integer("grade_id"), // For subject-wide files (scope)
+	seriesId: integer("series_id"), // For subject-wide files (scope, nullable)
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
@@ -378,7 +383,23 @@ export const lessonsContentFile = pgTable("lessons_content_file", {
 		foreignColumns: [lessons.id],
 		name: "lessons_content_file_lesson_id_lessons_id_fk"
 	}).onDelete("cascade"),
+	foreignKey({
+		columns: [table.subjectId],
+		foreignColumns: [subjects.id],
+		name: "lessons_content_file_subject_id_subjects_id_fk"
+	}).onDelete("cascade"),
+	foreignKey({
+		columns: [table.gradeId],
+		foreignColumns: [grades.id],
+		name: "lessons_content_file_grade_id_grades_id_fk"
+	}).onDelete("set null"),
+	foreignKey({
+		columns: [table.seriesId],
+		foreignColumns: [series.id],
+		name: "lessons_content_file_series_id_series_id_fk"
+	}).onDelete("set null"),
 	index("idx_lessons_content_lesson_id").on(table.lessonId),
+	index("idx_lessons_content_subject_wide").on(table.isSubjectWide, table.subjectId, table.gradeId),
 	index("idx_lessons_content_created_at").on(table.createdAt),
 ]);
 
