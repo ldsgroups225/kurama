@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, Trash2, Copy, Search, Eye, Upload } from 'lucide-react'
+import { Plus, Pencil, Trash2, Copy, Search, Eye, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -28,6 +28,7 @@ import {
   duplicateCard,
   getLessonsSimple,
   bulkCreateCards,
+  bulkDeleteCards,
 } from '@/core/functions/cards'
 import type { CreateCardInput, UpdateCardInput, CardOption } from '@/lib/schemas'
 import { toast } from 'sonner'
@@ -80,6 +81,8 @@ function CardsPage() {
   const [deletingCard, setDeletingCard] = useState<Card | null>(null)
   const [previewCard, setPreviewCard] = useState<Card | null>(null)
   const [importOpen, setImportOpen] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
 
   const { data: lessonsData } = useQuery({
     queryKey: ['lessons-simple'],
@@ -157,6 +160,19 @@ function CardsPage() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Erreur lors de l\'import')
+    },
+  })
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (ids: number[]) => bulkDeleteCards({ data: ids }),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['cards'] })
+      setBulkDeleteOpen(false)
+      setSelectedIds(new Set())
+      toast.success(`${result.deleted} carte(s) supprimée(s) avec succès`)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erreur lors de la suppression')
     },
   })
 
@@ -256,16 +272,40 @@ function CardsPage() {
         title="Cartes"
         description="Gérer les cartes de révision"
         actions={
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setImportOpen(true)}>
-              <Upload className="mr-2 h-4 w-4" />
-              Import JSON
-            </Button>
-            <Button onClick={() => setFormOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Nouvelle carte
-            </Button>
-          </div>
+          selectedIds.size > 0 ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                {selectedIds.size} sélectionné{selectedIds.size > 1 ? 's' : ''}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedIds(new Set())}
+              >
+                <X className="mr-2 h-4 w-4" />
+                Annuler
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setBulkDeleteOpen(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Supprimer ({selectedIds.size})
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setImportOpen(true)}>
+                <Upload className="mr-2 h-4 w-4" />
+                Import JSON
+              </Button>
+              <Button onClick={() => setFormOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nouvelle carte
+              </Button>
+            </div>
+          )
         }
       />
 
@@ -331,6 +371,10 @@ function CardsPage() {
         onPageChange={setPage}
         isLoading={isLoading}
         emptyMessage="Aucune carte trouvée"
+        selectable
+        selectedIds={selectedIds}
+        onSelectionChange={setSelectedIds}
+        getRowId={(card) => card.id}
       />
 
       <CardForm
@@ -437,6 +481,18 @@ function CardsPage() {
           })
         }}
         isLoading={bulkImportMutation.isPending}
+      />
+
+      {/* Bulk Delete Confirmation */}
+      <ConfirmDialog
+        open={bulkDeleteOpen}
+        onOpenChange={setBulkDeleteOpen}
+        title="Supprimer les cartes sélectionnées"
+        description={`Êtes-vous sûr de vouloir supprimer ${selectedIds.size} carte${selectedIds.size > 1 ? 's' : ''} ? Cette action est irréversible.`}
+        confirmLabel={`Supprimer (${selectedIds.size})`}
+        onConfirm={() => bulkDeleteMutation.mutate(Array.from(selectedIds))}
+        isLoading={bulkDeleteMutation.isPending}
+        variant="destructive"
       />
     </div>
   )

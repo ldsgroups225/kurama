@@ -381,3 +381,25 @@ export const bulkCreateCards = createServerFn({ method: 'POST' })
 
     return { created: result.length }
   })
+
+// Bulk delete cards
+export const bulkDeleteCards = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((ids: number[]) => ids)
+  .handler(async ({ data: ids, context }) => {
+    initAdminDb()
+    const db = getDb()
+
+    if (ids.length === 0) {
+      return { deleted: 0 }
+    }
+
+    const result = await db
+      .delete(cards)
+      .where(sql`${cards.id} IN ${ids}`)
+      .returning({ id: cards.id })
+
+    console.log(`[AUDIT] Bulk cards deleted by ${context.email}: ${result.length} cards`)
+
+    return { deleted: result.length }
+  })
