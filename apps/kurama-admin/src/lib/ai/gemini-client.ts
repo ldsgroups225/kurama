@@ -5,6 +5,25 @@ import {
   getRAGCardPrompt,
   type LessonPlanPromptParams,
 } from './prompts'
+import {
+  GEMINI_MODEL,
+  GEMINI_EMBEDDING_MODEL,
+  AI_CONFIG,
+  SIMILARITY_THRESHOLDS,
+  FUNCTION_CALLING_CONFIG,
+} from './constants'
+
+// Re-export constants for convenience
+export {
+  GEMINI_MODEL,
+  GEMINI_EMBEDDING_MODEL,
+  AI_CONFIG,
+  RAG_THRESHOLDS,
+  SIMILARITY_THRESHOLDS,
+  FUNCTION_CALLING_CONFIG,
+  CARD_GENERATION_DEFAULTS,
+  LESSON_PLAN_DEFAULTS,
+} from './constants'
 
 // Types for AI responses
 export interface WebSource {
@@ -15,6 +34,10 @@ export interface WebSource {
 export interface LessonPlanResult {
   content: string
   sources: WebSource[]
+  /** Model used for generation */
+  model: string
+  /** Generation timestamp */
+  generatedAt: string
 }
 
 export interface CompleteCardResult {
@@ -51,19 +74,45 @@ export function createGeminiClient(apiKey: string) {
 }
 
 /**
+ * Retry wrapper for API calls with exponential backoff
+ */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxAttempts: number = AI_CONFIG.retry.maxAttempts
+): Promise<T> {
+  let lastError: Error | undefined
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn()
+    } catch (error) {
+      lastError = error as Error
+      console.warn(`[AI] Attempt ${attempt}/${maxAttempts} failed:`, error)
+
+      if (attempt < maxAttempts) {
+        const delay = AI_CONFIG.retry.delayMs * Math.pow(2, attempt - 1)
+        await new Promise(resolve => setTimeout(resolve, delay))
+      }
+    }
+  }
+
+  throw lastError
+}
+
+/**
  * Generate a lesson plan using Gemini AI with Google Search grounding
+ * Enhanced with retry logic and better error handling
  */
 export async function generateLessonPlan(
   apiKey: string,
   params: LessonPlanPromptParams
 ): Promise<LessonPlanResult> {
   const ai = createGeminiClient(apiKey)
-  const model = 'gemini-2.5-flash'
   const prompt = getLessonPlanPrompt(params)
 
-  try {
+  return withRetry(async () => {
     const result = await ai.models.generateContent({
-      model,
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         tools: [{ googleSearch: {} }],
@@ -71,6 +120,10 @@ export async function generateLessonPlan(
     })
 
     const content = result.text || ''
+
+    if (!content || content.length < 100) {
+      throw new Error('Generated content is too short or empty')
+    }
 
     // Extract sources from grounding metadata
     const groundingMetadata = result.candidates?.[0]?.groundingMetadata
@@ -88,13 +141,23 @@ export async function generateLessonPlan(
       }
     }
 
-    return { content, sources }
-  } catch (error) {
+    // Deduplicate sources by URI
+    const uniqueSources = sources.filter(
+      (source, index, self) => index === self.findIndex(s => s.uri === source.uri)
+    )
+
+    return {
+      content,
+      sources: uniqueSources,
+      model: GEMINI_MODEL,
+      generatedAt: new Date().toISOString(),
+    }
+  }).catch(error => {
     console.error('Error generating lesson plan:', error)
     throw new Error(
       "Échec de la génération du plan de leçon. L'API a peut-être rejeté la requête. Vérifiez votre clé API et votre connexion réseau."
     )
-  }
+  })
 }
 
 // Card schema with additional metadata (per Gemini best practices)
@@ -166,7 +229,7 @@ const cardSchema = {
 
 /**
  * Generate complete cards (flashcard + quiz) from lesson content using Gemini AI
- * Legacy function - use generateCardsWithRAG for generation
+ * Enhanced with retry logic and validation
  */
 export async function generateCompleteCards(
   apiKey: string,
@@ -174,12 +237,11 @@ export async function generateCompleteCards(
   amount: number
 ): Promise<CompleteCardResult[]> {
   const ai = createGeminiClient(apiKey)
-  const model = 'gemini-2.5-flash'
   const prompt = getCompleteCardPrompt({ lessonContent, amount })
 
-  try {
+  return withRetry(async () => {
     const result = await ai.models.generateContent({
-      model,
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -191,18 +253,35 @@ export async function generateCompleteCards(
     })
 
     const jsonStr = result.text || '[]'
-    return JSON.parse(jsonStr) as CompleteCardResult[]
-  } catch (error) {
+    const cards = JSON.parse(jsonStr) as CompleteCardResult[]
+
+    // Validate cards have required fields
+    const validCards = cards.filter(card =>
+      card.title &&
+      card.frontContent &&
+      card.backContent &&
+      card.question &&
+      Array.isArray(card.options) &&
+      card.options.length === 4
+    )
+
+    if (validCards.length === 0) {
+      throw new Error('No valid cards generated')
+    }
+
+    return validCards
+  }).catch(error => {
     console.error('Error generating complete cards:', error)
     throw new Error(
       "Échec de la génération des cartes. L'API a peut-être rejeté la requête ou retourné des données invalides."
     )
-  }
+  })
 }
 
 /**
  * Generate cards with RAG context from lesson attachments
  * Reduces hallucinations by grounding generation in actual document content
+ * Enhanced with retry logic and validation
  */
 export async function generateCardsWithRAG(
   apiKey: string,
@@ -210,12 +289,11 @@ export async function generateCardsWithRAG(
   amount: number
 ): Promise<CompleteCardResult[]> {
   const ai = createGeminiClient(apiKey)
-  const model = 'gemini-2.5-flash'
   const prompt = getRAGCardPrompt(context, amount)
 
-  try {
+  return withRetry(async () => {
     const result = await ai.models.generateContent({
-      model,
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -227,17 +305,34 @@ export async function generateCardsWithRAG(
     })
 
     const jsonStr = result.text || '[]'
-    return JSON.parse(jsonStr) as CompleteCardResult[]
-  } catch (error) {
+    const cards = JSON.parse(jsonStr) as CompleteCardResult[]
+
+    // Validate cards have required fields
+    const validCards = cards.filter(card =>
+      card.title &&
+      card.frontContent &&
+      card.backContent &&
+      card.question &&
+      Array.isArray(card.options) &&
+      card.options.length === 4
+    )
+
+    if (validCards.length === 0) {
+      throw new Error('No valid cards generated')
+    }
+
+    return validCards
+  }).catch(error => {
     console.error('Error generating cards with RAG:', error)
     throw new Error(
       "Échec de la génération des cartes avec contexte enrichi. Vérifiez votre clé API et réessayez."
     )
-  }
+  })
 }
 
 /**
  * Generate embedding for a text query using Gemini
+ * Enhanced with retry logic
  */
 export async function generateEmbedding(
   apiKey: string,
@@ -245,17 +340,23 @@ export async function generateEmbedding(
 ): Promise<number[]> {
   const ai = createGeminiClient(apiKey)
 
-  try {
+  return withRetry(async () => {
     const result = await ai.models.embedContent({
-      model: 'text-embedding-004',
+      model: GEMINI_EMBEDDING_MODEL,
       contents: text,
     })
 
-    return result.embeddings?.[0]?.values || []
-  } catch (error) {
+    const embedding = result.embeddings?.[0]?.values || []
+
+    if (embedding.length === 0) {
+      throw new Error('Empty embedding returned')
+    }
+
+    return embedding
+  }).catch(error => {
     console.error('Error generating embedding:', error)
     throw new Error("Échec de la génération de l'embedding.")
-  }
+  })
 }
 
 /**
@@ -267,11 +368,10 @@ export async function extractKeyConcepts(
   maxConcepts: number = 5
 ): Promise<string[]> {
   const ai = createGeminiClient(apiKey)
-  const model = 'gemini-2.5-flash'
 
   try {
     const result = await ai.models.generateContent({
-      model,
+      model: GEMINI_MODEL,
       contents: `Extrais les ${maxConcepts} concepts clés les plus importants de ce plan de leçon. 
 Retourne uniquement un JSON array de strings courts (2-5 mots chacun).
 
@@ -314,13 +414,12 @@ export async function expandSearchQuery(
   context?: string
 ): Promise<QueryExpansion> {
   const ai = createGeminiClient(apiKey)
-  const model = 'gemini-2.5-flash'
 
   try {
     const contextInfo = context ? `\nContexte: ${context}` : ''
 
     const result = await ai.models.generateContent({
-      model,
+      model: GEMINI_MODEL,
       contents: `Tu es un expert en recherche d'information. Génère des variations de cette requête pour améliorer la recherche.
 ${contextInfo}
 
@@ -376,11 +475,10 @@ export async function generateSearchQueries(
   targetCount: number = 5
 ): Promise<string[]> {
   const ai = createGeminiClient(apiKey)
-  const model = 'gemini-2.5-flash'
 
   try {
     const result = await ai.models.generateContent({
-      model,
+      model: GEMINI_MODEL,
       contents: `Analyse ce plan de leçon et génère ${targetCount} requêtes de recherche distinctes.
 Chaque requête doit cibler un aspect différent du contenu pour une couverture complète.
 
@@ -424,8 +522,8 @@ export async function generateEmbeddings(
 
   const results: { text: string; embedding: number[] }[] = []
 
-  // Process in batches of 5 to avoid rate limits
-  const batchSize = 5
+  // Process in batches to avoid rate limits
+  const batchSize = AI_CONFIG.batch.embeddingSize
   for (let i = 0; i < texts.length; i += batchSize) {
     const batch = texts.slice(i, i + batchSize)
 
@@ -433,7 +531,7 @@ export async function generateEmbeddings(
       batch.map(async (text) => {
         try {
           const result = await ai.models.embedContent({
-            model: 'text-embedding-004',
+            model: GEMINI_EMBEDDING_MODEL,
             contents: text,
           })
           return {
@@ -465,7 +563,6 @@ export async function analyzeChunkRelevance(
   if (chunks.length === 0) return []
 
   const ai = createGeminiClient(apiKey)
-  const model = 'gemini-2.5-flash'
 
   try {
     const chunksText = chunks
@@ -473,7 +570,7 @@ export async function analyzeChunkRelevance(
       .join('\n\n')
 
     const result = await ai.models.generateContent({
-      model,
+      model: GEMINI_MODEL,
       contents: `Évalue la pertinence de chaque chunk pour cette requête.
 
 Requête: "${query}"
@@ -635,7 +732,7 @@ export async function executeFunctionCall(
   switch (functionName) {
     case 'search_lesson_documents': {
       const query = args.query as string
-      const maxResults = Math.min((args.maxResults as number) || 3, 5)
+      const maxResults = Math.min((args.maxResults as number) || 3, FUNCTION_CALLING_CONFIG.maxSearchResults)
 
       const results = await ctx.searchChunks(query, maxResults)
 
@@ -648,7 +745,7 @@ export async function executeFunctionCall(
             text: r.text,
             source: r.source,
             page: r.pageNumber,
-            relevance: r.similarity > 0.7 ? 'high' : r.similarity > 0.5 ? 'medium' : 'low',
+            relevance: r.similarity > SIMILARITY_THRESHOLDS.highRelevance ? 'high' : r.similarity > SIMILARITY_THRESHOLDS.mediumRelevance ? 'medium' : 'low',
           })),
         },
       }
@@ -675,7 +772,7 @@ export async function executeFunctionCall(
       const results = await ctx.searchChunks(statement, 3)
 
       const bestMatch = results[0]
-      const isValidated = bestMatch && bestMatch.similarity > 0.6
+      const isValidated = bestMatch && bestMatch.similarity > FUNCTION_CALLING_CONFIG.factValidationThreshold
 
       return {
         name: functionName,
@@ -726,7 +823,6 @@ export async function generateCardsWithFunctionCalling(
   ctx: FunctionCallContext
 ): Promise<{ cards: CompleteCardResult[]; functionCalls: string[] }> {
   const ai = createGeminiClient(apiKey)
-  const model = 'gemini-2.5-flash'
 
   // Build tools array with function declarations
   const tools = [
@@ -770,7 +866,7 @@ Commence par explorer le contexte avec les fonctions disponibles.`
   // Track conversation as simple string for context
   let conversationContext = initialPrompt
   const functionCallsLog: string[] = []
-  const maxIterations = 15
+  const maxIterations = FUNCTION_CALLING_CONFIG.maxIterations
   let iteration = 0
 
   while (iteration < maxIterations) {
@@ -778,7 +874,7 @@ Commence par explorer le contexte avec les fonctions disponibles.`
 
     try {
       const response = await ai.models.generateContent({
-        model,
+        model: GEMINI_MODEL,
         contents: conversationContext,
         config: { tools },
       })

@@ -20,6 +20,10 @@ import {
   generateEmbeddings,
   extractKeyConcepts,
   generateSearchQueries,
+  GEMINI_MODEL,
+  RAG_THRESHOLDS,
+  SIMILARITY_THRESHOLDS,
+  CARD_GENERATION_DEFAULTS,
   type RAGContext,
   type FunctionCallContext,
 } from '@/lib/ai/gemini-client'
@@ -101,7 +105,7 @@ async function searchRelevantChunks(
   return results
 }
 
-function deduplicateChunks(chunks: ChunkSearchResult[], similarityThreshold: number = 0.95): ChunkSearchResult[] {
+function deduplicateChunks(chunks: ChunkSearchResult[], similarityThreshold: number = SIMILARITY_THRESHOLDS.deduplication): ChunkSearchResult[] {
   const unique: ChunkSearchResult[] = []
   for (const chunk of chunks) {
     const isDuplicate = unique.some(existing => {
@@ -133,7 +137,7 @@ async function hybridSearch(
   const {
     vectorTopK = 10,
     vectorWeight = 0.7,
-    minSimilarity = 0.3,
+    minSimilarity = SIMILARITY_THRESHOLDS.minSimilarity,
   } = options
 
   // Vector search
@@ -265,7 +269,7 @@ export const generateTeachPlan = createServerFn({ method: 'POST' })
       grade: data.grade,
       language: data.language,
       sources: result.sources,
-      generatedBy: 'gemini-2.5-flash',
+      generatedBy: GEMINI_MODEL,
     }
 
     const updateResult = await db
@@ -294,9 +298,9 @@ export const generateTeachPlan = createServerFn({ method: 'POST' })
     }
   })
 
-// Thresholds for RAG strategy selection
-const VECTOR_SEARCH_THRESHOLD = 10
-const ADVANCED_SEARCH_THRESHOLD = 30
+// Use centralized thresholds from constants
+const VECTOR_SEARCH_THRESHOLD = RAG_THRESHOLDS.directLoad
+const ADVANCED_SEARCH_THRESHOLD = RAG_THRESHOLDS.vectorSearch
 
 // Generate complete cards from teach plan with RAG
 export const generateCardsFromPlan = createServerFn({ method: 'POST' })
@@ -465,7 +469,7 @@ export const generateCardsFromPlan = createServerFn({ method: 'POST' })
           explanation: card.explanation,
           hints: card.hints,
           displayOrder: index + 1,
-          points: card.difficulty === 2 ? 15 : card.difficulty === 1 ? 12 : 10,
+          points: card.difficulty === 2 ? CARD_GENERATION_DEFAULTS.points.hard : card.difficulty === 1 ? CARD_GENERATION_DEFAULTS.points.medium : CARD_GENERATION_DEFAULTS.points.easy,
           difficulty: card.difficulty ?? 0,
           metadata: {
             sourceReference: card.sourceReference,
@@ -565,8 +569,8 @@ export const updateTeachPlan = createServerFn({ method: 'POST' })
 // Phase 5: Function Calling for Dynamic Context Retrieval
 // ============================================================================
 
-// Threshold for using function calling (very large document sets)
-const FUNCTION_CALLING_THRESHOLD = 50
+// Use centralized threshold from constants
+const FUNCTION_CALLING_THRESHOLD = RAG_THRESHOLDS.functionCalling
 
 /**
  * Generate cards using function calling for dynamic context retrieval
@@ -704,7 +708,7 @@ export const generateCardsWithDynamicContext = createServerFn({ method: 'POST' }
           explanation: card.explanation,
           hints: card.hints,
           displayOrder: index + 1,
-          points: card.difficulty === 2 ? 15 : card.difficulty === 1 ? 12 : 10,
+          points: card.difficulty === 2 ? CARD_GENERATION_DEFAULTS.points.hard : card.difficulty === 1 ? CARD_GENERATION_DEFAULTS.points.medium : CARD_GENERATION_DEFAULTS.points.easy,
           difficulty: card.difficulty ?? 0,
           metadata: {
             sourceReference: card.sourceReference,

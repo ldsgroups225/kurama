@@ -47,7 +47,7 @@ La leçon doit porter spécifiquement sur ce titre. Le titre principal du docume
 
 En utilisant tes capacités de recherche, trouve les directives curriculaires les plus actuelles et précises pour le pays et le niveau fournis afin d'informer le plan de leçon.
 
-**IMPORTANT:** Priorise les informations des sites suivants si disponibles: scribd.com, ecoleweb.ci, et dpfc-ci.net. Ensuite, complète avec des informations d'autres sources officielles.
+**IMPORTANT:** Priorise les informations des sites suivants si disponibles: scribd.com, ecoleweb.ci, et dpfc-ci.net surtout dpfc-ci.net pour la Côte d'Ivoire. Ensuite, complète avec des informations d'autres sources officielles.
 
 La sortie doit être en ${language === 'French' ? 'français' : 'anglais'}.
 
@@ -84,8 +84,9 @@ Basé sur le contenu du plan de leçon suivant, crée ${amount} cartes d'étude 
 Chaque carte DOIT inclure:
 1. **Contenu Flashcard**: Un recto (question/terme) et un verso (réponse/définition)
 2. **Quiz QCM**: Une question avec 4 options (A, B, C, D), une seule correcte
-3. **Explication**: Pourquoi la réponse est correcte
-4. **Indices**: 1-2 indices pour aider l'étudiant
+3. **Quiz TrueFalse**: Une question avec 2 options (Vrai ou Faux), une seule correcte
+4. **Explication**: Pourquoi la réponse est correcte
+5. **Indices**: 1-2 indices pour aider l'étudiant
 
 **Règles de formatage:**
 - Utilise Markdown pour le formatage (gras, italique, listes)
