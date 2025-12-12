@@ -29,168 +29,269 @@ export interface RAGContext {
 
 /**
  * Generate the prompt for lesson plan generation
+ * Optimized for Gemini with Google Search grounding
  */
 export function getLessonPlanPrompt(params: LessonPlanPromptParams): string {
   const { country, subject, grade, language, schoolYear, lessonTitle, customInstructions } = params
 
-  let prompt = `
-Tu es un expert en conception de programmes scolaires spécialisé dans les systèmes éducatifs mondiaux. Ta tâche est de générer un plan de leçon détaillé basé sur le programme éducatif officiel du pays et de l'année scolaire spécifiés.
+  const isFrench = language === 'French'
+  const isIvoryCoast = country.toLowerCase().includes('ivoire') || country.toLowerCase().includes('ivory')
 
-**Pays:** ${country}
-**Niveau scolaire:** ${grade}
-**Matière:** ${subject}
-**Année scolaire:** ${schoolYear}
-**Langue du plan de leçon:** ${language}
-**Titre de la leçon:** "${lessonTitle}"
+  let prompt = `<role>Expert pedagogue specialise dans la conception de programmes scolaires ${isIvoryCoast ? 'ivoiriens' : 'africains'}.</role>
 
-La leçon doit porter spécifiquement sur ce titre. Le titre principal du document markdown généré (commençant par '# ') DOIT être exactement "${lessonTitle}".
+<task>Creer un plan de lecon complet et structure pour l'enseignement.</task>
 
-En utilisant tes capacités de recherche, trouve les directives curriculaires les plus actuelles et précises pour le pays et le niveau fournis afin d'informer le plan de leçon.
+<context>
+- Pays: ${country}
+- Niveau: ${grade}
+- Matiere: ${subject}
+- Annee scolaire: ${schoolYear}
+- Titre exact: "${lessonTitle}"
+</context>
 
-**IMPORTANT:** Priorise les informations des sites suivants si disponibles: scribd.com, ecoleweb.ci, et dpfc-ci.net surtout dpfc-ci.net pour la Côte d'Ivoire. Ensuite, complète avec des informations d'autres sources officielles.
+<search_priority>
+${isIvoryCoast ? `1. dpfc-ci.net (Direction de la Pedagogie et de la Formation Continue - OFFICIEL)
+2. men-dpes.org (Ministere de l'Education Nationale)
+3. ecoleweb.ci (ressources pedagogiques ivoiriennes)
+4. scribd.com/documents educatifs Cote d'Ivoire` : `1. Sites officiels du ministere de l'education de ${country}
+2. Ressources pedagogiques officielles
+3. Documents curriculaires nationaux`}
+</search_priority>
 
-La sortie doit être en ${language === 'French' ? 'français' : 'anglais'}.
+<output_format>
+# ${lessonTitle}
 
-Structure ta réponse en Markdown avec un titre principal (commençant par '# ') et les en-têtes de section suivants exactement comme écrits:
 ### Objectifs d'apprentissage
-### Matériel requis
-### Activités étape par étape
-### Méthodes d'évaluation
+- Objectif general (ce que l'eleve saura faire)
+- 3-5 objectifs specifiques mesurables (verbes d'action: definir, expliquer, calculer, analyser...)
+- Competences visees selon le programme officiel
 
-Sous chaque en-tête, utilise des puces pour les listes.
-Pour les formules mathématiques, utilise la syntaxe LaTeX (ex: $E=mc^2$ pour les équations en bloc, et $ax^2 + bx + c = 0$ pour les équations en ligne).
-`
+### Prerequis
+- Connaissances prealables necessaires
+- Notions a maitriser avant cette lecon
+
+### Duree estimee
+- Temps total recommande
+- Repartition par activite
+
+### Materiel requis
+- Materiel pour l'enseignant
+- Materiel pour les eleves
+- Ressources numeriques (si applicable)
+
+### Contenu de la lecon
+#### Introduction / Situation de depart
+- Accroche ou situation-probleme
+- Lien avec le vecu des eleves
+
+#### Developpement
+- Concepts cles avec definitions precises
+- Explications detaillees
+- Exemples concrets adaptes au contexte ${isIvoryCoast ? 'ivoirien' : 'local'}
+- Formules (si applicable, en LaTeX: $formule$)
+
+#### Synthese
+- Points essentiels a retenir
+- Schema ou resume visuel
+
+### Activites etape par etape
+1. **Phase de decouverte** (X min): description
+2. **Phase d'apprentissage** (X min): description
+3. **Phase d'application** (X min): exercices guides
+4. **Phase d'evaluation** (X min): verification des acquis
+
+### Exercices d'application
+- 2-3 exercices de difficulte croissante
+- Corriges ou elements de reponse
+
+### Methodes d'evaluation
+- Evaluation formative (pendant la lecon)
+- Evaluation sommative (criteres de reussite)
+- Indicateurs de maitrise
+
+### Prolongements
+- Liens avec d'autres lecons
+- Activites complementaires
+
+### Cartes d'etude recommandees
+- Nombre de cartes suggere: X cartes (basé sur la complexite et le nombre de concepts)
+- Repartition recommandee:
+  - X cartes faciles (definitions, faits de base)
+  - X cartes moyennes (applications, relations)
+  - X cartes difficiles (analyse, synthese)
+- Concepts cles a couvrir en priorite (liste)
+</output_format>
+
+<rules>
+1. LANGUE: Rediger entierement en ${isFrench ? 'francais' : 'anglais'}
+2. PRECISION: Utiliser des informations verifiees du programme officiel
+3. ADAPTATION: Adapter les exemples au contexte ${isIvoryCoast ? 'ivoirien' : 'local'}
+4. FORMULES: Utiliser LaTeX pour les mathematiques ($x^2$, $\\frac{a}{b}$)
+5. STRUCTURE: Respecter exactement les en-tetes demandes
+6. EXHAUSTIVITE: Couvrir tous les aspects du titre "${lessonTitle}"
+</rules>`
 
   if (customInstructions) {
     prompt += `
 
-**Instructions personnalisées:**
+<custom_instructions>
 ${customInstructions}
-`
+</custom_instructions>`
   }
 
   return prompt
 }
 
+
 /**
  * Generate the prompt for complete card generation (flashcard + quiz in one)
+ * Optimized for structured output with Gemini
  */
 export function getCompleteCardPrompt(params: CardGenerationPromptParams): string {
   const { lessonContent, amount } = params
 
-  return `
-Basé sur le contenu du plan de leçon suivant, crée ${amount} cartes d'étude complètes qui couvrent l'ensemble de la leçon. Chaque carte doit se concentrer sur un seul concept clé.
+  // Calculate distribution for variety
+  const easyCount = Math.ceil(amount * 0.3)
+  const mediumCount = Math.ceil(amount * 0.4)
+  const hardCount = amount - easyCount - mediumCount
 
-Chaque carte DOIT inclure:
-1. **Contenu Flashcard**: Un recto (question/terme) et un verso (réponse/définition)
-2. **Quiz QCM**: Une question avec 4 options (A, B, C, D), une seule correcte
-3. **Quiz TrueFalse**: Une question avec 2 options (Vrai ou Faux), une seule correcte
-4. **Explication**: Pourquoi la réponse est correcte
-5. **Indices**: 1-2 indices pour aider l'étudiant
+  return `<role>Expert en creation de contenu educatif et techniques de memorisation (spaced repetition).</role>
 
-**Règles de formatage:**
-- Utilise Markdown pour le formatage (gras, italique, listes)
-- Pour les formules mathématiques, utilise LaTeX: $E=mc^2$ (inline) ou $$ax^2+bx+c=0$$ (bloc)
-- Les options de quiz doivent être plausibles mais une seule correcte
+<task>Creer ${amount} cartes d'etude optimisees pour l'apprentissage actif.</task>
 
-**Contenu du plan de leçon:**
----
+<lesson_content>
 ${lessonContent}
----
+</lesson_content>
 
-Génère un tableau JSON avec cette structure pour chaque carte:
-[
-  {
-    "title": "Titre bref du concept",
-    "frontContent": "Question ou terme à mémoriser",
-    "backContent": "Réponse ou définition complète",
-    "question": "Question de quiz reformulée",
-    "options": [
-      { "id": "A", "text": "Option A", "isCorrect": false },
-      { "id": "B", "text": "Option B (correcte)", "isCorrect": true },
-      { "id": "C", "text": "Option C", "isCorrect": false },
-      { "id": "D", "text": "Option D", "isCorrect": false }
-    ],
-    "explanation": "Explication détaillée de la bonne réponse",
-    "hints": ["Premier indice", "Deuxième indice"]
-  }
-]
-`
+<card_structure>
+Chaque carte contient:
+1. title: Titre concis (max 60 car.)
+2. frontContent: Question/terme (Markdown, LaTeX pour maths)
+3. backContent: Reponse complete (Markdown, LaTeX)
+4. question: Question QCM differente du frontContent
+5. options: 4 choix [A,B,C,D] - 1 seule correcte, distracteurs plausibles
+6. explanation: Pourquoi la reponse est correcte
+7. hints: 2 indices progressifs (vague puis precis)
+8. difficulty: 0=facile, 1=moyen, 2=difficile
+</card_structure>
+
+<distribution>
+- ${easyCount} faciles (difficulty:0) - definitions, faits simples
+- ${mediumCount} moyennes (difficulty:1) - applications, relations
+- ${hardCount} difficiles (difficulty:2) - analyse, synthese
+</distribution>
+
+<quality_rules>
+- COUVERTURE: Tous les concepts importants de la lecon
+- UNICITE: 1 carte = 1 concept unique
+- PRECISION: Informations exactes uniquement
+- DISTRACTEURS: Bases sur erreurs courantes des eleves
+- FORMULES: LaTeX obligatoire pour maths ($x^2$, $\\frac{a}{b}$)
+- VARIETE: Varier position de la bonne reponse (pas toujours B)
+</quality_rules>
+
+<output_format>
+JSON array de ${amount} cartes:
+{
+  "title": "string",
+  "frontContent": "string (Markdown)",
+  "backContent": "string (Markdown)",
+  "question": "string",
+  "options": [
+    {"id": "A", "text": "string", "isCorrect": boolean},
+    {"id": "B", "text": "string", "isCorrect": boolean},
+    {"id": "C", "text": "string", "isCorrect": boolean},
+    {"id": "D", "text": "string", "isCorrect": boolean}
+  ],
+  "explanation": "string",
+  "hints": ["string", "string"],
+  "difficulty": 0|1|2
+}
+</output_format>`
 }
 
 
 /**
- * Generate the prompt for RAG card generation
+ * Generate the prompt for RAG-enhanced card generation
  * Combines lesson plan with document chunks for grounded generation
  */
 export function getRAGCardPrompt(context: RAGContext, amount: number): string {
   const { lessonPlan, attachmentChunks, metadata } = context
 
-  let prompt = `Tu es un expert en création de contenu éducatif pour le système scolaire ivoirien.
-Tu dois créer des cartes d'étude PRÉCISES et FACTUELLES basées uniquement sur les informations fournies.
+  // Calculate distribution
+  const easyCount = Math.ceil(amount * 0.3)
+  const mediumCount = Math.ceil(amount * 0.4)
+  const hardCount = amount - easyCount - mediumCount
 
-## Contexte de la leçon
-- **Matière:** ${metadata.subject}
-${metadata.lessonTitle ? `- **Titre:** ${metadata.lessonTitle}` : ''}
-${metadata.grade ? `- **Niveau:** ${metadata.grade}` : ''}
-${metadata.series ? `- **Série:** ${metadata.series}` : ''}
-${metadata.difficulty ? `- **Difficulté:** ${metadata.difficulty}` : ''}
+  let prompt = `<role>Expert en creation de contenu educatif pour le systeme scolaire ivoirien.</role>
 
-## Plan de leçon
+<task>Creer ${amount} cartes d'etude PRECISES et FACTUELLES basees sur les sources fournies.</task>
+
+<context>
+- Matiere: ${metadata.subject}
+${metadata.lessonTitle ? `- Titre: ${metadata.lessonTitle}` : ''}
+${metadata.grade ? `- Niveau: ${metadata.grade}` : ''}
+${metadata.series ? `- Serie: ${metadata.series}` : ''}
+${metadata.difficulty ? `- Difficulte: ${metadata.difficulty}` : ''}
+</context>
+
+<lesson_plan>
 ${lessonPlan}
+</lesson_plan>
 `
 
   // Add RAG context if available
   if (attachmentChunks.length > 0) {
     prompt += `
-## Documents de référence (IMPORTANT: utilise ces informations pour créer des cartes précises)
-Ces extraits proviennent des documents attachés à la leçon. Base tes cartes sur ces informations RÉELLES.
+<reference_documents>
+IMPORTANT: Ces extraits sont la SOURCE DE VERITE. Base tes cartes sur ces informations REELLES.
 `
-    for (const chunk of attachmentChunks) {
+    for (const [i, chunk] of attachmentChunks.entries()) {
       const pageInfo = chunk.pageNumber ? ` (page ${chunk.pageNumber})` : ''
       prompt += `
-### Source: ${chunk.source}${pageInfo}
-\`\`\`
+[Source ${i + 1}: ${chunk.source}${pageInfo}]
 ${chunk.text}
-\`\`\`
 `
     }
+    prompt += `</reference_documents>
+`
   }
 
   prompt += `
-## Instructions de génération
-Génère exactement **${amount} cartes d'étude** complètes basées sur le contenu ci-dessus.
+<critical_rules>
+1. FACTUEL: Chaque carte basee sur informations REELLES des sources
+2. PAS D'INVENTION: Ne PAS inventer faits, dates, noms non presents
+3. REFERENCE: Indiquer sourceReference pour chaque carte
+4. BLOOM: Assigner niveau taxonomique (remember, understand, apply, analyze)
+5. VARIETE: Difficultes variees selon distribution ci-dessous
+</critical_rules>
 
-### Règles CRITIQUES:
-1. **FACTUEL**: Chaque carte doit être basée sur des informations RÉELLES du plan ou des documents
-2. **PAS D'INVENTION**: Ne PAS inventer de faits, dates, noms ou données non présents dans les sources
-3. **VARIÉTÉ**: Varier les niveaux de difficulté (0=facile, 1=moyen, 2=difficile)
-4. **QUIZ PLAUSIBLE**: Les 4 options de quiz doivent être plausibles mais une seule correcte
-5. **INDICES PROGRESSIFS**: Les hints doivent être progressifs (du plus vague au plus précis)
-6. **RÉFÉRENCER**: Utilise sourceReference pour indiquer d'où vient l'information
-7. **BLOOM**: Assigne un niveau de Bloom approprié (remember, understand, apply, analyze)
-8. **FRANÇAIS IVOIRIEN**: Utilise un français approprié au niveau scolaire ivoirien
+<distribution>
+- ${easyCount} faciles (difficulty:0, bloomsLevel:remember/understand)
+- ${mediumCount} moyennes (difficulty:1, bloomsLevel:understand/apply)
+- ${hardCount} difficiles (difficulty:2, bloomsLevel:apply/analyze)
+</distribution>
 
-### Format de sortie
-JSON array de ${amount} cartes avec cette structure:
+<output_format>
+JSON array de ${amount} cartes:
 {
   "title": "Titre concis (max 60 car.)",
   "frontContent": "Question/terme en Markdown",
-  "backContent": "Réponse/définition en Markdown",
-  "question": "Question quiz reformulée",
+  "backContent": "Reponse/definition en Markdown",
+  "question": "Question quiz reformulee",
   "options": [
-    { "id": "A", "text": "Option A", "isCorrect": false },
-    { "id": "B", "text": "Option B", "isCorrect": true },
-    { "id": "C", "text": "Option C", "isCorrect": false },
-    { "id": "D", "text": "Option D", "isCorrect": false }
+    {"id": "A", "text": "Option A", "isCorrect": false},
+    {"id": "B", "text": "Option B", "isCorrect": true},
+    {"id": "C", "text": "Option C", "isCorrect": false},
+    {"id": "D", "text": "Option D", "isCorrect": false}
   ],
-  "explanation": "Explication détaillée",
-  "hints": ["Indice 1 (vague)", "Indice 2 (plus précis)"],
+  "explanation": "Explication detaillee",
+  "hints": ["Indice 1 (vague)", "Indice 2 (plus precis)"],
   "difficulty": 0|1|2,
   "sourceReference": "Nom du document ou section",
   "bloomsLevel": "remember|understand|apply|analyze"
 }
-`
+</output_format>`
 
   return prompt
 }
