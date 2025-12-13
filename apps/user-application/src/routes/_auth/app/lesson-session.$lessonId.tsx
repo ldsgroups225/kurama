@@ -1,17 +1,21 @@
 import type { Reward } from '@/components/gamification'
 import type { TestSettings } from '@/components/learning/test-settings-sheet'
+import type { XPCalculationResult } from '@/lib/flashcard-gamification'
+import type { LearningSession } from '@/lib/learning-mode-gamification'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { ArrowLeft, SlidersHorizontal, WifiOff } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { RewardAnimation } from '@/components/gamification'
+import { RewardAnimation, XPFeedback } from '@/components/gamification'
 import { CardFactory } from '@/components/learning/CardFactory'
+import { EnhancedExam } from '@/components/learning/enhanced-exam'
+import { EnhancedQuiz } from '@/components/learning/enhanced-quiz'
 import { QuizSettingsSheet } from '@/components/learning/quiz-settings-sheet'
 import { SessionControls } from '@/components/learning/session-controls'
 import { SessionCounterBadge } from '@/components/learning/session-counter-badge'
 import { SessionSettingsDialog } from '@/components/learning/session-settings-dialog'
-import { Test } from '@/components/learning/test'
+
 import { TestLoading } from '@/components/learning/test-loading'
 import { TestSettingsSheet } from '@/components/learning/test-settings-sheet'
 import { AppHeader } from '@/components/main'
@@ -27,6 +31,7 @@ import { useStatsUpdate } from '@/hooks/use-stats-update'
 import { createSwipeHandlers } from '@/hooks/use-swipe-handler'
 import { useViewportHeight } from '@/hooks/use-viewport-height'
 import { db } from '@/lib/db'
+import { calculateFlashcardXP, getCardDifficulty, getIntervalStage } from '@/lib/flashcard-gamification'
 import { getMutationQueueManager } from '@/lib/mutation-queue'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
@@ -34,14 +39,6 @@ import { generateUUID } from '@/utils/generateUUID'
 
 interface SearchParams {
   mode?: 'flashcards' | 'quiz' | 'exam'
-}
-
-interface TestAnswer {
-  question: string
-  userAnswer: string
-  correctAnswer: string
-  isCorrect: boolean
-  questionType: string
 }
 
 export const Route = createFileRoute('/_auth/app/lesson-session/$lessonId')({
@@ -65,14 +62,30 @@ function SessionPage() {
 
   // Test mode state
   const [showTestSettings, setShowTestSettings] = useState(mode === 'exam')
-  const [testSettings, setTestSettings] = useState<TestSettings | null>(null)
   const [hasStartedTest, setHasStartedTest] = useState(false)
-  const [testAnswers, setTestAnswers] = useState<TestAnswer[]>([])
-  const [showTestLoading, setShowTestLoading] = useState(false)
+  const [showTestLoading] = useState(false)
 
   // Stats update and reward animation state
   const [showReward, setShowReward] = useState(false)
   const [currentReward, setCurrentReward] = useState<Reward | null>(null)
+
+  // Enhanced XP feedback state
+  const [showXPFeedback, setShowXPFeedback] = useState(false)
+  const [currentXPResult, setCurrentXPResult] = useState<XPCalculationResult | null>(null)
+
+  // Enhanced session tracking
+  const [enhancedSession, setEnhancedSession] = useState<Partial<LearningSession>>({
+    mode: mode as 'flashcards' | 'quiz' | 'exam',
+    streakDays: 0, // This would come from user stats
+    currentCombo: 0,
+    totalQuestions: 0,
+    correctAnswers: 0,
+    incorrectAnswers: 0,
+    sessionStartTime: new Date(),
+    averageTimePerQuestion: 0,
+    perfectAnswers: 0,
+    struggledAnswers: 0,
+  })
 
   const { updateStats } = useStatsUpdate({
     onLevelUp: (newLevel) => {
@@ -224,8 +237,58 @@ function SessionPage() {
   }, [isDragging, setIsFlipped])
 
   const handleResponse = useCallback(
-    (response: 'correct' | 'incorrect') => {
+    (response: 'correct' | 'incorrect', timeSpent?: number) => {
       incrementStat(response)
+
+      // Update enhanced session stats
+      setEnhancedSession(prev => ({
+        ...prev,
+        totalQuestions: prev.totalQuestions! + 1,
+        correctAnswers: prev.correctAnswers! + (response === 'correct' ? 1 : 0),
+        incorrectAnswers: prev.incorrectAnswers! + (response === 'incorrect' ? 1 : 0),
+        currentCombo: response === 'correct' ? (prev.currentCombo || 0) + 1 : 0,
+        averageTimePerQuestion: timeSpent || prev.averageTimePerQuestion || 0,
+        perfectAnswers: response === 'correct' && (timeSpent || 0) < 5
+          ? (prev.perfectAnswers || 0) + 1
+          : prev.perfectAnswers || 0,
+        struggledAnswers: response === 'incorrect' || (timeSpent || 0) > 10
+          ? (prev.struggledAnswers || 0) + 1
+          : prev.struggledAnswers || 0,
+      }))
+
+      // Calculate enhanced XP for flashcards
+      if (mode === 'flashcards' && response === 'correct') {
+        const card = currentCard
+        const cardDifficulty = getCardDifficulty(card?.easeFactor || 2500)
+        const intervalStage = getIntervalStage(card?.repetitions || 0, card?.lastReviewedAt)
+
+        const flashcardCard = {
+          id: card?.id || currentCardIndex,
+          difficulty: cardDifficulty,
+          intervalStage,
+          responseQuality: (timeSpent || 0) < 3
+            ? 'perfect' as const
+            : (timeSpent || 0) < 8 ? 'good' as const : 'struggled' as const,
+          lastReviewedAt: card?.lastReviewedAt,
+          easeFactor: card?.easeFactor || 2500,
+          repetitions: card?.repetitions || 0,
+        }
+
+        const flashcardSession = {
+          streakDays: enhancedSession.streakDays || 0,
+          currentCombo: enhancedSession.currentCombo || 0,
+          totalCardsToday: enhancedSession.totalQuestions || 0,
+          sessionStartTime: enhancedSession.sessionStartTime || new Date(),
+          perfectCards: enhancedSession.perfectAnswers || 0,
+        }
+
+        const xpResult = calculateFlashcardXP(flashcardCard, flashcardSession, true)
+
+        if (xpResult.totalXP > 0) {
+          setCurrentXPResult(xpResult)
+          setShowXPFeedback(true)
+        }
+      }
 
       if (isLastCard) {
         const finalCorrect = response === 'correct' ? sessionStats.correct + 1 : sessionStats.correct
@@ -246,6 +309,10 @@ function SessionPage() {
       setIsFlipped,
       swipeAnimations.x,
       sessionStats,
+      mode,
+      currentCard,
+      currentCardIndex,
+      enhancedSession,
     ],
   )
 
@@ -404,68 +471,10 @@ function SessionPage() {
       setTestQuestions(questions)
     }
 
-    setTestSettings(settings)
     setHasStartedTest(true)
     setShowTestSettings(false)
-    setTestAnswers([])
     setCurrentCardIndex(0)
   }, [cards, setCurrentCardIndex])
-
-  const handleTestAnswer = useCallback((isCorrect: boolean, userAnswer: string) => {
-    const currentQuestion = testQuestions[currentCardIndex]
-    const correctAnswer = testSettings?.answerWith === 'term'
-      ? currentQuestion.frontContent || currentQuestion.front
-      : currentQuestion.backContent || currentQuestion.back
-
-    const newAnswer: TestAnswer = {
-      question: testSettings?.answerWith === 'term'
-        ? currentQuestion.backContent || currentQuestion.back
-        : currentQuestion.frontContent || currentQuestion.front,
-      userAnswer,
-      correctAnswer,
-      isCorrect,
-      questionType: currentQuestion.questionType,
-    }
-
-    setTestAnswers(prev => [...prev, newAnswer])
-    incrementStat(isCorrect ? 'correct' : 'incorrect')
-
-    if (currentCardIndex === testQuestions.length - 1) {
-      setShowTestLoading(true)
-      setTimeout(async () => {
-        const finalCorrect = isCorrect ? sessionStats.correct + 1 : sessionStats.correct
-        const finalIncorrect = !isCorrect ? sessionStats.incorrect + 1 : sessionStats.incorrect
-        const duration = Math.floor((Date.now() - startTime) / 1000)
-
-        const result = await updateStats({
-          lessonId: Number(lessonId),
-          correctCount: finalCorrect,
-          totalCount: testQuestions.length,
-          duration,
-          mode: 'exam',
-        })
-
-        navigate({
-          to: '/app/test-summary/$lessonId',
-          params: { lessonId },
-          search: {
-            correct: finalCorrect,
-            incorrect: finalIncorrect,
-            total: testQuestions.length,
-            answers: JSON.stringify([...testAnswers, newAnswer]),
-            xpEarned: result?.xpEarned,
-            masteryCount: result?.masteryCount,
-            isLessonCompleted: result?.isLessonCompleted ? 'true' : undefined,
-            nextLessonUnlocked: result?.nextLessonUnlocked ? 'true' : undefined,
-            nextLessonTitle: result?.nextLessonTitle ?? undefined,
-          },
-        })
-      }, 2000)
-    }
-    else {
-      setCurrentCardIndex(prev => prev + 1)
-    }
-  }, [currentCardIndex, testQuestions, testSettings, sessionStats, navigate, lessonId, testAnswers, incrementStat, setCurrentCardIndex, startTime, updateStats])
 
   useAutoplay({
     isAutoPlaying,
@@ -501,8 +510,8 @@ function SessionPage() {
       card: currentCard,
       cardIndex: currentCardIndex,
       totalCards: cards.length,
-      onAnswer: (isCorrect: boolean) => {
-        handleResponse(isCorrect ? 'correct' : 'incorrect')
+      onAnswer: (isCorrect: boolean, timeSpent?: number) => {
+        handleResponse(isCorrect ? 'correct' : 'incorrect', timeSpent)
       },
     }
 
@@ -513,13 +522,18 @@ function SessionPage() {
           if (!currentQuestion)
             return null
           return (
-            <CardFactory
+            <EnhancedQuiz
               key={`quiz-${currentCardIndex}`}
-              card={currentQuestion as unknown as Parameters<typeof CardFactory>[0]['card']}
+              card={currentQuestion}
               cardIndex={currentCardIndex}
               totalCards={quizQuestions.length}
-              onAnswer={(isCorrect: boolean) => {
-                handleResponse(isCorrect ? 'correct' : 'incorrect')
+              session={enhancedSession}
+              onAnswer={(isCorrect: boolean, timeSpent: number) => {
+                handleResponse(isCorrect ? 'correct' : 'incorrect', timeSpent)
+              }}
+              onXPEarned={(xp, breakdown) => {
+                // Handle XP feedback for quiz mode
+                console.log('Quiz XP earned:', xp, breakdown)
               }}
             />
           )
@@ -527,22 +541,29 @@ function SessionPage() {
         return null
       case 'exam':
         if (showTestLoading) {
-          // We can render a custom dark loading here if TestLoading isn't updated,
-          // but keeping it simple
           return <TestLoading />
         }
         if (hasStartedTest && testQuestions.length > 0) {
           const currentQuestion = testQuestions[currentCardIndex]
           return (
-            <Test
-              key={currentCardIndex}
+            <EnhancedExam
+              key={`exam-${currentCardIndex}`}
               card={currentQuestion}
               cardIndex={currentCardIndex}
               totalCards={testQuestions.length}
-              questionType={currentQuestion.questionType}
-              answerWith={testSettings?.answerWith || 'term'}
-              cardSide={testSettings?.cardSide || 'term'}
-              onAnswer={handleTestAnswer}
+              timeLimit={60}
+              session={enhancedSession}
+              onAnswer={(isCorrect: boolean, timeSpent: number) => {
+                handleResponse(isCorrect ? 'correct' : 'incorrect', timeSpent)
+              }}
+              onTimeUp={() => {
+                // Handle time up - auto-submit as incorrect
+                handleResponse('incorrect', 60)
+              }}
+              onXPEarned={(xp, breakdown) => {
+                // Handle XP feedback for exam mode
+                console.log('Exam XP earned:', xp, breakdown)
+              }}
             />
           )
         }
@@ -709,6 +730,16 @@ function SessionPage() {
           }}
         />
       )}
+
+      {/* Enhanced XP Feedback */}
+      <XPFeedback
+        result={currentXPResult}
+        show={showXPFeedback}
+        onComplete={() => {
+          setShowXPFeedback(false)
+          setCurrentXPResult(null)
+        }}
+      />
     </div>
   )
 }
