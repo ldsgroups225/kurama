@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { getDailyChallengeStatus } from '@/core/functions/daily-challenge'
 import { getDashboardStats } from '@/core/functions/dashboard'
+import { getReviewCardsCount } from '@/core/functions/review'
 
 import { Rocket, Trophy } from '@/lib/icons'
 import { trackRouteLoad } from '@/lib/performance-monitor'
@@ -49,6 +50,11 @@ function AppHome() {
     queryFn: () => getDailyChallengeStatus(),
   })
 
+  const { data: reviewCountData } = useQuery({
+    queryKey: ['review-cards-count'],
+    queryFn: () => getReviewCardsCount(),
+  })
+
   const userLevel = {
     level: Math.floor((dashboardData?.totalXP ?? 0) / 500) + 1,
     currentXP: (dashboardData?.totalXP ?? 0) % 500,
@@ -71,34 +77,37 @@ function AppHome() {
     visible: { opacity: 1, y: 0 },
   }
 
+  const reviewCount = reviewCountData?.count ?? 0
+
   const quickActions = [
     {
       icon: Brain,
       label: 'Révision',
-      subLabel: 'Cartes du jour',
+      subLabel: reviewCount > 0 ? `${reviewCount} carte${reviewCount > 1 ? 's' : ''}` : 'Cartes du jour',
       color: 'from-violet-500 to-fuchsia-500',
-      action: () => { },
+      action: () => navigate({ to: '/app/quick-review' }),
+      badge: reviewCount > 0 ? reviewCount : undefined,
     },
     {
       icon: Gamepad2,
       label: 'Quiz',
       subLabel: 'Test rapide',
       color: 'from-amber-400 to-orange-500',
-      action: () => { },
+      action: () => navigate({ to: '/app/subjects' }),
     },
     {
       icon: FileText,
       label: 'Examen',
       subLabel: 'Simulateur',
       color: 'from-blue-400 to-cyan-500',
-      action: () => { },
+      action: () => navigate({ to: '/app/subjects' }),
     },
     {
       icon: Trophy,
       label: 'Classement',
       subLabel: 'Top 10',
       color: 'from-emerald-400 to-green-500',
-      action: () => { },
+      action: () => navigate({ to: '/app/progress' }),
     },
   ]
 
@@ -266,12 +275,19 @@ function AppHome() {
                   )}
                   />
 
-                  <div className={cn(
-                    'w-10 h-10 rounded-xl mb-3 flex items-center justify-center bg-linear-to-br shadow-lg',
-                    action.color,
-                  )}
-                  >
-                    <action.icon className="w-5 h-5 text-white" />
+                  <div className="relative">
+                    <div className={cn(
+                      'w-10 h-10 rounded-xl mb-3 flex items-center justify-center bg-linear-to-br shadow-lg',
+                      action.color,
+                    )}
+                    >
+                      <action.icon className="w-5 h-5 text-white" />
+                    </div>
+                    {'badge' in action && action.badge && (
+                      <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1.5 flex items-center justify-center rounded-full bg-violet-500 text-white text-[10px] font-bold shadow-lg">
+                        {action.badge > 99 ? '99+' : action.badge}
+                      </span>
+                    )}
                   </div>
 
                   <span className="font-bold text-foreground/90">{action.label}</span>

@@ -21,6 +21,7 @@ import { Route as ApiStudySessionIdRouteImport } from './routes/api/study/$sessi
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AuthAppSettingsRouteImport } from './routes/_auth/app/settings'
 import { Route as AuthAppReferralsRouteImport } from './routes/_auth/app/referrals'
+import { Route as AuthAppQuickReviewRouteImport } from './routes/_auth/app/quick-review'
 import { Route as AuthAppProgressRouteImport } from './routes/_auth/app/progress'
 import { Route as AuthAppNotificationsRouteImport } from './routes/_auth/app/notifications'
 import { Route as AuthAppGroupsRouteImport } from './routes/_auth/app/groups'
@@ -96,6 +97,11 @@ const AuthAppSettingsRoute = AuthAppSettingsRouteImport.update({
 const AuthAppReferralsRoute = AuthAppReferralsRouteImport.update({
   id: '/app/referrals',
   path: '/app/referrals',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthAppQuickReviewRoute = AuthAppQuickReviewRouteImport.update({
+  id: '/app/quick-review',
+  path: '/app/quick-review',
   getParentRoute: () => AuthRouteRoute,
 } as any)
 const AuthAppProgressRoute = AuthAppProgressRouteImport.update({
@@ -189,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/app/groups': typeof AuthAppGroupsRoute
   '/app/notifications': typeof AuthAppNotificationsRoute
   '/app/progress': typeof AuthAppProgressRoute
+  '/app/quick-review': typeof AuthAppQuickReviewRoute
   '/app/referrals': typeof AuthAppReferralsRoute
   '/app/settings': typeof AuthAppSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -217,6 +224,7 @@ export interface FileRoutesByTo {
   '/app/groups': typeof AuthAppGroupsRoute
   '/app/notifications': typeof AuthAppNotificationsRoute
   '/app/progress': typeof AuthAppProgressRoute
+  '/app/quick-review': typeof AuthAppQuickReviewRoute
   '/app/referrals': typeof AuthAppReferralsRoute
   '/app/settings': typeof AuthAppSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -247,6 +255,7 @@ export interface FileRoutesById {
   '/_auth/app/groups': typeof AuthAppGroupsRoute
   '/_auth/app/notifications': typeof AuthAppNotificationsRoute
   '/_auth/app/progress': typeof AuthAppProgressRoute
+  '/_auth/app/quick-review': typeof AuthAppQuickReviewRoute
   '/_auth/app/referrals': typeof AuthAppReferralsRoute
   '/_auth/app/settings': typeof AuthAppSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/app/groups'
     | '/app/notifications'
     | '/app/progress'
+    | '/app/quick-review'
     | '/app/referrals'
     | '/app/settings'
     | '/api/auth/$'
@@ -305,6 +315,7 @@ export interface FileRouteTypes {
     | '/app/groups'
     | '/app/notifications'
     | '/app/progress'
+    | '/app/quick-review'
     | '/app/referrals'
     | '/app/settings'
     | '/api/auth/$'
@@ -334,6 +345,7 @@ export interface FileRouteTypes {
     | '/_auth/app/groups'
     | '/_auth/app/notifications'
     | '/_auth/app/progress'
+    | '/_auth/app/quick-review'
     | '/_auth/app/referrals'
     | '/_auth/app/settings'
     | '/api/auth/$'
@@ -452,6 +464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAppReferralsRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_auth/app/quick-review': {
+      id: '/_auth/app/quick-review'
+      path: '/app/quick-review'
+      fullPath: '/app/quick-review'
+      preLoaderRoute: typeof AuthAppQuickReviewRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
     '/_auth/app/progress': {
       id: '/_auth/app/progress'
       path: '/app/progress'
@@ -565,6 +584,7 @@ interface AuthRouteRouteChildren {
   AuthAppGroupsRoute: typeof AuthAppGroupsRoute
   AuthAppNotificationsRoute: typeof AuthAppNotificationsRoute
   AuthAppProgressRoute: typeof AuthAppProgressRoute
+  AuthAppQuickReviewRoute: typeof AuthAppQuickReviewRoute
   AuthAppReferralsRoute: typeof AuthAppReferralsRoute
   AuthAppSettingsRoute: typeof AuthAppSettingsRoute
   AuthAppIndexRoute: typeof AuthAppIndexRoute
@@ -586,6 +606,7 @@ const AuthRouteRouteChildren: AuthRouteRouteChildren = {
   AuthAppGroupsRoute: AuthAppGroupsRoute,
   AuthAppNotificationsRoute: AuthAppNotificationsRoute,
   AuthAppProgressRoute: AuthAppProgressRoute,
+  AuthAppQuickReviewRoute: AuthAppQuickReviewRoute,
   AuthAppReferralsRoute: AuthAppReferralsRoute,
   AuthAppSettingsRoute: AuthAppSettingsRoute,
   AuthAppIndexRoute: AuthAppIndexRoute,
