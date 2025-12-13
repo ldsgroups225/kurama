@@ -22,27 +22,31 @@ export function FlashcardFace({
   borderColor,
   onFlip,
 }: FlashcardFaceProps) {
-  const labelColor = isBack ? 'text-success' : 'text-muted-foreground'
+  const labelColor = isBack ? 'text-emerald-500 font-bold' : 'text-muted-foreground font-semibold'
   const textSize = isBack ? 'text-xl' : 'text-2xl'
 
   return (
     <motion.div
       className={`
-        absolute inset-0 h-full cursor-grab overflow-hidden rounded-lg shadow-xl
-        active:cursor-grabbing
+        absolute inset-0 h-full cursor-grab overflow-hidden rounded-3xl shadow-xl backdrop-blur-xl
+        active:cursor-grabbing bg-card
       `}
       onClick={onFlip}
       style={{
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
         transform: isBack ? 'rotateY(180deg)' : undefined,
-        backgroundColor,
-        borderWidth: '2px',
+        borderWidth: '1px',
         borderStyle: 'solid',
         borderColor,
       }}
     >
-      <Card className="h-full border-0 bg-card shadow-none">
+      {/* Swipe Color Overlay */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        style={{ backgroundColor }}
+      />
+      <Card className="relative z-10 h-full border-0 bg-transparent shadow-none">
         <div className={`
           pointer-events-none absolute top-4 right-4 left-4 z-10 flex
           items-center justify-between
@@ -51,14 +55,14 @@ export function FlashcardFace({
           <Button
             variant="ghost"
             size="icon"
-            className="pointer-events-auto bg-background/80 backdrop-blur-sm"
+            className="pointer-events-auto bg-card/50 hover:bg-accent text-muted-foreground hover:text-foreground backdrop-blur-sm rounded-full border border-border"
           >
             <Volume2 className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            className="pointer-events-auto bg-background/80 backdrop-blur-sm"
+            className="pointer-events-auto bg-card/50 hover:bg-accent text-muted-foreground hover:text-foreground backdrop-blur-sm rounded-full border border-border"
           >
             <Star className="h-4 w-4" />
           </Button>
@@ -70,16 +74,16 @@ export function FlashcardFace({
         >
           <div className="w-full space-y-6 text-center">
             <div className={`
-              text-xs font-semibold
+              text-xs font-bold
               ${labelColor}
-              tracking-wider uppercase
+              tracking-widest uppercase
             `}
             >
               {label}
             </div>
             <div className={`
               ${textSize}
-              px-4 leading-relaxed font-medium
+              px-4 leading-relaxed font-medium text-foreground
             `}
             >
               <MarkdownRenderer
@@ -98,7 +102,7 @@ export function FlashcardFace({
               transition={{ delay: 0.5 }}
               className="absolute right-0 bottom-8 left-0 text-center"
             >
-              <p className="text-xs text-muted-foreground">Appuyez pour retourner</p>
+              <p className="text-xs text-muted-foreground font-medium">Appuyez pour retourner</p>
             </motion.div>
           )}
         </CardContent>

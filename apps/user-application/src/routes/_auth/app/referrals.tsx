@@ -6,6 +6,7 @@
 
 import { createFileRoute } from '@tanstack/react-router'
 import { Gift } from 'lucide-react'
+import { AppHeader } from '@/components/main'
 import { ReferralShareCard, ReferralStats } from '@/components/referrals'
 
 export const Route = createFileRoute('/_auth/app/referrals')({
@@ -14,64 +15,80 @@ export const Route = createFileRoute('/_auth/app/referrals')({
 
 function ReferralsPage() {
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-8">
-      {/* Header */}
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-level">
-          <Gift className="h-8 w-8 text-white" />
-        </div>
-        <h1 className="mb-2 text-3xl font-bold">Programme de Parrainage</h1>
-        <p className="text-muted-foreground">
-          Invite tes amis et gagnez tous les deux des récompenses !
-        </p>
+    <div className="min-h-screen bg-background pb-24 text-foreground">
+      {/* Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[10%] left-[20%] w-[60%] h-[40%] rounded-full bg-indigo-600/10 blur-[120px]" />
+        <div className="absolute bottom-[20%] right-[10%] w-[50%] h-[50%] rounded-full bg-purple-600/10 blur-[120px]" />
       </div>
 
-      {/* Content */}
-      <div className="space-y-6">
-        {/* Share Card */}
-        <ReferralShareCard />
+      <AppHeader title="Parrainage" className="bg-transparent/0 border-none relative z-20" />
 
-        {/* Stats */}
-        <ReferralStats />
+      <div className="container mx-auto max-w-2xl px-4 py-8 relative z-10">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/25 animate-pulse">
+            <Gift className="h-8 w-8 text-foreground" />
+          </div>
+          <h1 className="mb-2 text-3xl font-bold bg-linear-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+            Programme de Parrainage
+          </h1>
+          <p className="text-muted-foreground">
+            Invite tes amis et gagnez tous les deux des récompenses !
+          </p>
+        </div>
 
-        {/* How it works */}
-        <div className="rounded-lg border bg-card p-6">
-          <h2 className="mb-4 text-lg font-semibold">Comment ça marche ?</h2>
-          <ol className="space-y-4">
-            <li className="flex gap-4">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-level text-sm font-bold text-white">
-                1
-              </span>
-              <div>
-                <p className="font-medium">Partage ton code</p>
-                <p className="text-sm text-muted-foreground">
-                  Envoie ton code de parrainage ou ton lien à tes amis
-                </p>
-              </div>
-            </li>
-            <li className="flex gap-4">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-level text-sm font-bold text-white">
-                2
-              </span>
-              <div>
-                <p className="font-medium">Ton ami s'inscrit</p>
-                <p className="text-sm text-muted-foreground">
-                  Il utilise ton code lors de son inscription et souscrit à un abonnement
-                </p>
-              </div>
-            </li>
-            <li className="flex gap-4">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-level text-sm font-bold text-white">
-                3
-              </span>
-              <div>
-                <p className="font-medium">Vous gagnez tous les deux</p>
-                <p className="text-sm text-muted-foreground">
-                  Tu reçois 3€ de crédit et ton ami bénéficie d'une réduction
-                </p>
-              </div>
-            </li>
-          </ol>
+        {/* Content */}
+        <div className="space-y-6">
+          {/* Share Card */}
+          <ReferralShareCard />
+
+          {/* Stats */}
+          <ReferralStats />
+
+          {/* How it works */}
+          <div className="rounded-xl border border-border bg-card backdrop-blur-xl p-6">
+            <h2 className="mb-4 text-lg font-semibold text-foreground">Comment ça marche ?</h2>
+            <ol className="space-y-4">
+              <li className="flex gap-4">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 border border-indigo-500/30 text-sm font-bold text-indigo-300">
+                  1
+                </span>
+                <div>
+                  <p className="font-medium text-foreground">Partage ton code</p>
+                  <p className="text-sm text-muted-foreground">
+                    Envoie ton code de parrainage ou ton lien à tes amis
+                  </p>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 border border-indigo-500/30 text-sm font-bold text-indigo-300">
+                  2
+                </span>
+                <div>
+                  <p className="font-medium text-foreground">Ton ami s'inscrit</p>
+                  <p className="text-sm text-muted-foreground">
+                    Il utilise ton code lors de son inscription et souscrit à un abonnement
+                  </p>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 border border-indigo-500/30 text-sm font-bold text-indigo-300">
+                  3
+                </span>
+                <div>
+                  <p className="font-medium text-foreground">Vous gagnez tous les deux</p>
+                  <p className="text-sm text-muted-foreground">
+                    Tu reçois
+                    {' '}
+                    <span className="text-indigo-400 font-semibold">3€</span>
+                    {' '}
+                    de crédit et ton ami bénéficie d'une réduction
+                  </p>
+                </div>
+              </li>
+            </ol>
+          </div>
         </div>
       </div>
     </div>

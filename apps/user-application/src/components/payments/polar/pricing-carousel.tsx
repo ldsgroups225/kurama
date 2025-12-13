@@ -13,7 +13,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { motion } from 'motion/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { getStoredCurrencyRate } from '@/lib/currency'
@@ -110,16 +110,16 @@ export function PricingCarousel({
     <div className="w-full">
       {/* Navigation dots */}
       <div className="mb-6 flex justify-center gap-2">
-        {sortedProducts.map((_, index) => (
+        {sortedProducts.map((product, index) => (
           <button
-            key={index}
+            key={product.id}
             type="button"
             onClick={() => setActiveIndex(index)}
             className={cn(
               'h-1.5 rounded-full transition-all duration-300',
               index === activeIndex
-                ? 'w-6 bg-white'
-                : 'w-1.5 bg-white/20 hover:bg-white/40',
+                ? 'w-6 bg-primary'
+                : 'w-1.5 bg-primary/20 hover:bg-primary/40',
             )}
             aria-label={`Voir le plan ${index + 1}`}
           />
@@ -134,8 +134,8 @@ export function PricingCarousel({
           onClick={handlePrev}
           disabled={activeIndex === 0}
           className={cn(
-            'absolute -left-2 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/10 bg-black/40 p-3 text-white shadow-xl backdrop-blur-md transition-all',
-            activeIndex === 0 ? 'opacity-0 scale-75 cursor-not-allowed' : 'opacity-100 hover:bg-black/60 hover:scale-110',
+            'absolute -left-2 top-1/2 z-20 -translate-y-1/2 rounded-full border border-border bg-background/80 p-3 text-foreground shadow-xl backdrop-blur-md transition-all',
+            activeIndex === 0 ? 'opacity-0 scale-75 cursor-not-allowed' : 'opacity-100 hover:bg-background hover:scale-110',
           )}
           aria-label="Plan précédent"
         >
@@ -147,8 +147,8 @@ export function PricingCarousel({
           onClick={handleNext}
           disabled={activeIndex === sortedProducts.length - 1}
           className={cn(
-            'absolute -right-2 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/10 bg-black/40 p-3 text-white shadow-xl backdrop-blur-md transition-all',
-            activeIndex === sortedProducts.length - 1 ? 'opacity-0 scale-75 cursor-not-allowed' : 'opacity-100 hover:bg-black/60 hover:scale-110',
+            'absolute -right-2 top-1/2 z-20 -translate-y-1/2 rounded-full border border-border bg-background/80 p-3 text-foreground shadow-xl backdrop-blur-md transition-all',
+            activeIndex === sortedProducts.length - 1 ? 'opacity-0 scale-75 cursor-not-allowed' : 'opacity-100 hover:bg-background hover:scale-110',
           )}
           aria-label="Plan suivant"
         >
@@ -175,7 +175,7 @@ export function PricingCarousel({
       </div>
 
       {/* Swipe hint */}
-      <p className="mt-6 text-center text-xs font-medium text-zinc-500">
+      <p className="mt-6 text-center text-xs font-medium text-muted-foreground">
         <span className="inline-flex items-center gap-1">
           <ChevronLeft className="h-3 w-3" />
           Glissez pour voir les autres offres
@@ -214,12 +214,7 @@ function PricingCarouselCard({
   const Icon = config.icon
 
   const isCurrentPlan = subscription && price && subscription.productId === price.productId
-  const [xofRate, setXofRate] = useState(getStoredCurrencyRate())
-
-  useEffect(() => {
-    // Update rate on mount/client-side to ensure accuracy
-    setXofRate(getStoredCurrencyRate())
-  }, [])
+  const [xofRate] = useState(() => getStoredCurrencyRate())
 
   const formatPrice = (priceData: Price | undefined) => {
     if (!priceData || priceData.amountType !== 'fixed' || !priceData.priceAmount) {
@@ -267,8 +262,8 @@ function PricingCarouselCard({
         'relative min-w-full shrink-0 rounded-3xl border p-6 transition-all duration-300',
         isActive ? 'scale-100 opacity-100' : 'scale-95 opacity-60 blur-[1px]',
         isCurrentPlan
-          ? 'border-emerald-500/50 bg-emerald-900/10'
-          : 'border-white/10 bg-zinc-900/40 backdrop-blur-xl',
+          ? 'border-emerald-500/50 bg-emerald-900/10 dark:bg-emerald-900/20'
+          : 'border-border bg-card/80 backdrop-blur-xl',
       )}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: isActive ? 1 : 0.6, y: 0 }}
@@ -312,21 +307,21 @@ function PricingCarouselCard({
           <Icon className="h-8 w-8 text-white" />
         </div>
 
-        <h3 className="mb-1 text-xl font-bold text-white">
+        <h3 className="mb-1 text-xl font-bold text-foreground">
           {INTERVAL_LABELS[interval] ?? product.name}
         </h3>
       </div>
 
       {/* Price */}
       <div className="mb-6 text-center">
-        <div className="flex items-baseline justify-center gap-1 text-white">
+        <div className="flex items-baseline justify-center gap-1 text-foreground">
           <span className="text-4xl font-bold">{amount}</span>
           <span className="text-2xl font-semibold">{currency}</span>
-          <span className="text-zinc-400">{getIntervalLabel()}</span>
+          <span className="text-muted-foreground">{getIntervalLabel()}</span>
         </div>
 
         {/* XP Bonus badge */}
-        <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/5 px-3 py-1 text-sm font-medium text-amber-400 border border-amber-500/20">
+        <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-3 py-1 text-sm font-medium text-amber-600 dark:text-amber-400 border border-amber-500/20">
           <Flame className="h-4 w-4 fill-current" />
           {config.xpBonus}
         </div>
@@ -334,8 +329,8 @@ function PricingCarouselCard({
 
       {/* Features */}
       <div className="mb-8 space-y-3">
-        {features.map((feature: string, index: number) => (
-          <div key={index} className="flex items-start gap-3">
+        {features.map((feature: string) => (
+          <div key={feature} className="flex items-start gap-3">
             <div className={cn(
               'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-linear-to-br',
               config.gradient,
@@ -343,7 +338,9 @@ function PricingCarouselCard({
             >
               <Check className="h-3 w-3 text-white" />
             </div>
-            <span className="text-sm font-medium text-zinc-300">{feature}</span>
+            <span className="text-sm font-medium text-muted-foreground">
+              {feature}
+            </span>
           </div>
         ))}
       </div>
@@ -354,7 +351,7 @@ function PricingCarouselCard({
           <div className="space-y-3">
             <Button
               variant="outline"
-              className="w-full border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300"
+              className="w-full border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
               asChild
             >
               <a href="/app/polar/portal">
@@ -392,7 +389,7 @@ function PricingCarouselCard({
 
       {/* Trial info */}
       {!subscription && !isCurrentPlan && (
-        <p className="mt-3 flex items-center justify-center text-[10px] font-medium text-zinc-500 uppercase tracking-wide">
+        <p className="mt-3 flex items-center justify-center text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
           <Gift className="mr-1 h-3 w-3" />
           7 jours gratuits • Sans engagement
         </p>

@@ -1,23 +1,29 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate, useParams } from '@tanstack/react-router'
-import { BookOpen, CheckCircle2, ChevronRight, Clock, Lock } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { BookOpen, CheckCircle2, ChevronRight, Clock, Lock, Sparkles } from 'lucide-react'
 import { useEffect } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LogoLoader } from '@/components/ui/logo-loader'
 import { getLessonsBySubject } from '@/core/functions/learning'
 import { trackRouteLoad } from '@/lib/performance-monitor'
+import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/_auth/app/subjects/$subjectId')({
   component: LessonsPage,
 })
 
+const difficultyConfigs: Record<string, { color: string, label: string, emoji: string }> = {
+  easy: { color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20', label: 'Facile', emoji: '😊' },
+  medium: { color: 'text-amber-400 bg-amber-400/10 border-amber-400/20', label: 'Moyen', emoji: '🤔' },
+  hard: { color: 'text-rose-400 bg-rose-400/10 border-rose-400/20', label: 'Difficile', emoji: '💪' },
+}
+
 function LessonsPage() {
   const { subjectId } = useParams({ from: '/_auth/app/subjects/$subjectId' })
   const navigate = useNavigate()
 
-  // Track route load performance
   useEffect(() => {
     const endTracking = trackRouteLoad('app-lessons')
     return endTracking
@@ -28,190 +34,193 @@ function LessonsPage() {
     queryFn: () => getLessonsBySubject({ data: Number(subjectId) }),
   })
 
-  // Get subject name from first lesson (all lessons have same subject)
   const subjectName = lessons?.[0]?.subject?.name || 'Leçons'
 
-  const difficultyColors: Record<string, string> = {
-    easy: 'bg-success text-success',
-    medium: 'bg-warning text-warning',
-    hard: 'bg-error text-error',
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
   }
 
-  const difficultyLabels: Record<string, string> = {
-    easy: 'Facile',
-    medium: 'Moyen',
-    hard: 'Difficile',
-  }
-
-  const difficultyEmojis: Record<string, string> = {
-    easy: '😊',
-    medium: '🤔',
-    hard: '💪',
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-28 text-foreground">
+      {/* Ambient Background - Blue/Indigo for Study Focus */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[10%] left-[20%] w-[60%] h-[40%] rounded-full bg-blue-600/10 blur-[120px]" />
+        <div className="absolute bottom-[20%] right-[10%] w-[50%] h-[50%] rounded-full bg-indigo-600/10 blur-[120px]" />
+      </div>
+
       <AppHeader
         title={subjectName}
         showAvatar={false}
         showBackButton
         onBackClick={() => navigate({ to: '/app/subjects' })}
+        className="bg-transparent/0 border-none"
       />
 
-      <main className="mx-auto max-w-lg space-y-4 px-4 py-6">
-        {/* Motivational Header */}
-        <div className="py-4 text-center">
-          <h2 className="mb-2 text-2xl font-bold">Choisis ta leçon 📚</h2>
-          <p className="text-muted-foreground">Chaque leçon te rapproche de ton objectif !</p>
-        </div>
+      <main className="relative z-10 mx-auto max-w-lg px-5 pt-2">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="py-4 text-center"
+        >
+          <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-muted mb-4 shadow-xl border border-border">
+            <BookOpen className="h-6 w-6 text-indigo-500" />
+          </div>
+          <h2 className="mb-2 text-2xl font-bold text-foreground">Choisis ta leçon 📚</h2>
+          <p className="text-muted-foreground px-8">Progresse étape par étape pour maîtriser la matière.</p>
+        </motion.div>
 
         {isLoading && (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center py-20">
             <LogoLoader size="md" />
           </div>
         )}
 
-        {lessons && lessons.length === 0 && (
-          <Card className="border-dashed">
-            <CardContent className="py-12 text-center">
-              <BookOpen className={`
-                mx-auto mb-4 h-16 w-16 text-muted-foreground opacity-50
-              `}
-              />
-              <p className="mb-2 text-lg font-medium">Aucune leçon disponible</p>
-              <p className="text-sm text-muted-foreground">
-                De nouvelles leçons arrivent bientôt ! 🚀
-              </p>
-            </CardContent>
-          </Card>
+        {!isLoading && lessons && lessons.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-12 px-6 text-center border border-dashed border-border rounded-3xl bg-muted/30">
+            <BookOpen className="mb-4 h-12 w-12 text-muted-foreground" />
+            <p className="mb-2 text-lg font-medium text-foreground">Aucune leçon disponible</p>
+            <p className="text-sm text-muted-foreground">
+              De nouvelles leçons arrivent bientôt ! 🚀
+            </p>
+          </div>
         )}
 
-        <div className="grid grid-cols-1 gap-3">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-4"
+        >
           {lessons?.map((lesson, index) => {
             const isLocked = (lesson as any).isLocked ?? false
-            const masteryCount = (lesson as any).masteryCount ?? 0
             const isCompleted = (lesson as any).isCompleted ?? false
+            const difficulty = (lesson as any).difficulty as string
+            const estDuration = (lesson as any).estimatedDuration
 
-            const LessonCard = (
-              <Card
-                key={lesson.id}
-                className={`h-full transition-all duration-200 border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group relative
-                  ${isLocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:scale-[1.01] hover:shadow-lg hover:border-primary/20 hover:bg-card/80'}
-                `}
+            const Content = (
+              <div className={cn(
+                'group relative overflow-hidden rounded-3xl border p-1 transition-all',
+                isLocked
+                  ? 'border-border bg-muted/20 opacity-60 grayscale'
+                  : 'border-border bg-card backdrop-blur-xl hover:bg-accent/50 hover:border-indigo-500/30 hover:shadow-lg hover:shadow-indigo-500/10',
+              )}
               >
                 {/* Lock Overlay */}
                 {isLocked && (
-                  <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center text-center p-4 rounded-xl border border-border/50">
-                    <div className="bg-background/80 p-3 rounded-full mb-3 border border-border shadow-sm">
-                      <Lock className="w-6 h-6 text-muted-foreground" />
+                  <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/10 backdrop-blur-[1px]">
+                    <div className="bg-muted p-2 rounded-full border border-border">
+                      <Lock className="w-4 h-4 text-muted-foreground" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Termine la leçon précédente
-                    </p>
                   </div>
                 )}
 
-                <CardHeader className="relative pb-2">
-                  <div className="flex items-start justify-between gap-3">
+                <div className="p-4 relative z-10">
+                  <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex-1">
-                      <CardTitle className={`
-                        mb-1 text-lg transition-colors
-                        ${!isLocked && 'group-hover:text-primary'}
-                      `}
+                      <h3 className={cn(
+                        'text-lg font-bold mb-1 trantision-colors',
+                        isLocked ? 'text-zinc-500' : 'text-foreground group-hover:text-indigo-300',
+                      )}
                       >
                         {lesson.title}
-                      </CardTitle>
+                      </h3>
                       {lesson.description && (
-                        <p className="line-clamp-2 text-sm text-muted-foreground">
+                        <p className="text-sm text-zinc-400 line-clamp-2">
                           {lesson.description}
                         </p>
                       )}
                     </div>
-                    {!isLocked && (
-                      <ChevronRight className={`
-                        h-5 w-5 shrink-0 text-muted-foreground transition-all
-                        group-hover:translate-x-1 group-hover:text-primary
-                      `}
-                      />
+
+                    {/* Status Icon */}
+                    <div className="shrink-0 pt-1">
+                      {isCompleted
+                        ? (
+                          <div className="h-6 w-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+                            <CheckCircle2 className="h-4 w-4" />
+                          </div>
+                        )
+                        : !isLocked
+                          ? (
+                            <div className="h-6 w-6 rounded-full bg-muted text-muted-foreground group-hover:bg-indigo-500/20 group-hover:text-indigo-500 flex items-center justify-center transition-colors">
+                              <ChevronRight className="h-4 w-4" />
+                            </div>
+                          )
+                          : null}
+                    </div>
+                  </div>
+
+                  {/* Metadata Chips */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge className="bg-muted text-muted-foreground hover:bg-muted/80 border-border pl-2 gap-1.5 font-normal">
+                      <span className={cn(
+                        'flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold',
+                        isCompleted ? 'bg-emerald-500 text-black' : 'bg-foreground/10 text-muted-foreground',
+                      )}
+                      >
+                        {index + 1}
+                      </span>
+                      <span className="text-xs">Leçon</span>
+                    </Badge>
+
+                    {estDuration && (
+                      <Badge variant="outline" className="border-white/10 text-zinc-400 gap-1.5 font-normal bg-transparent">
+                        <Clock className="w-3 h-3" />
+                        {estDuration}
+                        {' '}
+                        min
+                      </Badge>
+                    )}
+
+                    {difficulty && difficultyConfigs[difficulty] && (
+                      <Badge variant="outline" className={cn('gap-1.5 font-normal border', difficultyConfigs[difficulty].color)}>
+                        <span>{difficultyConfigs[difficulty].emoji}</span>
+                        {difficultyConfigs[difficulty].label}
+                      </Badge>
+                    )}
+
+                    {isCompleted && (
+                      <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 gap-1">
+                        <Sparkles className="w-3 h-3" />
+                        Complété
+                      </Badge>
                     )}
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-2">
-                    <div className="flex flex-wrap items-center gap-2 flex-1">
-                      {/* Mastery Progress */}
-                      {!isLocked && masteryCount < 2 && (
-                        <Badge variant="secondary" className="bg-primary/10 text-primary text-xs font-medium">
-                          🎯 Maîtrise:
-                          {' '}
-                          {masteryCount}
-                          /2
-                        </Badge>
-                      )}
-                      {isCompleted && (
-                        <Badge variant="secondary" className="bg-success/10 text-success text-xs font-medium">
-                          ✅ Maîtrisé
-                        </Badge>
-                      )}
-                      {lesson.difficulty && (
-                        <Badge
-                          variant="secondary"
-                          className={`
-                            ${difficultyColors[lesson.difficulty] || ''}
-                            text-xs font-medium
-                          `}
-                        >
-                          {difficultyEmojis[lesson.difficulty]}
-                          {' '}
-                          {difficultyLabels[lesson.difficulty] || lesson.difficulty}
-                        </Badge>
-                      )}
-                      {lesson.estimatedDuration && (
-                        <div className={`
-                          flex items-center gap-1 rounded-full bg-muted/50 px-2.5
-                          py-1 text-xs text-muted-foreground
-                        `}
-                        >
-                          <Clock className="h-3.5 w-3.5" />
-                          <span className="font-medium">
-                            {lesson.estimatedDuration}
-                            {' '}
-                            min
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    {/* Lesson Number Badge */}
-                    <div className={`
-                      flex h-8 w-8 items-center justify-center shrink-0
-                      rounded-full text-sm font-bold shadow-sm
-                      ${isCompleted ? 'bg-success/20 text-success' : 'bg-primary/10 text-primary'}
-                    `}
-                    >
-                      {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : index + 1}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )
 
-            // Wrap in Link only if not locked
-            return isLocked
-              ? (
-                  <div key={lesson.id}>{LessonCard}</div>
-                )
-              : (
-                  <Link
-                    key={lesson.id}
-                    to="/app/lessons/$lessonId"
-                    params={{ lessonId: String(lesson.id) }}
-                    aria-label={`Leçon ${index + 1}: ${lesson.title}`}
-                  >
-                    {LessonCard}
-                  </Link>
-                )
+            return (
+              <motion.div key={lesson.id} variants={itemVariants}>
+                {isLocked
+                  ? (
+                    Content
+                  )
+                  : (
+                    <Link
+                      to="/app/lessons/$lessonId"
+                      params={{ lessonId: String(lesson.id) }}
+                      className="block outline-none"
+                    >
+                      {Content}
+                    </Link>
+                  )}
+              </motion.div>
+            )
           })}
-        </div>
+        </motion.div>
       </main>
 
       <BottomNav />

@@ -16,51 +16,50 @@ export function ProgressIndicator({
   currentStep,
 }: ProgressIndicatorProps) {
   return (
-    <div className="mx-auto mb-8 w-full">
-      <div className="flex items-center justify-around">
+    <div className="mx-auto mb-8 w-full max-w-lg">
+      <div className="flex items-center justify-between">
         {steps.map((step, index) => {
           const isCompleted = index < currentStep
           const isCurrent = index === currentStep
           const isUpcoming = index > currentStep
 
           return (
-            <div key={step.id} className="flex items-center">
+            <div key={step.id} className="flex flex-1 items-center last:flex-none">
               {/* Step Circle */}
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center relative z-10">
                 <div
                   className={cn(
                     `
                       flex h-10 w-10 items-center justify-center rounded-full
-                      border-2 transition-all duration-300
+                      border transition-all duration-300 shadow-lg
                     `,
                     isCompleted
-                    && 'border-orange-500 bg-orange-500 text-white',
+                    && 'border-indigo-500 bg-indigo-500 text-white shadow-indigo-500/25',
                     isCurrent
                     && `
-                      scale-110 border-orange-500 bg-orange-50 text-orange-600
-                      dark:bg-orange-950 dark:text-orange-400
+                      scale-110 border-indigo-500 bg-background shadow-indigo-500/20
+                      text-indigo-400 ring-4 ring-indigo-500/20
                     `,
                     isUpcoming
                     && `
-                      border-zinc-300 bg-background text-zinc-400
-                      dark:border-zinc-700 dark:text-zinc-600
+                      border-border bg-muted/50 text-muted-foreground
                     `,
                   )}
                 >
                   {isCompleted
                     ? (
-                        <Check className="h-5 w-5" />
-                      )
+                      <Check className="h-5 w-5" />
+                    )
                     : (
-                        <span className="text-sm font-semibold">{index + 1}</span>
-                      )}
+                      <span className="text-sm font-bold">{index + 1}</span>
+                    )}
                 </div>
                 <span
                   className={cn(
-                    'mt-2 text-xs font-medium transition-colors',
-                    (isCompleted || isCurrent)
-                    && 'text-foreground',
-                    isUpcoming && 'text-muted-foreground',
+                    'absolute -bottom-8 whitespace-nowrap text-xs font-semibold transition-colors',
+                    isCurrent && 'text-indigo-400',
+                    isCompleted && 'text-muted-foreground',
+                    isUpcoming && 'text-muted-foreground/50',
                   )}
                 >
                   {step.label}
@@ -69,17 +68,14 @@ export function ProgressIndicator({
 
               {/* Connector Line */}
               {index < steps.length - 1 && (
-                <div
-                  className={cn(
-                    'mx-2 h-0.5 flex-1 transition-all duration-300',
-                    isCompleted
-                      ? 'bg-orange-500'
-                      : `
-                        bg-zinc-200
-                        dark:bg-zinc-800
-                      `,
-                  )}
-                />
+                <div className="relative mx-2 h-[2px] w-full flex-1 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className={cn(
+                      'absolute inset-0 h-full w-full bg-indigo-500 transition-transform duration-500 origin-left',
+                      isCompleted ? 'scale-x-100' : 'scale-x-0',
+                    )}
+                  />
+                </div>
               )}
             </div>
           )

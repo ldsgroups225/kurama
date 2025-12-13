@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
+import { generateUUID } from '@/utils/generateUUID'
 
 interface WelcomeScreenProps {
   onGetStarted: () => void
@@ -78,13 +79,16 @@ const pulseVariants = {
 
 export function WelcomeScreen({ onGetStarted, onSignIn }: WelcomeScreenProps) {
   return (
-    <div className={`
-      flex min-h-screen flex-col bg-linear-to-br from-orange-50 via-purple-50
-      to-blue-50
-    `}
-    >
+    <div className="flex min-h-screen flex-col bg-background overflow-hidden relative">
+      {/* Ambient Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="absolute bottom-[10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-600/10 blur-[120px]" />
+        <div className="absolute top-[40%] left-[20%] w-[40%] h-[40%] rounded-full bg-purple-600/5 blur-[100px]" />
+      </div>
+
       {/* Main Content */}
-      <div className="flex flex-1 items-center justify-center px-6 py-12">
+      <div className="flex flex-1 items-center justify-center px-6 py-12 relative z-10">
         <motion.div
           className="w-full max-w-sm space-y-10"
           variants={containerVariants}
@@ -97,158 +101,109 @@ export function WelcomeScreen({ onGetStarted, onSignIn }: WelcomeScreenProps) {
             variants={itemVariants}
           >
             <div className="relative">
+              <div className="absolute inset-0 bg-indigo-500/20 blur-3xl rounded-full" />
               <motion.div
-                className={`
-                  flex h-40 w-40 items-center justify-center rounded-full
-                  bg-linear-to-br from-orange-500 to-purple-600 shadow-2xl
-                `}
+                className="relative flex h-40 w-40 items-center justify-center rounded-[2.5rem] bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-2xl shadow-indigo-500/30 border border-white/10"
                 variants={iconVariants}
                 whileHover={{ scale: 1.05, rotate: 5 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <GraduationCap
-                  className="h-20 w-20 text-white"
+                  className="h-20 w-20 text-white drop-shadow-md"
                   strokeWidth={1.5}
                 />
               </motion.div>
               {/* Decorative icons */}
               <motion.div
-                className={`
-                  absolute -top-2 -right-2 flex h-10 w-10 items-center
-                  justify-center rounded-full bg-yellow-400 shadow-lg
-                `}
+                className="absolute -top-3 -right-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-background border border-white/10 shadow-xl"
                 variants={floatVariants}
                 animate="animate"
               >
-                <Star className="h-5 w-5 text-white" fill="currentColor" />
+                <div className="flex h-full w-full items-center justify-center rounded-xl bg-yellow-500/10">
+                  <Star className="h-6 w-6 text-yellow-400 fill-yellow-400/20" />
+                </div>
               </motion.div>
               <motion.div
-                className={`
-                  absolute -bottom-2 -left-2 flex h-10 w-10 items-center
-                  justify-center rounded-full bg-blue-400 shadow-lg
-                `}
+                className="absolute -bottom-2 -left-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-background border border-white/10 shadow-xl"
                 variants={pulseVariants}
                 animate="animate"
               >
-                <BookOpen className="h-5 w-5 text-white" />
+                <div className="flex h-full w-full items-center justify-center rounded-xl bg-blue-500/10">
+                  <BookOpen className="h-6 w-6 text-blue-400" />
+                </div>
               </motion.div>
             </div>
           </motion.div>
 
           {/* Title */}
           <motion.div
-            className="space-y-3 text-center"
+            className="space-y-4 text-center"
             variants={itemVariants}
           >
-            <h1 className="text-3xl leading-tight font-bold text-gray-900">
+            <h1 className="text-4xl font-black text-foreground tracking-tight leading-tight">
               Bienvenue sur
-              {' '}
-              <span className={`
-                bg-linear-to-r from-orange-500 to-purple-600 bg-clip-text
-                text-transparent
-              `}
-              >
+              <br />
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400">
                 Kurama
               </span>
             </h1>
-            <p className="px-2 text-base leading-relaxed text-gray-600">
+            <p className="px-2 text-base font-medium text-muted-foreground leading-relaxed">
               Votre compagnon d'apprentissage intelligent pour réussir le BEPC
               et le BAC en Côte d'Ivoire
             </p>
           </motion.div>
 
           {/* Features */}
-          <motion.div className="space-y-4" variants={itemVariants}>
-            <motion.div
-              className={`
-                flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm
-              `}
-              whileHover={{ scale: 1.02, x: 4 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-            >
+          <motion.div className="space-y-3" variants={itemVariants}>
+            {[
+              {
+                icon: Target,
+                color: 'text-orange-400',
+                bg: 'bg-orange-500/10',
+                title: 'Apprentissage personnalisé',
+                desc: 'Adapté à votre rythme et niveau',
+              },
+              {
+                icon: Smartphone,
+                color: 'text-purple-400',
+                bg: 'bg-purple-500/10',
+                title: 'Disponible hors ligne',
+                desc: 'Étudiez n\'importe où, n\'importe quand',
+              },
+              {
+                icon: Trophy,
+                color: 'text-emerald-400',
+                bg: 'bg-emerald-500/10',
+                title: 'Suivi de progression',
+                desc: 'Badges, défis et récompenses',
+              },
+            ].map(feature => (
               <motion.div
-                className={`
-                  flex h-12 w-12 shrink-0 items-center justify-center rounded-xl
-                  bg-orange-100
-                `}
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.6 }}
+                key={generateUUID()}
+                className="group flex items-center gap-4 rounded-2xl bg-card border border-border p-4 backdrop-blur-md transition-all hover:bg-accent hover:border-accent-foreground/10"
+                whileHover={{ scale: 1.02, x: 4 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <Target className="h-6 w-6 text-orange-600" />
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${feature.bg}`}>
+                  <feature.icon className={`h-6 w-6 ${feature.color}`} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-foreground group-hover:text-indigo-400 transition-colors">
+                    {feature.title}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">
+                    {feature.desc}
+                  </p>
+                </div>
               </motion.div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900">
-                  Apprentissage personnalisé
-                </p>
-                <p className="mt-0.5 text-xs text-gray-500">
-                  Adapté à votre rythme et niveau
-                </p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className={`
-                flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm
-              `}
-              whileHover={{ scale: 1.02, x: 4 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-            >
-              <motion.div
-                className={`
-                  flex h-12 w-12 shrink-0 items-center justify-center rounded-xl
-                  bg-purple-100
-                `}
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.6 }}
-              >
-                <Smartphone className="h-6 w-6 text-purple-600" />
-              </motion.div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900">
-                  Disponible hors ligne
-                </p>
-                <p className="mt-0.5 text-xs text-gray-500">
-                  Étudiez n'importe où, n'importe quand
-                </p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className={`
-                flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm
-              `}
-              whileHover={{ scale: 1.02, x: 4 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-            >
-              <motion.div
-                className={`
-                  flex h-12 w-12 shrink-0 items-center justify-center rounded-xl
-                  bg-blue-100
-                `}
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.6 }}
-              >
-                <Trophy className="h-6 w-6 text-blue-600" />
-              </motion.div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900">
-                  Suivi de progression
-                </p>
-                <p className="mt-0.5 text-xs text-gray-500">
-                  Badges, défis et récompenses
-                </p>
-              </div>
-            </motion.div>
+            ))}
           </motion.div>
         </motion.div>
       </div>
 
       {/* Bottom CTA */}
       <motion.div
-        className="space-y-4 px-6 pb-8"
+        className="space-y-6 px-6 pb-10 relative z-10"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8, type: 'spring', stiffness: 100 }}
@@ -257,43 +212,28 @@ export function WelcomeScreen({ onGetStarted, onSignIn }: WelcomeScreenProps) {
           <Button
             onClick={onGetStarted}
             size="lg"
-            className={`
-              group w-full rounded-full bg-linear-to-r from-orange-500
-              to-purple-600 py-6 font-semibold text-white shadow-xl
-              transition-all duration-300
-              hover:from-orange-600 hover:to-purple-700 hover:shadow-2xl
-            `}
+            className="group w-full rounded-2xl bg-linear-to-r from-indigo-600 to-purple-600 py-7 text-lg font-bold text-white shadow-xl shadow-indigo-500/20 transition-all duration-300 hover:from-indigo-500 hover:to-purple-500 hover:shadow-indigo-500/30 border-t border-white/10"
           >
             Commencer l'aventure
-            <motion.div
-              className="ml-2 inline-block"
-              animate={{ x: [0, 4, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              <ArrowRight className="h-5 w-5" />
-            </motion.div>
+            <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
           </Button>
         </motion.div>
 
         <motion.p
-          className="text-center text-sm text-gray-500"
+          className="text-center text-sm font-medium text-muted-foreground"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
         >
           Déjà un compte?
           {' '}
-          <motion.button
+          <button
+            type="button"
             onClick={onSignIn}
-            className={`
-              font-semibold text-purple-600
-              hover:text-purple-700
-            `}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="font-bold text-indigo-400 hover:text-indigo-300 transition-colors underline underline-offset-4"
           >
             Se connecter
-          </motion.button>
+          </button>
         </motion.p>
       </motion.div>
     </div>

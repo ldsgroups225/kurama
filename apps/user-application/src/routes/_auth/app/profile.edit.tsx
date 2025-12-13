@@ -36,9 +36,9 @@ function ProfileEditPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background pb-24">
-        <AppHeader title="Informations Personnelles" showAvatar={false} />
-        <main className="mx-auto max-w-lg px-4 py-6">
+      <div className="min-h-screen bg-background pb-24 text-foreground">
+        <AppHeader title="Informations Personnelles" showAvatar={false} className="bg-transparent/0 border-none relative z-20" />
+        <main className="mx-auto max-w-lg px-4 py-6 relative z-10">
           <FormSkeleton />
         </main>
       </div>
@@ -46,10 +46,16 @@ function ProfileEditPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <AppHeader title="Informations Personnelles" showAvatar={false} />
+    <div className="min-h-screen bg-background pb-24 text-foreground selection:bg-indigo-500/30">
+      {/* Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[10%] left-[50%] -translate-x-1/2 w-[80%] h-[40%] rounded-full bg-indigo-600/10 blur-[120px]" />
+        <div className="absolute bottom-[20%] right-[10%] w-[50%] h-[50%] rounded-full bg-purple-600/10 blur-[120px]" />
+      </div>
 
-      <main className="mx-auto max-w-lg px-4 py-6">
+      <AppHeader title="Informations Personnelles" showAvatar={false} className="bg-transparent/0 border-none relative z-20" />
+
+      <main className="mx-auto max-w-lg px-4 py-6 relative z-10">
         <ProfileEditForm
           profile={profile}
           onBack={handleBack}

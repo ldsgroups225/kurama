@@ -1,5 +1,6 @@
 'use client'
 
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowLeft,
   ArrowRight,
@@ -8,10 +9,22 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { generateUUID } from '@/utils/generateUUID'
+
+/**
+ * Ambient background colors for onboarding steps
+ * These match the theme variables in styles.css:
+ * - indigo: --xp-to (oklch 0.5 0.24 264) ≈ #4f46e5 with 20% opacity
+ * - purple: --epic-from (oklch 0.6 0.26 295) ≈ #9333ea with 20% opacity
+ * - pink: --chart-5 (oklch 0.645 0.246 16.439) ≈ #db2777 with 20% opacity
+ */
+const AMBIENT_COLORS = {
+  indigo: 'rgba(79, 70, 229, 0.2)', // #4f46e533
+  purple: 'rgba(147, 51, 234, 0.2)', // #9333ea33
+  pink: 'rgba(219, 39, 119, 0.2)', // #db277733
+} as const
 
 interface OnboardingScreenProps {
   onComplete: () => void
@@ -23,25 +36,28 @@ const onboardingSteps = [
     icon: BookOpen,
     title: 'Leçons interactives',
     description:
-      'Découvrez des cours alignés sur le programme du Ministère de l\'Éducation avec des explications claires et des exemples pratiques.',
-    color: 'bg-gradient-xp',
-    bgColor: 'bg-xp',
+      'Découvrez des cours alignés sur le programme du Ministère de l\'Éducation.',
+    gradient: 'bg-linear-to-br from-indigo-500 to-purple-600',
+    shadow: 'shadow-indigo-500/20',
+    blobColor: 'indigo' as const,
   },
   {
     icon: Brain,
     title: 'Révision intelligente',
     description:
-      'Notre système de répétition espacée vous aide à mémoriser efficacement. Révisez au bon moment pour maximiser votre apprentissage.',
-    color: 'bg-gradient-epic',
-    bgColor: 'bg-epic',
+      'Notre système de répétition espacée vous aide à mémoriser efficacement.',
+    gradient: 'bg-linear-to-br from-purple-500 to-pink-600',
+    shadow: 'shadow-purple-500/20',
+    blobColor: 'purple' as const,
   },
   {
     icon: Users,
     title: 'Apprendre ensemble',
     description:
-      'Rejoignez des groupes d\'étude, participez à des défis et comparez vos progrès avec d\'autres étudiants.',
-    color: 'bg-gradient-streak',
-    bgColor: 'bg-streak',
+      'Rejoignez des groupes d\'étude et participez à des défis.',
+    gradient: 'bg-linear-to-br from-pink-500 to-rose-600',
+    shadow: 'shadow-pink-500/20',
+    blobColor: 'pink' as const,
   },
 ]
 
@@ -49,14 +65,17 @@ const slideVariants = {
   enter: (direction: number) => ({
     x: direction > 0 ? 300 : -300,
     opacity: 0,
+    scale: 0.9,
   }),
   center: {
     x: 0,
     opacity: 1,
+    scale: 1,
   },
   exit: (direction: number) => ({
     x: direction < 0 ? 300 : -300,
     opacity: 0,
+    scale: 0.9,
   }),
 }
 
@@ -157,17 +176,19 @@ export function OnboardingScreen({
   }
 
   return (
-    <motion.div
-      className={`
-        min-h-screen
-        ${step.bgColor}
-        flex flex-col
-      `}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="relative flex min-h-screen flex-col bg-background overflow-hidden">
+      {/* Ambient Background - Dynamic based on step */}
+      <div className="absolute inset-0 pointer-events-none">
+        <motion.div
+          className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] rounded-full blur-[120px] transition-colors duration-700"
+          animate={{ backgroundColor: AMBIENT_COLORS[step.blobColor] }}
+        />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] rounded-full bg-blue-600/10 blur-[120px]" />
+      </div>
+
       {/* Header */}
       <motion.div
-        className="flex items-center justify-between px-6 pt-6 pb-4"
+        className="relative z-10 flex items-center justify-between px-6 pt-8 pb-4"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
@@ -177,10 +198,7 @@ export function OnboardingScreen({
             {currentStep > 0 && (
               <motion.button
                 onClick={handlePrevious}
-                className={`
-                  text-muted-foreground transition-colors
-                  hover:text-foreground
-                `}
+                className="text-muted-foreground transition-colors hover:text-foreground"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
@@ -194,10 +212,7 @@ export function OnboardingScreen({
         </div>
         <motion.button
           onClick={onSkip}
-          className={`
-            text-sm font-semibold text-muted-foreground transition-colors
-            hover:text-foreground
-          `}
+          className="text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -206,10 +221,7 @@ export function OnboardingScreen({
       </motion.div>
 
       {/* Content */}
-      <div className={`
-        flex flex-1 items-center justify-center overflow-hidden px-6
-      `}
-      >
+      <div className="relative z-10 flex flex-1 items-center justify-center overflow-hidden px-6">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={currentStep}
@@ -231,19 +243,16 @@ export function OnboardingScreen({
               handleDragEnd(event, info)
             }}
             whileDrag={{ scale: 0.95 }}
-            className={`
-              w-full max-w-sm cursor-grab touch-pan-y space-y-8
-              active:cursor-grabbing
-            `}
+            className="w-full max-w-sm cursor-grab touch-pan-y space-y-12 active:cursor-grabbing"
           >
             {/* Icon with decorative element */}
             <div className="relative flex justify-center">
               <div className="relative">
                 <motion.div
                   className={`
-                    h-36 w-36
-                    ${step.color}
-                    flex items-center justify-center rounded-3xl shadow-2xl
+                    h-40 w-40
+                    ${step.gradient}
+                    flex items-center justify-center rounded-[2.5rem] shadow-2xl ${step.shadow}
                   `}
                   variants={iconVariants}
                   initial="initial"
@@ -251,18 +260,15 @@ export function OnboardingScreen({
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Icon className="h-20 w-20 text-white" strokeWidth={1.5} />
+                  <Icon className="h-20 w-20 text-white drop-shadow-lg" strokeWidth={1.5} />
                 </motion.div>
                 {/* Decorative sparkle */}
                 <motion.div
-                  className={`
-                    bg-gradient-warning absolute -top-2 -right-2 flex h-8 w-8
-                    items-center justify-center rounded-full shadow-lg
-                  `}
+                  className="absolute -top-4 -right-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-900 border border-white/10 shadow-lg"
                   variants={sparkleVariants}
                   animate="animate"
                 >
-                  <Sparkles className="h-4 w-4 text-white" fill="currentColor" />
+                  <Sparkles className="h-5 w-5 text-yellow-500" fill="currentColor" />
                 </motion.div>
               </div>
             </div>
@@ -274,37 +280,31 @@ export function OnboardingScreen({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <h2 className="text-2xl leading-tight font-bold text-foreground">
+              <h2 className="text-3xl font-bold text-foreground tracking-tight">
                 {step.title}
               </h2>
-              <p className={`
-                px-2 text-base leading-relaxed text-muted-foreground
-              `}
-              >
+              <p className="px-2 text-lg leading-relaxed text-muted-foreground">
                 {step.description}
               </p>
             </motion.div>
 
             {/* Progress indicators */}
             <motion.div
-              className="flex justify-center gap-2 pt-4"
+              className="flex justify-center gap-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              {onboardingSteps.map((_, index) => (
+              {onboardingSteps.map((s, index) => (
                 <motion.button
                   key={generateUUID()}
                   onClick={() => handleDotClick(index)}
                   className={`
                     h-2 rounded-full transition-all duration-300
                     ${index === currentStep
-                  ? `
-                    w-8
-                    ${step.color}
-                  `
-                  : 'w-2 bg-muted'
-                }
+                      ? `w-8 ${s.gradient}`
+                      : 'w-2 bg-white/10 hover:bg-white/20'
+                    }
                   `}
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}
@@ -316,10 +316,7 @@ export function OnboardingScreen({
             {/* Swipe hint - only show on first step and not while dragging */}
             {currentStep === 0 && !isDragging && (
               <motion.div
-                className={`
-                  mt-6 flex items-center justify-center gap-2 text-sm
-                  text-muted-foreground
-                `}
+                className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground font-medium"
                 variants={swipeHintVariants}
                 initial="initial"
                 animate="animate"
@@ -334,7 +331,7 @@ export function OnboardingScreen({
 
       {/* Bottom CTA */}
       <motion.div
-        className="px-6 pb-8"
+        className="px-6 pb-10 pt-4 relative z-10"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
@@ -345,13 +342,13 @@ export function OnboardingScreen({
             size="lg"
             className={`
               w-full
-              ${step.color}
-              group rounded-full py-6 font-semibold text-white shadow-xl
+              ${step.gradient}
+              group rounded-2xl py-7 font-bold text-lg text-white shadow-xl ${step.shadow}
               transition-all duration-300
-              hover:opacity-90
+              hover:opacity-90 border-t border-white/20
             `}
           >
-            {isLastStep ? 'Commencer' : 'Suivant'}
+            {isLastStep ? 'C\'est parti !' : 'Suivant'}
             <motion.div
               className="ml-2 inline-block"
               animate={{ x: [0, 4, 0] }}
@@ -362,7 +359,7 @@ export function OnboardingScreen({
           </Button>
         </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   )
 }
 

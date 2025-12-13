@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { motion } from 'framer-motion'
 import { Check, Clock, Flame, Loader2, Play, Timer, Trophy, X, Zap } from 'lucide-react'
-import { motion } from 'motion/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { RewardAnimation } from '@/components/gamification'
 import { Test } from '@/components/learning/test'
-import { TestLoading } from '@/components/learning/test-loading'
 import { AppHeader } from '@/components/main'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { LogoLoader } from '@/components/ui/logo-loader'
@@ -17,6 +17,7 @@ import {
   startDailyChallenge,
 } from '@/core/functions/daily-challenge'
 import { trackRouteLoad } from '@/lib/performance-monitor'
+import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/_auth/app/daily-challenge')({
   component: DailyChallengePage,
@@ -51,6 +52,7 @@ function DailyChallengePage() {
     queryFn: () => getDailyChallengeStatus(),
   })
 
+  // Start Mutation
   const startMutation = useMutation({
     mutationFn: () => startDailyChallenge(),
     onSuccess: (result) => {
@@ -64,6 +66,7 @@ function DailyChallengePage() {
     },
   })
 
+  // Complete Mutation
   const completeMutation = useMutation({
     mutationFn: (data: {
       sessionId: number
@@ -250,62 +253,101 @@ function DailyChallengePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <AppHeader title="Défi du Jour" showAvatar={false} />
-        <div className="flex items-center justify-center py-20">
-          <LogoLoader size="md" />
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <LogoLoader size="md" />
       </div>
+    )
+  }
+
+  // Phase-based Ambient Background
+  const getAmbientBackground = () => {
+    if (phase === 'active') {
+      // Intense Orange/Red for Focus/Time
+      return (
+        <>
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-orange-600/10 blur-[120px]" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-red-600/10 blur-[120px]" />
+        </>
+      )
+    }
+    else if (phase === 'completed' || challengeStatus?.isCompleted) {
+      // Success Green/Gold
+      return (
+        <>
+          <div className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[70%] h-[70%] rounded-full bg-emerald-600/10 blur-[130px]" />
+        </>
+      )
+    }
+    // Default Preview (Purple/Blue)
+    return (
+      <>
+        <div className="absolute top-0 right-0 w-[60%] h-[60%] rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[40%] h-[40%] rounded-full bg-blue-600/10 blur-[120px]" />
+      </>
     )
   }
 
   // Already completed today
   if (challengeStatus?.isCompleted) {
     return (
-      <div className="min-h-screen bg-background">
-        <AppHeader title="Défi du Jour" showAvatar={false} />
-        <main className="mx-auto max-w-lg space-y-6 px-4 py-8">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-center">
-            <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-success">
-              <Check className="h-12 w-12 text-white" />
+      <div className="min-h-screen bg-background text-foreground">
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          {getAmbientBackground()}
+        </div>
+
+        <AppHeader title="Défi du Jour" showAvatar={false} className="bg-transparent/0 border-none" />
+
+        <main className="relative z-10 mx-auto max-w-lg space-y-8 px-5 py-8">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center">
+            <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-emerald-500/20 shadow-xl shadow-emerald-500/10 ring-1 ring-emerald-500/50">
+              <Check className="h-10 w-10 text-emerald-500" />
             </div>
-            <h2 className="mb-2 text-2xl font-bold">Défi Complété !</h2>
+            <h2 className="mb-2 text-3xl font-bold bg-linear-to-b from-foreground to-muted-foreground bg-clip-text text-transparent">Défi Complété !</h2>
             <p className="text-muted-foreground">Revenez demain pour un nouveau défi</p>
           </motion.div>
-          <Card className="border-2">
-            <CardContent className="p-6 text-center">
-              <div className="mb-4 text-4xl font-bold text-primary">
+
+          {/* Stats Card */}
+          <div className="rounded-3xl border border-border bg-card backdrop-blur-xl p-6 text-center shadow-lg">
+            <div className="mb-6">
+              <span className="text-5xl font-bold bg-linear-to-br from-emerald-500 to-teal-600 bg-clip-text text-transparent">
                 {challengeStatus.score}
                 %
-              </div>
-              <div className="mb-4 flex items-center justify-center gap-2 text-xp">
-                <Zap className="h-5 w-5" />
-                <span className="font-semibold">
-                  +
-                  {challengeStatus.xpEarned}
-                  {' '}
-                  XP
-                </span>
-              </div>
+              </span>
+            </div>
+
+            <div className="flex items-center justify-center gap-4">
+              <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-amber-500/20 px-3 py-1.5 text-sm gap-1.5">
+                <Zap className="h-3.5 w-3.5 fill-current" />
+                +
+                {challengeStatus.xpEarned}
+                {' '}
+                XP
+              </Badge>
+
               {challengeStatus.consecutiveDays > 1 && (
-                <div className="flex items-center justify-center gap-2 text-streak">
-                  <Flame className="h-5 w-5" />
-                  <span className="font-medium">
-                    {challengeStatus.consecutiveDays}
-                    {' '}
-                    jours consécutifs
-                  </span>
-                </div>
+                <Badge className="bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 border-orange-500/20 px-3 py-1.5 text-sm gap-1.5">
+                  <Flame className="h-3.5 w-3.5 fill-current" />
+                  {challengeStatus.consecutiveDays}
+                  {' '}
+                  jours
+                </Badge>
               )}
-            </CardContent>
-          </Card>
-          <div className="text-center text-sm text-muted-foreground">
-            <Clock className="mr-1 inline h-4 w-4" />
-            Prochain défi dans
-            {' '}
-            {formatTimeUntilReset(challengeStatus.timeUntilReset)}
+            </div>
           </div>
-          <Button variant="outline" className="w-full" onClick={() => navigate({ to: '/app' })}>
+
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-muted py-2 px-4 rounded-full w-fit mx-auto border border-border">
+            <Clock className="h-4 w-4" />
+            <span className="font-medium">
+              Prochain défi dans
+              {formatTimeUntilReset(challengeStatus.timeUntilReset)}
+            </span>
+          </div>
+
+          <Button
+            variant="outline"
+            className="w-full h-12 rounded-xl border-border bg-card hover:bg-accent hover:text-foreground text-muted-foreground"
+            onClick={() => navigate({ to: '/app' })}
+          >
             Retour à l'accueil
           </Button>
         </main>
@@ -316,19 +358,24 @@ function DailyChallengePage() {
   // Preview phase
   if (phase === 'preview') {
     return (
-      <div className="min-h-screen bg-background">
-        <AppHeader title="Défi du Jour" showAvatar={false} />
-        <main className="mx-auto max-w-lg space-y-6 px-4 py-8">
+      <div className="min-h-screen bg-background text-foreground">
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          {getAmbientBackground()}
+        </div>
+
+        <AppHeader title="" showAvatar={false} className="bg-transparent/0 border-none" />
+
+        <main className="relative z-10 mx-auto max-w-lg space-y-6 px-5 pt-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center"
+            className="text-center mb-8"
           >
-            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-level">
+            <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-linear-to-br from-violet-600 to-indigo-600 shadow-2xl shadow-indigo-500/30">
               <Trophy className="h-10 w-10 text-white" />
             </div>
-            <h2 className="mb-2 text-2xl font-bold">Défi du Jour</h2>
-            <p className="text-muted-foreground">
+            <h2 className="mb-2 text-3xl font-bold bg-linear-to-b from-foreground to-muted-foreground bg-clip-text text-transparent">Défi du Jour</h2>
+            <p className="text-muted-foreground font-medium">
               {new Date().toLocaleDateString('fr-FR', {
                 weekday: 'long',
                 day: 'numeric',
@@ -336,127 +383,162 @@ function DailyChallengePage() {
               })}
             </p>
           </motion.div>
-          <Card className="border-2 border-primary/20">
-            <CardContent className="p-6">
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-3xl font-bold text-primary">{totalCards}</div>
-                  <div className="text-sm text-muted-foreground">Questions</div>
+
+          <div className="rounded-3xl border border-border bg-card backdrop-blur-xl p-1 overflow-hidden">
+            <div className="p-6 space-y-6 bg-muted/50 rounded-[20px]">
+              {/* Stats Grid */}
+              <div className="grid grid-cols-3 gap-4 border-b border-border pb-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-foreground mb-1">{totalCards}</div>
+                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Questions</div>
                 </div>
-                <div>
-                  <div className="text-3xl font-bold text-primary">10</div>
-                  <div className="text-sm text-muted-foreground">Minutes</div>
+                <div className="text-center border-x border-border">
+                  <div className="text-2xl font-bold text-foreground mb-1">10</div>
+                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Minutes</div>
                 </div>
-                <div>
-                  <div className="flex items-center justify-center text-3xl font-bold text-primary">
-                    <Timer className="h-6 w-6" />
+                <div className="text-center">
+                  <div className="flex items-center justify-center text-2xl font-bold text-foreground mb-1">
+                    <Timer className="h-6 w-6 text-orange-500" />
                   </div>
-                  <div className="text-sm text-muted-foreground">Chronométré</div>
+                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Chrono</div>
                 </div>
               </div>
-              <div className="mt-6 space-y-2">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Zap className="h-4 w-4 text-xp" />
-                  <span>Gagnez jusqu'à 150 XP</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Flame className="h-4 w-4 text-streak" />
-                  <span>Bonus série : +25 XP</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Timer className="h-4 w-4 text-warning" />
-                  <span>Mode examen chronométré</span>
-                </div>
-                {challengeStatus?.consecutiveDays && challengeStatus.consecutiveDays > 0 && (
-                  <div className="flex items-center gap-2 text-sm font-medium text-streak">
-                    <Flame className="h-4 w-4" />
-                    <span>
-                      Série actuelle :
-                      {challengeStatus.consecutiveDays}
-                      {' '}
-                      jours
-                    </span>
+
+              {/* Rewards List */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                    <Zap className="h-4 w-4 text-amber-500 fill-current" />
                   </div>
-                )}
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-foreground">Gain d'expérience</div>
+                    <div className="text-xs text-muted-foreground">Jusqu'à 150 XP possibles</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                    <Flame className="h-4 w-4 text-orange-500 fill-current" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-foreground">Bonus de série</div>
+                    <div className="text-xs text-muted-foreground">+25 XP si maintenu</div>
+                  </div>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-          <Button
-            size="lg"
-            className="w-full bg-gradient-level text-lg font-semibold"
-            onClick={handleStart}
-            disabled={startMutation.isPending}
-          >
-            {startMutation.isPending
-              ? (
+            </div>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <Button
+              size="lg"
+              className="w-full h-14 text-lg font-bold bg-linear-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 shadow-xl shadow-indigo-500/20 border-0 rounded-2xl text-white"
+              onClick={handleStart}
+              disabled={startMutation.isPending}
+            >
+              {startMutation.isPending
+                ? (
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 )
-              : (
-                  <Play className="mr-2 h-5 w-5" />
+                : (
+                  <Play className="mr-2 h-5 w-5 fill-current" />
                 )}
-            {challengeStatus?.isInProgress ? 'Reprendre' : 'Commencer l\'examen'}
-          </Button>
-          <Button variant="ghost" className="w-full" onClick={() => navigate({ to: '/app' })}>
-            Plus tard
-          </Button>
+              {challengeStatus?.isInProgress ? 'Reprendre le défi' : 'Commencer le défi'}
+            </Button>
+
+            <Button
+              variant="ghost"
+              className="w-full text-muted-foreground hover:text-foreground hover:bg-muted"
+              onClick={() => navigate({ to: '/app' })}
+            >
+              Faire plus tard
+            </Button>
+          </div>
         </main>
       </div>
     )
   }
 
-  // Show loading screen
+  // Show loading screen - Premium Style
   if (showLoading) {
-    return <TestLoading />
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center text-foreground">
+        <LogoLoader size="lg" />
+        <p className="mt-8 text-lg font-medium animate-pulse text-muted-foreground">Calcul des résultats...</p>
+      </div>
+    )
   }
 
   // Active phase - timed exam mode
   if (phase === 'active' && currentQuestion) {
-    const progress = ((currentCardIndex + 1) / totalCards) * 100
     const timeProgress = (timeRemaining / TIME_LIMIT) * 100
     const isLowTime = timeRemaining < 60
 
     return (
-      <div className="min-h-screen bg-background">
-        <AppHeader title={`Question ${currentCardIndex + 1}/${totalCards}`} showAvatar={false} />
-        <main className="mx-auto max-w-lg px-4 py-6">
-          <div className="mb-6 space-y-3">
-            <div className="flex items-center justify-between">
-              <div
-                className={`flex items-center gap-2 text-lg font-bold ${isLowTime ? 'text-error animate-pulse' : 'text-foreground'}`}
+      <div className="min-h-screen bg-background text-foreground">
+        {/* Ambient Background for Focus */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          {getAmbientBackground()}
+        </div>
+
+        <AppHeader title="" showAvatar={false} className="bg-transparent/0 border-none relative z-20" />
+
+        <main className="relative z-10 mx-auto max-w-lg px-4 pt-0 pb-6 w-full h-full flex flex-col">
+          {/* Top Bar Stats */}
+          <div className="mb-6 bg-card/80 backdrop-blur-md rounded-2xl p-4 border border-border shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <div className={cn(
+                'flex items-center gap-2 font-mono text-xl font-bold transition-colors',
+                isLowTime ? 'text-red-500 animate-pulse' : 'text-foreground',
+              )}
               >
                 <Timer className="h-5 w-5" />
                 {formatTime(timeRemaining)}
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Check className="h-4 w-4 text-success" />
-                {correctCount}
-                {' '}
-                /
-                {currentCardIndex}
-              </div>
+
+              <Badge variant="secondary" className="bg-muted text-muted-foreground border-border gap-2 px-3">
+                <span>Question</span>
+                <span className="font-bold text-foreground">
+                  {currentCardIndex + 1}
+                  {' '}
+                  <span className="text-muted-foreground">
+                    /
+                    {totalCards}
+                  </span>
+                </span>
+              </Badge>
             </div>
-            <Progress
-              value={timeProgress}
-              className={`h-2 ${isLowTime ? '[&>div]:bg-error' : '[&>div]:bg-primary'}`}
-            />
-            <Progress value={progress} className="h-1" />
+
+            {/* Progress Bars */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                <span>Temps écoulé</span>
+              </div>
+              <Progress
+                value={timeProgress}
+                className={cn('h-1.5 bg-muted', isLowTime ? '[&>div]:bg-red-500' : '[&>div]:bg-indigo-500')}
+              />
+            </div>
           </div>
-          <Test
-            key={currentCardIndex}
-            card={currentQuestion}
-            cardIndex={currentCardIndex}
-            totalCards={totalCards}
-            questionType={currentQuestion.questionType}
-            answerWith="definition"
-            cardSide="term"
-            onAnswer={handleAnswer}
-          />
+
+          <div className="flex-1 flex flex-col justify-center">
+            <Test
+              key={currentCardIndex}
+              card={currentQuestion}
+              cardIndex={currentCardIndex}
+              totalCards={totalCards}
+              questionType={currentQuestion.questionType}
+              answerWith="definition"
+              cardSide="term"
+              onAnswer={handleAnswer}
+            // Pass custom classNames if Test component accepts them, or just rely on global styles
+            />
+          </div>
         </main>
       </div>
     )
   }
 
-  // Completed phase
+  // Completed phase - Revamped Results
   if (phase === 'completed') {
     const score = totalCards > 0 ? Math.round((correctCount / totalCards) * 100) : 0
     const baseXP = 100
@@ -465,80 +547,122 @@ function DailyChallengePage() {
     const totalXP = baseXP + scoreBonus + streakBonus
 
     return (
-      <div className="min-h-screen bg-background">
-        <AppHeader title="Résultats" showAvatar={false} />
-        <main className="mx-auto max-w-lg space-y-6 px-4 py-8">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-center">
-            <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-level">
-              <Trophy className="h-12 w-12 text-white" />
+      <div className="min-h-screen bg-background text-foreground">
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          {getAmbientBackground()}
+        </div>
+
+        <AppHeader title="Résultats" showAvatar={false} className="bg-transparent/0 border-none" />
+
+        <main className="relative z-10 mx-auto max-w-lg space-y-6 px-5 py-6">
+          <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center py-4">
+            <div className="mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[2.5rem] bg-linear-to-br from-indigo-500 to-purple-600 shadow-2xl shadow-purple-500/30 ring-4 ring-white/10">
+              <Trophy className="h-14 w-14 text-white" />
             </div>
-            <h2 className="mb-2 text-2xl font-bold">Défi Terminé !</h2>
+
+            <h2 className="mb-1 text-3xl font-bold text-foreground">Défi Terminé !</h2>
+            <p className="text-muted-foreground">Voici votre score pour aujourd'hui</p>
           </motion.div>
-          <Card className="overflow-hidden border-2">
+
+          <Card className="overflow-hidden border-border bg-card backdrop-blur-xl rounded-4xl">
             <CardContent className="p-0">
-              <div className="bg-gradient-level p-6 text-center text-white">
-                <div className="text-5xl font-bold">
-                  {score}
-                  %
+              {/* Score Header */}
+              <div className="bg-linear-to-r from-emerald-500/10 to-teal-500/10 p-8 text-center border-b border-border relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay"></div>
+                <div className="relative z-10">
+                  <div className="text-6xl font-black text-emerald-500 mb-1 tracking-tight">
+                    {score}
+                    <span className="text-3xl align-top opacity-60">%</span>
+                  </div>
+                  <div className="text-sm font-medium text-emerald-600 uppercase tracking-widest">Score Final</div>
                 </div>
-                <div className="text-white/80">Score</div>
               </div>
-              <div className="p-6">
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div>
-                    <div className="flex items-center justify-center gap-1 text-2xl font-bold text-success">
-                      <Check className="h-6 w-6" />
-                      {correctCount}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Correct</div>
+
+              {/* Grid Details */}
+              <div className="grid grid-cols-2 divide-x divide-border">
+                <div className="p-5 text-center hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <Check className="h-5 w-5 text-emerald-500" />
+                    <span className="text-2xl font-bold text-foreground">{correctCount}</span>
                   </div>
-                  <div>
-                    <div className="flex items-center justify-center gap-1 text-2xl font-bold text-error">
-                      <X className="h-6 w-6" />
-                      {totalCards - correctCount}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Incorrect</div>
+                  <div className="text-xs text-muted-foreground font-medium uppercase">Correct</div>
+                </div>
+                <div className="p-5 text-center hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <X className="h-5 w-5 text-red-500" />
+                    <span className="text-2xl font-bold text-foreground">{totalCards - correctCount}</span>
                   </div>
+                  <div className="text-xs text-muted-foreground font-medium uppercase">Incorrect</div>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="border-2 border-xp bg-gradient-xp-horizontal">
-            <CardContent className="p-6 text-center text-white">
-              <div className="mb-2 text-4xl font-bold">
-                +
-                {totalXP}
-                {' '}
-                XP
-              </div>
-              <div className="space-y-1 text-sm text-white/80">
-                <div>
-                  Base : +
-                  {baseXP}
-                  {' '}
-                  XP
+
+          {/* XP Card */}
+          <div className="relative rounded-4xl overflow-hidden border border-amber-500/20 p-6 bg-linear-to-br from-amber-500/10 to-orange-600/10 backdrop-blur-xl">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center border border-amber-500/20">
+                  <Zap className="h-6 w-6 text-amber-600 fill-current" />
                 </div>
                 <div>
-                  Bonus score : +
-                  {scoreBonus}
-                  {' '}
-                  XP
-                </div>
-                {streakBonus > 0 && (
-                  <div>
-                    Bonus série : +
-                    {streakBonus}
+                  <div className="text-sm text-yellow-600">Total XP Gagné</div>
+                  <div className="text-2xl font-bold text-amber-600">
+                    +
+                    {totalXP}
                     {' '}
                     XP
                   </div>
-                )}
+                </div>
               </div>
-            </CardContent>
-          </Card>
-          <Button size="lg" className="w-full" onClick={() => navigate({ to: '/app' })}>
+            </div>
+
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between text-muted-foreground">
+                <span>Base</span>
+                <span>
+                  +
+                  {baseXP}
+                  {' '}
+                  XP
+                </span>
+              </div>
+              <div className="flex justify-between text-muted-foreground">
+                <span>Bonus de score</span>
+                <span>
+                  +
+                  {scoreBonus}
+                  {' '}
+                  XP
+                </span>
+              </div>
+              {streakBonus > 0 && (
+                <div className="flex justify-between text-orange-300 font-medium">
+                  <span className="flex items-center gap-1">
+                    <Flame className="w-3 h-3" />
+                    {' '}
+                    Bonus série
+                  </span>
+                  <span>
+                    +
+                    {streakBonus}
+                    {' '}
+                    XP
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <Button
+            size="lg"
+            className="w-full h-14 bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-bold rounded-2xl shadow-xl shadow-primary/20"
+            onClick={() => navigate({ to: '/app' })}
+          >
             Retour à l'accueil
           </Button>
         </main>
+
         {showReward && completeMutation.data && (
           <RewardAnimation
             show={showReward}

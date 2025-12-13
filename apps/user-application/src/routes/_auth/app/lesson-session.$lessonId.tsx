@@ -2,19 +2,20 @@ import type { Reward } from '@/components/gamification'
 import type { TestSettings } from '@/components/learning/test-settings-sheet'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router'
-import { WifiOff } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { ArrowLeft, SlidersHorizontal, WifiOff } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { RewardAnimation } from '@/components/gamification'
 import { CardFactory } from '@/components/learning/CardFactory'
 import { QuizSettingsSheet } from '@/components/learning/quiz-settings-sheet'
 import { SessionControls } from '@/components/learning/session-controls'
 import { SessionCounterBadge } from '@/components/learning/session-counter-badge'
-import { SessionHeader } from '@/components/learning/session-header'
 import { SessionSettingsDialog } from '@/components/learning/session-settings-dialog'
 import { Test } from '@/components/learning/test'
 import { TestLoading } from '@/components/learning/test-loading'
 import { TestSettingsSheet } from '@/components/learning/test-settings-sheet'
 import { AppHeader } from '@/components/main'
+import { Button } from '@/components/ui/button'
 import { LogoLoader } from '@/components/ui/logo-loader'
 import { getLessonDetails } from '@/core/functions/learning'
 import { useAutoplay } from '@/hooks/use-autoplay'
@@ -28,6 +29,8 @@ import { useViewportHeight } from '@/hooks/use-viewport-height'
 import { db } from '@/lib/db'
 import { getMutationQueueManager } from '@/lib/mutation-queue'
 import { trackRouteLoad } from '@/lib/performance-monitor'
+import { cn } from '@/lib/utils'
+import { generateUUID } from '@/utils/generateUUID'
 
 interface SearchParams {
   mode?: 'flashcards' | 'quiz' | 'exam'
@@ -40,9 +43,6 @@ interface TestAnswer {
   isCorrect: boolean
   questionType: string
 }
-
-// Reserved for spaced repetition algorithm
-// type QuizMode = 'memorize-all' | 'review-starred' | 'quick-review'
 
 export const Route = createFileRoute('/_auth/app/lesson-session/$lessonId')({
   component: SessionPage,
@@ -61,7 +61,6 @@ function SessionPage() {
   // Quiz mode state
   const [showQuizSettings, setShowQuizSettings] = useState(mode === 'quiz')
   const [hasStartedQuiz, setHasStartedQuiz] = useState(false)
-  // Quiz mode setter for future spaced repetition features (value not currently read)
   const [, setQuizMode] = useState<'memorize-all' | 'review-starred' | 'quick-review' | null>(null)
 
   // Test mode state
@@ -75,7 +74,6 @@ function SessionPage() {
   const [showReward, setShowReward] = useState(false)
   const [currentReward, setCurrentReward] = useState<Reward | null>(null)
 
-  // Stats update hook with callbacks for level-up and achievements
   const { updateStats } = useStatsUpdate({
     onLevelUp: (newLevel) => {
       setCurrentReward({
@@ -88,7 +86,6 @@ function SessionPage() {
     },
     onAchievementUnlocked: (achievements) => {
       if (achievements.length > 0) {
-        // Show first achievement (can queue others)
         setCurrentReward({
           type: 'achievement',
           title: 'Nouveau badge !',
@@ -98,9 +95,6 @@ function SessionPage() {
       }
     },
   })
-
-  // No need for mode reset effect - state is initialized based on mode prop
-  // and the component will re-render with correct initial values when mode changes via URL
 
   // Session state management
   const {
@@ -133,13 +127,11 @@ function SessionPage() {
   const { isOnline } = useOnlineStatus()
   const [pendingMutations, setPendingMutations] = useState(0)
 
-  // Track route load performance
   useEffect(() => {
     const endTracking = trackRouteLoad('app-session')
     return endTracking
   }, [])
 
-  // Track pending mutations count
   useEffect(() => {
     const updatePendingCount = async () => {
       const queueManager = getMutationQueueManager()
@@ -153,33 +145,25 @@ function SessionPage() {
     return () => clearInterval(interval)
   }, [])
 
-  // Fetch lesson data with offline support
   const { data: lesson, isLoading } = useQuery({
     queryKey: ['lesson', lessonId],
     queryFn: async () => {
-      // Try to fetch from network first
       if (isOnline) {
         return await getLessonDetails({ data: Number(lessonId) })
       }
-
-      // If offline, try to get from IndexedDB cache
       const cachedLesson = await db.queryCache.get(`lesson-${lessonId}`)
       if (cachedLesson) {
         return cachedLesson.value
       }
-
       throw new Error('No cached data available offline')
     },
-    // Enable offline-first behavior
     networkMode: 'offlineFirst',
-    // Keep data fresh for 5 minutes
     staleTime: 5 * 60 * 1000,
   })
 
   const cards = useMemo(() => (lesson as any)?.cards ?? [], [lesson])
   const currentCard = cards[currentCardIndex]
 
-  // Store quiz questions in state - generated in handleStartQuiz callback
   const [quizQuestions, setQuizQuestions] = useState<Array<{
     cardType: 'multichoice' | 'true_false'
     question?: string
@@ -189,12 +173,10 @@ function SessionPage() {
     [key: string]: unknown
   }>>([])
 
-  // Calculate progress based on mode
   const activeCards = mode === 'quiz' && hasStartedQuiz ? quizQuestions : cards
   const progress = activeCards.length > 0 ? ((currentCardIndex + 1) / activeCards.length) * 100 : 0
   const isLastCard = currentCardIndex === activeCards.length - 1
 
-  // Navigation handlers
   const navigateToLesson = useCallback(() => {
     navigate({
       to: '/app/lessons/$lessonId',
@@ -209,7 +191,6 @@ function SessionPage() {
       const incorrect = finalIncorrect ?? sessionStats.incorrect
       const totalCards = activeCards.length
 
-      // Update stats via server function (handles offline queueing internally)
       const result = await updateStats({
         lessonId: Number(lessonId),
         correctCount: correct,
@@ -218,7 +199,6 @@ function SessionPage() {
         mode: mode as 'flashcards' | 'quiz' | 'exam',
       })
 
-      // Navigate to summary with stats result
       navigate({
         to: '/app/lesson-summary/$lessonId',
         params: { lessonId },
@@ -228,7 +208,6 @@ function SessionPage() {
           total: totalCards,
           duration,
           mode,
-          // Pass XP earned for display
           xpEarned: result?.xpEarned ?? correct * 10,
           leveledUp: result?.leveledUp ? 'true' : undefined,
           newLevel: result?.currentLevel,
@@ -238,7 +217,6 @@ function SessionPage() {
     [navigate, lessonId, startTime, sessionStats, activeCards.length, mode, updateStats],
   )
 
-  // Card interaction handlers
   const handleFlip = useCallback(() => {
     if (!isDragging) {
       setIsFlipped(prev => !prev)
@@ -250,7 +228,6 @@ function SessionPage() {
       incrementStat(response)
 
       if (isLastCard) {
-        // Calculate final stats to pass to summary (state update is async)
         const finalCorrect = response === 'correct' ? sessionStats.correct + 1 : sessionStats.correct
         const finalIncorrect = response === 'incorrect' ? sessionStats.incorrect + 1 : sessionStats.incorrect
         navigateToSummary(finalCorrect, finalIncorrect)
@@ -317,7 +294,6 @@ function SessionPage() {
     swipeAnimations.x.set(0)
   }, [resetSession, setShowSettings, swipeAnimations.x])
 
-  // Swipe gesture handling
   const { handleDragStart, handleDragEnd } = createSwipeHandlers({
     x: swipeAnimations.x,
     onCorrect: () => handleResponse('correct'),
@@ -326,21 +302,18 @@ function SessionPage() {
     onDragEnd: () => setIsDragging(false),
   })
 
-  // Store test questions in state - generated in handleStartTest callback
+  // Store test questions
   const [testQuestions, setTestQuestions] = useState<Array<typeof cards[0] & { questionType: 'multiple-choice' | 'written' | 'true-false' }>>([])
 
-  // Handle quiz mode start - generates questions here to avoid impure render
+  // Helper to start quiz
   const handleStartQuiz = useCallback((selectedMode: 'memorize-all' | 'review-starred' | 'quick-review') => {
-    // Generate quiz questions in event handler (Math.random is safe here)
     if (cards.length > 0) {
-      // Fisher-Yates shuffle for proper randomization
       const shuffled = [...cards]
       for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1))
           ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
       }
 
-      // Generate quiz questions with options from flashcard data
       const questions = shuffled.map((card, index) => {
         const questionType = Math.random() > 0.5 ? 'multichoice' : 'true_false'
 
@@ -357,7 +330,7 @@ function SessionPage() {
             ...wrongAnswers.map((text, i) => ({ id: `wrong-${i}`, text, isCorrect: false })),
           ]
 
-          // Shuffle options
+          // Shuffle
           for (let i = allOptions.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1))
             const temp = allOptions[i]
@@ -403,9 +376,8 @@ function SessionPage() {
     setCurrentCardIndex(0)
   }, [setCurrentCardIndex, cards])
 
-  // Handle test mode start - generates questions here to avoid impure render
+  // Handle test start
   const handleStartTest = useCallback((settings: TestSettings) => {
-    // Generate test questions based on settings
     const availableTypes: Array<'multiple-choice' | 'written' | 'true-false'> = []
     if (settings.multipleChoice)
       availableTypes.push('multiple-choice')
@@ -415,7 +387,6 @@ function SessionPage() {
       availableTypes.push('written')
 
     if (availableTypes.length > 0) {
-      // Fisher-Yates shuffle for proper randomization
       const shuffled = [...cards]
       for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1))
@@ -423,7 +394,6 @@ function SessionPage() {
       }
       const selected = shuffled.slice(0, settings.questionCount)
 
-      // Assign random question types
       const questions = selected.map((card) => {
         const randomType = availableTypes[Math.floor(Math.random() * availableTypes.length)]
         return {
@@ -441,7 +411,6 @@ function SessionPage() {
     setCurrentCardIndex(0)
   }, [cards, setCurrentCardIndex])
 
-  // Handle test answer
   const handleTestAnswer = useCallback((isCorrect: boolean, userAnswer: string) => {
     const currentQuestion = testQuestions[currentCardIndex]
     const correctAnswer = testSettings?.answerWith === 'term'
@@ -458,23 +427,16 @@ function SessionPage() {
       questionType: currentQuestion.questionType,
     }
 
-    // Record answer
     setTestAnswers(prev => [...prev, newAnswer])
-
-    // Update stats
     incrementStat(isCorrect ? 'correct' : 'incorrect')
 
     if (currentCardIndex === testQuestions.length - 1) {
-      // Show loading screen
       setShowTestLoading(true)
-
-      // Navigate to summary after 2 seconds
       setTimeout(async () => {
         const finalCorrect = isCorrect ? sessionStats.correct + 1 : sessionStats.correct
         const finalIncorrect = !isCorrect ? sessionStats.incorrect + 1 : sessionStats.incorrect
         const duration = Math.floor((Date.now() - startTime) / 1000)
 
-        // Update stats via server function
         const result = await updateStats({
           lessonId: Number(lessonId),
           correctCount: finalCorrect,
@@ -505,10 +467,6 @@ function SessionPage() {
     }
   }, [currentCardIndex, testQuestions, testSettings, sessionStats, navigate, lessonId, testAnswers, incrementStat, setCurrentCardIndex, startTime, updateStats])
 
-  // Show quiz/test settings based on mode - state is initialized correctly above
-  // No need for useEffect since state is initialized with the correct value
-
-  // Autoplay functionality
   useAutoplay({
     isAutoPlaying,
     isFlipped,
@@ -519,54 +477,37 @@ function SessionPage() {
     onNextCard: goToNextCard,
   })
 
-  // Loading state
+  // LOADING
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <AppHeader title="Session" showAvatar={false} />
-        <div className="flex items-center justify-center py-12">
-          <LogoLoader size="md" />
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <LogoLoader size="md" />
       </div>
     )
   }
 
-  // Empty state
+  // EMPTY
   if (!lesson || cards.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
-        <AppHeader title="Session" showAvatar={false} />
-        <div className="flex items-center justify-center py-12">
-          <p className="text-muted-foreground">Aucune carte disponible</p>
-        </div>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center text-foreground">
+        <AppHeader title="Session" showAvatar={false} className="bg-transparent/0 border-none" />
+        <p className="text-zinc-500">Aucune carte disponible</p>
       </div>
     )
   }
 
-  // Render different components based on mode
   const renderLearningMode = () => {
-    // Common props for CardFactory
     const commonProps = {
       card: currentCard,
       cardIndex: currentCardIndex,
       totalCards: cards.length,
       onAnswer: (isCorrect: boolean) => {
-        if (mode === 'exam') {
-          // Test mode handles answers differently (accumulates them)
-          // We might need to adapt Test component or handle it here
-          // For now, let's keep Test component separate if it's complex
-          // But for Quiz and Flashcards, we use CardFactory
-          handleResponse(isCorrect ? 'correct' : 'incorrect')
-        }
-        else {
-          handleResponse(isCorrect ? 'correct' : 'incorrect')
-        }
+        handleResponse(isCorrect ? 'correct' : 'incorrect')
       },
     }
 
     switch (mode) {
       case 'quiz':
-        // Show quiz questions after settings are configured
         if (hasStartedQuiz && quizQuestions.length > 0) {
           const currentQuestion = quizQuestions[currentCardIndex]
           if (!currentQuestion)
@@ -585,12 +526,11 @@ function SessionPage() {
         }
         return null
       case 'exam':
-        // Show loading screen
         if (showTestLoading) {
+          // We can render a custom dark loading here if TestLoading isn't updated,
+          // but keeping it simple
           return <TestLoading />
         }
-
-        // Show test questions
         if (hasStartedTest && testQuestions.length > 0) {
           const currentQuestion = testQuestions[currentCardIndex]
           return (
@@ -606,18 +546,15 @@ function SessionPage() {
             />
           )
         }
-
         return null
       case 'flashcards':
       default: {
-        // Force cardType to 'basic' for flashcard mode to ensure flashcard UI is shown
         const flashcardCard = { ...currentCard, cardType: 'basic' as const }
         return (
           <>
             <CardFactory
               {...commonProps}
               card={flashcardCard}
-              // Flashcard specific props
               cardOrientation={cardOrientation}
               cardHeight={cardHeight}
               x={swipeAnimations.x}
@@ -644,39 +581,77 @@ function SessionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <SessionHeader
-        currentIndex={currentCardIndex}
-        totalCards={activeCards.length}
-        progress={progress}
-        onClose={navigateToLesson}
-        onSettings={() => setShowSettings(true)}
-      />
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[20%] right-[20%] w-[60%] h-[40%] rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="absolute bottom-[20%] left-[10%] w-[50%] h-[50%] rounded-full bg-indigo-600/10 blur-[120px]" />
+      </div>
 
-      {/* Offline indicator */}
+      {/* Custom Inline Header for Premium Look */}
+      <header className="relative z-50 px-4 py-3 flex items-center justify-between">
+        <Button variant="ghost" size="icon" onClick={navigateToLesson} className="text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full">
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+
+        <div className="flex flex-col items-center">
+          <span className="text-sm font-bold text-foreground tracking-wide">
+            {currentCardIndex + 1}
+            {' '}
+            /
+            {activeCards.length}
+          </span>
+          {/* Simple progress dot indicator */}
+          <div className="flex gap-1 mt-1">
+            {activeCards.slice(0, Math.min(activeCards.length, 10)).map((_: any, i: number) => (
+              <div
+                key={generateUUID()}
+                className={cn(
+                  'h-1 w-1 rounded-full bg-muted',
+                  i === currentCardIndex
+                    ? 'bg-primary w-3 transition-all'
+                    : i < currentCardIndex ? 'bg-primary/50' : '',
+                )}
+              />
+            ))}
+          </div>
+        </div>
+
+        <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="text-zinc-400 hover:text-foreground hover:bg-foreground/5 rounded-full">
+          <SlidersHorizontal className="h-5 w-5" />
+        </Button>
+      </header>
+
+      {/* Progress Line */}
+      <div className="w-full h-px bg-muted relative">
+        <motion.div
+          className="absolute top-0 left-0 h-full bg-indigo-500 shadow-glow-indigo"
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+        />
+      </div>
+
       {!isOnline && (
         <div className="mx-auto max-w-lg px-4 pt-2">
-          <div className="flex items-center gap-2 rounded-lg bg-warning/10 px-3 py-2 text-sm text-warning">
+          <div className="flex items-center gap-2 rounded-lg bg-orange-500/10 border border-orange-500/20 px-3 py-2 text-sm text-orange-400">
             <WifiOff className="h-4 w-4" />
-            <span>Mode hors ligne - Vos progrès seront synchronisés plus tard</span>
+            <span>Hors ligne</span>
             {pendingMutations > 0 && (
-              <span className="ml-auto rounded-full bg-warning/20 px-2 py-0.5 text-xs font-medium">
+              <span className="ml-auto rounded-full bg-orange-500/20 px-2 py-0.5 text-xs font-medium">
                 {pendingMutations}
-                {' '}
-                en attente
               </span>
             )}
           </div>
         </div>
       )}
 
-      <main className="mx-auto max-w-lg py-6 px-4">
+      <main className="relative z-10 mx-auto max-w-lg pt-6 px-4">
         {(mode !== 'quiz' || hasStartedQuiz) && (
           <div className="mb-6 flex items-center justify-between">
             <SessionCounterBadge
               count={sessionStats.incorrect}
               type="incorrect"
-              backgroundColor={swipeAnimations.incorrectBadge.backgroundColor}
+              backgroundColor={swipeAnimations.incorrectBadge.backgroundColor as any}
               scale={swipeAnimations.incorrectBadge.scale}
               showPreview={swipeAnimations.incorrectBadge.showPreview}
               hideCount={swipeAnimations.incorrectBadge.hideCount}
@@ -685,7 +660,7 @@ function SessionPage() {
             <SessionCounterBadge
               count={sessionStats.correct}
               type="correct"
-              backgroundColor={swipeAnimations.correctBadge.backgroundColor}
+              backgroundColor={swipeAnimations.correctBadge.backgroundColor as any}
               scale={swipeAnimations.correctBadge.scale}
               showPreview={swipeAnimations.correctBadge.showPreview}
               hideCount={swipeAnimations.correctBadge.hideCount}
@@ -724,7 +699,6 @@ function SessionPage() {
         />
       )}
 
-      {/* Reward Animation for level-ups and achievements */}
       {currentReward && (
         <RewardAnimation
           reward={currentReward}

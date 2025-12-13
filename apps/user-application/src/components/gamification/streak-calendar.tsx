@@ -17,58 +17,41 @@ interface StreakCalendarProps {
   className?: string
 }
 
-/**
- * Get the day of week index (0 = Monday, 6 = Sunday)
- * JavaScript's getDay() returns 0 for Sunday, so we convert it
- */
 function getDayIndex(date: Date): number {
   const jsDay = date.getDay()
   return jsDay === 0 ? 6 : jsDay - 1
 }
 
-/**
- * Build a 2-week grid where:
- * - Top row = last week (Mon-Sun)
- * - Bottom row = current week (Mon-Sun)
- * Each cell is either a StreakDay or null (empty placeholder)
- */
 function buildWeekGrids(streakHistory: StreakDay[]): (StreakDay | null)[][] {
   const today = new Date()
   const todayDayIndex = getDayIndex(today)
 
-  // Calculate the start of current week (Monday)
   const currentWeekStart = new Date(today)
   currentWeekStart.setDate(today.getDate() - todayDayIndex)
   currentWeekStart.setHours(0, 0, 0, 0)
 
-  // Calculate the start of last week (Monday)
   const lastWeekStart = new Date(currentWeekStart)
   lastWeekStart.setDate(currentWeekStart.getDate() - 7)
 
-  // Initialize both weeks with nulls
   const lastWeek: (StreakDay | null)[] = Array.from({ length: 7 }, () => null)
   const currentWeek: (StreakDay | null)[] = Array.from({ length: 7 }, () => null)
 
-  // Place each streak day in the correct position
   for (const day of streakHistory) {
     const dayDate = new Date(day.date)
     dayDate.setHours(0, 0, 0, 0)
     const dayIndex = getDayIndex(dayDate)
 
-    // Check if day belongs to last week
     const lastWeekEnd = new Date(lastWeekStart)
     lastWeekEnd.setDate(lastWeekStart.getDate() + 6)
 
     if (dayDate >= lastWeekStart && dayDate <= lastWeekEnd) {
       lastWeek[dayIndex] = day
     }
-    // Check if day belongs to current week
     else if (dayDate >= currentWeekStart) {
       currentWeek[dayIndex] = day
     }
   }
 
-  // Return: top row = last week, bottom row = current week
   return [lastWeek, currentWeek]
 }
 
@@ -82,85 +65,114 @@ export function StreakCalendar({
   const weekGrids = buildWeekGrids(streakHistory)
 
   return (
-    <Card className={cn('overflow-hidden py-0', className)}>
+    <Card className={cn('overflow-hidden border-border bg-card backdrop-blur-xl', className)}>
       <CardContent className="p-6">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-gradient-streak flex h-12 w-12 items-center justify-center rounded-full shadow-lg">
-              <Flame className="h-6 w-6 text-white" />
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              {/* Fire Glow Base */}
+              <div className={`absolute inset-0 rounded-full blur-[20px] ${currentStreak > 0 ? 'bg-orange-600/50' : 'bg-transparent'}`} />
+
+              <div className={`
+                relative z-10
+                flex h-14 w-14 items-center justify-center rounded-2xl shadow-xl
+                transition-all duration-500
+                ${currentStreak > 0
+                  ? 'bg-linear-to-br from-orange-500 to-red-600 border border-orange-400/50'
+                  : 'bg-muted/50 border border-border'}
+                `}
+              >
+                <Flame className={cn(
+                  'h-7 w-7 transition-all duration-500',
+                  currentStreak > 0 ? 'text-white fill-white/20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]' : 'text-muted-foreground',
+                )}
+                />
+              </div>
+
+              {currentStreak > 0 && (
+                <div className="absolute -top-1 -right-1 z-20 flex h-5 w-5 items-center justify-center rounded-full bg-white border-2 border-orange-500 shadow-sm animate-bounce">
+                  <span className="text-[10px] role='img'">🔥</span>
+                </div>
+              )}
             </div>
+
             <div>
-              <h3 className="text-2xl font-bold text-foreground">{currentStreak}</h3>
-              <p className="text-sm text-muted-foreground">
-                {currentStreak > 0 ? 'jours de série' : 'Commencez une série'}
+              <div className="flex items-baseline gap-1">
+                <h3 className="text-3xl font-black text-foreground tracking-tight">{currentStreak}</h3>
+                <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Jours</span>
+              </div>
+              <p className="text-xs font-medium text-muted-foreground">
+                {currentStreak > 0 ? 'Série active !' : 'Série inactive'}
               </p>
             </div>
           </div>
 
-          <Badge variant="secondary" className="gap-1.5">
-            <Trophy className="h-3.5 w-3.5" />
-            Record:
-            {' '}
-            {longestStreak}
-            j
-          </Badge>
+          <div className="flex flex-col items-end">
+            <Badge variant="outline" className="gap-1.5 border-yellow-500/20 bg-yellow-500/5 text-yellow-500 px-3 py-1 mb-1">
+              <Trophy className="h-3 w-3" />
+              <span className="font-bold">
+                Record:
+                {longestStreak}
+              </span>
+            </Badge>
+            <span className="text-[10px] text-muted-foreground font-medium">Continuez comme ça !</span>
+          </div>
         </div>
 
         {/* Calendar Grid */}
-        <div className="space-y-3">
-          {/* Week day labels */}
-          <div className="grid grid-cols-7 gap-2">
+        <div className="space-y-4">
+          <div className="grid grid-cols-7 gap-3">
             {weekDays.map(day => (
               <div
                 key={`weekday-${generateUUID()}`}
-                className="text-center text-xs font-medium text-muted-foreground"
+                className="text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
               >
                 {day}
               </div>
             ))}
           </div>
 
-          {/* Week rows: top = last week, bottom = current week */}
           {weekGrids.map(week => (
-            <div key={`week-${generateUUID()}`} className="grid grid-cols-7 gap-2">
+            <div key={`week-${generateUUID()}`} className="grid grid-cols-7 gap-3">
               {week.map((day) => {
-                const isToday = day?.date.toDateString() === new Date().toDateString()
+                const dayDate = day ? new Date(day.date) : null
+                const isToday = dayDate?.toDateString() === new Date().toDateString()
                 const isCompleted = day?.completed ?? false
+
+                // Determine if this logic day is in the future for current week (simple approximation)
+                // In a real app we'd compare dates properly, here assuming filled array structure
 
                 return (
                   <div
-                    key={`day-${generateUUID()}-${generateUUID()}`}
+                    key={`day-${generateUUID()}`}
                     className={cn(
-                      'flex aspect-square items-center justify-center rounded-lg transition-all',
+                      'relative flex aspect-square items-center justify-center rounded-xl transition-all duration-300 group',
                       isCompleted
-                        ? 'bg-gradient-streak shadow-md'
-                        : 'bg-muted',
-                      isToday && 'ring-2 ring-primary ring-offset-2',
+                        ? 'bg-linear-to-br from-orange-400 to-red-600 shadow-[0_4px_12px_rgba(234,88,12,0.3)] scale-100'
+                        : 'bg-muted border border-border shadow-inner',
+                      isToday && !isCompleted && 'ring-2 ring-orange-500/50 ring-offset-2 ring-offset-black animate-pulse',
+                      !isCompleted && !isToday && 'opacity-80',
                     )}
                   >
                     {isCompleted
                       ? (
-                          <Flame className="h-4 w-4 text-white" />
-                        )
+                        <Flame className="h-4 w-4 text-white fill-white/20 drop-shadow-md" />
+                      )
                       : (
-                          <div className="h-2 w-2 rounded-full bg-muted-foreground/20" />
-                        )}
+                        isToday
+                          ? (
+                            <div className="h-2 w-2 rounded-full bg-orange-500/50" />
+                          )
+                          : (
+                            <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50 group-hover:bg-muted-foreground transition-colors" />
+                          )
+                      )}
                   </div>
                 )
               })}
             </div>
           ))}
-        </div>
-
-        {/* Motivation Message */}
-        <div className="mt-4 rounded-lg bg-muted/50 p-3">
-          <p className="text-center text-xs text-muted-foreground">
-            {currentStreak === 0 && 'Étudiez aujourd\'hui pour commencer une série ! 🎯'}
-            {currentStreak > 0 && currentStreak < 7 && 'Continuez comme ça ! Vous êtes sur la bonne voie 🚀'}
-            {currentStreak >= 7 && currentStreak < 30 && 'Incroyable ! Vous êtes en feu ! 🔥'}
-            {currentStreak >= 30 && 'Vous êtes une légende ! 🏆'}
-          </p>
         </div>
       </CardContent>
     </Card>

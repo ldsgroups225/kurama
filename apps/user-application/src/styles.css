@@ -3,7 +3,7 @@
 @import 'tw-animate-css';
 
 :root {
-  --background: oklch(1 0 0);
+  --background: oklch(0.985 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.141 0.005 285.823);
@@ -256,7 +256,6 @@
 }
 
 @layer base {
-
   /* NATIVE APP GLOBAL RESET */
   :root {
     /* App-like sizing */
@@ -342,7 +341,6 @@
 }
 
 @layer utilities {
-
   /* XP System Gradients */
   .bg-gradient-xp {
     background: linear-gradient(to bottom right, var(--xp-from), var(--xp-to));
@@ -623,6 +621,27 @@
 
   .bg-subject-accounting {
     background-color: oklch(0.95 0.02 195);
+  }
+
+  /* Glow Shadow Utilities */
+  .shadow-glow-orange {
+    box-shadow: 0 0 15px rgba(249, 115, 22, 0.15);
+  }
+
+  .shadow-glow-yellow {
+    box-shadow: 0 0 15px rgba(250, 204, 21, 0.15);
+  }
+
+  .shadow-glow-blue {
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+  }
+
+  .shadow-glow-indigo {
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+  }
+
+  .shadow-glow-warning {
+    box-shadow: 0 0 40px -5px rgba(249, 115, 22, 0.4);
   }
 }
 

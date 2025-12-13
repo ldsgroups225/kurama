@@ -207,8 +207,7 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
     return (
       <div className={`
         flex min-h-screen items-center justify-center bg-linear-to-br
-        from-orange-50 via-white to-orange-50
-        dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950
+        from-background via-muted to-background
       `}
       >
         <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
@@ -224,29 +223,22 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
   }
 
   return (
-    <div className={`
-      flex min-h-screen items-center justify-center bg-linear-to-br
-      from-orange-50 via-white to-orange-50 p-4
-      dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950
-    `}
-    >
-      <div className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4 relative overflow-hidden">
+      {/* Ambient Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] rounded-full bg-indigo-600/10 blur-[120px]" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] rounded-full bg-purple-600/10 blur-[120px]" />
+      </div>
+
+      <div className="w-full max-w-md relative z-10 animate-in fade-in slide-in-from-bottom-5 duration-700">
         <div className="mb-8 text-center">
-          <div className={`
-            mb-4 inline-flex size-12 items-center justify-center rounded-xl
-            bg-linear-to-br from-orange-500 to-orange-600 shadow-lg
-          `}
-          >
-            <span className="text-xl font-bold text-white">K</span>
+          <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 shadow-xl shadow-indigo-500/20">
+            <span className="text-3xl font-black text-white tracking-tighter">K</span>
           </div>
         </div>
 
-        <Card className={`
-          border border-zinc-200 bg-white shadow-xl
-          dark:border-zinc-800 dark:bg-zinc-900
-        `}
-        >
-          <CardHeader>
+        <Card className="border-border bg-card backdrop-blur-xl shadow-2xl">
+          <CardHeader className="pb-2">
             <div className="mb-2 flex items-center gap-4">
               <Button
                 variant="ghost"
@@ -254,34 +246,27 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                 onClick={handlePrevious}
                 disabled={submitMutation.isPending}
                 aria-label="Retour"
+                className="hover:bg-accent text-muted-foreground hover:text-foreground"
               >
-                <ArrowLeft className="size-5" />
+                <ArrowLeft className="h-5 w-5" />
               </Button>
-              <CardTitle className={`
-                text-zinc-900
-                dark:text-zinc-50
-              `}
-              >
+              <CardTitle className="text-xl font-bold text-foreground">
                 Profil Étudiant
               </CardTitle>
             </div>
-            <p className={`
-              text-center text-sm text-zinc-600
-              dark:text-zinc-400
-            `}
-            >
+            <p className="text-center text-sm font-medium text-muted-foreground">
               {stepDescriptions[currentStep]}
             </p>
           </CardHeader>
 
-          <CardContent>
+          <CardContent className="pt-6">
             <ProgressIndicator steps={STEPS} currentStep={currentStepIndex} />
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {currentStep === 'personal' && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">Prénom</Label>
+                    <Label htmlFor="firstName" className="text-muted-foreground">Prénom</Label>
                     <Input
                       id="firstName"
                       type="text"
@@ -289,14 +274,15 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                       value={formData.firstName}
                       onChange={e => updateFormData({ firstName: e.target.value })}
                       disabled={submitMutation.isPending}
+                      className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                     />
                     {errors.firstName && (
-                      <p className="text-sm text-destructive">{errors.firstName}</p>
+                      <p className="text-sm text-red-400 font-medium">{errors.firstName}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Nom</Label>
+                    <Label htmlFor="lastName" className="text-muted-foreground">Nom</Label>
                     <Input
                       id="lastName"
                       type="text"
@@ -304,19 +290,22 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                       value={formData.lastName}
                       onChange={e => updateFormData({ lastName: e.target.value })}
                       disabled={submitMutation.isPending}
+                      className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                     />
                     {errors.lastName && (
-                      <p className="text-sm text-destructive">{errors.lastName}</p>
+                      <p className="text-sm text-red-400 font-medium">{errors.lastName}</p>
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="age">
-                      Âge:
-                      {formData.age}
-                      {' '}
-                      ans
-                    </Label>
+                  <div className="space-y-4 pt-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="age" className="text-muted-foreground">Âge</Label>
+                      <span className="text-lg font-bold text-foreground">
+                        {formData.age}
+                        {' '}
+                        ans
+                      </span>
+                    </div>
                     <Slider
                       id="age"
                       value={[formData.age || 14]}
@@ -325,14 +314,15 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                       max={25}
                       step={1}
                       disabled={submitMutation.isPending}
+                      className="py-4"
                     />
                     {errors.age && (
-                      <p className="text-sm text-destructive">{errors.age}</p>
+                      <p className="text-sm text-red-400 font-medium">{errors.age}</p>
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="gender">Vous êtes</Label>
+                  <div className="space-y-3 pt-2">
+                    <Label htmlFor="gender" className="text-muted-foreground">Vous êtes</Label>
                     <ToggleGroup
                       type="single"
                       value={formData.gender || ''}
@@ -345,20 +335,30 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                         }
                       }}
                       disabled={submitMutation.isPending}
-                      className="justify-start"
+                      className="justify-stretch gap-4"
                     >
-                      <ToggleGroupItem value="male">Garçon</ToggleGroupItem>
-                      <ToggleGroupItem value="female">Fille</ToggleGroupItem>
+                      <ToggleGroupItem
+                        value="male"
+                        className="flex-1 border-input bg-background/50 text-muted-foreground hover:bg-accent hover:text-foreground data-[state=on]:bg-indigo-600 data-[state=on]:text-white transition-all duration-300"
+                      >
+                        Garçon
+                      </ToggleGroupItem>
+                      <ToggleGroupItem
+                        value="female"
+                        className="flex-1 border-input bg-background/50 text-muted-foreground hover:bg-accent hover:text-foreground data-[state=on]:bg-purple-600 data-[state=on]:text-white transition-all duration-300"
+                      >
+                        Fille
+                      </ToggleGroupItem>
                     </ToggleGroup>
                     {errors.gender && (
-                      <p className="text-sm text-destructive">{errors.gender}</p>
+                      <p className="text-sm text-red-400 font-medium">{errors.gender}</p>
                     )}
                   </div>
 
                   <Button
                     type="button"
                     onClick={handleNext}
-                    className="mt-6 w-full"
+                    className="mt-6 w-full bg-linear-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/20"
                     size="lg"
                   >
                     Suivant
@@ -370,7 +370,7 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
               {currentStep === 'contact' && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Téléphone</Label>
+                    <Label htmlFor="phone" className="text-muted-foreground">Téléphone</Label>
                     <Input
                       id="phone"
                       type="tel"
@@ -378,14 +378,15 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                       value={formData.phone}
                       onChange={e => updateFormData({ phone: e.target.value })}
                       disabled={submitMutation.isPending}
+                      className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                     />
                     {errors.phone && (
-                      <p className="text-sm text-destructive">{errors.phone}</p>
+                      <p className="text-sm text-red-400 font-medium">{errors.phone}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="city">Ville</Label>
+                    <Label htmlFor="city" className="text-muted-foreground">Ville</Label>
                     <Input
                       id="city"
                       type="text"
@@ -393,16 +394,17 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                       value={formData.city}
                       onChange={e => updateFormData({ city: e.target.value })}
                       disabled={submitMutation.isPending}
+                      className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                     />
                     {errors.city && (
-                      <p className="text-sm text-destructive">{errors.city}</p>
+                      <p className="text-sm text-red-400 font-medium">{errors.city}</p>
                     )}
                   </div>
 
                   <Button
                     type="button"
                     onClick={handleNext}
-                    className="mt-6 w-full"
+                    className="mt-6 w-full bg-linear-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/20"
                     size="lg"
                   >
                     Suivant
@@ -414,7 +416,7 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
               {currentStep === 'educational' && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="idNumber">Numéro matricule</Label>
+                    <Label htmlFor="idNumber" className="text-muted-foreground">Numéro matricule</Label>
                     <Input
                       id="idNumber"
                       type="text"
@@ -422,49 +424,50 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                       value={formData.idNumber}
                       onChange={e => updateFormData({ idNumber: e.target.value })}
                       disabled={submitMutation.isPending}
+                      className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                     />
                     {errors.idNumber && (
-                      <p className="text-sm text-destructive">{errors.idNumber}</p>
+                      <p className="text-sm text-red-400 font-medium">{errors.idNumber}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="grade">Niveau</Label>
+                    <Label htmlFor="grade" className="text-muted-foreground">Niveau</Label>
                     <Select
                       value={formData.gradeName}
                       onValueChange={value => updateFormData({ gradeName: value, seriesName: '' })}
                       disabled={submitMutation.isPending}
                     >
-                      <SelectTrigger id="grade" className="w-full">
+                      <SelectTrigger id="grade" className="w-full bg-background/50 border-input text-foreground hover:bg-accent focus:ring-indigo-500/20">
                         <SelectValue placeholder="Sélectionnez votre niveau" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-popover border-border text-popover-foreground">
                         {educationalData?.grades.map(grade => (
-                          <SelectItem key={grade.id} value={grade.name}>
+                          <SelectItem key={grade.id} value={grade.name} className="focus:bg-indigo-600 focus:text-white">
                             {grade.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     {errors.gradeName && (
-                      <p className="text-sm text-destructive">{errors.gradeName}</p>
+                      <p className="text-sm text-red-400 font-medium">{errors.gradeName}</p>
                     )}
                   </div>
 
                   {requiresSeries && (
                     <div className="space-y-2">
-                      <Label htmlFor="series">Série</Label>
+                      <Label htmlFor="series" className="text-muted-foreground">Série</Label>
                       <Select
                         value={formData.seriesName}
                         onValueChange={value => updateFormData({ seriesName: value })}
                         disabled={submitMutation.isPending}
                       >
-                        <SelectTrigger id="series" className="w-full">
+                        <SelectTrigger id="series" className="w-full bg-background/50 border-input text-foreground hover:bg-accent focus:ring-indigo-500/20">
                           <SelectValue placeholder="Sélectionnez votre série" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-popover border-border text-popover-foreground">
                           {educationalData?.levelSeries.filter(grd => grd.gradeId === selectedGrade.id).map(ls => (
-                            <SelectItem key={ls.seriesId} value={ls.series.name}>
+                            <SelectItem key={ls.seriesId} value={ls.series.name} className="focus:bg-indigo-600 focus:text-white">
                               {ls.series.name}
                               {' '}
                               -
@@ -474,7 +477,7 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                         </SelectContent>
                       </Select>
                       {errors.seriesName && (
-                        <p className="text-sm text-destructive">{errors.seriesName}</p>
+                        <p className="text-sm text-red-400 font-medium">{errors.seriesName}</p>
                       )}
                     </div>
                   )}
@@ -482,7 +485,7 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                   <Button
                     type="button"
                     onClick={handleNext}
-                    className="mt-6 w-full"
+                    className="mt-6 w-full bg-linear-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/20"
                     size="lg"
                   >
                     Suivant
@@ -494,19 +497,23 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
               {currentStep === 'preferences' && (
                 <>
                   <div className="space-y-2">
-                    <Label>Matières préférées (optionnel)</Label>
+                    <Label className="text-muted-foreground">Matières préférées (optionnel)</Label>
                     <div className="grid grid-cols-2 gap-2">
                       {SUBJECTS.map(subject => (
                         <Button
                           key={subject}
                           type="button"
-                          variant={
-                            formData.favoriteSubjects?.includes(subject) ? 'default' : 'outline'
-                          }
+                          variant="ghost"
                           size="sm"
                           onClick={() => toggleSubject(subject)}
                           disabled={submitMutation.isPending}
-                          className="justify-start"
+                          className={`
+                            justify-start border transition-all duration-200
+                            ${formData.favoriteSubjects?.includes(subject)
+                              ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400'
+                              : 'border-input bg-background/50 text-muted-foreground hover:bg-accent hover:text-foreground'
+                            }
+                          `}
                         >
                           {subject}
                         </Button>
@@ -515,30 +522,30 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="studyTime">Temps d'étude quotidien</Label>
+                    <Label htmlFor="studyTime" className="text-muted-foreground">Temps d'étude quotidien</Label>
                     <Select
                       value={formData.studyTime}
                       onValueChange={value => updateFormData({ studyTime: value })}
                       disabled={submitMutation.isPending}
                     >
-                      <SelectTrigger id="studyTime" className="w-full">
+                      <SelectTrigger id="studyTime" className="w-full bg-background/50 border-input text-foreground hover:bg-accent focus:ring-indigo-500/20">
                         <SelectValue placeholder="Combien de temps étudiez-vous par jour ?" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="less-1h">Moins d'1 heure</SelectItem>
-                        <SelectItem value="1-2h">1 à 2 heures</SelectItem>
-                        <SelectItem value="2-3h">2 à 3 heures</SelectItem>
-                        <SelectItem value="3-4h">3 à 4 heures</SelectItem>
-                        <SelectItem value="more-4h">Plus de 4 heures</SelectItem>
+                      <SelectContent className="bg-popover border-border text-popover-foreground">
+                        <SelectItem value="less-1h" className="focus:bg-indigo-600 focus:text-white">Moins d'1 heure</SelectItem>
+                        <SelectItem value="1-2h" className="focus:bg-indigo-600 focus:text-white">1 à 2 heures</SelectItem>
+                        <SelectItem value="2-3h" className="focus:bg-indigo-600 focus:text-white">2 à 3 heures</SelectItem>
+                        <SelectItem value="3-4h" className="focus:bg-indigo-600 focus:text-white">3 à 4 heures</SelectItem>
+                        <SelectItem value="more-4h" className="focus:bg-indigo-600 focus:text-white">Plus de 4 heures</SelectItem>
                       </SelectContent>
                     </Select>
                     {errors.studyTime && (
-                      <p className="text-sm text-destructive">{errors.studyTime}</p>
+                      <p className="text-sm text-red-400 font-medium">{errors.studyTime}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="learningGoals">Objectifs d'apprentissage (optionnel)</Label>
+                    <Label htmlFor="learningGoals" className="text-muted-foreground">Objectifs d'apprentissage (optionnel)</Label>
                     <Textarea
                       id="learningGoals"
                       placeholder="Décrivez vos objectifs académiques..."
@@ -546,34 +553,32 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                       onChange={e => updateFormData({ learningGoals: e.target.value })}
                       disabled={submitMutation.isPending}
                       rows={3}
+                      className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:ring-indigo-500/20 resize-none"
                     />
                   </div>
 
                   {errors.submit && (
-                    <div className={`
-                      rounded-lg bg-destructive/10 p-3 text-sm text-destructive
-                    `}
-                    >
+                    <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400 font-medium">
                       {errors.submit}
                     </div>
                   )}
 
                   <Button
                     type="submit"
-                    className="mt-6 w-full"
+                    className="mt-6 w-full bg-linear-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/20"
                     size="lg"
                     disabled={submitMutation.isPending}
                   >
                     {submitMutation.isPending
                       ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Enregistrement...
-                          </>
-                        )
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Enregistrement...
+                        </>
+                      )
                       : (
-                          'Terminer'
-                        )}
+                        'Terminer'
+                      )}
                   </Button>
                 </>
               )}

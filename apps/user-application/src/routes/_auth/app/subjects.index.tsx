@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { motion } from 'framer-motion'
 import {
   Atom,
   BookOpen,
@@ -13,36 +14,38 @@ import {
   Megaphone,
   Pi,
   Scale,
+  Sparkles,
   TrendingUp,
 } from 'lucide-react'
 import { useEffect } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
-import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { LogoLoader } from '@/components/ui/logo-loader'
 import { getSubjects } from '@/core/functions/learning'
 import { trackRouteLoad } from '@/lib/performance-monitor'
+import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/_auth/app/subjects/')({
   component: SubjectsPage,
 })
 
-// Subject config by abbreviation (matches database abbreviations)
-const subjectConfig: Record<string, { icon: LucideIcon, text: string, bg: string }> = {
-  MATH: { icon: Pi, text: 'text-subject-math', bg: 'bg-subject-math' },
-  FR: { icon: BookOpen, text: 'text-subject-french', bg: 'bg-subject-french' },
-  ANG: { icon: Languages, text: 'text-subject-english', bg: 'bg-subject-english' },
-  PC: { icon: Atom, text: 'text-subject-physics', bg: 'bg-subject-physics' },
-  SVT: { icon: Dna, text: 'text-subject-svt', bg: 'bg-subject-svt' },
-  HG: { icon: Map, text: 'text-subject-history', bg: 'bg-subject-history' },
-  PHILO: { icon: Brain, text: 'text-subject-philosophy', bg: 'bg-subject-philosophy' },
-  ECM: { icon: Scale, text: 'text-subject-ecm', bg: 'bg-subject-ecm' },
-  ESP: { icon: Megaphone, text: 'text-subject-spanish', bg: 'bg-subject-spanish' },
-  ALL: { icon: Megaphone, text: 'text-subject-german', bg: 'bg-subject-german' },
-  ECO: { icon: TrendingUp, text: 'text-subject-economics', bg: 'bg-subject-economics' },
-  COMPTA: { icon: Calculator, text: 'text-subject-accounting', bg: 'bg-subject-accounting' },
+// Subject config with premium gradients
+const subjectConfig: Record<string, { icon: LucideIcon, gradient: string }> = {
+  MATH: { icon: Pi, gradient: 'from-blue-500 to-cyan-500' },
+  FR: { icon: BookOpen, gradient: 'from-rose-500 to-pink-500' },
+  ANG: { icon: Languages, gradient: 'from-indigo-500 to-purple-500' },
+  PC: { icon: Atom, gradient: 'from-sky-500 to-blue-600' },
+  SVT: { icon: Dna, gradient: 'from-emerald-500 to-green-600' },
+  HG: { icon: Map, gradient: 'from-amber-500 to-yellow-600' },
+  PHILO: { icon: Brain, gradient: 'from-fuchsia-500 to-pink-600' },
+  ECM: { icon: Scale, gradient: 'from-teal-500 to-cyan-600' },
+  ESP: { icon: Megaphone, gradient: 'from-red-500 to-orange-500' },
+  ALL: { icon: Megaphone, gradient: 'from-yellow-400 to-orange-500' },
+  ECO: { icon: TrendingUp, gradient: 'from-blue-400 to-indigo-500' },
+  COMPTA: { icon: Calculator, gradient: 'from-slate-500 to-zinc-500' },
 }
 
-// Fallback patterns for name-based matching (handles "Histoire", "Histoire-Géo", "Histoire-Géographie")
+// Fallback patterns
 const namePatterns: Array<{ pattern: RegExp, abbr: string }> = [
   { pattern: /math/i, abbr: 'MATH' },
   { pattern: /fran[cç]ais/i, abbr: 'FR' },
@@ -58,18 +61,13 @@ const namePatterns: Array<{ pattern: RegExp, abbr: string }> = [
   { pattern: /compta/i, abbr: 'COMPTA' },
 ]
 
-const defaultConfig = { icon: BookOpen, text: 'text-primary', bg: 'bg-primary' }
+const defaultConfig = { icon: BookOpen, gradient: 'from-zinc-500 to-zinc-400' }
 
-interface SubjectConfigValue { icon: LucideIcon, text: string, bg: string }
-
-/** Get subject config by abbreviation or name pattern */
-function getSubjectConfig(abbreviation?: string | null, name?: string): SubjectConfigValue {
-  // Try abbreviation first
+function getSubjectConfig(abbreviation?: string | null, name?: string) {
   const byAbbr = abbreviation ? subjectConfig[abbreviation] : undefined
   if (byAbbr)
     return byAbbr
 
-  // Fallback to name pattern matching
   if (name) {
     const match = namePatterns.find(({ pattern }) => pattern.test(name))
     const byPattern = match ? subjectConfig[match.abbr] : undefined
@@ -80,7 +78,6 @@ function getSubjectConfig(abbreviation?: string | null, name?: string): SubjectC
 }
 
 function SubjectsPage() {
-  // Track route load performance
   useEffect(() => {
     const endTracking = trackRouteLoad('app-subjects')
     return endTracking
@@ -91,24 +88,55 @@ function SubjectsPage() {
     queryFn: () => getSubjects(),
   })
 
-  return (
-    <div className="min-h-screen bg-background pb-24">
-      <AppHeader title="Matières" showAvatar={false} />
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05,
+      },
+    },
+  }
 
-      <main className="mx-auto max-w-lg space-y-4 px-4 py-6">
-        {/* Motivational Header */}
-        <div className="py-4 text-center">
-          <h2 className="mb-2 text-2xl font-bold">Quelle matière aujourd'hui ? 🎯</h2>
-          <p className="text-muted-foreground">Choisis ta matière préférée et commence à apprendre !</p>
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  }
+
+  return (
+    <div className="min-h-screen bg-background pb-28">
+      {/* Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[30%] -right-[20%] w-[60%] h-[60%] rounded-full bg-blue-600/10 blur-[120px]" />
+        <div className="absolute bottom-[10%] -left-[20%] w-[60%] h-[60%] rounded-full bg-violet-600/10 blur-[120px]" />
+      </div>
+
+      <AppHeader title="Matières" showAvatar={false} className="bg-transparent/0 border-none" />
+
+      <main className="relative z-10 mx-auto max-w-lg space-y-4 px-5 pt-2">
+        {/* Header */}
+        <div className="py-4">
+          <Badge className="mb-3 bg-muted text-muted-foreground border-border hover:bg-muted/80 transition-colors">
+            <Sparkles className="w-3 h-3 mr-1.5 text-yellow-500" />
+            Parcours Scolaire
+          </Badge>
+          <h2 className="mb-2 text-2xl font-bold text-foreground">Quelle matière travailler ?</h2>
+          <p className="text-muted-foreground">Choisis un sujet et progresse à ton rythme.</p>
         </div>
 
         {isLoading && (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center py-20">
             <LogoLoader size="md" />
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 gap-4"
+        >
           {subjects?.map((subject) => {
             const config = getSubjectConfig(subject.abbreviation, subject.name)
             const Icon = config.icon
@@ -118,65 +146,47 @@ function SubjectsPage() {
                 key={subject.id}
                 to="/app/subjects/$subjectId"
                 params={{ subjectId: String(subject.id) }}
-                aria-label={`Matière: ${subject.name}`}
+                className="block outline-none"
               >
-                <Card className={`
-                  group cursor-pointer overflow-hidden border-2 transition-all
-                  duration-200
-                  hover:scale-[1.02] hover:border-primary/50 hover:shadow-lg
-                `}
+                <motion.div
+                  variants={itemVariants}
+                  className="group relative overflow-hidden rounded-3xl border border-border bg-card p-1 backdrop-blur-xl transition-all hover:bg-accent/50 hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <div className={`
-                    pointer-events-none absolute inset-0 bg-linear-to-br
-                    from-transparent to-primary/5 opacity-0 transition-opacity
-                    group-hover:opacity-100
-                  `}
-                  />
-                  <CardHeader className="relative">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={`
-                            flex h-16 w-16 items-center justify-center
-                            rounded-2xl
-                            ${config.bg}
-                            ${config.text}
-                            shadow-lg transition-transform duration-200
-                            group-hover:scale-110
-                          `}
-                        >
-                          <Icon className="h-8 w-8" />
-                        </div>
-                        <div className="flex-1">
-                          <CardTitle className={`
-                            mb-1 text-lg transition-colors
-                            group-hover:text-primary
-                          `}
-                          >
-                            {subject.name}
-                          </CardTitle>
-                          {subject.description && (
-                            <p className={`
-                              line-clamp-2 text-sm text-muted-foreground
-                            `}
-                            >
-                              {subject.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <ChevronRight className={`
-                        h-6 w-6 shrink-0 text-muted-foreground transition-all
-                        group-hover:translate-x-1 group-hover:text-primary
-                      `}
-                      />
+                  <div className="flex items-center p-4">
+                    {/* Icon Box */}
+                    <div className={cn(
+                      'relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl shadow-lg transition-transform duration-300 group-hover:scale-110',
+                      'bg-linear-to-br',
+                      config.gradient,
+                    )}
+                    >
+                      {/* Inner glare */}
+                      <div className="absolute inset-0 rounded-2xl bg-linear-to-br from-white/20 to-transparent opacity-50" />
+                      <Icon className="h-8 w-8 text-white relative z-10" />
                     </div>
-                  </CardHeader>
-                </Card>
+
+                    {/* Content */}
+                    <div className="ml-5 flex-1 min-w-0">
+                      <h3 className="text-lg font-bold text-foreground mb-1 truncate group-hover:text-primary transition-all">
+                        {subject.name}
+                      </h3>
+                      {subject.description && (
+                        <p className="line-clamp-1 text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                          {subject.description}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Arrow */}
+                    <div className="h-10 w-10 flex items-center justify-center rounded-full bg-muted group-hover:bg-accent transition-colors ml-2">
+                      <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                    </div>
+                  </div>
+                </motion.div>
               </Link>
             )
           })}
-        </div>
+        </motion.div>
       </main>
 
       <BottomNav />

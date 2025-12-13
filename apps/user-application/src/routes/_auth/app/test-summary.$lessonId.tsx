@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router'
-import { Check, Home, Lock, RefreshCw, Trophy, Unlock, X } from 'lucide-react'
+import { BarChart3, Home, Lock, RefreshCw, Trophy, Unlock } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { AppHeader } from '@/components/main'
@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
+import { generateUUID } from '@/utils/generateUUID'
 
 interface TestAnswer {
   question: string
@@ -20,7 +21,7 @@ interface SearchParams {
   correct?: number
   incorrect?: number
   total?: number
-  answers?: string // JSON stringified array of TestAnswer
+  answers?: string
   xpEarned?: number
   masteryCount?: number
   isLessonCompleted?: string
@@ -74,458 +75,249 @@ function TestSummaryPage() {
   const incorrectCount = incorrect ?? 0
   const actualXpEarned = xpEarned ?? (correct ?? 0) * 10
 
-  // Mastery result from search params (passed from session page via updateSessionStats)
   const masteryResult = masteryCountParam !== undefined
     ? {
-        masteryCount: masteryCountParam,
-        masteryRequired: 2,
-        isCompleted: isLessonCompletedParam === 'true',
-        nextLessonUnlocked: nextLessonUnlockedParam === 'true',
-        nextLessonTitle: nextLessonTitleParam ?? null,
-      }
+      masteryCount: masteryCountParam,
+      masteryRequired: 2,
+      isCompleted: isLessonCompletedParam === 'true',
+      nextLessonUnlocked: nextLessonUnlockedParam === 'true',
+      nextLessonTitle: nextLessonTitleParam ?? null,
+    }
     : null
 
-  // Determine performance message
-  let performanceMessage = ''
-  let performanceEmoji = '💡'
+  const isSuccess = score >= 70
 
-  if (score >= 90) {
-    performanceMessage = ''
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 },
+    },
   }
-  else if (score >= 70) {
-    performanceMessage = ''
-  }
-  else if (score < 50) {
-    performanceMessage = `Exercez-vous avec le mode Apprendre sur les termes qui vous posent problème, jusqu'à ce que vous les maîtrisiez.`
-    performanceEmoji = '📚'
-  }
-  else {
-    performanceMessage = `Exercez-vous avec le mode Apprendre sur les termes qui vous posent problème, jusqu'à ce que vous les maîtrisiez.`
-    performanceEmoji = '💪'
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0 },
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader title={`${total}/${total}`} showAvatar={false} />
+    <div className="min-h-screen bg-background text-foreground overflow-hidden pb-24">
+      {/* Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none">
+        {isSuccess
+          ? (
+            <div className="absolute top-[20%] right-[50%] translate-x-1/2 w-[80%] h-[40%] rounded-full opacity-30 blur-[130px] bg-linear-to-r from-emerald-600 to-cyan-600" />
+          )
+          : (
+            <div className="absolute top-[20%] right-[50%] translate-x-1/2 w-[80%] h-[40%] rounded-full opacity-30 blur-[130px] bg-linear-to-r from-orange-600 to-red-600" />
+          )}
+      </div>
 
-      <main className="mx-auto max-w-2xl space-y-6 px-6 py-8 pb-24">
-        {/* Performance Header */}
+      <AppHeader title="Résultats du Test" showAvatar={false} className="bg-transparent/0 border-none relative z-20" />
+
+      <main className="relative z-10 mx-auto max-w-lg px-6 pt-4">
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', duration: 0.6 }}
-          className="space-y-4 text-center"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-6"
         >
-          <div className="flex justify-center">
-            <motion.div
-              initial={{ rotate: 0 }}
-              animate={{ rotate: 360 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative"
-            >
-              <div className="text-8xl">
-                {score >= 70 ? '🎉' : performanceEmoji}
-              </div>
-            </motion.div>
-          </div>
-
-          <div className="space-y-2">
-            <h2 className="text-3xl font-bold">
-              {score >= 70 ? 'Vous êtes en train d\'apprendre !' : 'Vous êtes en train d\'apprendre !'}
+          {/* Header Result */}
+          <motion.div variants={itemVariants} className="text-center space-y-2 py-6">
+            <div className="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full bg-muted border border-border backdrop-blur-md shadow-2xl">
+              <span className="text-4xl">
+                {isSuccess ? '🎉' : '💪'}
+              </span>
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground">
+              {isSuccess ? 'Excellent Travail !' : 'On continue les efforts !'}
             </h2>
-            {performanceMessage && (
-              <p className="mx-auto max-w-md text-base text-muted-foreground">
-                {performanceMessage}
-              </p>
-            )}
-          </div>
-        </motion.div>
+            <p className="text-muted-foreground">
+              {isSuccess
+                ? 'Vous maîtrisez ce sujet avec brio.'
+                : 'Ne lâchez rien, la maîtrise vient avec la pratique.'}
+            </p>
+          </motion.div>
 
-        {/* Results Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card className="border-2">
-            <CardContent className="p-6">
-              <h3 className="mb-4 text-lg font-semibold">Vos résultats</h3>
-
-              {/* Score Circle */}
-              <div className="mb-6 flex items-center gap-6">
-                <div className="relative h-32 w-32">
-                  <svg className="h-full w-full -rotate-90 transform">
-                    {/* Background circle */}
-                    <circle
-                      cx="64"
-                      cy="64"
-                      r="56"
-                      stroke="currentColor"
-                      strokeWidth="12"
-                      fill="none"
-                      className="text-border"
-                    />
-                    {/* Correct answers arc */}
-                    <circle
-                      cx="64"
-                      cy="64"
-                      r="56"
-                      stroke="currentColor"
-                      strokeWidth="12"
-                      fill="none"
-                      strokeDasharray={`${((correct ?? 0) / (total ?? 1)) * 351.86} 351.86`}
-                      className="text-success transition-all duration-1000"
-                      strokeLinecap="round"
-                    />
-                    {/* Incorrect answers arc */}
-                    <circle
-                      cx="64"
-                      cy="64"
-                      r="56"
-                      stroke="currentColor"
-                      strokeWidth="12"
-                      fill="none"
-                      strokeDasharray={`${((incorrect ?? 0) / (total ?? 1)) * 351.86} 351.86`}
-                      strokeDashoffset={`-${((correct ?? 0) / (total ?? 1)) * 351.86}`}
-                      className="text-error transition-all duration-1000"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-3xl font-bold">
-                      {score}
-                      %
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex-1 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/10">
-                      <Check className="h-5 w-5 text-success" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm text-muted-foreground">Correct</div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold">{correct}</span>
-                        <span className="rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
-                          {correct}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-error/10">
-                      <X className="h-5 w-5 text-error" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm text-muted-foreground">Incorrect</div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold text-error">{incorrect}</span>
-                        <span className="rounded-full bg-error/10 px-2 py-0.5 text-xs font-medium text-error">
-                          {incorrectCount}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* XP Earned Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.22, type: 'spring' }}
-        >
-          <Card className="overflow-hidden border-2 border-xp bg-gradient-xp-horizontal shadow-xl">
-            <CardContent className="px-6 py-6 text-center">
-              <motion.div
-                initial={{ scale: 1 }}
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="mb-1 text-4xl font-bold text-white"
+          {/* Mastery Progress Card (Highlighted) */}
+          {masteryResult && (
+            <motion.div variants={itemVariants}>
+              <Card className={cn(
+                'relative overflow-hidden border-0 bg-card backdrop-blur-xl',
+                masteryResult.isCompleted ? 'ring-1 ring-emerald-500/50' : 'ring-1 ring-border',
+              )}
               >
-                +
-                {actualXpEarned}
-                {' '}
-                XP
-              </motion.div>
-              <div className="text-sm text-white/90">Points d'expérience gagnés 🎉</div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Mastery Progress Card */}
-        {masteryResult && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-          >
-            <Card className={`border-2 ${masteryResult.isCompleted
-              ? 'border-success/50 bg-success/5'
-              : masteryResult.masteryCount > 0
-                ? 'border-primary/50 bg-primary/5'
-                : 'border-border'
-            }`}
-            >
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  {/* Mastery Header */}
-                  <div className="flex items-center gap-3">
-                    {masteryResult.isCompleted
-                      ? (
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/20">
-                            <Trophy className="h-6 w-6 text-success" />
-                          </div>
-                        )
-                      : (
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
-                            <Lock className="h-6 w-6 text-primary" />
-                          </div>
-                        )}
+                {masteryResult.isCompleted && (
+                  <div className="absolute inset-0 bg-emerald-500/5" />
+                )}
+                <CardContent className="p-6 relative">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className={cn(
+                      'h-12 w-12 rounded-xl flex items-center justify-center',
+                      masteryResult.isCompleted ? 'bg-emerald-500/20 text-emerald-500' : 'bg-muted text-muted-foreground',
+                    )}
+                    >
+                      {masteryResult.isCompleted ? <Trophy className="h-6 w-6" /> : <Lock className="h-6 w-6" />}
+                    </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold">
-                        {masteryResult.isCompleted ? 'Leçon maîtrisée !' : 'Progression de maîtrise'}
+                      <h3 className="font-bold text-foreground text-lg">
+                        {masteryResult.isCompleted ? 'Leçon Maîtrisée' : 'Progression'}
                       </h3>
                       <p className="text-sm text-muted-foreground">
                         {masteryResult.masteryCount}
+                        {' '}
                         /
                         {masteryResult.masteryRequired}
                         {' '}
-                        tests réussis
+                        succès requis
                       </p>
                     </div>
                   </div>
 
-                  {/* Progress Bar */}
-                  <div className="relative h-3 w-full overflow-hidden rounded-full bg-border">
+                  <div className="h-3 w-full bg-muted rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(masteryResult.masteryCount / masteryResult.masteryRequired) * 100}%` }}
-                      transition={{ duration: 0.8, delay: 0.3 }}
-                      className={`h-full ${masteryResult.isCompleted ? 'bg-success' : 'bg-primary'
-                      }`}
+                      className={cn('h-full', masteryResult.isCompleted ? 'bg-emerald-500' : 'bg-indigo-500')}
                     />
                   </div>
 
-                  {/* Feedback Message */}
-                  {score >= 80 && !masteryResult.isCompleted && (
-                    <div className="rounded-lg bg-primary/10 p-3 text-sm">
-                      <p className="font-medium text-primary">
-                        🎯 Excellent ! Plus que
-                        {' '}
-                        {masteryResult.masteryRequired - masteryResult.masteryCount}
-                        {' '}
-                        test(s) réussi(s) pour débloquer la prochaine leçon !
-                      </p>
+                  {masteryResult.nextLessonUnlocked && (
+                    <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-2 text-emerald-400">
+                      <Unlock className="h-4 w-4" />
+                      <span className="text-sm font-bold">Prochaine leçon débloquée !</span>
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
-                  {masteryResult.nextLessonUnlocked && masteryResult.nextLessonTitle && (
-                    <motion.div
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: 0.5 }}
-                      className="rounded-lg bg-success/10 p-4 text-center"
-                    >
-                      <Unlock className="mx-auto mb-2 h-8 w-8 text-success" />
-                      <p className="font-semibold text-success">
-                        🎉 Nouvelle leçon débloquée !
-                      </p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {masteryResult.nextLessonTitle}
-                      </p>
-                    </motion.div>
-                  )}
-
-                  {masteryResult.isCompleted && (
-                    <div className="rounded-lg bg-success/10 p-3 text-center text-sm font-medium text-success">
-                      ✅ Vous avez maîtrisé cette leçon !
-                    </div>
-                  )}
+          {/* Score Detail Card */}
+          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3">
+            <Card className="bg-card border-border backdrop-blur-md">
+              <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                <div className="mb-2 text-sm text-muted-foreground">Score</div>
+                <div className={cn('text-3xl font-bold', isSuccess ? 'text-emerald-500' : 'text-orange-500')}>
+                  {score}
+                  %
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border backdrop-blur-md">
+              <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                <div className="mb-2 text-sm text-muted-foreground">XP Gagnés</div>
+                <div className="text-3xl font-bold text-yellow-500">
+                  +
+                  {actualXpEarned}
                 </div>
               </CardContent>
             </Card>
           </motion.div>
-        )}
 
-        {/* Next Steps */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="space-y-3"
-        >
-          <h3 className="text-lg font-semibold">Prochaines étapes</h3>
+          {/* Answers Toggle */}
+          <motion.div variants={itemVariants}>
+            <button
+              type="button"
+              onClick={() => setShowAnswers(!showAnswers)}
+              className="flex w-full items-center justify-between rounded-xl bg-muted px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-muted/80 transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Détail des réponses
+                <span className="ml-2 rounded-full bg-background px-2 text-xs text-muted-foreground">{answers.length}</span>
+              </span>
+              <span className="text-xs text-indigo-500">
+                {showAnswers ? 'Masquer' : 'Voir tout'}
+              </span>
+            </button>
 
-          {incorrectCount > 0 && (
-            <Button
-              size="lg"
-              className="w-full justify-start gap-3 bg-gradient-xp text-lg font-semibold"
-              onClick={() =>
-                navigate({
+            {showAnswers && (
+              <div className="mt-4 space-y-3">
+                {answers.map((answer, i) => (
+                  <motion.div
+                    key={generateUUID()}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                  >
+                    <Card className="border-0 bg-card backdrop-blur-sm overflow-hidden">
+                      <div className={cn(
+                        'h-1 w-full',
+                        answer.isCorrect ? 'bg-emerald-500' : 'bg-red-500',
+                      )}
+                      />
+                      <CardContent className="p-4">
+                        <p className="text-sm font-medium text-foreground mb-3">{answer.question}</p>
+                        <div className="space-y-2 text-xs">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Votre réponse</span>
+                            <span className={cn(
+                              'font-bold',
+                              answer.isCorrect ? 'text-emerald-400' : 'text-red-400',
+                            )}
+                            >
+                              {answer.userAnswer}
+                            </span>
+                          </div>
+                          {!answer.isCorrect && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Correct</span>
+                              <span className="font-bold text-emerald-500">{answer.correctAnswer}</span>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+
+          {/* Actions */}
+          <motion.div variants={itemVariants} className="space-y-3 pt-2">
+            {incorrectCount > 0 && (
+              <Button
+                size="lg"
+                className="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold"
+                onClick={() => navigate({
                   to: '/app/lesson-session/$lessonId',
                   params: { lessonId },
                   search: { mode: 'quiz' },
                 })}
-            >
-              <RefreshCw className="h-5 w-5" />
-              <div className="flex-1 text-left">
-                <div>
-                  Révisez les
-                  {' '}
-                  {incorrectCount}
-                  {' '}
-                  termes manqués
-                </div>
-              </div>
-            </Button>
-          )}
-
-          <Button
-            size="lg"
-            variant="outline"
-            className="w-full justify-start gap-3 border-2"
-            onClick={() =>
-              navigate({
-                to: '/app/lesson-session/$lessonId',
-                params: { lessonId },
-                search: { mode: 'exam' },
-              })}
-          >
-            <Lock className="h-5 w-5" />
-            <div className="flex-1 text-left">Effectuer un nouveau test</div>
-          </Button>
-        </motion.div>
-
-        {/* Answers Review */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="space-y-3"
-        >
-          <button
-            type="button"
-            onClick={() => setShowAnswers(!showAnswers)}
-            className="w-full text-left"
-          >
-            <h3 className="text-lg font-semibold">
-              Vos réponses
-              {' '}
-              <span className="text-sm font-normal text-muted-foreground">
-                (
-                {showAnswers ? 'Masquer' : 'Afficher'}
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Revoir les erreurs (
+                {incorrectCount}
                 )
-              </span>
-            </h3>
-          </button>
+              </Button>
+            )}
 
-          {showAnswers && (
-            <div className="space-y-3">
-              {answers.map(answer => (
-                <motion.div
-                  key={`${answer.question}-${answer.userAnswer}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: answers.indexOf(answer) * 0.05 }}
-                >
-                  <Card
-                    className={cn(
-                      'border-2',
-                      answer.isCorrect ? 'border-success/20' : 'border-error/20',
-                    )}
-                  >
-                    <CardContent className="p-4">
-                      <div className="mb-3 font-medium">{answer.question}</div>
-
-                      <div className="space-y-2">
-                        {/* User's answer */}
-                        <div className="flex items-start gap-2">
-                          {answer.isCorrect
-                            ? (
-                                <Check className="mt-0.5 h-5 w-5 shrink-0 text-success" />
-                              )
-                            : (
-                                <X className="mt-0.5 h-5 w-5 shrink-0 text-error" />
-                              )}
-                          <div className="flex-1">
-                            <div className="text-sm text-muted-foreground">Votre réponse</div>
-                            <div
-                              className={cn(
-                                'font-medium',
-                                answer.isCorrect ? 'text-success' : 'text-error',
-                              )}
-                            >
-                              {answer.userAnswer}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Correct answer (if wrong) */}
-                        {!answer.isCorrect && (
-                          <div className="flex items-start gap-2">
-                            <Check className="mt-0.5 h-5 w-5 shrink-0 text-success" />
-                            <div className="flex-1">
-                              <div className="text-sm text-muted-foreground">Réponse correcte</div>
-                              <div className="font-medium text-success">{answer.correctAnswer}</div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Correct badge */}
-                      <div
-                        className={cn(
-                          'mt-3 w-full rounded-lg py-2 text-center text-sm font-semibold',
-                          answer.isCorrect
-                            ? 'bg-success text-white'
-                            : 'bg-error text-white',
-                        )}
-                      >
-                        {answer.isCorrect
-                          ? (
-                              <div className="flex items-center justify-center gap-2">
-                                <Check className="h-4 w-4" />
-                                Correct
-                              </div>
-                            )
-                          : (
-                              <div className="flex items-center justify-center gap-2">
-                                <X className="h-4 w-4" />
-                                Incorrect
-                              </div>
-                            )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+            <div className="flex gap-3">
+              <Button
+                size="lg"
+                variant="ghost"
+                className="flex-1 border border-border bg-card hover:bg-accent text-foreground"
+                onClick={() => navigate({ to: '/app' })}
+              >
+                <Home className="mr-2 h-4 w-4" />
+                Accueil
+              </Button>
+              <Button
+                size="lg"
+                className="flex-1 bg-white text-black hover:bg-zinc-200 font-bold"
+                onClick={() => navigate({
+                  to: '/app/lesson-session/$lessonId',
+                  params: { lessonId },
+                  search: { mode: 'exam' },
+                })}
+              >
+                <Lock className="mr-2 h-4 w-4" />
+                Nouveau Test
+              </Button>
             </div>
-          )}
-        </motion.div>
-
-        {/* Action Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="space-y-3 pt-4"
-        >
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full border-2"
-            onClick={() => navigate({ to: '/app' })}
-          >
-            <Home className="mr-2 h-5 w-5" />
-            Retour à l'accueil
-          </Button>
+          </motion.div>
         </motion.div>
       </main>
     </div>

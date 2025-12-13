@@ -163,6 +163,7 @@ export const getDashboardStats = createServerFn()
       totalXP,
       currentStreak,
       longestStreak,
+      streakHistory: uniqueDates,
       lessonsCompleted,
       recentSessions: recentSessions.map(session => ({
         id: session.id,

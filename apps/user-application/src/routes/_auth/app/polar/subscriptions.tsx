@@ -90,7 +90,7 @@ function RouteComponent() {
   const isPremium = tier !== 'free'
 
   return (
-    <div className="relative min-h-screen bg-black pb-12 text-white">
+    <div className="relative min-h-screen bg-background pb-12 text-foreground">
       {/* Aurora Background */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div className="absolute -left-[20%] -top-[10%] h-[70vw] w-[70vw] rounded-full bg-orange-600/10 blur-[120px]" />
@@ -105,7 +105,7 @@ function RouteComponent() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8 flex items-center justify-between"
         >
-          <Button variant="ghost" size="sm" className="h-9 gap-2 rounded-full border border-white/5 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white" asChild>
+          <Button variant="ghost" size="sm" className="h-9 gap-2 rounded-full border border-border bg-card/50 text-muted-foreground hover:bg-accent hover:text-foreground" asChild>
             <Link to="/app/profile">
               <ArrowLeft className="h-4 w-4" />
               Retour
@@ -128,7 +128,7 @@ function RouteComponent() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
         >
           <motion.div
-            className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-linear-to-br from-amber-400 via-orange-500 to-red-600 shadow-[0_0_40px_-5px_rgba(249,115,22,0.4)]"
+            className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-linear-to-br from-amber-400 via-orange-500 to-red-600 shadow-glow-warning"
             initial={{ rotate: -10 }}
             animate={{ rotate: 0 }}
             transition={{ type: 'spring', bounce: 0.5, duration: 1.5 }}
@@ -139,7 +139,7 @@ function RouteComponent() {
           <h1 className="mb-3 text-4xl font-black tracking-tight">
             {isPremium
               ? (
-                <span className="bg-linear-to-br from-white to-zinc-400 bg-clip-text text-transparent">
+                <span className="bg-linear-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
                   L'élite de Kurama
                 </span>
               )
@@ -153,7 +153,7 @@ function RouteComponent() {
                 </span>
               )}
           </h1>
-          <p className="mx-auto max-w-[280px] text-lg font-medium text-zinc-400">
+          <p className="mx-auto max-w-[280px] text-lg font-medium text-muted-foreground">
             {isPremium
               ? 'Profite de ton apprentissage sans limites.'
               : 'Débloque tout le potentiel et apprends 3x plus vite.'}
@@ -165,7 +165,7 @@ function RouteComponent() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-10 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl"
+            className="mb-10 rounded-3xl border border-border bg-card/50 p-6 backdrop-blur-xl"
           >
             <SubscriptionStatus showManageButton />
           </motion.div>
@@ -180,15 +180,15 @@ function RouteComponent() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: feature.delay }}
-                className="group relative overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/40 p-1 backdrop-blur-md transition-colors hover:bg-zinc-900/60"
+                className="group relative overflow-hidden rounded-2xl border border-border bg-card p-1 backdrop-blur-md transition-colors hover:bg-accent/40"
               >
                 <div className="flex items-center gap-4 p-3">
                   <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br ${feature.gradient} shadow-lg`}>
                     <feature.icon className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white group-hover:text-amber-400 transition-colors">{feature.title}</h3>
-                    <p className="text-sm font-medium text-zinc-500 leading-snug">{feature.description}</p>
+                    <h3 className="font-bold text-foreground group-hover:text-amber-400 transition-colors">{feature.title}</h3>
+                    <p className="text-sm font-medium text-muted-foreground leading-snug">{feature.description}</p>
                   </div>
                 </div>
               </motion.div>
@@ -218,7 +218,7 @@ function RouteComponent() {
             isCheckoutPending={isCheckoutPending}
           />
 
-          <p className="mt-8 text-center text-xs text-zinc-600">
+          <p className="mt-8 text-center text-xs text-muted-foreground">
             Paiement sécurisé • Annulation à tout moment
           </p>
         </motion.div>
@@ -232,7 +232,7 @@ function RouteComponent() {
         >
           <Link
             to="/app/referrals"
-            className="inline-flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-white transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             <Gift className="h-4 w-4" />
             Parraine un ami et gagne 3€

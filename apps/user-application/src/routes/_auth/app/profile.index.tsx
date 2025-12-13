@@ -24,6 +24,7 @@ import { getSubscriptionTier } from '@/core/functions/payments'
 import { getProfileStats } from '@/core/functions/profile'
 import { signOut, useSession } from '@/lib/auth-client'
 import { cn } from '@/lib/utils'
+import { generateUUID } from '@/utils/generateUUID'
 
 export const Route = createFileRoute('/_auth/app/profile/')({
   component: ProfilePage,
@@ -77,22 +78,22 @@ function ProfilePage() {
       icon: User,
       label: 'Informations Personnelles',
       href: '/app/profile/edit',
-      color: 'text-blue-400',
-      bgColor: 'bg-blue-400/10',
+      color: 'text-blue-600 dark:text-blue-400',
+      bgColor: 'bg-blue-500/10 dark:bg-blue-400/10',
     },
     {
       icon: Settings,
       label: 'Paramètres',
       href: '/app/settings',
-      color: 'text-gray-400',
-      bgColor: 'bg-gray-400/10',
+      color: 'text-zinc-600 dark:text-zinc-400',
+      bgColor: 'bg-zinc-500/10 dark:bg-zinc-400/10',
     },
     {
       icon: Bell,
       label: 'Notifications',
       href: '/app/notifications',
-      color: 'text-yellow-400',
-      bgColor: 'bg-yellow-400/10',
+      color: 'text-yellow-600 dark:text-yellow-400',
+      bgColor: 'bg-yellow-500/10 dark:bg-yellow-400/10',
     },
     {
       icon: isPremium ? Sparkles : Crown,
@@ -100,15 +101,15 @@ function ProfilePage() {
       href: '/app/polar/subscriptions',
       badge: isPremium ? undefined : 'Nouveau',
       highlight: !isPremium,
-      color: isPremium ? 'text-purple-400' : 'text-amber-400',
-      bgColor: isPremium ? 'bg-purple-400/10' : 'bg-amber-400/10',
+      color: isPremium ? 'text-purple-600 dark:text-purple-400' : 'text-amber-600 dark:text-amber-400',
+      bgColor: isPremium ? 'bg-purple-500/10 dark:bg-purple-400/10' : 'bg-amber-500/10 dark:bg-amber-400/10',
     },
     {
       icon: HelpCircle,
       label: 'Aide & Support',
       href: '/app/help',
-      color: 'text-emerald-400',
-      bgColor: 'bg-emerald-400/10',
+      color: 'text-emerald-600 dark:text-emerald-400',
+      bgColor: 'bg-emerald-500/10 dark:bg-emerald-400/10',
     },
   ]
 
@@ -128,7 +129,7 @@ function ProfilePage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-black pb-24 text-white selection:bg-primary/30">
+    <div className="relative min-h-screen bg-background pb-24 text-foreground selection:bg-primary/30">
       {/* Ambient background effects */}
       <div className="fixed inset-0 z-0">
         <div className="absolute -left-1/4 -top-1/4 h-[500px] w-[500px] rounded-full bg-indigo-900/20 blur-[100px]" />
@@ -149,14 +150,15 @@ function ProfilePage() {
             <motion.div variants={itemVariants} className="relative text-center">
               <div className="relative inline-block">
                 <div className="absolute -inset-0.5 animate-pulse rounded-full bg-linear-to-tr from-indigo-500 via-purple-500 to-pink-500 opacity-75 blur-sm" />
-                <Avatar className="relative h-28 w-28 border-2 border-black">
+                <Avatar className="relative h-28 w-28 border-2 border-background shadow-xl">
                   <AvatarImage src={session?.user?.image || undefined} className="object-cover" />
-                  <AvatarFallback className="bg-zinc-900 text-2xl font-bold text-zinc-300">
+                  <AvatarFallback className="bg-muted text-2xl font-bold text-muted-foreground">
                     {getUserInitials()}
                   </AvatarFallback>
                 </Avatar>
                 {/* Level Badge overlapped */}
-                <div className="absolute -bottom-2 -right-2 rounded-full border-2 border-black bg-zinc-800 px-2 py-0.5 text-xs font-bold text-white shadow-lg">
+                {/* Level Badge overlapped */}
+                <div className="absolute -bottom-2 -right-2 rounded-full border-2 border-background bg-card px-2 py-0.5 text-xs font-bold text-foreground shadow-lg">
                   Lvl
                   {' '}
                   {stats?.level ?? 1}
@@ -164,19 +166,21 @@ function ProfilePage() {
               </div>
 
               <div className="mt-4 space-y-1">
-                <h2 className="text-2xl font-bold tracking-tight text-white">
-                  {session?.user?.name || 'Étudiant'}
-                </h2>
-                <p className="text-sm font-medium text-zinc-400">
-                  {session?.user?.email}
-                </p>
+                <div className="mt-4 space-y-1">
+                  <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                    {session?.user?.name || 'Étudiant'}
+                  </h2>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {session?.user?.email}
+                  </p>
+                </div>
               </div>
 
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 {isPremium && subscriptionTier && (
-                  <SubscriptionBadge tier={subscriptionTier} size="md" className="border-white/10 bg-white/5 backdrop-blur-md" />
+                  <SubscriptionBadge tier={subscriptionTier} size="md" className="border-border bg-card/50 backdrop-blur-md text-foreground" />
                 )}
-                <Badge variant="outline" className="border-white/10 bg-white/5 backdrop-blur-md">
+                <Badge variant="outline" className="border-border bg-card/50 backdrop-blur-md text-foreground">
                   <Shield className="mr-1 h-3 w-3" />
                   {stats?.gradeName || 'Lycéen'}
                 </Badge>
@@ -189,16 +193,16 @@ function ProfilePage() {
                 { label: 'Cartes', value: stats?.totalCardsStudied ?? 0, icon: Sparkles, color: 'text-cyan-400' },
                 { label: 'Points XP', value: stats?.totalXP ?? 0, icon: Zap, color: 'text-amber-400' },
                 { label: 'Série', value: `${stats?.currentStreak ?? 0}j`, icon: Flame, color: 'text-orange-500' },
-              ].map((stat, i) => (
+              ].map(stat => (
                 <div
-                  key={i}
-                  className="group relative overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/50 p-4 text-center backdrop-blur-xl transition-all hover:bg-zinc-900/70"
+                  key={generateUUID()}
+                  className="group relative overflow-hidden rounded-2xl border border-border bg-card p-4 text-center backdrop-blur-xl transition-all hover:bg-accent/50"
                 >
-                  <div className={`mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/5 ${stat.color}`}>
+                  <div className={`mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-muted/50 ${stat.color}`}>
                     <stat.icon className="h-4 w-4" />
                   </div>
-                  <p className="text-xl font-bold text-white">{stat.value.toLocaleString()}</p>
-                  <p className="text-xs font-medium text-zinc-500">{stat.label}</p>
+                  <p className="text-xl font-bold text-foreground">{stat.value.toLocaleString()}</p>
+                  <p className="text-xs font-medium text-muted-foreground">{stat.label}</p>
                 </div>
               ))}
             </motion.div>
@@ -220,13 +224,13 @@ function ProfilePage() {
                       'relative flex items-center justify-between border p-4 backdrop-blur-xl transition-colors',
                       isHighlighted
                         ? 'border-amber-500/30 bg-linear-to-r from-amber-500/10 to-orange-500/10'
-                        : 'border-white/5 bg-zinc-900/40 hover:bg-zinc-800/60',
+                        : 'border-border bg-card hover:bg-accent/50',
                     )}
                     >
                       <div className="flex items-center gap-4">
                         <div className={cn(
                           'flex h-10 w-10 items-center justify-center rounded-xl transition-colors',
-                          isHighlighted ? 'bg-amber-500/20 text-amber-500' : 'bg-zinc-800/80 text-zinc-400 group-hover:bg-zinc-700 group-hover:text-white',
+                          isHighlighted ? 'bg-amber-500/20 text-amber-600' : 'bg-muted text-muted-foreground group-hover:bg-accent group-hover:text-foreground',
                         )}
                         >
                           <Icon className="h-5 w-5" />
@@ -234,7 +238,7 @@ function ProfilePage() {
                         <div className="text-left">
                           <span className={cn(
                             'block font-medium',
-                            isHighlighted ? 'text-amber-200' : 'text-zinc-200',
+                            isHighlighted ? 'text-amber-600 dark:text-amber-200' : 'text-foreground',
                           )}
                           >
                             {item.label}
@@ -248,7 +252,7 @@ function ProfilePage() {
                             {item.badge}
                           </Badge>
                         )}
-                        <ChevronRight className="h-4 w-4 text-zinc-600 transition-transform group-hover:translate-x-1" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
                       </div>
                     </div>
                   </button>
@@ -262,7 +266,7 @@ function ProfilePage() {
                 variant="ghost"
                 onClick={handleSignOut}
                 disabled={isSigningOut}
-                className="w-full justify-center text-zinc-500 hover:bg-red-500/10 hover:text-red-400"
+                className="w-full justify-center text-muted-foreground hover:bg-red-500/10 hover:text-red-500"
               >
                 <LogOut className={`mr-2 h-4 w-4 ${isSigningOut ? 'animate-spin' : ''}`} />
                 {isSigningOut ? 'Déconnexion en cours...' : 'Se Déconnecter'}
@@ -270,7 +274,7 @@ function ProfilePage() {
             </motion.div>
 
             {/* Footer Info */}
-            <motion.div variants={itemVariants} className="text-center text-xs text-zinc-700">
+            <motion.div variants={itemVariants} className="text-center text-xs text-muted-foreground">
               <p>Kurama App v1.2.0 (Beta)</p>
             </motion.div>
           </motion.div>

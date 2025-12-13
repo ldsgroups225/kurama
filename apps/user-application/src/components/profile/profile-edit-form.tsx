@@ -18,6 +18,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useToast } from '@/components/ui/use-toast'
 import { submitProfile } from '@/core/functions/profile'
 import { ArrowLeft, Loader2, Plus, X } from '@/lib/icons'
+import { cn } from '@/lib/utils'
 import { generateUUID } from '@/utils/generateUUID'
 
 interface ProfileEditFormProps {
@@ -36,6 +37,26 @@ const SUBJECTS = [
   'Philosophie',
   'Informatique',
 ]
+
+function CardWrapper({ children, title, subtitle, className }: { children: React.ReactNode, title?: string, subtitle?: string, className?: string }) {
+  return (
+    <Card className={cn('border-white/5 bg-zinc-900/40 backdrop-blur-xl', className)}>
+      {(title || subtitle) && (
+        <CardHeader>
+          {title && <CardTitle className="text-white">{title}</CardTitle>}
+          {subtitle && <p className="text-sm text-zinc-400">{subtitle}</p>}
+        </CardHeader>
+      )}
+      <CardContent className="space-y-4">
+        {children}
+      </CardContent>
+    </Card>
+  )
+}
+
+function InputLabel({ children, htmlFor }: { children: React.ReactNode, htmlFor?: string }) {
+  return <Label htmlFor={htmlFor} className="text-zinc-400 font-medium mb-1.5 block">{children}</Label>
+}
 
 export function ProfileEditForm({ profile, onBack, onSuccess }: ProfileEditFormProps) {
   const { toast } = useToast()
@@ -191,14 +212,15 @@ export function ProfileEditForm({ profile, onBack, onSuccess }: ProfileEditFormP
           size="icon"
           onClick={onBack}
           disabled={submitMutation.isPending}
+          className="text-white hover:bg-white/10"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h2 className="text-2xl font-bold text-foreground">
+          <h2 className="text-2xl font-bold text-white">
             Informations Personnelles
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-zinc-400">
             {isStudent ? 'Profil Étudiant' : 'Profil Parent'}
           </p>
         </div>
@@ -206,236 +228,227 @@ export function ProfileEditForm({ profile, onBack, onSuccess }: ProfileEditFormP
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Common Fields */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Informations de Base</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">Prénom</Label>
-                <Input
-                  id="firstName"
-                  type="text"
-                  placeholder="Votre prénom"
-                  value={formData.firstName}
-                  onChange={e => updateFormData({ firstName: e.target.value })}
-                  disabled={submitMutation.isPending}
-                />
-                {errors.firstName && (
-                  <p className="text-sm text-destructive">{errors.firstName}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Nom</Label>
-                <Input
-                  id="lastName"
-                  type="text"
-                  placeholder="Votre nom"
-                  value={formData.lastName}
-                  onChange={e => updateFormData({ lastName: e.target.value })}
-                  disabled={submitMutation.isPending}
-                />
-                {errors.lastName && (
-                  <p className="text-sm text-destructive">{errors.lastName}</p>
-                )}
-              </div>
+        <CardWrapper title="Informations de Base">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <InputLabel htmlFor="firstName">Prénom</InputLabel>
+              <Input
+                id="firstName"
+                type="text"
+                placeholder="Votre prénom"
+                value={formData.firstName}
+                onChange={e => updateFormData({ firstName: e.target.value })}
+                disabled={submitMutation.isPending}
+                className="bg-zinc-800/50 border-white/10 text-white placeholder:text-zinc-500"
+              />
+              {errors.firstName && (
+                <p className="text-sm text-red-500">{errors.firstName}</p>
+              )}
             </div>
 
-            <div className="rounded-lg bg-muted/50 p-3">
-              <p className="text-sm text-muted-foreground">
-                <span className="font-medium">Type de profil:</span>
-                {' '}
-                {isStudent ? 'Étudiant' : 'Parent'}
-              </p>
+            <div className="space-y-2">
+              <InputLabel htmlFor="lastName">Nom</InputLabel>
+              <Input
+                id="lastName"
+                type="text"
+                placeholder="Votre nom"
+                value={formData.lastName}
+                onChange={e => updateFormData({ lastName: e.target.value })}
+                disabled={submitMutation.isPending}
+                className="bg-zinc-800/50 border-white/10 text-white placeholder:text-zinc-500"
+              />
+              {errors.lastName && (
+                <p className="text-sm text-red-500">{errors.lastName}</p>
+              )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          <div className="rounded-lg bg-indigo-500/10 border border-indigo-500/20 p-3">
+            <p className="text-sm text-indigo-300">
+              <span className="font-medium text-indigo-400">Type de profil:</span>
+              {' '}
+              {isStudent ? 'Étudiant' : 'Parent'}
+            </p>
+          </div>
+        </CardWrapper>
 
         {/* Student-Specific Fields */}
         {isStudent && (
           <>
-            <Card>
-              <CardHeader>
-                <CardTitle>Informations de Contact</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Téléphone</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="+225 XX XX XX XX XX"
-                    value={(formData as StudentProfile).phone}
-                    onChange={e => updateFormData({ phone: e.target.value })}
-                    disabled={submitMutation.isPending}
-                  />
-                  {errors.phone && (
-                    <p className="text-sm text-destructive">{errors.phone}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="city">Ville</Label>
-                  <Input
-                    id="city"
-                    type="text"
-                    placeholder="Abidjan"
-                    value={(formData as StudentProfile).city}
-                    onChange={e => updateFormData({ city: e.target.value })}
-                    disabled={submitMutation.isPending}
-                  />
-                  {errors.city && (
-                    <p className="text-sm text-destructive">{errors.city}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Âge</Label>
-                  <div className="rounded-md border bg-muted/50 px-3 py-2 text-sm">
-                    {(formData as StudentProfile).age || 14}
-                    {' '}
-                    ans
-                    <span className="ml-2 text-xs text-muted-foreground">(non modifiable)</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="gender">Genre</Label>
-                  <ToggleGroup
-                    type="single"
-                    value={(formData as StudentProfile).gender || ''}
-                    onValueChange={(value) => {
-                      if (value === 'male' || value === 'female') {
-                        updateFormData({ gender: value })
-                      }
-                      else if (value === '') {
-                        updateFormData({ gender: undefined })
-                      }
-                    }}
-                    disabled={submitMutation.isPending}
-                    className="justify-start"
-                  >
-                    <ToggleGroupItem value="male">Garçon</ToggleGroupItem>
-                    <ToggleGroupItem value="female">Fille</ToggleGroupItem>
-                  </ToggleGroup>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Informations Scolaires</CardTitle>
-                <p className="text-xs text-muted-foreground">
-                  Ces informations ne peuvent pas être modifiées. Contactez le support si nécessaire.
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Numéro Matricule</Label>
-                  <div className="rounded-md border bg-muted/50 px-3 py-2 text-sm">
-                    {(formData as StudentProfile).idNumber || 'Non renseigné'}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Niveau</Label>
-                  <div className="rounded-md border bg-muted/50 px-3 py-2 text-sm">
-                    {(formData as StudentProfile).gradeName || 'Non renseigné'}
-                  </div>
-                </div>
-
-                {(formData as StudentProfile).seriesName && (
-                  <div className="space-y-2">
-                    <Label>Série</Label>
-                    <div className="rounded-md border bg-muted/50 px-3 py-2 text-sm">
-                      {(formData as StudentProfile).seriesName}
-                    </div>
-                  </div>
+            <CardWrapper title="Informations de Contact">
+              <div className="space-y-2">
+                <InputLabel htmlFor="phone">Téléphone</InputLabel>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+225 XX XX XX XX XX"
+                  value={(formData as StudentProfile).phone}
+                  onChange={e => updateFormData({ phone: e.target.value })}
+                  disabled={submitMutation.isPending}
+                  className="bg-zinc-800/50 border-white/10 text-white placeholder:text-zinc-500"
+                />
+                {errors.phone && (
+                  <p className="text-sm text-red-500">{errors.phone}</p>
                 )}
-              </CardContent>
-            </Card>
+              </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Préférences d'Apprentissage</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <InputLabel htmlFor="city">Ville</InputLabel>
+                <Input
+                  id="city"
+                  type="text"
+                  placeholder="Abidjan"
+                  value={(formData as StudentProfile).city}
+                  onChange={e => updateFormData({ city: e.target.value })}
+                  disabled={submitMutation.isPending}
+                  className="bg-zinc-800/50 border-white/10 text-white placeholder:text-zinc-500"
+                />
+                {errors.city && (
+                  <p className="text-sm text-red-500">{errors.city}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <InputLabel>Âge</InputLabel>
+                <div className="rounded-md border border-white/10 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-400">
+                  {(formData as StudentProfile).age || 14}
+                  {' '}
+                  ans
+                  <span className="ml-2 text-xs text-zinc-600">(non modifiable)</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <InputLabel htmlFor="gender">Genre</InputLabel>
+                <ToggleGroup
+                  type="single"
+                  value={(formData as StudentProfile).gender || ''}
+                  onValueChange={(value) => {
+                    if (value === 'male' || value === 'female') {
+                      updateFormData({ gender: value })
+                    }
+                    else if (value === '') {
+                      updateFormData({ gender: undefined })
+                    }
+                  }}
+                  disabled={submitMutation.isPending}
+                  className="justify-start"
+                >
+                  <ToggleGroupItem value="male" className="data-[state=on]:bg-indigo-600 data-[state=on]:text-white text-zinc-400 hover:text-white hover:bg-white/5">Garçon</ToggleGroupItem>
+                  <ToggleGroupItem value="female" className="data-[state=on]:bg-pink-600 data-[state=on]:text-white text-zinc-400 hover:text-white hover:bg-white/5">Fille</ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+            </CardWrapper>
+
+            <CardWrapper
+              title="Informations Scolaires"
+              subtitle="Ces informations ne peuvent pas être modifiées. Contactez le support si nécessaire."
+            >
+              <div className="space-y-2">
+                <InputLabel>Numéro Matricule</InputLabel>
+                <div className="rounded-md border border-white/10 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-400">
+                  {(formData as StudentProfile).idNumber || 'Non renseigné'}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <InputLabel>Niveau</InputLabel>
+                <div className="rounded-md border border-white/10 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-400">
+                  {(formData as StudentProfile).gradeName || 'Non renseigné'}
+                </div>
+              </div>
+
+              {(formData as StudentProfile).seriesName && (
                 <div className="space-y-2">
-                  <Label>Matières Préférées (optionnel)</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {SUBJECTS.map(subject => (
-                      <Button
-                        key={subject}
-                        type="button"
-                        variant={
-                          (formData as StudentProfile).favoriteSubjects?.includes(subject)
-                            ? 'default'
-                            : 'outline'
-                        }
-                        size="sm"
-                        onClick={() => toggleSubject(subject)}
-                        disabled={submitMutation.isPending}
-                        className="justify-start"
-                      >
-                        {subject}
-                      </Button>
-                    ))}
+                  <InputLabel>Série</InputLabel>
+                  <div className="rounded-md border border-white/10 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-400">
+                    {(formData as StudentProfile).seriesName}
                   </div>
                 </div>
+              )}
+            </CardWrapper>
 
-                <div className="space-y-2">
-                  <Label htmlFor="studyTime">Temps d'Étude Quotidien</Label>
-                  <Select
-                    value={(formData as StudentProfile).studyTime}
-                    onValueChange={value => updateFormData({ studyTime: value })}
-                    disabled={submitMutation.isPending}
-                  >
-                    <SelectTrigger id="studyTime" className="w-full">
-                      <SelectValue placeholder="Combien de temps étudiez-vous par jour ?" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="less-1h">Moins d'1 heure</SelectItem>
-                      <SelectItem value="1-2h">1 à 2 heures</SelectItem>
-                      <SelectItem value="2-3h">2 à 3 heures</SelectItem>
-                      <SelectItem value="3-4h">3 à 4 heures</SelectItem>
-                      <SelectItem value="more-4h">Plus de 4 heures</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.studyTime && (
-                    <p className="text-sm text-destructive">{errors.studyTime}</p>
-                  )}
+            <CardWrapper title="Préférences d'Apprentissage">
+              <div className="space-y-2">
+                <InputLabel>Matières Préférées (optionnel)</InputLabel>
+                <div className="grid grid-cols-2 gap-2">
+                  {SUBJECTS.map(subject => (
+                    <Button
+                      key={subject}
+                      type="button"
+                      variant={
+                        (formData as StudentProfile).favoriteSubjects?.includes(subject)
+                          ? 'default'
+                          : 'outline'
+                      }
+                      size="sm"
+                      onClick={() => toggleSubject(subject)}
+                      disabled={submitMutation.isPending}
+                      className={cn(
+                        'justify-start transition-all',
+                        (formData as StudentProfile).favoriteSubjects?.includes(subject)
+                          ? 'bg-indigo-600 hover:bg-indigo-500 text-white border-transparent'
+                          : 'border-white/10 bg-transparent text-zinc-400 hover:text-white hover:bg-white/5',
+                      )}
+                    >
+                      {subject}
+                    </Button>
+                  ))}
                 </div>
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="learningGoals">Objectifs d'Apprentissage (optionnel)</Label>
-                  <Textarea
-                    id="learningGoals"
-                    placeholder="Décrivez vos objectifs académiques..."
-                    value={(formData as StudentProfile).learningGoals}
-                    onChange={e => updateFormData({ learningGoals: e.target.value })}
-                    disabled={submitMutation.isPending}
-                    rows={3}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+              <div className="space-y-2">
+                <InputLabel htmlFor="studyTime">Temps d'Étude Quotidien</InputLabel>
+                <Select
+                  value={(formData as StudentProfile).studyTime}
+                  onValueChange={value => updateFormData({ studyTime: value })}
+                  disabled={submitMutation.isPending}
+                >
+                  <SelectTrigger id="studyTime" className="w-full bg-zinc-800/50 border-white/10 text-white">
+                    <SelectValue placeholder="Combien de temps étudiez-vous par jour ?" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                    <SelectItem value="less-1h">Moins d'1 heure</SelectItem>
+                    <SelectItem value="1-2h">1 à 2 heures</SelectItem>
+                    <SelectItem value="2-3h">2 à 3 heures</SelectItem>
+                    <SelectItem value="3-4h">3 à 4 heures</SelectItem>
+                    <SelectItem value="more-4h">Plus de 4 heures</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.studyTime && (
+                  <p className="text-sm text-red-500">{errors.studyTime}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <InputLabel htmlFor="learningGoals">Objectifs d'Apprentissage (optionnel)</InputLabel>
+                <Textarea
+                  id="learningGoals"
+                  placeholder="Décrivez vos objectifs académiques..."
+                  value={(formData as StudentProfile).learningGoals}
+                  onChange={e => updateFormData({ learningGoals: e.target.value })}
+                  disabled={submitMutation.isPending}
+                  rows={3}
+                  className="bg-zinc-800/50 border-white/10 text-white placeholder:text-zinc-500 resize-none"
+                />
+              </div>
+            </CardWrapper>
           </>
         )}
 
         {/* Parent-Specific Fields */}
         {!isStudent && (
-          <Card>
+          <Card className="border-white/10 bg-zinc-900/40 backdrop-blur-xl">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Enfants</CardTitle>
+                <CardTitle className="text-white">Enfants</CardTitle>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={handleAddChild}
                   disabled={submitMutation.isPending}
+                  className="border-white/10 bg-white/5 text-white hover:bg-white/10"
                 >
                   <Plus className="mr-1 h-4 w-4" />
                   Ajouter
@@ -445,7 +458,7 @@ export function ProfileEditForm({ profile, onBack, onSuccess }: ProfileEditFormP
             <CardContent className="space-y-4">
               {(!(formData as ParentProfile).childrenMatricules
                 || (formData as ParentProfile).childrenMatricules!.length === 0) && (
-                <p className="py-4 text-center text-sm text-muted-foreground">
+                <p className="py-4 text-center text-sm text-zinc-500">
                   Aucun enfant ajouté. Cliquez sur "Ajouter" pour lier un enfant.
                 </p>
               )}
@@ -454,11 +467,11 @@ export function ProfileEditForm({ profile, onBack, onSuccess }: ProfileEditFormP
                 <div key={generateUUID()} className="space-y-2">
                   <div className="flex items-start gap-2">
                     <div className="flex-1 space-y-2">
-                      <Label htmlFor={`child-${index}`}>
+                      <InputLabel htmlFor={`child-${index}`}>
                         Enfant
                         {' '}
                         {index + 1}
-                      </Label>
+                      </InputLabel>
                       <Input
                         id={`child-${index}`}
                         type="text"
@@ -467,6 +480,7 @@ export function ProfileEditForm({ profile, onBack, onSuccess }: ProfileEditFormP
                         onChange={e =>
                           handleChildMatriculeChange(index, e.target.value)}
                         disabled={submitMutation.isPending}
+                        className="bg-zinc-800/50 border-white/10 text-white"
                       />
                     </div>
                     <Button
@@ -475,7 +489,7 @@ export function ProfileEditForm({ profile, onBack, onSuccess }: ProfileEditFormP
                       size="icon"
                       onClick={() => handleRemoveChild(index)}
                       disabled={submitMutation.isPending}
-                      className="mt-8"
+                      className="mt-8 text-zinc-500 hover:text-red-400 hover:bg-red-500/10"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -483,7 +497,7 @@ export function ProfileEditForm({ profile, onBack, onSuccess }: ProfileEditFormP
                 </div>
               ))}
 
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-zinc-500">
                 Cette information nous aide à personnaliser votre expérience
               </p>
             </CardContent>
@@ -492,7 +506,7 @@ export function ProfileEditForm({ profile, onBack, onSuccess }: ProfileEditFormP
 
         {/* Error Message */}
         {errors.submit && (
-          <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+          <div className="rounded-lg bg-red-500/10 p-3 text-sm text-red-500 border border-red-500/20">
             {errors.submit}
           </div>
         )}
@@ -504,14 +518,14 @@ export function ProfileEditForm({ profile, onBack, onSuccess }: ProfileEditFormP
             variant="outline"
             onClick={onBack}
             disabled={submitMutation.isPending}
-            className="flex-1"
+            className="flex-1 border-white/10 bg-transparent text-white hover:bg-white/5"
           >
             Annuler
           </Button>
           <Button
             type="submit"
             disabled={submitMutation.isPending}
-            className="flex-1"
+            className="flex-1 bg-white text-black hover:bg-zinc-200"
           >
             {submitMutation.isPending
               ? (

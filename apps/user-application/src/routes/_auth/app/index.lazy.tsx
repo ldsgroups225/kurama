@@ -1,32 +1,32 @@
-import type { Achievement } from '@/components/gamification'
 import { useQuery } from '@tanstack/react-query'
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
+import { motion } from 'framer-motion'
 import {
   BookOpen,
   Brain,
-  Clock,
-  Crown,
+  ChevronRight,
   FileText,
   Flame,
   Gamepad2,
-  GraduationCap,
-  Target,
+  Sparkles,
   Timer,
+  TrendingUp,
+  Zap,
 } from 'lucide-react'
 import { useEffect } from 'react'
 import {
-  AchievementShowcase,
-  LeaderboardWidget,
   LevelBadge,
   StreakCalendar,
 } from '@/components/gamification'
-import { AppHeader, BottomNav, ChallengeCard, QuickActions, StatsGrid } from '@/components/main'
+import { AppHeader, BottomNav } from '@/components/main'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { getDailyChallengeStatus } from '@/core/functions/daily-challenge'
 import { getDashboardStats } from '@/core/functions/dashboard'
-import { getLeaderboard } from '@/core/functions/gamification'
-import { Rocket, Star, Trophy } from '@/lib/icons'
+import { Rocket, Trophy } from '@/lib/icons'
 import { trackRouteLoad } from '@/lib/performance-monitor'
+import { cn, isDefined } from '@/lib/utils'
+import { generateUUID } from '@/utils/generateUUID'
 
 export const Route = createLazyFileRoute('/_auth/app/')({
   component: AppHome,
@@ -35,311 +35,346 @@ export const Route = createLazyFileRoute('/_auth/app/')({
 function AppHome() {
   const navigate = useNavigate()
 
-  // Track route load performance
   useEffect(() => {
     const endTracking = trackRouteLoad('app-dashboard')
     return endTracking
   }, [])
 
-  // Fetch real dashboard data
   const { data: dashboardData } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: () => getDashboardStats(),
   })
 
-  const { data: leaderboardData } = useQuery({
-    queryKey: ['leaderboard'],
-    queryFn: () => getLeaderboard(),
-  })
-
-  // Fetch daily challenge status
   const { data: dailyChallengeData, isLoading: isDailyChallengeLoading } = useQuery({
     queryKey: ['daily-challenge-status'],
     queryFn: () => getDailyChallengeStatus(),
   })
 
-  // Mock data - Replace with real data from your backend
   const userLevel = {
     level: Math.floor((dashboardData?.totalXP ?? 0) / 500) + 1,
     currentXP: (dashboardData?.totalXP ?? 0) % 500,
     nextLevelXP: 500,
   }
 
-  const achievements: Achievement[] = [
-    {
-      id: '1',
-      name: 'Premier Pas',
-      description: 'Complétez votre première leçon',
-      icon: Star,
-      color: 'bg-gradient-xp',
-      unlocked: true,
-      unlockedAt: new Date('2024-01-15'),
-      rarity: 'common',
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
     },
-    {
-      id: '2',
-      name: 'Série de Feu',
-      description: 'Maintenez une série de 7 jours',
-      icon: Flame,
-      color: 'bg-gradient-streak',
-      unlocked: true,
-      unlockedAt: new Date('2024-02-01'),
-      rarity: 'rare',
-    },
-    {
-      id: '3',
-      name: 'Maître du Quiz',
-      description: 'Obtenez 100% à 10 quiz',
-      icon: Trophy,
-      color: 'bg-gradient-level',
-      unlocked: true,
-      unlockedAt: new Date('2024-02-10'),
-      rarity: 'epic',
-    },
-    {
-      id: '4',
-      name: 'Étudiant Légendaire',
-      description: 'Atteignez le niveau 50',
-      icon: Crown,
-      color: 'bg-gradient-legendary',
-      unlocked: false,
-      progress: 12,
-      maxProgress: 50,
-      rarity: 'legendary',
-    },
-    {
-      id: '5',
-      name: 'Mathématicien',
-      description: 'Complétez tous les chapitres de maths',
-      icon: Target,
-      color: 'bg-gradient-epic',
-      unlocked: false,
-      progress: 8,
-      maxProgress: 12,
-      rarity: 'epic',
-    },
-    {
-      id: '6',
-      name: 'Fusée',
-      description: 'Étudiez 30 jours d\'affilée',
-      icon: Rocket,
-      color: 'bg-gradient-rare',
-      unlocked: false,
-      progress: 12,
-      maxProgress: 30,
-      rarity: 'rare',
-    },
-  ]
-
-  const streakData = {
-    currentStreak: dashboardData?.currentStreak ?? 0,
-    longestStreak: dashboardData?.longestStreak ?? 0,
-    streakHistory: Array.from({ length: 14 }, (_, i) => {
-      const date = new Date()
-      date.setDate(date.getDate() - (13 - i))
-      return {
-        date,
-        completed: i >= (14 - (dashboardData?.currentStreak ?? 0)),
-        count: i >= (14 - (dashboardData?.currentStreak ?? 0)) ? 1 : 0,
-      }
-    }),
   }
 
-  const stats = [
-    {
-      icon: BookOpen,
-      label: 'Cartes Étudiées',
-      value: String(dashboardData?.totalCardsStudied ?? 0),
-      subValue: `${dashboardData?.cardsStudiedToday ?? 0} aujourd'hui`,
-      color: 'text-xp',
-      progress: Math.min(((dashboardData?.cardsStudiedToday ?? 0) / 25) * 100, 100),
-    },
-    {
-      icon: Trophy,
-      label: 'Points Gagnés',
-      value: String(dashboardData?.totalXP ?? 0),
-      subValue: `Niveau ${userLevel.level}`,
-      color: 'text-level',
-      progress: (userLevel.currentXP / userLevel.nextLevelXP) * 100,
-    },
-    {
-      icon: Target,
-      label: 'Objectif Quotidien',
-      value: `${dashboardData?.cardsStudiedToday ?? 0}/25`,
-      subValue: `${Math.max(0, 25 - (dashboardData?.cardsStudiedToday ?? 0))} cartes restantes`,
-      color: 'text-success',
-      progress: Math.min(((dashboardData?.cardsStudiedToday ?? 0) / 25) * 100, 100),
-    },
-    {
-      icon: Flame,
-      label: 'Série Actuelle',
-      value: `${dashboardData?.currentStreak ?? 0} jours`,
-      subValue: `Record: ${dashboardData?.longestStreak ?? 0} jours`,
-      color: 'text-streak',
-      progress: Math.min(((dashboardData?.currentStreak ?? 0) / (dashboardData?.longestStreak || 1)) * 100, 100),
-    },
-  ]
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  }
 
   const quickActions = [
     {
       icon: Brain,
-      label: 'Révision Rapide',
-      color: 'bg-epic text-epic',
+      label: 'Révision',
+      subLabel: 'Cartes du jour',
+      color: 'from-violet-500 to-fuchsia-500',
+      action: () => { },
     },
     {
       icon: Gamepad2,
       label: 'Quiz',
-      color: 'bg-xp text-xp',
-    },
-    {
-      icon: Timer,
-      label: 'Chrono',
-      color: 'bg-success text-success',
+      subLabel: 'Test rapide',
+      color: 'from-amber-400 to-orange-500',
+      action: () => { },
     },
     {
       icon: FileText,
-      label: 'Examen Blanc',
-      color: 'bg-error text-error',
+      label: 'Examen',
+      subLabel: 'Simulateur',
+      color: 'from-blue-400 to-cyan-500',
+      action: () => { },
+    },
+    {
+      icon: Trophy,
+      label: 'Classement',
+      subLabel: 'Top 10',
+      color: 'from-emerald-400 to-green-500',
+      action: () => { },
+    },
+  ]
+
+  const stats = [
+    {
+      label: 'Série',
+      value: `${dashboardData?.currentStreak ?? 0}`,
+      icon: Flame,
+      color: 'text-orange-400',
+      bg: 'bg-orange-500/10',
+      borderColor: 'border-orange-500/20',
+      glow: 'shadow-glow-orange',
+    },
+    {
+      label: 'XP',
+      value: `${dashboardData?.totalXP ?? 0}`,
+      icon: Zap,
+      color: 'text-yellow-400',
+      bg: 'bg-yellow-500/10',
+      borderColor: 'border-yellow-500/20',
+      glow: 'shadow-glow-yellow',
+    },
+    {
+      label: 'Cartes',
+      value: `${dashboardData?.totalCardsStudied ?? 0}`,
+      icon: BookOpen,
+      color: 'text-blue-400',
+      bg: 'bg-blue-500/10',
+      borderColor: 'border-blue-500/20',
+      glow: 'shadow-glow-blue',
     },
   ]
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-28 text-foreground">
+      {/* Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[50%] rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="absolute top-[10%] -right-[10%] w-[60%] h-[60%] rounded-full bg-indigo-600/10 blur-[120px]" />
+        <div className="absolute bottom-[10%] left-[20%] w-[80%] h-[40%] rounded-full bg-blue-600/5 blur-[100px]" />
+      </div>
+
       <AppHeader />
 
-      <main className="mx-auto max-w-lg space-y-6 px-4 py-6">
-        {/* Level Progress */}
-        <section>
-          <LevelBadge
-            level={userLevel.level}
-            currentXP={userLevel.currentXP}
-            nextLevelXP={userLevel.nextLevelXP}
-          />
-        </section>
+      <main className="relative z-10 px-5 pt-4">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-8"
+        >
+          {/* Hero / Level Section - Uses new LevelBadge */}
+          <motion.section variants={itemVariants}>
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-foreground tracking-tight leading-tight">
+                    Bonjour,
+                    {' '}
+                    <br />
+                    <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400">
+                      Étudiant 👋
+                    </span>
+                  </h1>
+                  <p className="text-muted-foreground font-medium mt-1">Prêt à surpasser vos limites ?</p>
+                </div>
+              </div>
 
-        {/* Daily Challenge */}
-        <section>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-foreground">Défi du Jour</h2>
-            {dailyChallengeData && !dailyChallengeData.isCompleted && (
-              <Badge variant="secondary" className="gap-1">
-                <Clock className="h-3 w-3" />
-                {Math.floor(dailyChallengeData.timeUntilReset / 3600)}
-                h
-                {Math.floor((dailyChallengeData.timeUntilReset % 3600) / 60)}
-                m
-              </Badge>
-            )}
-          </div>
-          <ChallengeCard
-            title="Défi du Jour"
-            description={dailyChallengeData?.isCompleted
-              ? 'Revenez demain pour un nouveau défi'
-              : `Complétez ${dailyChallengeData?.totalCards ?? 10} cartes variées`}
-            duration={`${dailyChallengeData?.estimatedMinutes ?? 7} min`}
-            icon={<GraduationCap className="h-6 w-6 text-primary" />}
-            onStart={() => navigate({ to: '/app/daily-challenge' })}
-            isLoading={isDailyChallengeLoading}
-            isCompleted={dailyChallengeData?.isCompleted}
-            isInProgress={dailyChallengeData?.isInProgress}
-            score={dailyChallengeData?.score}
-            xpEarned={dailyChallengeData?.xpEarned}
-            consecutiveDays={dailyChallengeData?.consecutiveDays}
-            timeUntilReset={dailyChallengeData?.timeUntilReset}
-          />
-        </section>
+              {/* Premium Level Badge Interface */}
+              <LevelBadge
+                level={userLevel.level}
+                currentXP={userLevel.currentXP}
+                nextLevelXP={userLevel.nextLevelXP}
+                compact={true}
+                className="bg-card p-4 rounded-2xl border border-border backdrop-blur-xl shadow-xl"
+              />
+            </div>
+          </motion.section>
 
-        {/* Quick Actions */}
-        <section>
-          <h2 className="mb-4 text-lg font-bold text-foreground">Actions Rapides</h2>
-          <QuickActions actions={quickActions} />
-        </section>
-
-        {/* Streak Calendar */}
-        <section>
-          <StreakCalendar
-            currentStreak={streakData.currentStreak}
-            longestStreak={streakData.longestStreak}
-            streakHistory={streakData.streakHistory}
-          />
-        </section>
-
-        {/* Stats */}
-        <section>
-          <h2 className="mb-4 text-lg font-bold text-foreground">Vos Statistiques</h2>
-          <StatsGrid stats={stats} />
-        </section>
-
-        {/* Achievements */}
-        <section>
-          <AchievementShowcase achievements={achievements} />
-        </section>
-
-        {/* Leaderboard */}
-        <section>
-          <LeaderboardWidget
-            entries={leaderboardData ?? []}
-            title="Classement Général"
-          />
-        </section>
-
-        {/* Recent Activity */}
-        <section>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-foreground">Activité Récente</h2>
-            <button
-              type="button"
-              className={`
-                text-sm text-primary
-                hover:underline
-              `}
-            >
-              Voir tout
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {dashboardData?.recentSessions.map((session) => {
-              return (
-                <div
-                  key={session.id}
-                  className={`
-                    flex items-center gap-3 rounded-xl bg-muted/50 p-4
-                    transition-colors
-                    hover:bg-muted
-                  `}
+          {/* Quick Stats Grid */}
+          <motion.section variants={itemVariants} className="grid grid-cols-3 gap-3">
+            {stats.map(stat => (
+              <div
+                key={generateUUID()}
+                className={cn(
+                  'group relative overflow-hidden rounded-2xl border p-3 flex flex-col items-center justify-center gap-2 backdrop-blur-md transition-all hover:bg-accent',
+                  stat.bg,
+                  stat.borderColor,
+                )}
+              >
+                <div className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-xl transition-transform group-hover:scale-110 duration-300',
+                  stat.bg,
+                  stat.borderColor,
+                  stat.color,
+                  stat.glow,
+                  'border shadow-sm',
+                )}
                 >
-                  <div className={`
-                    flex h-10 w-10 items-center justify-center rounded-full
-                    bg-background text-primary
-                  `}
-                  >
-                    <BookOpen className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-foreground">
-                      {session.lessonTitle}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {session.subjectName}
-                      {' '}
-                      •
-                      {session.cardsReviewed}
-                      {' '}
-                      cartes
-                    </p>
-                  </div>
-                  <span className={`
-                    text-xs whitespace-nowrap text-muted-foreground
-                  `}
-                  >
-                    {new Date(session.startedAt).toLocaleDateString()}
+                  <stat.icon className={cn('w-5 h-5 fill-current/20')} />
+                </div>
+
+                <div className="flex flex-col items-center">
+                  <span className="text-lg font-bold text-foreground leading-none">{stat.value}</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mt-1">
+                    {stat.label}
                   </span>
                 </div>
-              )
-            })}
-          </div>
-        </section>
+              </div>
+            ))}
+          </motion.section>
+
+          {/* Daily Challenge Card - Featured */}
+          <motion.section variants={itemVariants}>
+            <div className="group relative overflow-hidden rounded-3xl border border-border bg-card p-1 backdrop-blur-xl transition-all hover:bg-accent">
+              <div className="p-6 relative overflow-hidden rounded-[20px]">
+                <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 to-transparent opacity-50 transition-opacity group-hover:opacity-100" />
+                <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-violet-600/20 blur-3xl" />
+
+                <div className="relative flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge className="bg-violet-500/10 text-violet-400 border-violet-500/20 hover:bg-violet-500/20">
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Défi du jour
+                      </Badge>
+                    </div>
+                    <h3 className="text-xl font-bold text-foreground mb-1">
+                      {dailyChallengeData?.isCompleted ? 'Défi Complété !' : 'Boostez votre savoir'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground max-w-[90%]">
+                      {dailyChallengeData?.isCompleted
+                        ? 'Revenez demain pour gagner plus de récompenses.'
+                        : `Complétez ${dailyChallengeData?.totalCards ?? 10} cartes pour gagner un bonus d'XP !`}
+                    </p>
+                  </div>
+                  <div className="relative">
+                    {dailyChallengeData && !dailyChallengeData.isCompleted && (
+                      <div className="flex flex-col items-end animate-pulse">
+                        <div className="flex items-center gap-1 text-xs font-mono text-orange-400 bg-orange-400/10 px-2 py-1 rounded-lg border border-orange-400/20">
+                          <Timer className="w-3 h-3" />
+                          <span>
+                            {Math.floor(dailyChallengeData.timeUntilReset / 3600)}
+                            h
+                            {' '}
+                            {Math.floor((dailyChallengeData.timeUntilReset % 3600) / 60)}
+                            m
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <Button
+                    onClick={() => navigate({ to: '/app/daily-challenge' })}
+                    disabled={isDailyChallengeLoading || dailyChallengeData?.isCompleted}
+                    className="w-full bg-violet-600 text-white hover:bg-violet-700 font-bold rounded-xl h-12 shadow-lg shadow-violet-500/10 active:scale-95 transition-all text-sm uppercase tracking-wide"
+                  >
+                    {dailyChallengeData?.isCompleted ? 'À demain !' : 'Commencer le défi'}
+                    {!dailyChallengeData?.isCompleted && <ChevronRight className="w-4 h-4 ml-2" />}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </motion.section>
+
+          {/* Quick Actions Grid */}
+          <motion.section variants={itemVariants}>
+            <div className="flex items-center justify-between mb-4 px-1">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <Rocket className="w-5 h-5 text-indigo-400" />
+                Démarrage Rapide
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {quickActions.map(action => (
+                <button
+                  type="button"
+                  key={generateUUID()}
+                  onClick={action.action}
+                  className="group relative flex flex-col p-4 rounded-2xl border border-border bg-card backdrop-blur-md transition-all hover:bg-accent hover:scale-[1.02] active:scale-95 text-left overflow-hidden"
+                >
+                  <div className={cn(
+                    'absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-linear-to-br',
+                    action.color,
+                  )}
+                  />
+
+                  <div className={cn(
+                    'w-10 h-10 rounded-xl mb-3 flex items-center justify-center bg-linear-to-br shadow-lg',
+                    action.color,
+                  )}
+                  >
+                    <action.icon className="w-5 h-5 text-white" />
+                  </div>
+
+                  <span className="font-bold text-foreground/90">{action.label}</span>
+                  <span className="text-xs text-muted-foreground mt-1">{action.subLabel}</span>
+                </button>
+              ))}
+            </div>
+          </motion.section>
+
+          {/* Recent Activity */}
+          <motion.section variants={itemVariants}>
+            <div className="flex items-center justify-between mb-4 px-1">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-emerald-400" />
+                Activité Récente
+              </h2>
+              <button type="button" className="text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors uppercase tracking-wide">
+                Voir tout
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {dashboardData?.recentSessions?.length
+                ? (
+                  dashboardData.recentSessions.map((session, i) => (
+                    <motion.div
+                      key={session.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      className="group flex items-center gap-4 p-4 rounded-2xl border border-border bg-card hover:bg-accent backdrop-blur-md transition-all hover:border-accent-foreground/10"
+                    >
+                      <div className="h-10 w-10 shrink-0 rounded-xl bg-muted flex items-center justify-center border border-border group-hover:border-indigo-500/30 group-hover:bg-indigo-500/10 transition-colors">
+                        <BookOpen className="w-5 h-5 text-muted-foreground group-hover:text-indigo-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-bold text-foreground truncate pr-2">
+                          {session.lessonTitle}
+                        </h4>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                          <span>{session.subjectName}</span>
+                          <span className="w-1 h-1 rounded-full bg-zinc-400" />
+                          <span>
+                            {session.cardsReviewed}
+                            {' '}
+                            cartes
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-1 rounded-lg border border-border">
+                        {new Date(session.startedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                      </span>
+                    </motion.div>
+                  ))
+                )
+                : (
+                  <div className="text-center py-10 text-sm text-muted-foreground bg-muted/50 rounded-3xl border border-border border-dashed">
+                    <div className="mb-2">👻</div>
+                    Aucune activité récente.
+                  </div>
+                )}
+            </div>
+          </motion.section>
+
+          {/* Gamification Modules (Streak & Leaderboard) */}
+          <motion.section variants={itemVariants} className="grid grid-cols-1 gap-6">
+            {/* Streamlined Steak Calendar */}
+            <StreakCalendar
+              currentStreak={dashboardData?.currentStreak ?? 0}
+              longestStreak={dashboardData?.longestStreak ?? 0}
+              streakHistory={
+                dashboardData?.streakHistory?.filter(isDefined).map(date => ({
+                  date: new Date(date),
+                  completed: true,
+                })) ?? []
+              }
+            />
+          </motion.section>
+        </motion.div>
       </main>
 
       <BottomNav />

@@ -66,13 +66,13 @@ export function ReferralShareCard({ className }: ShareCardProps) {
   }
 
   return (
-    <Card className={cn('', className)}>
+    <Card className={cn('border-white/5 bg-zinc-900/40 backdrop-blur-xl', className)}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Gift className="h-5 w-5 text-level" />
+        <CardTitle className="flex items-center gap-2 text-white">
+          <Gift className="h-5 w-5 text-indigo-400" />
           Parrainage
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-zinc-400">
           Invite tes amis et gagne 3€ de crédit pour chaque inscription !
         </CardDescription>
       </CardHeader>
@@ -80,12 +80,12 @@ export function ReferralShareCard({ className }: ShareCardProps) {
       <CardContent className="space-y-4">
         {/* Referral Code */}
         <div className="space-y-2">
-          <span className="text-sm font-medium">Ton code de parrainage</span>
+          <span className="text-sm font-medium text-zinc-300">Ton code de parrainage</span>
           <div className="flex gap-2">
             <Input
               value={referralCode || ''}
               readOnly
-              className="font-mono text-center text-lg tracking-wider"
+              className="font-mono text-center text-lg tracking-wider bg-zinc-800/50 border-white/10 text-white"
               aria-label="Code de parrainage"
             />
             <Button
@@ -93,26 +93,27 @@ export function ReferralShareCard({ className }: ShareCardProps) {
               size="icon"
               onClick={() => handleCopy(referralCode || '')}
               aria-label={copied ? 'Copié' : 'Copier le code'}
+              className="border-white/10 bg-transparent text-white hover:bg-white/5"
             >
               {copied
                 ? (
-                  <Check className="h-4 w-4 text-success" />
-                )
+                    <Check className="h-4 w-4 text-emerald-400" />
+                  )
                 : (
-                  <Copy className="h-4 w-4" />
-                )}
+                    <Copy className="h-4 w-4" />
+                  )}
             </Button>
           </div>
         </div>
 
         {/* Referral Link */}
         <div className="space-y-2">
-          <span className="text-sm font-medium">Lien de parrainage</span>
+          <span className="text-sm font-medium text-zinc-300">Lien de parrainage</span>
           <div className="flex gap-2">
             <Input
               value={referralLink}
               readOnly
-              className="text-sm text-muted-foreground"
+              className="text-sm text-zinc-400 bg-zinc-800/50 border-white/10"
               aria-label="Lien de parrainage"
             />
             <Button
@@ -120,6 +121,7 @@ export function ReferralShareCard({ className }: ShareCardProps) {
               size="icon"
               onClick={() => handleCopy(referralLink)}
               aria-label="Copier le lien"
+              className="border-white/10 bg-transparent text-white hover:bg-white/5"
             >
               <Copy className="h-4 w-4" />
             </Button>
@@ -128,7 +130,7 @@ export function ReferralShareCard({ className }: ShareCardProps) {
 
         {/* Share Button */}
         <Button
-          className="w-full bg-gradient-level hover:opacity-90"
+          className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-90 text-white border-0"
           onClick={handleShare}
         >
           <Share2 className="h-4 w-4 mr-2" />
@@ -136,12 +138,12 @@ export function ReferralShareCard({ className }: ShareCardProps) {
         </Button>
 
         {/* Reward Info */}
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-muted text-sm">
-          <Users className="h-4 w-4 text-muted-foreground" />
-          <span>
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-sm">
+          <Users className="h-4 w-4 text-indigo-400" />
+          <span className="text-indigo-200">
             Tu gagnes
             {' '}
-            <span className="font-semibold text-level">3€</span>
+            <span className="font-semibold text-indigo-300">3€</span>
             {' '}
             pour chaque ami qui s'abonne !
           </span>
@@ -153,21 +155,21 @@ export function ReferralShareCard({ className }: ShareCardProps) {
 
 function ReferralShareCardSkeleton({ className }: { className?: string }) {
   return (
-    <Card className={cn('', className)}>
+    <Card className={cn('border-white/5 bg-zinc-900/40', className)}>
       <CardHeader>
-        <Skeleton className="h-6 w-32" />
-        <Skeleton className="h-4 w-full mt-2" />
+        <Skeleton className="h-6 w-32 bg-zinc-800" />
+        <Skeleton className="h-4 w-full mt-2 bg-zinc-800" />
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-4 w-24 bg-zinc-800" />
+          <Skeleton className="h-10 w-full bg-zinc-800" />
         </div>
         <div className="space-y-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-4 w-24 bg-zinc-800" />
+          <Skeleton className="h-10 w-full bg-zinc-800" />
         </div>
-        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full bg-zinc-800" />
       </CardContent>
     </Card>
   )

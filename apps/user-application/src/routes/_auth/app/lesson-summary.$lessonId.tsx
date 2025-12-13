@@ -5,19 +5,20 @@ import {
   CloudUpload,
   Home,
   RotateCcw,
+  Share2,
+  Sparkles,
   Target,
-  TrendingUp,
-  Trophy,
   X,
 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { AppHeader } from '@/components/main'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { useOnlineStatus } from '@/hooks/use-online-status'
 import { getMutationQueueManager } from '@/lib/mutation-queue'
 import { trackRouteLoad } from '@/lib/performance-monitor'
+import { cn } from '@/lib/utils'
 
 interface SearchParams {
   correct?: number
@@ -86,265 +87,254 @@ function SummaryPage() {
   const seconds = (duration ?? 0) % 60
 
   // Determine performance level
-  let performanceLevel = 'Bon travail!'
-  let performanceColor = 'text-info'
-  let performanceIcon = Target
+  let performanceLevel = 'Bon travail !'
+  let performanceColor = 'text-white'
+  let gradientClass = 'from-blue-500 to-cyan-500'
 
   if (score >= 90) {
-    performanceLevel = 'Excellent!'
-    performanceColor = 'text-success'
-    performanceIcon = Trophy
+    performanceLevel = 'Excellent !'
+    performanceColor = 'text-emerald-400'
+    gradientClass = 'from-emerald-500 to-teal-500'
+    gradientClass = 'from-emerald-500 to-teal-500'
   }
   else if (score >= 70) {
-    performanceLevel = 'Très bien!'
-    performanceColor = 'text-level'
-    performanceIcon = TrendingUp
+    performanceLevel = 'Très bien !'
+    performanceColor = 'text-blue-400'
+    gradientClass = 'from-blue-500 to-indigo-500'
   }
   else if (score < 50) {
     performanceLevel = 'Continue à pratiquer'
-    performanceColor = 'text-warning'
+    performanceColor = 'text-orange-400'
+    gradientClass = 'from-orange-500 to-red-500'
   }
 
-  const PerformanceIcon = performanceIcon
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader title="Résumé" showAvatar={false} />
+    <div className="min-h-screen bg-background text-foreground overflow-hidden pb-24">
+      {/* Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className={`absolute top-[10%] left-[50%] -translate-x-1/2 w-[80%] h-[40%] rounded-full opacity-30 blur-[120px] bg-linear-to-r ${gradientClass}`} />
+        <div className="absolute bottom-0 left-0 w-full h-[30%] bg-linear-to-t from-background to-transparent z-10" />
+      </div>
 
-      <main className="mx-auto max-w-lg space-y-6 px-6 py-8 pb-24">
-        {/* Performance Header */}
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', duration: 0.6 }}
-          className="space-y-6 text-center"
-        >
-          <div className="flex justify-center">
-            <motion.div
-              initial={{ rotate: 0 }}
-              animate={{ rotate: 360 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className={`
-                bg-gradient-level flex h-28 w-28 items-center justify-center
-                rounded-full shadow-xl
-              `}
-            >
-              <PerformanceIcon className="h-14 w-14 text-white" />
-            </motion.div>
-          </div>
-          <div className="space-y-2">
-            <h2 className={`
-              text-3xl font-bold
-              ${performanceColor}
-            `}
-            >
-              {performanceLevel}
-            </h2>
-            <p className="text-base text-muted-foreground">Session terminée</p>
-          </div>
-        </motion.div>
+      <AppHeader title="Résumé" showAvatar={false} className="bg-transparent/0 border-none relative z-20" />
 
-        {/* Score Card */}
+      <main className="relative z-10 mx-auto max-w-lg px-6 pt-4">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-6"
         >
-          <Card className="overflow-hidden border-2 p-0">
-            <CardHeader className="bg-gradient-level pb-8 pt-8 text-white">
-              <CardTitle className="text-center text-5xl font-bold">
-                {score}
-                %
-              </CardTitle>
-              <p className="text-center text-base opacity-90">Score final</p>
-            </CardHeader>
-            <CardContent className="px-6 py-8">
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-3 text-center">
-                  <div className={`
-                    bg-gradient-success mx-auto flex h-16 w-16 items-center
-                    justify-center rounded-full shadow-lg
-                  `}
-                  >
-                    <Check className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold">{correct}</div>
-                    <div className="text-sm text-muted-foreground">Correctes</div>
-                  </div>
+          {/* Main Score Circle */}
+          <motion.div variants={itemVariants} className="flex flex-col items-center justify-center pt-8 pb-4">
+            <div className="relative group">
+              <div className={`absolute -inset-1 rounded-full opacity-75 blur-2xl transition duration-1000 group-hover:opacity-100 bg-linear-to-r ${gradientClass}`} />
+              <div className="relative flex h-40 w-40 items-center justify-center rounded-full bg-card border-4 border-muted shadow-2xl">
+                <div className="flex flex-col items-center">
+                  <span className="text-5xl font-black bg-clip-text text-transparent bg-linear-to-br from-foreground to-foreground/70">
+                    {score}
+                    %
+                  </span>
+                  <span className="text-sm font-medium text-muted-foreground mt-1">Score Final</span>
                 </div>
-                <div className="space-y-3 text-center">
-                  <div className={`
-                    bg-gradient-error mx-auto flex h-16 w-16 items-center
-                    justify-center rounded-full shadow-lg
-                  `}
-                  >
-                    <X className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold">{incorrect}</div>
-                    <div className="text-sm text-muted-foreground">Incorrectes</div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
 
-        {/* Stats Grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="grid grid-cols-2 gap-4"
-        >
-          <Card className="border-2">
-            <CardContent className="px-4 py-6 text-center">
-              <div className="bg-info mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                <Clock className="h-6 w-6 text-white" />
+                {/* Circular Progress (Static for now, could be animated SVG) */}
+                <svg className="absolute inset-0 h-full w-full -rotate-90">
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="76"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    fill="none"
+                    className="text-muted/20"
+                  />
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="76"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    fill="none"
+                    strokeDasharray={477}
+                    strokeDashoffset={477 - (477 * score) / 100}
+                    className={cn('transition-all duration-1000 ease-out', performanceColor)}
+                    strokeLinecap="round"
+                  />
+                </svg>
               </div>
-              <div className="text-2xl font-bold">
-                {minutes}
-                :
-                {seconds.toString().padStart(2, '0')}
-              </div>
-              <div className="mt-1 text-sm text-muted-foreground">Temps total</div>
-            </CardContent>
-          </Card>
-          <Card className="border-2">
-            <CardContent className="px-4 py-6 text-center">
-              <div className="bg-info mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                <Target className="h-6 w-6 text-white" />
-              </div>
-              <div className="text-2xl font-bold">{total}</div>
-              <div className="mt-1 text-sm text-muted-foreground">Cartes vues</div>
-            </CardContent>
-          </Card>
-        </motion.div>
+            </div>
 
-        {/* XP Earned */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4, type: 'spring' }}
-        >
-          <Card className="overflow-hidden border-2 border-xp bg-gradient-xp-horizontal shadow-xl">
-            <CardContent className="px-6 py-8 text-center">
-              <motion.div
-                initial={{ scale: 1 }}
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                className="mb-2 text-5xl font-bold text-white"
-              >
-                +
-                {actualXpEarned}
+            <div className="mt-6 text-center space-y-2">
+              <h2 className={cn('text-3xl font-bold tracking-tight', performanceColor)}>
+                {performanceLevel}
+              </h2>
+              <p className="text-muted-foreground font-medium">
+                Session terminée •
                 {' '}
-                XP
-              </motion.div>
-              <div className="text-base text-white/90">Points d'expérience gagnés 🎉</div>
-              {didLevelUp && newLevel && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 }}
-                  className="mt-3 rounded-full bg-white/20 px-4 py-2 text-sm font-semibold text-white"
-                >
-                  🎉 Niveau
-                  {' '}
-                  {newLevel}
-                  {' '}
-                  atteint !
-                </motion.div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
+                {minutes}
+                m
+                {' '}
+                {seconds}
+                s
+              </p>
+            </div>
+          </motion.div>
 
-        {/* Sync Status - Show if offline or has pending mutations */}
-        {(!isOnline || pendingMutations > 0) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-          >
-            <Card className="border-2 border-info/50 bg-info/5">
-              <CardContent className="flex items-center gap-3 px-4 py-4">
-                <div className="bg-info flex h-10 w-10 items-center justify-center rounded-full">
-                  <CloudUpload className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm font-medium">
-                    {isOnline ? 'Synchronisation en cours...' : 'En attente de connexion'}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {pendingMutations > 0
-                      ? `${pendingMutations} action${pendingMutations > 1 ? 's' : ''} en attente`
-                      : 'Vos progrès seront synchronisés automatiquement'}
+          {/* XP Card */}
+          <motion.div variants={itemVariants}>
+            <Card className="border-border bg-card backdrop-blur-xl overflow-hidden relative">
+              <div className={`absolute inset-0 opacity-10 bg-linear-to-r ${gradientClass}`} />
+              <CardContent className="p-6 relative flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm font-medium mb-1">XP Gagnés</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold text-foreground">
+                      +
+                      {actualXpEarned}
+                    </span>
+                    <span className="text-sm text-yellow-500 font-bold">XP</span>
                   </div>
                 </div>
+                {didLevelUp && (
+                  <div className="flex flex-col items-end">
+                    <div className="bg-yellow-500/20 text-yellow-600 px-3 py-1 rounded-full text-xs font-bold border border-yellow-500/30 animate-pulse">
+                      LEVEL UP!
+                    </div>
+                    <span className="text-2xl font-bold text-foreground mt-1">
+                      Lvl
+                      {newLevel}
+                    </span>
+                  </div>
+                )}
+                {!didLevelUp && (
+                  <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                    <Sparkles className="h-6 w-6 text-yellow-500" />
+                  </div>
+                )}
               </CardContent>
             </Card>
           </motion.div>
-        )}
 
-        {/* Motivational Message */}
-        {score >= 70 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="rounded-xl bg-success/10 p-4 text-center"
-          >
-            <p className="text-sm font-medium text-success">
-              {score >= 90
-                ? '🌟 Performance exceptionnelle ! Tu es sur la bonne voie !'
-                : '💪 Très bon travail ! Continue comme ça !'}
-            </p>
+          {/* Detailed Stats */}
+          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3">
+            <div className="rounded-2xl bg-card border border-border p-4 backdrop-blur-md flex flex-col items-center justify-center text-center group transition-colors hover:bg-accent/50">
+              <div className="h-10 w-10 rounded-full bg-emerald-500/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <Check className="h-5 w-5 text-emerald-500" />
+              </div>
+              <span className="text-2xl font-bold text-foreground">{correct}</span>
+              <span className="text-xs font-medium text-emerald-500">Correctes</span>
+            </div>
+
+            <div className="rounded-2xl bg-card border border-border p-4 backdrop-blur-md flex flex-col items-center justify-center text-center group transition-colors hover:bg-accent/50">
+              <div className="h-10 w-10 rounded-full bg-red-500/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <X className="h-5 w-5 text-red-500" />
+              </div>
+              <span className="text-2xl font-bold text-foreground">{incorrect}</span>
+              <span className="text-xs font-medium text-red-500">Incorrectes</span>
+            </div>
+
+            <div className="rounded-2xl bg-card border border-border p-4 backdrop-blur-md flex flex-col items-center justify-center text-center group transition-colors hover:bg-accent/50">
+              <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <Target className="h-5 w-5 text-blue-500" />
+              </div>
+              <span className="text-2xl font-bold text-foreground">{total}</span>
+              <span className="text-xs font-medium text-blue-500">Total Cartes</span>
+            </div>
+
+            <div className="rounded-2xl bg-card border border-border p-4 backdrop-blur-md flex flex-col items-center justify-center text-center group transition-colors hover:bg-accent/50">
+              <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <Clock className="h-5 w-5 text-purple-500" />
+              </div>
+              <span className="text-2xl font-bold text-foreground">
+                {minutes}
+                :
+                {seconds.toString().padStart(2, '0')}
+              </span>
+              <span className="text-xs font-medium text-purple-500">Temps</span>
+            </div>
           </motion.div>
-        )}
 
-        {score < 50 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="rounded-xl bg-warning/10 p-4 text-center"
-          >
-            <p className="text-sm font-medium text-warning">
-              📚 N'abandonne pas ! La pratique rend parfait. Essaie encore !
-            </p>
-          </motion.div>
-        )}
+          {/* Offline Sync Status */}
+          {(!isOnline || pendingMutations > 0) && (
+            <motion.div variants={itemVariants}>
+              <div className="rounded-xl border border-orange-500/20 bg-orange-500/10 p-4 flex items-center gap-3">
+                <CloudUpload className="h-5 w-5 text-orange-400" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-orange-300">
+                    {isOnline ? 'Synchronisation...' : 'Mode Hors Ligne'}
+                  </p>
+                  <p className="text-xs text-orange-400/70">
+                    {pendingMutations}
+                    {' '}
+                    changements en attente
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
-        {/* Action Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="space-y-3 pt-2"
-        >
-          <Button
-            size="lg"
-            className="w-full bg-gradient-xp text-lg font-semibold shadow-lg"
-            onClick={() =>
-              navigate({
+          {/* Actions */}
+          <motion.div variants={itemVariants} className="space-y-3 pt-4">
+            <Button
+              size="lg"
+              className={cn(
+                'w-full font-semibold text-white shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all',
+                'bg-linear-to-r hover:opacity-90',
+                gradientClass,
+              )}
+              onClick={() => navigate({
                 to: '/app/lesson-session/$lessonId',
                 params: { lessonId },
-                search: { mode: mode as 'flashcards' | 'quiz' | 'exam' },
+                search: { mode: mode as any },
               })}
-          >
-            <RotateCcw className="mr-2 h-5 w-5" />
-            Recommencer
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full border-2"
-            onClick={() => navigate({ to: '/app' })}
-          >
-            <Home className="mr-2 h-5 w-5" />
-            Retour à l'accueil
-          </Button>
+            >
+              <RotateCcw className="mr-2 h-5 w-5" />
+              Recommencer la session
+            </Button>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                variant="ghost"
+                size="lg"
+                className="w-full border border-border bg-card hover:bg-accent text-foreground"
+                onClick={() => navigate({ to: '/app' })}
+              >
+                <Home className="mr-2 h-4 w-4" />
+                Accueil
+              </Button>
+              <Button
+                variant="ghost"
+                size="lg"
+                className="w-full border border-border bg-card hover:bg-accent text-foreground"
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({
+                      title: 'Kurama App',
+                      text: `Je viens de terminer une session avec un score de ${score}% !`,
+                      url: window.location.href,
+                    }).catch(() => { })
+                  }
+                }}
+              >
+                <Share2 className="mr-2 h-4 w-4" />
+                Partager
+              </Button>
+            </div>
+          </motion.div>
         </motion.div>
       </main>
     </div>

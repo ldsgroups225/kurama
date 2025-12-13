@@ -50,18 +50,12 @@ export function EmailStep({ onSubmit }: EmailStepProps) {
       <div className="space-y-2">
         <Label
           htmlFor="email"
-          className={`
-            text-zinc-900
-            dark:text-zinc-50
-          `}
+          className="text-foreground"
         >
           Adresse email
         </Label>
         <div className="relative">
-          <Mail className={`
-            absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-zinc-400
-          `}
-          />
+          <Mail className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input
             id="email"
             type="email"
@@ -73,11 +67,7 @@ export function EmailStep({ onSubmit }: EmailStepProps) {
           />
         </div>
         {error && (
-          <p className={`
-            text-sm text-red-600
-            dark:text-red-400
-          `}
-          >
+          <p className="text-sm text-destructive">
             {error}
           </p>
         )}
@@ -85,29 +75,22 @@ export function EmailStep({ onSubmit }: EmailStepProps) {
 
       <Button
         type="submit"
-        className={`
-          w-full bg-orange-600 text-white
-          hover:bg-orange-700
-        `}
+        className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
         disabled={isLoading}
       >
         {isLoading
           ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Envoi en cours...
-              </>
-            )
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Envoi en cours...
+            </>
+          )
           : (
-              'Continuer'
-            )}
+            'Continuer'
+          )}
       </Button>
 
-      <p className={`
-        text-center text-xs text-zinc-500
-        dark:text-zinc-400
-      `}
-      >
+      <p className="text-center text-xs text-muted-foreground">
         Nous vous enverrons un code de vérification à 6 chiffres
       </p>
     </form>

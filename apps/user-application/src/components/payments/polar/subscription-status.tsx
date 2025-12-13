@@ -108,34 +108,34 @@ export function SubscriptionStatus({ className, showManageButton = true }: Subsc
           <div className="flex gap-2">
             {isPremium && portalUrl
               ? (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => window.open(portalUrl, '_blank')}
-                  disabled={isLoadingPortal}
-                >
-                  {isLoadingPortal
-                    ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    )
-                    : (
-                      <CreditCard className="h-4 w-4 mr-2" />
-                    )}
-                  Gérer l'abonnement
-                  <ExternalLink className="h-3 w-3 ml-2" />
-                </Button>
-              )
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => window.open(portalUrl, '_blank')}
+                    disabled={isLoadingPortal}
+                  >
+                    {isLoadingPortal
+                      ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        )
+                      : (
+                          <CreditCard className="h-4 w-4 mr-2" />
+                        )}
+                    Gérer l'abonnement
+                    <ExternalLink className="h-3 w-3 ml-2" />
+                  </Button>
+                )
               : !isPremium && (
-                <Button
-                  className="w-full bg-gradient-level hover:opacity-90"
-                  asChild
-                >
-                  <a href="/app/polar/subscriptions">
-                    <Crown className="h-4 w-4 mr-2" />
-                    Passer à Premium
-                  </a>
-                </Button>
-              )}
+                  <Button
+                    className="w-full bg-gradient-level hover:opacity-90"
+                    asChild
+                  >
+                    <a href="/app/polar/subscriptions">
+                      <Crown className="h-4 w-4 mr-2" />
+                      Passer à Premium
+                    </a>
+                  </Button>
+                )}
           </div>
         )}
       </CardContent>

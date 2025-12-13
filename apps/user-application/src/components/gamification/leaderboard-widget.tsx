@@ -30,11 +30,11 @@ export function LeaderboardWidget({
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Trophy className="text-level h-5 w-5" />
+        return <Trophy className="h-5 w-5 text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]" />
       case 2:
-        return <Medal className="h-5 w-5 text-muted-foreground" />
+        return <Medal className="h-5 w-5 text-zinc-300 drop-shadow-[0_0_8px_rgba(212,212,216,0.5)]" />
       case 3:
-        return <Award className="text-streak h-5 w-5" />
+        return <Award className="h-5 w-5 text-amber-700 drop-shadow-[0_0_8px_rgba(180,83,9,0.5)]" />
       default:
         return null
     }
@@ -47,7 +47,7 @@ export function LeaderboardWidget({
 
     if (change > 0) {
       return (
-        <Badge variant="secondary" className="bg-success text-success gap-1">
+        <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-400 gap-1 border border-emerald-500/20">
           <TrendingUp className="h-3 w-3" />
           +
           {change}
@@ -56,7 +56,7 @@ export function LeaderboardWidget({
     }
     else if (change < 0) {
       return (
-        <Badge variant="secondary" className="bg-error text-error gap-1">
+        <Badge variant="secondary" className="bg-red-500/10 text-red-400 gap-1 border border-red-500/20">
           <TrendingDown className="h-3 w-3" />
           {change}
         </Badge>
@@ -64,7 +64,7 @@ export function LeaderboardWidget({
     }
     else {
       return (
-        <Badge variant="secondary" className="gap-1">
+        <Badge variant="secondary" className="gap-1 bg-zinc-800 text-zinc-500 border border-white/5">
           <Minus className="h-3 w-3" />
         </Badge>
       )
@@ -81,12 +81,12 @@ export function LeaderboardWidget({
   }
 
   return (
-    <Card className={cn('overflow-hidden py-0', className)}>
+    <Card className={cn('overflow-hidden border-white/5 bg-zinc-900/40 backdrop-blur-xl', className)}>
       <CardContent className="p-6">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-foreground">{title}</h3>
-          <Badge variant="secondary">Cette semaine</Badge>
+          <h3 className="text-lg font-bold text-white">{title}</h3>
+          <Badge variant="outline" className="border-indigo-500/30 bg-indigo-500/10 text-indigo-300">Cette semaine</Badge>
         </div>
 
         {/* Leaderboard List */}
@@ -99,31 +99,29 @@ export function LeaderboardWidget({
               <div
                 key={entry.id}
                 className={cn(
-                  'flex items-center gap-3 rounded-xl p-3 transition-all',
+                  'flex items-center gap-3 rounded-xl p-3 transition-all border',
                   isCurrentUser
-                    ? 'bg-primary/10 ring-2 ring-primary/20'
-                    : `
-                      bg-muted/50
-                      hover:bg-muted
-                    `,
+                    ? 'bg-indigo-500/10 border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.15)]'
+                    : 'bg-zinc-800/30 border-white/5 hover:bg-zinc-800/50 hover:border-white/10',
                 )}
               >
                 {/* Rank */}
                 <div className="flex w-8 items-center justify-center">
                   {rankIcon || (
-                    <span className="text-sm font-bold text-muted-foreground">
+                    <span className="text-sm font-bold text-zinc-500">
                       {entry.rank}
                     </span>
                   )}
                 </div>
 
                 {/* Avatar */}
-                <Avatar className="h-10 w-10 border-2 border-background">
+                <Avatar className={cn(
+                  'h-10 w-10 border-2',
+                  isCurrentUser ? 'border-indigo-500/50' : 'border-zinc-800',
+                )}
+                >
                   <AvatarImage src={entry.avatar} />
-                  <AvatarFallback className={`
-                    bg-primary/10 text-xs font-semibold text-primary
-                  `}
-                  >
+                  <AvatarFallback className="bg-zinc-800 text-xs font-bold text-zinc-400">
                     {getInitials(entry.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -132,18 +130,18 @@ export function LeaderboardWidget({
                 <div className="min-w-0 flex-1">
                   <p className={cn(
                     'truncate text-sm font-medium',
-                    isCurrentUser ? 'text-primary' : 'text-foreground',
+                    isCurrentUser ? 'text-indigo-400' : 'text-zinc-200',
                   )}
                   >
                     {entry.name}
                     {isCurrentUser && (
-                      <span className="ml-2 text-xs text-muted-foreground">(Vous)</span>
+                      <span className="ml-2 text-xs font-normal text-zinc-500">(Vous)</span>
                     )}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-zinc-500 font-medium">
                     {entry.points.toLocaleString()}
                     {' '}
-                    points
+                    XP
                   </p>
                 </div>
 
@@ -157,10 +155,7 @@ export function LeaderboardWidget({
         {/* View All Link */}
         <button
           type="button"
-          className={`
-            mt-4 w-full text-sm font-medium text-primary
-            hover:underline
-          `}
+          className="mt-4 w-full text-sm font-medium text-zinc-400 hover:text-white hover:underline transition-colors"
         >
           Voir le classement complet
         </button>

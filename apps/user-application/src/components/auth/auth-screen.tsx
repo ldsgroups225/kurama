@@ -23,78 +23,52 @@ export function AuthScreen() {
   }
 
   return (
-    <div className={`
-      flex min-h-screen items-center justify-center bg-linear-to-br
-      from-orange-50 via-white to-orange-50 p-4
-      dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950
-    `}
-    >
-      <div className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4 relative overflow-hidden">
+      {/* Ambient Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] rounded-full bg-indigo-600/10 blur-[120px]" />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
         {/* Logo and Title */}
-        <div className="mb-8 text-center">
-          <div className={`
-            mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl
-            bg-linear-to-br from-orange-500 to-orange-600 shadow-lg
-          `}
-          >
-            <span className="text-2xl font-bold text-white">K</span>
+        <div className="mb-8 text-center animate-in fade-in slide-in-from-bottom-5 duration-700">
+          <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-linear-to-br from-indigo-500 to-purple-600 shadow-2xl shadow-indigo-500/20">
+            <span className="text-4xl font-black text-white tracking-tighter">K</span>
           </div>
-          <h1 className={`
-            mb-2 text-3xl font-bold text-zinc-900
-            dark:text-zinc-50
-          `}
-          >
+          <h1 className="mb-2 text-3xl font-bold text-foreground tracking-tight">
             Bienvenue sur Kurama
           </h1>
-          <p className={`
-            text-zinc-600
-            dark:text-zinc-400
-          `}
-          >
+          <p className="text-muted-foreground font-medium">
             Connectez-vous pour continuer votre apprentissage
           </p>
         </div>
 
         {/* Auth Card */}
-        <div className={`
-          rounded-2xl border border-zinc-200 bg-white p-8 shadow-xl
-          dark:border-zinc-800 dark:bg-zinc-900
-        `}
-        >
+        <div className="rounded-3xl border border-border bg-card/50 backdrop-blur-xl p-8 shadow-2xl animate-in fade-in slide-in-from-bottom-5 duration-700 delay-100">
           <Suspense fallback={(
             <div className="animate-pulse space-y-4">
-              <div className="h-10 rounded-sm bg-muted" />
-              <div className="h-10 rounded-sm bg-muted" />
+              <div className="h-10 rounded-xl bg-muted" />
+              <div className="h-10 rounded-xl bg-muted" />
             </div>
           )}
           >
             {step === 'email'
               ? (
-                  <EmailStep onSubmit={handleEmailSubmit} />
-                )
+                <EmailStep onSubmit={handleEmailSubmit} />
+              )
               : (
-                  <OtpStep email={email} onBack={handleBackToEmail} />
-                )}
+                <OtpStep email={email} onBack={handleBackToEmail} />
+              )}
           </Suspense>
 
           {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className={`
-                w-full border-t border-zinc-200
-                dark:border-zinc-800
-              `}
-              />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className={`
-                bg-white px-4 text-zinc-500
-                dark:bg-zinc-900 dark:text-zinc-400
-              `}
-              >
-                Ou continuer avec
-              </span>
-            </div>
+          <div className="relative my-8 flex items-center gap-4">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs font-medium uppercase text-muted-foreground tracking-widest">
+              Ou continuer avec
+            </span>
+            <div className="h-px flex-1 bg-border" />
           </div>
 
           {/* Social Auth */}
@@ -102,20 +76,12 @@ export function AuthScreen() {
         </div>
 
         {/* Footer */}
-        <p className={`
-          mt-6 text-center text-sm text-zinc-600
-          dark:text-zinc-400
-        `}
-        >
+        <p className="mt-8 text-center text-xs text-muted-foreground animate-in fade-in slide-in-from-bottom-5 duration-700 delay-200">
           En continuant, vous acceptez nos
           {' '}
           <button
             type="button"
-            className={`
-              text-orange-600 underline
-              hover:text-orange-700
-              dark:text-orange-500 dark:hover:text-orange-400
-            `}
+            className="text-primary hover:text-primary/80 transition-colors font-medium underline underline-offset-4"
             onClick={() => {
               // TODO: Navigate to terms page
             }}
@@ -127,11 +93,7 @@ export function AuthScreen() {
           {' '}
           <button
             type="button"
-            className={`
-              text-orange-600 underline
-              hover:text-orange-700
-              dark:text-orange-500 dark:hover:text-orange-400
-            `}
+            className="text-primary hover:text-primary/80 transition-colors font-medium underline underline-offset-4"
             onClick={() => {
               // TODO: Navigate to privacy page
             }}

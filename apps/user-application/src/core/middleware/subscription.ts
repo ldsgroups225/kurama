@@ -1,12 +1,12 @@
 /**
  * Subscription Middleware
- * 
+ *
  * Middleware for protecting premium features based on subscription status.
  */
 
-import { createMiddleware } from '@tanstack/react-start'
-import { getUserSubscriptionTier, hasActiveSubscription } from '@kurama/data-ops/queries/subscriptions'
 import type { SubscriptionTier } from '@kurama/data-ops/drizzle/schema'
+import { getUserSubscriptionTier, hasActiveSubscription } from '@kurama/data-ops/queries/subscriptions'
+import { createMiddleware } from '@tanstack/react-start'
 
 // Tier hierarchy for comparison
 const TIER_HIERARCHY: Record<SubscriptionTier, number> = {
@@ -97,7 +97,8 @@ export const subscriptionInfoMiddleware = createMiddleware().server(async ({ nex
         hasSubscription,
       },
     })
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error fetching subscription info:', error)
     return next({
       context: {
@@ -114,7 +115,7 @@ export const subscriptionInfoMiddleware = createMiddleware().server(async ({ nex
  */
 export function tierMeetsRequirement(
   userTier: SubscriptionTier,
-  requiredTier: SubscriptionTier
+  requiredTier: SubscriptionTier,
 ): boolean {
   return TIER_HIERARCHY[userTier] >= TIER_HIERARCHY[requiredTier]
 }
@@ -123,12 +124,12 @@ export function tierMeetsRequirement(
  * Feature flags based on subscription tier
  */
 export const TIER_FEATURES: Record<SubscriptionTier, {
-  maxLessonsPerDay: number;
-  hasOfflineAccess: boolean;
-  hasAdvancedStats: boolean;
-  hasExamMode: boolean;
-  hasPrioritySupport: boolean;
-  hasNoAds: boolean;
+  maxLessonsPerDay: number
+  hasOfflineAccess: boolean
+  hasAdvancedStats: boolean
+  hasExamMode: boolean
+  hasPrioritySupport: boolean
+  hasNoAds: boolean
 }> = {
   free: {
     maxLessonsPerDay: 3,

@@ -177,11 +177,7 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
       <button
         type="button"
         onClick={onBack}
-        className={`
-          flex items-center text-sm text-zinc-600 transition-colors
-          hover:text-zinc-900
-          dark:text-zinc-400 dark:hover:text-zinc-50
-        `}
+        className="flex items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
         disabled={isLoading}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -190,25 +186,13 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
 
       {/* Instructions */}
       <div className="text-center">
-        <h2 className={`
-          mb-2 text-xl font-semibold text-zinc-900
-          dark:text-zinc-50
-        `}
-        >
+        <h2 className="mb-2 text-xl font-semibold text-foreground">
           Entrez le code de vérification
         </h2>
-        <p className={`
-          text-sm text-zinc-600
-          dark:text-zinc-400
-        `}
-        >
+        <p className="text-sm text-muted-foreground">
           Nous avons envoyé un code à 6 chiffres à
         </p>
-        <p className={`
-          mt-1 text-sm font-medium text-zinc-900
-          dark:text-zinc-50
-        `}
-        >
+        <p className="mt-1 text-sm font-medium text-foreground">
           {email}
         </p>
       </div>
@@ -233,32 +217,23 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
             autoCapitalize="off"
             spellCheck="false"
             className={`
-        h-14 w-12 rounded-lg border-2 border-zinc-200 bg-white text-center
-        text-2xl font-semibold text-zinc-900 transition-all outline-none
-        focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20
-        disabled:cursor-not-allowed disabled:opacity-50
-        dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50
-      `}
+              h-14 w-12 rounded-lg border-2 border-border bg-background text-center
+              text-2xl font-semibold text-foreground transition-all outline-none
+              focus:border-primary focus:ring-2 focus:ring-primary/20
+              disabled:cursor-not-allowed disabled:opacity-50
+            `}
           />
         ))}
       </div>
 
       {error && (
-        <p className={`
-          text-center text-sm text-red-600
-          dark:text-red-400
-        `}
-        >
+        <p className="text-center text-sm text-destructive">
           {error}
         </p>
       )}
 
       {isLoading && (
-        <div className={`
-          flex items-center justify-center text-sm text-zinc-600
-          dark:text-zinc-400
-        `}
-        >
+        <div className="flex items-center justify-center text-sm text-muted-foreground">
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Vérification en cours...
         </div>
@@ -268,32 +243,24 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
       <div className="text-center">
         {canResend
           ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleResend}
-                className={`
-                  text-orange-600
-                  hover:text-orange-700
-                  dark:text-orange-500 dark:hover:text-orange-400
-                `}
-              >
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Renvoyer le code
-              </Button>
-            )
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleResend}
+              className="text-primary hover:text-primary/80"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Renvoyer le code
+            </Button>
+          )
           : (
-              <p className={`
-                text-sm text-zinc-500
-                dark:text-zinc-400
-              `}
-              >
-                Renvoyer le code dans
-                {' '}
-                {countdown}
-                s
-              </p>
-            )}
+            <p className="text-sm text-muted-foreground">
+              Renvoyer le code dans
+              {' '}
+              {countdown}
+              s
+            </p>
+          )}
       </div>
     </div>
   )

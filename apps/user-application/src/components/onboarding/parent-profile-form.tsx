@@ -9,6 +9,8 @@ import { submitProfile } from '@/core/functions/profile'
 import { ArrowLeft, ArrowRight, Loader2, Plus, X } from '@/lib/icons'
 import { generateUUID } from '@/utils/generateUUID'
 
+import { ProgressIndicator } from './progress-indicator'
+
 interface Steps {
   id: string
   label: string
@@ -20,50 +22,6 @@ interface ParentProfileFormProps {
 }
 
 type FormStep = 'personal' | 'children'
-
-// Mock progress indicator component
-function ProgressIndicator({ steps, currentStep }: { steps: Steps[], currentStep: number }) {
-  return (
-    <div className="mb-6 flex items-center justify-between">
-      {steps.map((step, index) => (
-        <div key={step.id} className="flex flex-1 items-center">
-          <div className="flex flex-1 flex-col items-center">
-            <div className={`
-              flex h-8 w-8 items-center justify-center rounded-full
-              ${index <= currentStep
-          ? 'bg-gradient-xp text-white'
-          : 'bg-muted text-muted-foreground'
-        }
-            `}
-            >
-              {index + 1}
-            </div>
-            <span className={`
-              mt-1 text-xs
-              ${index <= currentStep
-          ? 'text-xp'
-          : `text-muted-foreground`
-        }
-            `}
-            >
-              {step.label}
-            </span>
-          </div>
-          {index < steps.length - 1 && (
-            <div className={`
-              h-0.5 flex-1
-              ${index < currentStep
-              ? `bg-gradient-xp-horizontal`
-              : `bg-muted`
-            }
-            `}
-            />
-          )}
-        </div>
-      ))}
-    </div>
-  )
-}
 
 export function ParentProfileForm({
   onBack,
@@ -202,42 +160,44 @@ export function ParentProfileForm({
   }
 
   return (
-    <div className="bg-streak flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo */}
+    <div className="flex min-h-screen items-center justify-center bg-background p-4 relative overflow-hidden">
+      {/* Ambient Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] rounded-full bg-indigo-600/10 blur-[120px]" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] rounded-full bg-purple-600/10 blur-[120px]" />
+      </div>
+
+      <div className="w-full max-w-md relative z-10 animate-in fade-in slide-in-from-bottom-5 duration-700">
         <div className="mb-8 text-center">
-          <div className={`
-            bg-gradient-xp mb-4 inline-flex h-12 w-12 items-center
-            justify-center rounded-xl shadow-lg
-          `}
-          >
-            <span className="text-xl font-bold text-white">K</span>
+          <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 shadow-xl shadow-indigo-500/20">
+            <span className="text-3xl font-black text-white tracking-tighter">K</span>
           </div>
         </div>
 
-        <Card className="shadow-xl">
-          <CardHeader>
+        <Card className="border-border bg-card backdrop-blur-xl shadow-2xl">
+          <CardHeader className="pb-2">
             <div className="mb-2 flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handlePrevious}
                 disabled={isSubmitting}
+                className="hover:bg-accent text-muted-foreground hover:text-foreground"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <CardTitle className="text-foreground">
+              <CardTitle className="text-xl font-bold text-foreground">
                 Profil Parent
               </CardTitle>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-center text-sm font-medium text-muted-foreground">
               {currentStep === 'personal'
                 ? 'Commençons par vos informations personnelles'
                 : 'Liez vos enfants par matricule (optionnel)'}
             </p>
           </CardHeader>
 
-          <CardContent>
+          <CardContent className="pt-6">
             <ProgressIndicator steps={steps} currentStep={currentStepIndex} />
 
             <div className="space-y-4">
@@ -245,7 +205,7 @@ export function ParentProfileForm({
               {currentStep === 'personal' && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">Prénom</Label>
+                    <Label htmlFor="firstName" className="text-muted-foreground">Prénom</Label>
                     <Input
                       id="firstName"
                       type="text"
@@ -254,16 +214,17 @@ export function ParentProfileForm({
                       onChange={e =>
                         setFormData({ ...formData, firstName: e.target.value })}
                       disabled={isSubmitting}
+                      className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                     />
                     {errors.firstName && (
-                      <p className="text-error text-sm">
+                      <p className="text-red-400 text-sm font-medium">
                         {errors.firstName}
                       </p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Nom</Label>
+                    <Label htmlFor="lastName" className="text-muted-foreground">Nom</Label>
                     <Input
                       id="lastName"
                       type="text"
@@ -272,9 +233,10 @@ export function ParentProfileForm({
                       onChange={e =>
                         setFormData({ ...formData, lastName: e.target.value })}
                       disabled={isSubmitting}
+                      className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                     />
                     {errors.lastName && (
-                      <p className="text-error text-sm">
+                      <p className="text-red-400 text-sm font-medium">
                         {errors.lastName}
                       </p>
                     )}
@@ -283,7 +245,7 @@ export function ParentProfileForm({
                   <Button
                     type="button"
                     onClick={handleNext}
-                    className="w-full"
+                    className="w-full bg-linear-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/20 mt-4"
                     size="lg"
                   >
                     Suivant
@@ -297,13 +259,14 @@ export function ParentProfileForm({
                 <>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <Label>Matricules des enfants</Label>
+                      <Label className="text-muted-foreground">Matricules des enfants</Label>
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={handleAddChild}
                         disabled={isSubmitting}
+                        className="border-input bg-background/50 text-muted-foreground hover:bg-accent hover:text-foreground"
                       >
                         <Plus className="mr-1 h-4 w-4" />
                         Ajouter
@@ -311,19 +274,24 @@ export function ParentProfileForm({
                     </div>
 
                     {(!formData.childrenMatricules || formData.childrenMatricules.length === 0) && (
-                      <p className={`
-                        py-4 text-center text-sm text-muted-foreground
-                      `}
-                      >
-                        Aucun enfant ajouté. Cliquez sur "Ajouter" pour lier un enfant.
-                      </p>
+                      <div className="mx-auto flex max-w-[280px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 px-2 py-8 text-center animate-in fade-in zoom-in-95 duration-300">
+                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                          <Plus className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Aucun enfant ajouté
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground/80">
+                          Cliquez sur "Ajouter" pour lier un enfant
+                        </p>
+                      </div>
                     )}
 
                     {formData.childrenMatricules?.map((matricule, index) => (
-                      <div key={generateUUID()} className="space-y-2">
+                      <div key={generateUUID()} className="space-y-2 animate-in slide-in-from-right-5 fade-in duration-300">
                         <div className="flex items-start gap-2">
                           <div className="flex-1 space-y-2">
-                            <Label htmlFor={`child-${index}`}>
+                            <Label htmlFor={`child-${index}`} className="text-xs text-muted-foreground">
                               Enfant
                               {' '}
                               {index + 1}
@@ -336,6 +304,7 @@ export function ParentProfileForm({
                               onChange={e =>
                                 handleChildMatriculeChange(index, e.target.value)}
                               disabled={isSubmitting}
+                              className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:ring-indigo-500/20"
                             />
                           </div>
                           <Button
@@ -344,7 +313,7 @@ export function ParentProfileForm({
                             size="icon"
                             onClick={() => handleRemoveChild(index)}
                             disabled={isSubmitting}
-                            className="mt-8"
+                            className="mt-8 text-muted-foreground hover:text-red-400 hover:bg-red-500/10"
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -352,23 +321,23 @@ export function ParentProfileForm({
                       </div>
                     ))}
 
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground pt-2 text-center">
                       Cette information nous aide à personnaliser votre expérience
                     </p>
                   </div>
 
                   {/* Submit Error */}
                   {errors.submit && (
-                    <div className="bg-error text-error rounded-lg p-3 text-sm">
+                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg p-3 text-sm font-medium">
                       {errors.submit}
                     </div>
                   )}
 
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 mt-6">
                     <Button
                       type="button"
                       variant="outline"
-                      className="flex-1"
+                      className="flex-1 border-input bg-background/50 text-muted-foreground hover:bg-accent hover:text-foreground"
                       size="lg"
                       disabled={isSubmitting}
                       onClick={handleSkip}
@@ -377,21 +346,21 @@ export function ParentProfileForm({
                     </Button>
                     <Button
                       type="button"
-                      className="flex-1"
+                      className="flex-1 bg-linear-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/20"
                       size="lg"
                       disabled={isSubmitting}
                       onClick={handleSubmit}
                     >
                       {isSubmitting
                         ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Enregistrement...
-                            </>
-                          )
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Enregistrement...
+                          </>
+                        )
                         : (
-                            'Terminer'
-                          )}
+                          'Terminer'
+                        )}
                     </Button>
                   </div>
                 </>

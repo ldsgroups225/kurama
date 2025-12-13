@@ -1,8 +1,9 @@
+import { useNavigate } from '@tanstack/react-router'
 import { useAtom } from 'jotai'
 import { LevelBadge } from '@/components/gamification'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { userProfileAtom } from '@/lib/atoms'
+import { hasUnreadNotificationsAtom, userProfileAtom } from '@/lib/atoms'
 import { useSession } from '@/lib/auth-client'
 import { ArrowLeft, Bell } from '@/lib/icons'
 import { cn } from '@/lib/utils'
@@ -32,10 +33,9 @@ export function AppHeader({
   userLevel,
   className,
 }: AppHeaderProps) {
-  // Use cached profile data from localStorage for instant access
   const [userProfile] = useAtom(userProfileAtom)
-  // Fallback to session data if profile not cached
   const { data: session } = useSession()
+  const navigate = useNavigate()
 
   const getGreeting = () => {
     const hour = new Date().getHours()
@@ -47,98 +47,111 @@ export function AppHeader({
   }
 
   const getUserInitials = () => {
-    // Try to get initials from cached profile first
     if (userProfile?.firstName && userProfile?.lastName) {
       return `${userProfile.firstName[0]}${userProfile.lastName[0]}`.toUpperCase()
     }
-    // Fallback to session name
     if (session?.user?.name) {
-      return session.user.name
-        .split(' ')
-        .map(n => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
+      return session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     }
     return 'U'
   }
 
-  const getUserDisplayName = () => {
-    // Try cached profile first for instant display
-    if (userProfile?.firstName) {
-      return userProfile.firstName
+  const handleBack = () => {
+    if (onBackClick) {
+      onBackClick()
     }
-    // Fallback to session
-    return session?.user?.name || 'Étudiant'
+    else {
+      navigate({ to: '..' })
+    }
   }
 
+  const [hasNotifications] = useAtom(hasUnreadNotificationsAtom)
+
   return (
-    <header className={cn(`
-      sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm
-      supports-backdrop-filter:bg-background/60
-    `, className)}
+    <header className={cn(
+      'sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-xl transition-all duration-300 supports-backdrop-filter:bg-background/60',
+      className,
+    )}
     >
-      <div className="mx-auto max-w-lg px-4 py-4">
-        <div className="flex items-center justify-between">
+      <div className="mx-auto max-w-lg px-4 py-3">
+        <div className="flex items-center justify-between gap-4">
+
           <div className="flex items-center gap-3">
-            {showBackButton && onBackClick && (
+            {showBackButton && (
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={onBackClick}
-                className="shrink-0"
+                onClick={handleBack}
+                className="h-9 w-9 shrink-0 rounded-full text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             )}
-            {showAvatar && (
-              <Avatar className="h-10 w-10 border-2 border-primary/20">
-                <AvatarImage src={session?.user?.image || undefined} />
-                <AvatarFallback className={`
-                  bg-primary/10 font-semibold text-primary
-                `}
-                >
-                  {getUserInitials()}
-                </AvatarFallback>
-              </Avatar>
+
+            {!showBackButton && showAvatar && (
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate({ to: '/app/profile' })}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    navigate({ to: '/app/profile' })
+                  }
+                }}
+                className="cursor-pointer transition-opacity hover:opacity-80"
+              >
+                <Avatar className="h-9 w-9 border border-border ring-2 ring-muted">
+                  <AvatarImage src={session?.user?.image || undefined} className="object-cover" />
+                  <AvatarFallback className="bg-muted text-xs font-bold text-muted-foreground">
+                    {getUserInitials()}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
             )}
-            <div>
+
+            <div className="flex flex-col justify-center">
               {title
                 ? (
-                  <h1 className="text-xl font-bold text-foreground">{title}</h1>
+                  <h1 className="text-lg font-bold text-foreground tracking-tight animate-in fade-in slide-in-from-left-2 duration-300">
+                    {title}
+                  </h1>
                 )
                 : (
-                  <>
-                    <p className="text-sm text-muted-foreground">{getGreeting()}</p>
-                    <h1 className="text-lg font-bold text-foreground">
-                      {getUserDisplayName()}
-                    </h1>
-                  </>
+                  <div className="flex flex-col animate-in fade-in slide-in-from-left-2 duration-300">
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider leading-none mb-0.5">{getGreeting()}</span>
+                    <span className="text-sm font-bold text-foreground leading-tight">
+                      {userProfile?.firstName || session?.user?.name || 'Étudiant'}
+                    </span>
+                  </div>
                 )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {showNotifications && (
-              <Button variant="ghost" size="icon" className="relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative h-9 w-9 rounded-full text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                onClick={() => navigate({ to: '/app/notifications' })}
+              >
                 <Bell className="h-5 w-5" />
-                <span className={`
-                  absolute top-1 right-1 h-2 w-2 rounded-full bg-primary
-                `}
-                />
+                {hasNotifications && (
+                  <span className="absolute top-2.5 right-2.5 h-1.5 w-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                )}
               </Button>
             )}
           </div>
         </div>
 
-        {/* Compact Level Badge */}
         {showLevel && userLevel && (
-          <div className="mt-3">
+          <div className="mt-3 pb-1 px-1 animate-in fade-in slide-in-from-top-1">
             <LevelBadge
               level={userLevel.level}
               currentXP={userLevel.currentXP}
               nextLevelXP={userLevel.nextLevelXP}
               compact
+              className="bg-card/50"
             />
           </div>
         )}
