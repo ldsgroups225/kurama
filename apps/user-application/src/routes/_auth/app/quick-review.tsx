@@ -125,7 +125,7 @@ function QuickReviewPage() {
           correctCount: correct,
           totalCount: totalCards,
           duration,
-          mode: 'flashcards',
+          mode: 'quick-review',
         })
       }
 
@@ -137,7 +137,7 @@ function QuickReviewPage() {
           incorrect,
           total: totalCards,
           duration,
-          mode: 'flashcards',
+          mode: 'quick-review',
           xpEarned: correct * 10,
         },
       })

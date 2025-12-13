@@ -7,7 +7,13 @@ import { protectedFunctionMiddleware } from '@/core/middleware/auth'
 /**
  * XP calculation constants
  */
-const XP_BASE_CORRECT = 10 // Base XP per correct answer
+const XP_BASE_RATES = {
+  'flashcards': 5, // Self-assessed review, encouraging but modest
+  'quiz': 10, // Objective assessment, standard rate
+  'exam': 12, // Timed + objective, slightly higher
+  'quick-review': 7, // Targeted review of difficult cards
+} as const
+
 const XP_STREAK_BONUS_MULTIPLIER = 0.1 // 10% bonus per streak day (max 50%)
 const XP_STREAK_BONUS_MAX = 0.5
 const XP_PERFECT_SCORE_BONUS = 50 // Bonus for 100% score
@@ -116,7 +122,7 @@ export interface SessionStatsInput {
   correctCount: number
   totalCount: number
   duration: number // in seconds
-  mode: 'flashcards' | 'quiz' | 'exam'
+  mode: 'flashcards' | 'quiz' | 'exam' | 'quick-review'
 }
 
 export interface SessionStatsResult {
@@ -182,8 +188,9 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
     // Calculate current streak for bonus
     const currentStreak = await calculateStreak(db, userId)
 
-    // Calculate XP breakdown
-    const baseXP = correctCount * XP_BASE_CORRECT
+    // Calculate XP breakdown based on mode
+    const baseXPRate = XP_BASE_RATES[mode] || XP_BASE_RATES.flashcards
+    const baseXP = correctCount * baseXPRate
     const streakMultiplier = Math.min(currentStreak * XP_STREAK_BONUS_MULTIPLIER, XP_STREAK_BONUS_MAX)
     const streakBonus = Math.round(baseXP * streakMultiplier)
     const perfectBonus = percentage === 100 ? XP_PERFECT_SCORE_BONUS : 0

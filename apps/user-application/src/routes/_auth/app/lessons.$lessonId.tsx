@@ -9,6 +9,7 @@ import {
   FileText,
   ListChecks,
   Target,
+  Zap,
 } from 'lucide-react'
 import { useEffect } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
@@ -17,6 +18,7 @@ import { LogoLoader } from '@/components/ui/logo-loader'
 import { getLessonDetails } from '@/core/functions/learning'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
+import { getXPRateText } from '@/lib/xp-rates'
 
 export const Route = createFileRoute('/_auth/app/lessons/$lessonId')({
   component: LessonModePage,
@@ -211,9 +213,13 @@ function LessonModePage() {
                               {mode.tag}
                             </Badge>
                           </div>
-                          <p className="text-xs text-muted-foreground line-clamp-1">
+                          <p className="text-xs text-muted-foreground line-clamp-1 mb-1">
                             {mode.description}
                           </p>
+                          <div className="flex items-center gap-1 text-[10px] text-xp font-medium">
+                            <Zap className="w-3 h-3" />
+                            <span>{getXPRateText(mode.id)}</span>
+                          </div>
                         </div>
 
                         {/* Arrow */}

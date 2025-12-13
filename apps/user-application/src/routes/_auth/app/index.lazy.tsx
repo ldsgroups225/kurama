@@ -22,10 +22,11 @@ import { Button } from '@/components/ui/button'
 import { getDailyChallengeStatus } from '@/core/functions/daily-challenge'
 import { getDashboardStats } from '@/core/functions/dashboard'
 import { getReviewCardsCount } from '@/core/functions/review'
-
 import { Rocket, Trophy } from '@/lib/icons'
+
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn, isDefined } from '@/lib/utils'
+import { getXPRateText } from '@/lib/xp-rates'
 import { generateUUID } from '@/utils/generateUUID'
 
 export const Route = createLazyFileRoute('/_auth/app/')({
@@ -83,7 +84,7 @@ function AppHome() {
     {
       icon: Brain,
       label: 'Révision',
-      subLabel: reviewCount > 0 ? `${reviewCount} carte${reviewCount > 1 ? 's' : ''}` : 'Cartes du jour',
+      subLabel: reviewCount > 0 ? `${reviewCount} carte${reviewCount > 1 ? 's' : ''}` : getXPRateText('quick-review'),
       color: 'from-violet-500 to-fuchsia-500',
       action: () => navigate({ to: '/app/quick-review' }),
       badge: reviewCount > 0 ? reviewCount : undefined,
@@ -91,14 +92,14 @@ function AppHome() {
     {
       icon: Gamepad2,
       label: 'Quiz',
-      subLabel: 'Test rapide',
+      subLabel: getXPRateText('quiz'),
       color: 'from-amber-400 to-orange-500',
       action: () => navigate({ to: '/app/subjects' }),
     },
     {
       icon: FileText,
       label: 'Examen',
-      subLabel: 'Simulateur',
+      subLabel: getXPRateText('exam'),
       color: 'from-blue-400 to-cyan-500',
       action: () => navigate({ to: '/app/subjects' }),
     },

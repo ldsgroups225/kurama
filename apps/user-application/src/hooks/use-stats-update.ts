@@ -79,10 +79,19 @@ export function useStatsUpdate(options: UseStatsUpdateOptions = {}) {
           ? Math.round((input.correctCount / input.totalCount) * 100)
           : 0
 
+        // Calculate offline XP based on mode
+        const baseRates = {
+          flashcards: 5,
+          quiz: 10,
+          exam: 12,
+          'quick-review': 7,
+        } as const
+        const baseXP = input.correctCount * (baseRates[input.mode] || baseRates.flashcards)
+
         return {
-          xpEarned: input.correctCount * 10,
+          xpEarned: baseXP,
           xpBreakdown: {
-            base: input.correctCount * 10,
+            base: baseXP,
             streakBonus: 0,
             perfectBonus: 0,
             speedBonus: 0,
