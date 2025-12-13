@@ -12,4 +12,14 @@ export type { CardOrientation, SessionStats } from './use-session-state'
 export { useStatsUpdate } from './use-stats-update'
 export type { UseStatsUpdateOptions } from './use-stats-update'
 export { createSwipeHandlers } from './use-swipe-handler'
+export { default as useVibration } from './use-vibration'
+export type {
+  UseVibrationReturn,
+  VibrationControls,
+  VibrationPattern,
+  VibrationState,
+} from './use-vibration'
+export { useStreakVibration } from './use-streak-vibration'
+export { useQuizVibration } from './use-quiz-vibration'
 export { useViewportHeight } from './use-viewport-height'
+export { VibrationPatterns } from './vibration-patterns'

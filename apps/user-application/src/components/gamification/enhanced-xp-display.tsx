@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, Clock, Flame, Star, Target, Zap } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { useVibration, VibrationPatterns } from '@/hooks'
 import { cn } from '@/lib/utils'
 
 interface XPBreakdownItem {
@@ -36,6 +37,22 @@ export function EnhancedXPDisplay({
   className,
 }: EnhancedXPDisplayProps) {
   const [showBreakdown, setShowBreakdown] = useState(false)
+  const [{ isSupported }, { vibrate }] = useVibration()
+
+  // Trigger vibration feedback on mount for XP gain and level up
+  useEffect(() => {
+    if (!isSupported)
+      return
+
+    if (hasLevelUp) {
+      // Level up gets priority vibration
+      vibrate(VibrationPatterns.levelUp)
+    }
+    else if (totalXP > 0) {
+      // XP gain vibration based on amount
+      vibrate(VibrationPatterns.xpGain(totalXP))
+    }
+  }, [isSupported, vibrate, hasLevelUp, totalXP])
 
   // Calculate XP breakdown based on mode
   const baseRates = {
@@ -294,6 +311,20 @@ export function CompactXPDisplay({
   newLevel,
   className,
 }: CompactXPDisplayProps) {
+  const [{ isSupported }, { vibrate }] = useVibration()
+
+  // Trigger vibration feedback on mount
+  useEffect(() => {
+    if (!isSupported)
+      return
+
+    if (hasLevelUp) {
+      vibrate(VibrationPatterns.levelUp)
+    }
+    else if (totalXP > 0) {
+      vibrate(VibrationPatterns.xpGain(totalXP))
+    }
+  }, [isSupported, vibrate, hasLevelUp, totalXP])
   return (
     <div className={cn('flex items-center gap-3', className)}>
       <div className="flex items-center gap-2">

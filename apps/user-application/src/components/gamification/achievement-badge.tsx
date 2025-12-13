@@ -1,6 +1,8 @@
 import type { LucideIcon } from '@/lib/icons'
+import { useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { CardContent } from '@/components/ui/card'
+import { useVibration, VibrationPatterns } from '@/hooks'
 import { Lock } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
@@ -21,6 +23,8 @@ interface AchievementBadgeProps {
   achievement: Achievement
   size?: 'sm' | 'md' | 'lg'
   onClick?: () => void
+  /** Whether this achievement was just unlocked (triggers vibration) */
+  isNewlyUnlocked?: boolean
 }
 
 const rarityGradients = {
@@ -48,7 +52,17 @@ export function AchievementBadge({
   achievement,
   size = 'md',
   onClick,
+  isNewlyUnlocked = false,
 }: AchievementBadgeProps) {
+  const [{ isSupported }, { vibrate }] = useVibration()
+
+  // Trigger vibration when achievement is newly unlocked
+  useEffect(() => {
+    if (!isSupported || !isNewlyUnlocked || !achievement.unlocked) return
+
+    const rarity = achievement.rarity || 'common'
+    vibrate(VibrationPatterns.achievement[rarity])
+  }, [isSupported, vibrate, isNewlyUnlocked, achievement.unlocked, achievement.rarity])
   const Icon = achievement.icon
   const isLocked = !achievement.unlocked
   const hasProgress = achievement.progress !== undefined && achievement.maxProgress !== undefined
@@ -84,11 +98,11 @@ export function AchievementBadge({
       onClick={onClick}
       onKeyDown={onClick
         ? (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              onClick()
-            }
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onClick()
           }
+        }
         : undefined}
       type={onClick ? 'button' : undefined}
       aria-label={onClick ? `${achievement.name} - ${achievement.unlocked ? 'Débloqué' : 'Verrouillé'}` : undefined}
@@ -111,11 +125,11 @@ export function AchievementBadge({
             >
               {isLocked
                 ? (
-                    <Lock className={cn(iconSizes[size], 'text-muted-foreground')} />
-                  )
+                  <Lock className={cn(iconSizes[size], 'text-muted-foreground')} />
+                )
                 : (
-                    <Icon className={cn(iconSizes[size], 'text-white')} />
-                  )}
+                  <Icon className={cn(iconSizes[size], 'text-white')} />
+                )}
             </div>
 
             {/* Rarity Badge */}

@@ -1,0 +1,131 @@
+import { useCallback, useEffect, useRef, useState } from "react"
+
+/**
+ * Vibration pattern - can be a single duration in milliseconds
+ * or an array of durations (vibrate, pause, vibrate, pause, ...)
+ */
+export type VibrationPattern = number | number[]
+
+/**
+ * Current state of the vibration functionality
+ */
+export interface VibrationState {
+  /** Whether the device supports vibration */
+  isSupported: boolean
+  /** Whether the device is currently vibrating */
+  isVibrating: boolean
+}
+
+/**
+ * Controls for managing device vibration
+ */
+export interface VibrationControls {
+  /**
+   * Triggers vibration with the given pattern
+   * @param pattern - Duration in ms or pattern array of durations
+   */
+  vibrate: (pattern?: VibrationPattern) => void
+  /**
+   * Stops any ongoing vibration
+   */
+  stop: () => void
+}
+
+/**
+ * Hook return type
+ */
+export type UseVibrationReturn = [VibrationState, VibrationControls]
+
+/**
+ * React hook for controlling device vibration
+ *
+ * @example
+ * ```tsx
+ * const [{ isSupported, isVibrating }, { vibrate, stop }] = useVibration();
+ *
+ * // Simple vibration
+ * vibrate(); // Default 200ms
+ * vibrate(500); // 500ms
+ *
+ * // Pattern: vibrate 100ms, pause 50ms, vibrate 200ms
+ * vibrate([100, 50, 200]);
+ *
+ * // Using predefined patterns
+ * vibrate(VibrationPatterns.success);
+ * vibrate(VibrationPatterns.double);
+ * vibrate(VibrationPatterns.error);
+ *
+ * // Stop vibration
+ * stop();
+ * ```
+ */
+const useVibration = (): UseVibrationReturn => {
+  const isSupported =
+    typeof navigator !== "undefined" && typeof navigator.vibrate === "function"
+
+  const [isVibrating, setIsVibrating] = useState<boolean>(false)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearVibrationTimeout = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      clearVibrationTimeout()
+    }
+  }, [clearVibrationTimeout])
+
+  const vibrate = useCallback(
+    (pattern: VibrationPattern = 200) => {
+      if (!isSupported) return
+
+      clearVibrationTimeout()
+
+      try {
+        const didVibrate = navigator.vibrate(pattern)
+        setIsVibrating(didVibrate)
+
+        if (Array.isArray(pattern)) {
+          const totalDuration = pattern.reduce((sum, duration) => sum + duration, 0)
+          timeoutRef.current = setTimeout(() => {
+            setIsVibrating(false)
+            timeoutRef.current = null
+          }, totalDuration)
+        } else if (pattern > 0) {
+          timeoutRef.current = setTimeout(() => {
+            setIsVibrating(false)
+            timeoutRef.current = null
+          }, pattern)
+        }
+      } catch (error) {
+        console.error("An error occurred while trying to use the Vibration API:", error)
+        setIsVibrating(false)
+      }
+    },
+    [isSupported, clearVibrationTimeout]
+  )
+
+  const stop = useCallback(() => {
+    if (!isSupported) return
+
+    clearVibrationTimeout()
+
+    try {
+      navigator.vibrate(0)
+      setIsVibrating(false)
+    } catch (error) {
+      console.error("An error occurred while stopping vibration:", error)
+    }
+  }, [isSupported, clearVibrationTimeout])
+
+  return [
+    { isSupported, isVibrating },
+    { vibrate, stop }
+  ]
+}
+
+export default useVibration

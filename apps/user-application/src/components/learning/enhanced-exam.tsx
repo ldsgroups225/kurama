@@ -7,6 +7,7 @@ import { MarkdownRenderer } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { useQuizVibration } from '@/hooks'
 import { calculateLearningModeXP } from '@/lib/learning-mode-gamification'
 import { cn } from '@/lib/utils'
 
@@ -42,9 +43,13 @@ export function EnhancedExam({
   const [earnedXP, setEarnedXP] = useState(0)
   const [combo, setCombo] = useState(session.currentCombo || 0)
   const [isUnderPressure, setIsUnderPressure] = useState(false)
+  const [hasTriggeredTimeWarning, setHasTriggeredTimeWarning] = useState(false)
 
   // Ref for auto-scroll functionality
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Vibration feedback
+  const { triggerTimeWarning } = useQuizVibration()
 
   // Timer effect
   useEffect(() => {
@@ -56,6 +61,12 @@ export function EnhancedExam({
         if (prev <= 1) {
           onTimeUp?.()
           return 0
+        }
+
+        // Trigger time warning vibration at 10 seconds remaining
+        if (prev === 10 && !hasTriggeredTimeWarning) {
+          triggerTimeWarning()
+          setHasTriggeredTimeWarning(true)
         }
 
         // Mark as under pressure when less than 25% time remaining
@@ -99,8 +110,6 @@ export function EnhancedExam({
       }, 100)
     }
   }, [examState])
-
-
 
   const handleAnswerSelect = useCallback((answerIndex: number) => {
     if (examState !== 'answering')
@@ -280,7 +289,6 @@ export function EnhancedExam({
             ))}
           </div>
 
-
         </CardContent>
       </Card>
 
@@ -316,7 +324,6 @@ export function EnhancedExam({
           )}
         />
       </div>
-
 
     </div>
   )

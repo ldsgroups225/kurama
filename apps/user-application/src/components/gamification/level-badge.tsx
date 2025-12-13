@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
+import { useVibration, VibrationPatterns } from '@/hooks'
 import { Sparkles, TrendingUp } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
@@ -9,6 +11,8 @@ interface LevelBadgeProps {
   nextLevelXP: number
   className?: string
   compact?: boolean
+  /** Whether this level was just reached (triggers vibration) */
+  isNewLevel?: boolean
 }
 
 export function LevelBadge({
@@ -17,7 +21,15 @@ export function LevelBadge({
   nextLevelXP,
   className,
   compact = false,
+  isNewLevel = false,
 }: LevelBadgeProps) {
+  const [{ isSupported }, { vibrate }] = useVibration()
+
+  // Trigger vibration when reaching a new level
+  useEffect(() => {
+    if (!isSupported || !isNewLevel) return
+    vibrate(VibrationPatterns.levelUp)
+  }, [isSupported, vibrate, isNewLevel])
   const progress = (currentXP / nextLevelXP) * 100
   const xpRemaining = nextLevelXP - currentXP
 

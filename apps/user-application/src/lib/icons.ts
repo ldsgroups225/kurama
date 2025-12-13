@@ -113,4 +113,7 @@ export {
   FileQuestion,
   Github,
   Route,
+  Smartphone,
+  Volume2,
+  VolumeX,
 } from 'lucide-react'

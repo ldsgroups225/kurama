@@ -26,8 +26,10 @@ import { useAutoplay } from '@/hooks/use-autoplay'
 import { useCardHeight } from '@/hooks/use-card-height'
 import { useCardSwipeAnimations } from '@/hooks/use-card-swipe-animations'
 import { useOnlineStatus } from '@/hooks/use-online-status'
+import { useQuizVibration } from '@/hooks/use-quiz-vibration'
 import { useSessionState } from '@/hooks/use-session-state'
 import { useStatsUpdate } from '@/hooks/use-stats-update'
+import { useStreakVibration } from '@/hooks/use-streak-vibration'
 import { createSwipeHandlers } from '@/hooks/use-swipe-handler'
 import { useViewportHeight } from '@/hooks/use-viewport-height'
 import { db } from '@/lib/db'
@@ -136,6 +138,10 @@ function SessionPage() {
   const cardHeight = useCardHeight(viewportHeight)
   const swipeAnimations = useCardSwipeAnimations()
 
+  // Vibration feedback hooks
+  const streakVibration = useStreakVibration()
+  const quizVibration = useQuizVibration()
+
   // Offline support
   const { isOnline } = useOnlineStatus()
   const [pendingMutations, setPendingMutations] = useState(0)
@@ -240,13 +246,17 @@ function SessionPage() {
     (response: 'correct' | 'incorrect', timeSpent?: number) => {
       incrementStat(response)
 
+      // Calculate new combo and streak values
+      const newCombo = response === 'correct' ? (enhancedSession.currentCombo || 0) + 1 : 0
+      const newCorrectCount = enhancedSession.correctAnswers! + (response === 'correct' ? 1 : 0)
+
       // Update enhanced session stats
       setEnhancedSession(prev => ({
         ...prev,
         totalQuestions: prev.totalQuestions! + 1,
-        correctAnswers: prev.correctAnswers! + (response === 'correct' ? 1 : 0),
+        correctAnswers: newCorrectCount,
         incorrectAnswers: prev.incorrectAnswers! + (response === 'incorrect' ? 1 : 0),
-        currentCombo: response === 'correct' ? (prev.currentCombo || 0) + 1 : 0,
+        currentCombo: newCombo,
         averageTimePerQuestion: timeSpent || prev.averageTimePerQuestion || 0,
         perfectAnswers: response === 'correct' && (timeSpent || 0) < 5
           ? (prev.perfectAnswers || 0) + 1
@@ -255,6 +265,27 @@ function SessionPage() {
           ? (prev.struggledAnswers || 0) + 1
           : prev.struggledAnswers || 0,
       }))
+
+      // Trigger vibration feedback based on mode and response
+      if (response === 'correct') {
+        if (mode === 'flashcards') {
+          // Trigger streak vibration for flashcards
+          streakVibration.triggerStreakVibration(newCorrectCount)
+        }
+        else if (mode === 'quiz' || mode === 'exam') {
+          // Trigger combo vibration for quiz/exam modes
+          quizVibration.triggerComboVibration(newCombo)
+        }
+      }
+      else {
+        // Reset streaks/combos on incorrect answers
+        if (mode === 'flashcards') {
+          streakVibration.resetStreak()
+        }
+        else if (mode === 'quiz' || mode === 'exam') {
+          quizVibration.resetCombo()
+        }
+      }
 
       // Calculate enhanced XP for flashcards
       if (mode === 'flashcards' && response === 'correct') {
@@ -293,9 +324,28 @@ function SessionPage() {
       if (isLastCard) {
         const finalCorrect = response === 'correct' ? sessionStats.correct + 1 : sessionStats.correct
         const finalIncorrect = response === 'incorrect' ? sessionStats.incorrect + 1 : sessionStats.incorrect
+
+        // Trigger session complete vibration
+        if (mode === 'flashcards') {
+          streakVibration.triggerSessionComplete()
+        }
+        else if (mode === 'quiz') {
+          const finalScore = Math.round((finalCorrect / (finalCorrect + finalIncorrect)) * 100)
+          quizVibration.triggerQuizComplete(finalScore)
+        }
+        else if (mode === 'exam') {
+          const finalScore = Math.round((finalCorrect / (finalCorrect + finalIncorrect)) * 100)
+          quizVibration.triggerQuizComplete(finalScore)
+        }
+
         navigateToSummary(finalCorrect, finalIncorrect)
       }
       else {
+        // Trigger question advance vibration for quiz/exam modes
+        if (mode === 'quiz' || mode === 'exam') {
+          quizVibration.triggerQuestionAdvance()
+        }
+
         setCurrentCardIndex(prev => prev + 1)
         setIsFlipped(false)
         swipeAnimations.x.set(0)

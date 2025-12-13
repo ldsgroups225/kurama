@@ -1,184 +1,178 @@
-me: "Analyze this "/**
- * XP calculation constants
- */
-const XP_BASE_RATES = {
-'flashcards': 5, // Self-assessed review, encouraging but modest
-'quiz': 10, // Objective assessment, standard rate
-'exam': 12, // Timed + objective, slightly higher
-'quick-review': 7, // Targeted review of difficult cards
-} as const" and let braindstorm about flashcards point. Reply in french"
+# Vibration Feedback Implementation - COMPLETED ✅
 
----
+## Overview
+Successfully implemented haptic feedback system using custom `useVibration()` hook in Kurama's learning platform, with comprehensive patterns and user controls.
 
-claude: "Analysons ce système de points d'XP pour les flashcards (5 XP) :
+## Priority Features to Implement
 
-## Réflexions sur le taux actuel
+### Flashcard Mode
+- **Streak Milestones**: Escalating patterns (3 correct = triple pulse, 5 correct = longer celebration)
+- **Session Complete**: Victory pattern (short-long-short pulses)
 
-**Pourquoi 5 XP semble approprié :**
-- C'est une auto-évaluation, donc moins objective qu'un quiz
-- Encourage la pratique régulière sans sur-récompenser
-- Crée une progression naturelle : flashcards → quiz → exam
+### Quiz Mode
+- **Time Warning**: Urgent pattern when 10 seconds left
+- **Question Advance**: Soft confirmation tap
+- **Combo Achievements**: Progressive intensity (2x, 3x, 5x combos)
+- **Quiz Complete**: Celebration sequence based on score
 
-**Mais considérons aussi :**
+### Gamification Integration
+- **XP Gain**: Pulse intensity matching XP amount (more XP = longer pulse)
+- **Level Up**: Special ascending pattern (3 pulses, increasing intensity)
+- **Achievement Unlock**: Unique signature pattern per rarity:
+  - Common: Single pulse (100ms)
+  - Rare: Double pulse (100ms, pause, 100ms)
+  - Epic: Triple pulse with crescendo
+  - Legendary: Extended celebration sequence
 
-### Arguments pour augmenter (vers 7-8 XP)
-- Les flashcards sont la **base de l'apprentissage** espacé
-- Elles demandent un effort cognitif réel (rappel actif)
-- Si elles donnent trop peu d'XP, les utilisateurs pourraient les négliger au profit des quiz
-- La répétition espacée est scientifiquement la méthode la plus efficace
+## Implementation Requirements
 
-### Arguments pour différencier
-Plutôt qu'un taux fixe, on pourrait imaginer :
-- **Première révision** : 5 XP (découverte)
-- **Révisions espacées** (après X jours) : 7-8 XP (renforcement à long terme)
-- **Carte difficile maîtrisée** : bonus de 2-3 XP
-- **Streak de révisions quotidiennes** : multiplicateur x1.2
+### Accessibility (Critical)
+- Always check `isVibrationSupported` before triggering
+- Provide settings to disable/customize vibration intensity
+- Respect system-level vibration settings
+- Alternative feedback for users who disable vibration
 
-### Comparaison avec "quick-review" (7 XP)
-C'est intéressant que quick-review donne plus ! Cela suggère :
-- Cibler les difficultés vaut plus que la révision générale
-- Peut-être faudrait-il aligner les flashcards standards à 6-7 XP ?
+### Performance (Critical)
+- Debounce rapid successive vibrations
+- Queue vibration patterns to avoid conflicts
+- Minimal battery impact with short, efficient patterns
 
-**Quelle direction te semble la plus pertinente pour ton application ?** 🤔"
+### User Experience (Critical)
+- Start subtle and allow users to increase intensity
+- Provide haptic feedback preview in settings
+- Context-aware patterns (study mode vs review mode)
+- Progressive disclosure of advanced patterns
 
----
+## Pattern Library Structure
 
-me: "Vue que les flashcards sont la base de l'apprentissage et réellement prouvé, renforçons le système de gamification."
-
----
-
-claude: "Excellente décision ! Renforçons la gamification des flashcards pour refléter leur valeur pédagogique. Voici mes propositions :
-
-## Système XP Amélioré pour Flashcards
-
-### 1. **XP de base augmenté**
-```javascript
-const XP_BASE_RATES = {
-  'flashcards': 8, // ↑ de 5 à 8 (reconnaissance de la valeur)
-  'quiz': 10,
-  'exam': 12,
-  'quick-review': 7,
-}
-```
-
-### 2. **Système de multiplicateurs dynamiques**
-
-```javascript
-const FLASHCARD_MULTIPLIERS = {
-  // Streak quotidien
+```typescript
+const VibrationPatterns = {
+  // Streak milestones
   streak: {
-    3: 1.1,   // 3 jours consécutifs : +10%
-    7: 1.25,  // 1 semaine : +25%
-    30: 1.5,  // 1 mois : +50%
+    x3: [50, 30, 50, 30, 50],
+    x5: [100, 50, 100, 50, 100],
+    x10: [200, 100, 200]
   },
   
-  // Difficulté de la carte
-  difficulty: {
-    'hard': 1.3,      // Cartes difficiles valent plus
-    'medium': 1.0,
-    'easy': 0.8,      // Cartes faciles moins valorisées
+  // Session completion
+  sessionComplete: [100, 50, 150],
+  
+  // Quiz patterns
+  timeWarning: [100, 100, 100, 100],
+  questionAdvance: [40],
+  combo: {
+    x2: [80, 40, 80],
+    x3: [100, 50, 100, 50, 100],
+    x5: [150, 75, 150, 75, 150]
+  },
+  quizComplete: (score: number) => {
+    if (score >= 90) return [200, 100, 200, 100, 250]
+    if (score >= 70) return [150, 75, 150]
+    return [100]
   },
   
-  // Intervalle de répétition (SRS)
-  interval: {
-    first_review: 1.0,
-    day_1: 1.1,
-    day_3: 1.2,
-    week_1: 1.3,
-    week_2: 1.4,
-    month_1: 1.5,     // Révision à long terme = max XP
-  },
+  // Gamification
+  xpGain: (amount: number) => [Math.min(amount * 2, 200)],
+  levelUp: [100, 50, 150, 50, 200],
   
-  // Performance
-  accuracy: {
-    perfect: 1.2,     // Réponse immédiate et correcte
-    good: 1.0,
-    struggled: 0.9,   // A hésité mais correct
+  // Achievements by rarity
+  achievement: {
+    common: [100],
+    rare: [100, 100, 100],
+    epic: [150, 100, 200],
+    legendary: [200, 150, 250, 150, 300]
   }
 }
 ```
 
-### 3. **Système de bonus**
+## Integration Points
 
-```javascript
-const FLASHCARD_BONUSES = {
-  // Badges/achievements
-  'morning_learner': 5,      // Révision avant 9h
-  'night_owl': 3,            // Révision après 22h
-  'century_club': 50,        // 100 cartes en une session
-  'perfect_session': 20,     // 20 cartes sans erreur
-  'mastery': 30,             // Carte passée de "hard" à "easy"
-  
-  // Combos
-  'combo_5': 10,             // 5 bonnes réponses d'affilée
-  'combo_10': 25,
-  'combo_20': 50,
-  
-  // Milestones
-  'first_100_cards': 100,
-  'first_1000_cards': 500,
-}
+### Priority Components
+- `EnhancedXPDisplay`: XP gain celebrations
+- `LevelBadge`: Level-up animations
+- `AchievementBadge`: Achievement unlocks
+- Quiz components: Time warnings, combo tracking
+- Session completion screens
+
+### Settings Integration
+- Vibration intensity slider (0-100%)
+- Enable/disable toggle
+- Pattern preview functionality
+- Accessibility preferences
+
+## Implementation Status ✅
+
+### ✅ Completed Features
+
+1. **Vibration Hook & Patterns Library**
+   - `useVibration()` hook with full TypeScript support
+   - Comprehensive `VibrationPatterns` library with Kurama-specific patterns
+   - Proper error handling and device support detection
+
+2. **Gamification Integration**
+   - `EnhancedXPDisplay`: XP gain vibrations based on amount
+   - `LevelBadge`: Level-up celebration vibrations
+   - `AchievementBadge`: Rarity-based achievement unlock vibrations
+
+3. **Specialized Hooks**
+   - `useStreakVibration()`: Flashcard streak milestone management
+   - `useQuizVibration()`: Quiz mode feedback (combos, warnings, completion)
+
+4. **User Settings Panel**
+   - `VibrationSettings` component with intensity control
+   - Enable/disable toggle with accessibility considerations
+   - Pattern testing functionality
+   - Proper fallbacks for unsupported devices
+
+5. **Accessibility & Performance**
+   - Device support detection
+   - Intensity scaling (10-100%)
+   - Debounced vibrations to prevent conflicts
+   - Respects system-level vibration settings
+
+### 📁 File Structure Created
+
+```
+src/
+├── hooks/
+│   ├── use-vibration.ts          # Core vibration hook
+│   ├── vibration-patterns.ts     # Pattern library
+│   ├── use-streak-vibration.ts   # Flashcard streaks
+│   └── use-quiz-vibration.ts     # Quiz mode feedback
+├── components/
+│   ├── settings/
+│   │   └── vibration-settings.tsx # User control panel
+│   └── gamification/
+│       ├── enhanced-xp-display.tsx    # ✅ Updated
+│       ├── achievement-badge.tsx      # ✅ Updated
+│       └── level-badge.tsx           # ✅ Updated
+└── lib/
+    └── icons.ts                  # ✅ Added missing icons
 ```
 
-### 4. **Exemple de calcul complet**
+### 🎯 Fully Integrated ✅
 
-```javascript
-function calculateFlashcardXP(card, session) {
-  let baseXP = 8;
-  
-  // Multiplicateur de streak
-  baseXP *= FLASHCARD_MULTIPLIERS.streak[session.streakDays] || 1;
-  
-  // Multiplicateur de difficulté
-  baseXP *= FLASHCARD_MULTIPLIERS.difficulty[card.difficulty];
-  
-  // Multiplicateur d'intervalle (SRS)
-  baseXP *= FLASHCARD_MULTIPLIERS.interval[card.intervalStage] || 1;
-  
-  // Multiplicateur de performance
-  baseXP *= FLASHCARD_MULTIPLIERS.accuracy[card.responseQuality];
-  
-  // Bonus de combo
-  if (session.currentCombo >= 20) {
-    baseXP += FLASHCARD_BONUSES.combo_20;
-  } else if (session.currentCombo >= 10) {
-    baseXP += FLASHCARD_BONUSES.combo_10;
-  } else if (session.currentCombo >= 5) {
-    baseXP += FLASHCARD_BONUSES.combo_5;
-  }
-  
-  return Math.round(baseXP);
-}
-```
+The vibration system has been completely integrated into:
 
-### 5. **Visualisation en temps réel**
+**Learning Session Components:**
+- ✅ **Flashcard Mode**: Streak milestone vibrations (3x, 5x, 10x+) and session completion
+- ✅ **Quiz Mode**: Combo achievement vibrations and completion feedback
+- ✅ **Exam Mode**: Time warning vibrations (10 seconds remaining) and completion feedback
 
-Afficher à l'utilisateur :
-- **"+8 XP"** (base)
-- **"+2 XP"** (streak bonus 7 jours)
-- **"+3 XP"** (carte difficile maîtrisée)
-- **"🔥 Combo x5 +10 XP"**
-- **Total : 23 XP** ✨
+**Gamification Components:**
+- ✅ **Enhanced XP Display**: Vibrates on XP gain and level-up
+- ✅ **Achievement Badge**: Rarity-based vibration patterns
+- ✅ **Level Badge**: Level-up celebration vibrations
 
-### 6. **Système de niveaux adapté**
+**User Settings:**
+- ✅ **Settings Page**: Complete vibration control panel at `/app/settings`
+- ✅ **Intensity Control**: 10-100% intensity slider
+- ✅ **Pattern Testing**: Preview all vibration types
+- ✅ **Accessibility**: Device support detection and fallbacks
 
-```javascript
-const LEVELS = {
-  1: 0,
-  2: 100,      // ~12-15 cartes
-  3: 250,      // ~18-25 cartes additionnelles
-  4: 500,
-  5: 1000,
-  // Progression exponentielle mais atteignable
-}
-```
+**Integration Points:**
+- ✅ `lesson-session.$lessonId.tsx`: All learning modes with contextual feedback
+- ✅ `enhanced-exam.tsx`: Time warning at 10 seconds remaining
+- ✅ `settings.tsx`: User control panel with full customization
 
-## Avantages psychologiques
-
-✅ **Récompense immédiate** : chaque carte donne un feedback positif
-✅ **Progression visible** : les multiplicateurs montrent l'amélioration
-✅ **Habitudes encouragées** : les streaks fidélisent
-✅ **Défis motivants** : les combos créent du suspense
-✅ **Reconnaissance de l'effort** : les cartes difficiles valent plus
-
-**Veux-tu que je te code ce système complet en TypeScript avec interface de configuration ?** 🚀"
+All components follow Kurama's conventions with proper TypeScript typing, accessibility support, and semantic color usage. The system is production-ready!
