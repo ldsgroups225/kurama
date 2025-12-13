@@ -1,10 +1,11 @@
 import type { LearningQuestion, LearningSession } from '@/lib/learning-mode-gamification'
 import { AnimatePresence, motion } from 'framer-motion'
-import { AlertTriangle, CheckCircle2, Clock, FileText, Flame, Timer, XCircle, Zap } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { AlertTriangle, Clock, FileText, Flame, Timer, Zap } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { CompactXPDisplay } from '@/components/gamification'
 import { MarkdownRenderer } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { calculateLearningModeXP } from '@/lib/learning-mode-gamification'
@@ -43,6 +44,10 @@ export function EnhancedExam({
   const [combo, setCombo] = useState(session.currentCombo || 0)
   const [isUnderPressure, setIsUnderPressure] = useState(false)
 
+  // Refs for auto-scroll functionality
+  const feedbackRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
   // Timer effect
   useEffect(() => {
     if (examState !== 'answering')
@@ -67,17 +72,54 @@ export function EnhancedExam({
     return () => clearInterval(timer)
   }, [examState, timeLimit, onTimeUp])
 
-  // Generate exam options (more challenging than quiz)
+  // Generate exam options (stable across re-renders to maintain position)
   const correctAnswer = card?.backContent || card?.back || 'Réponse correcte'
-  const options = [
-    correctAnswer,
-    'Option plausible A',
-    'Option plausible B',
-    'Option plausible C',
-  ].sort(() => Math.random() - 0.5) // Shuffle options
+  const [shuffledOptions] = useState(() => {
+    const opts = [
+      correctAnswer,
+      'Option plausible A',
+      'Option plausible B',
+      'Option plausible C',
+    ]
+    // Shuffle once and keep stable
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [opts[i], opts[j]] = [opts[j], opts[i]]
+    }
+    return opts
+  })
 
-  const correctIndex = options.indexOf(correctAnswer)
+  const correctIndex = shuffledOptions.indexOf(correctAnswer)
   const question = card?.frontContent || card?.front || 'Question'
+
+  // Auto-scroll to feedback on incorrect answer
+  useEffect(() => {
+    if (examState === 'feedback' && selectedAnswer !== correctIndex && feedbackRef.current) {
+      // Scroll to feedback with smooth animation
+      feedbackRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest',
+      })
+    }
+  }, [examState, selectedAnswer, correctIndex])
+
+  // Auto-scroll to top when moving to next card after wrong answer
+  useEffect(() => {
+    if (examState === 'completed' && selectedAnswer !== correctIndex) {
+      // Scroll to top of container for next card
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }, 100)
+    }
+  }, [examState, selectedAnswer, correctIndex])
+
+  const handleContinue = useCallback(() => {
+    const isCorrect = selectedAnswer === correctIndex
+    const timeUsed = timeLimit - timeRemaining
+    setExamState('completed')
+    onAnswer(isCorrect, timeUsed, attempts)
+  }, [selectedAnswer, correctIndex, timeLimit, timeRemaining, attempts, onAnswer])
 
   const handleAnswerSelect = useCallback((answerIndex: number) => {
     if (examState !== 'answering')
@@ -135,11 +177,14 @@ export function EnhancedExam({
 
     setExamState('feedback')
 
-    // Shorter feedback time in exam mode (pressure simulation)
-    setTimeout(() => {
-      setExamState('completed')
-      onAnswer(isCorrect, timeUsed, attempts)
-    }, isCorrect ? 1000 : 1500)
+    // Auto-advance only for correct answers (shorter time in exam mode)
+    if (isCorrect) {
+      setTimeout(() => {
+        setExamState('completed')
+        onAnswer(isCorrect, timeUsed, attempts)
+      }, 1000)
+    }
+    // For incorrect answers, wait for user to click Continue button
   }, [examState, correctIndex, startTime, timeLimit, timeRemaining, attempts, combo, isUnderPressure, card, cardIndex, totalCards, session, onAnswer, onXPEarned])
 
   const formatTime = (seconds: number) => {
@@ -174,27 +219,14 @@ export function EnhancedExam({
     return 'border-border bg-muted/30'
   }
 
-  const getOptionIcon = (index: number) => {
-    if (examState === 'answering')
-      return null
-
-    if (index === correctIndex) {
-      return <CheckCircle2 className="w-5 h-5 text-success" />
-    }
-
-    if (selectedAnswer === index && index !== correctIndex) {
-      return <XCircle className="w-5 h-5 text-error" />
-    }
-
-    return null
-  }
+  // No icons needed - using background colors instead
 
   return (
-    <div className="space-y-6">
+    <div ref={containerRef} className="space-y-6">
       {/* Exam Header with Timer */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Badge variant="outline" className="gap-1 bg-exam/10 text-exam border-exam/20">
+          <Badge variant="outline" className="gap-1 bg-info/10 text-info border-info/20">
             <FileText className="w-3 h-3" />
             Examen
             {' '}
@@ -244,7 +276,7 @@ export function EnhancedExam({
       </div>
 
       {/* Question Card */}
-      <Card className="overflow-hidden border-exam/20">
+      <Card className="overflow-hidden border-info/20">
         <CardContent className="p-6">
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-3">
@@ -265,7 +297,7 @@ export function EnhancedExam({
 
           {/* Options */}
           <div className="space-y-3">
-            {options.map((option, index) => (
+            {shuffledOptions.map((option, index) => (
               <motion.button
                 key={index}
                 type="button"
@@ -282,18 +314,6 @@ export function EnhancedExam({
                 <span className="flex-1">
                   <MarkdownRenderer content={option} compact />
                 </span>
-
-                <AnimatePresence>
-                  {getOptionIcon(index) && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0 }}
-                    >
-                      {getOptionIcon(index)}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </motion.button>
             ))}
           </div>
@@ -302,6 +322,7 @@ export function EnhancedExam({
           <AnimatePresence>
             {examState === 'feedback' && (
               <motion.div
+                ref={feedbackRef}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
@@ -309,31 +330,35 @@ export function EnhancedExam({
               >
                 {selectedAnswer === correctIndex
                   ? (
-                      <div className="flex items-center gap-3 text-success">
-                        <CheckCircle2 className="w-6 h-6" />
-                        <div>
-                          <p className="font-semibold">Excellent !</p>
-                          <p className="text-sm opacity-80">
-                            {isUnderPressure
-                              ? 'Remarquable sous pression !'
-                              : attempts === 1 ? 'Réponse parfaite !' : 'Bonne réponse !'}
-                          </p>
-                        </div>
+                    <div className="flex items-center gap-3 text-success">
+                      <div className="w-6 h-6 rounded-full bg-success/10 border border-success/20 flex items-center justify-center">
+                        <span className="text-success text-sm font-bold">✓</span>
                       </div>
-                    )
+                      <div>
+                        <p className="font-semibold">Excellent !</p>
+                        <p className="text-sm opacity-80">
+                          {isUnderPressure
+                            ? 'Remarquable sous pression !'
+                            : attempts === 1 ? 'Réponse parfaite !' : 'Bonne réponse !'}
+                        </p>
+                      </div>
+                    </div>
+                  )
                   : (
-                      <div className="flex items-center gap-3 text-error">
-                        <XCircle className="w-6 h-6" />
-                        <div>
-                          <p className="font-semibold">Incorrect</p>
-                          <p className="text-sm opacity-80">
-                            Réponse correcte :
-                            {' '}
-                            <strong>{correctAnswer}</strong>
-                          </p>
-                        </div>
+                    <div className="flex items-center gap-3 text-error">
+                      <div className="w-6 h-6 rounded-full bg-error/10 border border-error/20 flex items-center justify-center">
+                        <span className="text-error text-sm font-bold">✗</span>
                       </div>
-                    )}
+                      <div>
+                        <p className="font-semibold">Incorrect</p>
+                        <p className="text-sm opacity-80">
+                          Réponse correcte :
+                          {' '}
+                          <strong>{correctAnswer}</strong>
+                        </p>
+                      </div>
+                    </div>
+                  )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -372,6 +397,17 @@ export function EnhancedExam({
           )}
         />
       </div>
+
+      {/* Continue Button - Only show for incorrect answers */}
+      {examState === 'feedback' && selectedAnswer !== correctIndex && (
+        <Button
+          size="lg"
+          className="w-full bg-gradient-xp text-lg font-semibold"
+          onClick={handleContinue}
+        >
+          Continuer
+        </Button>
+      )}
     </div>
   )
 }

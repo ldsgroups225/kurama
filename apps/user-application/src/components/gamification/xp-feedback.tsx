@@ -242,7 +242,7 @@ export function CompactXPDisplay({ xp, breakdown, className }: CompactXPDisplayP
       <motion.button
         type="button"
         onClick={() => setShowBreakdown(!showBreakdown)}
-        className="flex items-center gap-1 px-2 py-1 rounded-full bg-xp/10 text-xp border border-xp/20 hover:bg-xp/20 transition-colors"
+        className="flex items-center gap-1 px-2 rounded-full bg-xp/10 text-xp border border-xp/20 hover:bg-xp/20 transition-colors"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
