@@ -81,7 +81,7 @@ export function useStatsUpdate(options: UseStatsUpdateOptions = {}) {
 
         // Calculate offline XP based on mode
         const baseRates = {
-          flashcards: 5,
+          flashcards: 8,
           quiz: 10,
           exam: 12,
           'quick-review': 7,

@@ -8,7 +8,7 @@ import { protectedFunctionMiddleware } from '@/core/middleware/auth'
  * XP calculation constants
  */
 const XP_BASE_RATES = {
-  'flashcards': 5, // Self-assessed review, encouraging but modest
+  'flashcards': 8, // Enhanced: Self-assessed review with gamification (increased from 5)
   'quiz': 10, // Objective assessment, standard rate
   'exam': 12, // Timed + objective, slightly higher
   'quick-review': 7, // Targeted review of difficult cards

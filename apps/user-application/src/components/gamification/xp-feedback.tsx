@@ -1,0 +1,276 @@
+import type { XPCalculationResult } from '@/lib/flashcard-gamification'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Clock, Flame, Star, Target, Zap } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { cn } from '@/lib/utils'
+
+interface XPFeedbackProps {
+  result: XPCalculationResult | null
+  show: boolean
+  onComplete?: () => void
+}
+
+export function XPFeedback({ result, show, onComplete }: XPFeedbackProps) {
+  const [currentStep, setCurrentStep] = useState(0)
+  const [showTotal, setShowTotal] = useState(false)
+
+  useEffect(() => {
+    if (!show || !result) {
+      setCurrentStep(0)
+      setShowTotal(false)
+      return
+    }
+
+    // Animate through each bonus step
+    const steps = [
+      { type: 'base', value: result.baseXP },
+      ...result.bonuses.map(bonus => ({ type: 'bonus', value: bonus.value, name: bonus.name })),
+    ]
+
+    let stepIndex = 0
+    const interval = setInterval(() => {
+      if (stepIndex < steps.length) {
+        setCurrentStep(stepIndex + 1)
+        stepIndex++
+      }
+      else {
+        setShowTotal(true)
+        clearInterval(interval)
+
+        // Auto-hide after showing total
+        setTimeout(() => {
+          onComplete?.()
+        }, 2000)
+      }
+    }, 600)
+
+    return () => clearInterval(interval)
+  }, [show, result, onComplete])
+
+  if (!show || !result)
+    return null
+
+  const hasMultipliers = Object.values(result.multipliers).some(m => m !== 1)
+  const hasBonuses = result.bonuses.length > 0
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+      <AnimatePresence mode="wait">
+        {!showTotal ? (
+          <motion.div
+            key="breakdown"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            className="bg-card/95 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-2xl max-w-sm mx-4"
+          >
+            <div className="text-center space-y-4">
+              {/* Base XP */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: currentStep >= 1 ? 1 : 0.3, y: 0 }}
+                className="flex items-center justify-center gap-2"
+              >
+                <Zap className="w-5 h-5 text-xp" />
+                <span className="text-lg font-bold text-foreground">
+                  +
+                  {result.baseXP}
+                  {' '}
+                  XP
+                </span>
+                <span className="text-sm text-muted-foreground">(base)</span>
+              </motion.div>
+
+              {/* Multipliers */}
+              {hasMultipliers && (
+                <div className="space-y-2">
+                  {result.multipliers.streak > 1 && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: currentStep >= 2 ? 1 : 0.3, x: 0 }}
+                      className="flex items-center justify-center gap-2 text-sm"
+                    >
+                      <Flame className="w-4 h-4 text-streak" />
+                      <span className="text-streak font-medium">
+                        x
+                        {result.multipliers.streak.toFixed(1)}
+                        {' '}
+                        série
+                      </span>
+                    </motion.div>
+                  )}
+
+                  {result.multipliers.difficulty !== 1 && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: currentStep >= 2 ? 1 : 0.3, x: 0 }}
+                      className="flex items-center justify-center gap-2 text-sm"
+                    >
+                      <Target className="w-4 h-4 text-rare" />
+                      <span className="text-rare font-medium">
+                        x
+                        {result.multipliers.difficulty.toFixed(1)}
+                        {' '}
+                        difficulté
+                      </span>
+                    </motion.div>
+                  )}
+
+                  {result.multipliers.interval > 1 && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: currentStep >= 2 ? 1 : 0.3, x: 0 }}
+                      className="flex items-center justify-center gap-2 text-sm"
+                    >
+                      <Clock className="w-4 h-4 text-epic" />
+                      <span className="text-epic font-medium">
+                        x
+                        {result.multipliers.interval.toFixed(1)}
+                        {' '}
+                        révision espacée
+                      </span>
+                    </motion.div>
+                  )}
+                </div>
+              )}
+
+              {/* Bonuses */}
+              {hasBonuses && (
+                <div className="space-y-2">
+                  {result.bonuses.map((bonus, index) => (
+                    <motion.div
+                      key={bonus.name}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{
+                        opacity: currentStep >= 3 + index ? 1 : 0.3,
+                        scale: currentStep >= 3 + index ? 1 : 0.8,
+                      }}
+                      className="flex items-center justify-center gap-2 text-sm"
+                    >
+                      <Star className="w-4 h-4 text-legendary" />
+                      <span className="text-legendary font-medium">
+                        +
+                        {bonus.value}
+                        {' '}
+                        XP
+                      </span>
+                      <span className="text-muted-foreground">
+                        (
+                        {bonus.name}
+                        )
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="total"
+            initial={{ opacity: 0, scale: 0.3 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.3 }}
+            className="bg-gradient-xp text-white rounded-3xl p-8 shadow-2xl"
+          >
+            <div className="text-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                className="mb-4"
+              >
+                <Zap className="w-12 h-12 mx-auto" />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <div className="text-4xl font-bold mb-2">
+                  +
+                  {result.totalXP}
+                </div>
+                <div className="text-lg opacity-90">
+                  XP Total
+                </div>
+              </motion.div>
+
+              {/* Achievement badges */}
+              {result.achievements.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="mt-4 flex flex-wrap justify-center gap-2"
+                >
+                  {result.achievements.map(achievement => (
+                    <div
+                      key={achievement}
+                      className="bg-white/20 rounded-full px-3 py-1 text-xs font-medium"
+                    >
+                      🏆
+                      {' '}
+                      {achievement}
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+/**
+ * Compact XP display for inline feedback
+ */
+interface CompactXPDisplayProps {
+  xp: number
+  breakdown?: string[]
+  className?: string
+}
+
+export function CompactXPDisplay({ xp, breakdown, className }: CompactXPDisplayProps) {
+  const [showBreakdown, setShowBreakdown] = useState(false)
+
+  return (
+    <div className={cn('relative', className)}>
+      <motion.button
+        type="button"
+        onClick={() => setShowBreakdown(!showBreakdown)}
+        className="flex items-center gap-1 px-2 py-1 rounded-full bg-xp/10 text-xp border border-xp/20 hover:bg-xp/20 transition-colors"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <Zap className="w-3 h-3" />
+        <span className="text-sm font-bold">
+          +
+          {xp}
+        </span>
+      </motion.button>
+
+      <AnimatePresence>
+        {showBreakdown && breakdown && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.9 }}
+            className="absolute top-full left-0 mt-2 bg-card border border-border rounded-lg p-3 shadow-lg z-10 min-w-48"
+          >
+            <div className="space-y-1">
+              {breakdown.map((line, index) => (
+                <div key={index} className="text-xs text-muted-foreground">
+                  {line}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}

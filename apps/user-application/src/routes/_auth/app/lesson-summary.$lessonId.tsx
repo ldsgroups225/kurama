@@ -6,15 +6,14 @@ import {
   Home,
   RotateCcw,
   Share2,
-  Sparkles,
   Target,
   X,
 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
+import { EnhancedXPDisplay } from '@/components/gamification'
 import { AppHeader } from '@/components/main'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { useOnlineStatus } from '@/hooks/use-online-status'
 import { getMutationQueueManager } from '@/lib/mutation-queue'
 import { trackRouteLoad } from '@/lib/performance-monitor'
@@ -194,39 +193,17 @@ function SummaryPage() {
             </div>
           </motion.div>
 
-          {/* XP Card */}
+          {/* Enhanced XP Card */}
           <motion.div variants={itemVariants}>
-            <Card className="border-border bg-card backdrop-blur-xl overflow-hidden relative">
-              <div className={`absolute inset-0 opacity-10 bg-linear-to-r ${gradientClass}`} />
-              <CardContent className="p-6 relative flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground text-sm font-medium mb-1">XP Gagnés</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-foreground">
-                      +
-                      {actualXpEarned}
-                    </span>
-                    <span className="text-sm text-yellow-500 font-bold">XP</span>
-                  </div>
-                </div>
-                {didLevelUp && (
-                  <div className="flex flex-col items-end">
-                    <div className="bg-yellow-500/20 text-yellow-600 px-3 py-1 rounded-full text-xs font-bold border border-yellow-500/30 animate-pulse">
-                      LEVEL UP!
-                    </div>
-                    <span className="text-2xl font-bold text-foreground mt-1">
-                      Lvl
-                      {newLevel}
-                    </span>
-                  </div>
-                )}
-                {!didLevelUp && (
-                  <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                    <Sparkles className="h-6 w-6 text-yellow-500" />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <EnhancedXPDisplay
+              totalXP={actualXpEarned}
+              mode={mode as 'flashcards' | 'quiz' | 'exam' | 'quick-review'}
+              correctCount={correct ?? 0}
+              totalCount={total ?? 0}
+              streakDays={7} // TODO: Get actual streak from dashboard data
+              hasLevelUp={didLevelUp}
+              newLevel={newLevel}
+            />
           </motion.div>
 
           {/* Detailed Stats */}

@@ -3,10 +3,10 @@
  * Used for UI display and offline calculations
  */
 export const XP_RATES = {
-  flashcards: 5,      // Self-assessed review
-  quiz: 10,           // Objective assessment
-  exam: 12,           // Timed + objective
-  'quick-review': 7,  // Targeted review of difficult cards
+  'flashcards': 8, // Enhanced: Self-assessed review with gamification
+  'quiz': 10, // Objective assessment
+  'exam': 12, // Timed + objective
+  'quick-review': 7, // Targeted review of difficult cards
 } as const
 
 export type LearningMode = keyof typeof XP_RATES
@@ -31,9 +31,9 @@ export function getXPRateText(mode: LearningMode): string {
  */
 export function getModeDescription(mode: LearningMode): string {
   const descriptions = {
-    flashcards: 'Révision libre avec retournement de cartes',
-    quiz: 'Questions à choix multiples et vrai/faux',
-    exam: 'Simulation d\'examen chronométrée',
+    'flashcards': 'Révision avec système de gamification avancé',
+    'quiz': 'Questions à choix multiples et vrai/faux',
+    'exam': 'Simulation d\'examen chronométrée',
     'quick-review': 'Révision ciblée des cartes difficiles',
   } as const
 
@@ -45,10 +45,10 @@ export function getModeDescription(mode: LearningMode): string {
  */
 export function getModeDifficulty(mode: LearningMode): 'easy' | 'medium' | 'hard' {
   const difficulty = {
-    flashcards: 'easy',
+    'flashcards': 'easy',
     'quick-review': 'medium',
-    quiz: 'medium',
-    exam: 'hard',
+    'quiz': 'medium',
+    'exam': 'hard',
   } as const
 
   return difficulty[mode] || 'easy'
