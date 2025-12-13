@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
-import { useAtom } from 'jotai'
+
 import {
   BookOpen,
   Brain,
@@ -15,17 +15,13 @@ import {
   Zap,
 } from 'lucide-react'
 import { useEffect } from 'react'
-import {
-  LevelBadge,
-  StreakCalendar,
-} from '@/components/gamification'
+import { StreakCalendar } from '@/components/gamification'
 import { AppHeader, BottomNav } from '@/components/main'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { getDailyChallengeStatus } from '@/core/functions/daily-challenge'
 import { getDashboardStats } from '@/core/functions/dashboard'
-import { userProfileAtom } from '@/lib/atoms'
-import { useSession } from '@/lib/auth-client'
+
 import { Rocket, Trophy } from '@/lib/icons'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn, isDefined } from '@/lib/utils'
@@ -37,8 +33,6 @@ export const Route = createLazyFileRoute('/_auth/app/')({
 
 function AppHome() {
   const navigate = useNavigate()
-  const { data: session } = useSession()
-  const [userProfile] = useAtom(userProfileAtom)
 
   useEffect(() => {
     const endTracking = trackRouteLoad('app-dashboard')
@@ -147,44 +141,19 @@ function AppHome() {
         <div className="absolute bottom-[10%] left-[20%] w-[80%] h-[40%] rounded-full bg-blue-600/5 blur-[100px]" />
       </div>
 
-      <AppHeader />
+      <AppHeader
+        variant="hero"
+        showLevel
+        userLevel={userLevel}
+      />
 
-      <main className="relative z-10 px-5 pt-4">
+      <main className="relative z-10 px-5 pt-6">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           className="space-y-8"
         >
-          {/* Hero / Level Section - Uses new LevelBadge */}
-          <motion.section variants={itemVariants}>
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold text-foreground tracking-tight leading-tight">
-                    Bonjour,
-                    {' '}
-                    <br />
-                    <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400">
-                      {userProfile?.firstName || session?.user?.name || 'Étudiant'}
-                      {' '}
-                      👋
-                    </span>
-                  </h1>
-                  <p className="text-muted-foreground font-medium mt-1">Prêt à surpasser vos limites ?</p>
-                </div>
-              </div>
-
-              {/* Premium Level Badge Interface */}
-              <LevelBadge
-                level={userLevel.level}
-                currentXP={userLevel.currentXP}
-                nextLevelXP={userLevel.nextLevelXP}
-                compact={true}
-                className="bg-card p-4 rounded-2xl border border-border backdrop-blur-xl shadow-xl"
-              />
-            </div>
-          </motion.section>
 
           {/* Quick Stats Grid */}
           <motion.section variants={itemVariants} className="grid grid-cols-3 gap-3">
