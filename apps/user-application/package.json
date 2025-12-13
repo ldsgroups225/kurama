@@ -55,6 +55,7 @@
     "clsx": "catalog:ui",
     "dexie": "catalog:shared",
     "dexie-react-hooks": "catalog:shared",
+    "framer-motion": "catalog:ui",
     "highlight.js": "catalog:shared",
     "jotai": "catalog:frontend",
     "katex": "catalog:shared",

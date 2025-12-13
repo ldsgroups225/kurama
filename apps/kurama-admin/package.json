@@ -61,7 +61,7 @@
     "cmdk": "catalog:ui",
     "date-fns": "catalog:shared",
     "embla-carousel-react": "catalog:ui",
-    "framer-motion": "^12.23.26",
+    "framer-motion": "catalog:ui",
     "input-otp": "catalog:ui",
     "katex": "catalog:shared",
     "lucide-react": "catalog:ui",

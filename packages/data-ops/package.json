@@ -57,7 +57,7 @@
     "@cloudflare/workers-types": "catalog:backend",
     "@types/better-sqlite3": "catalog:dev",
     "dotenv": "catalog:dev",
-    "dotenv-cli": "^11.0.0",
+    "dotenv-cli": "catalog:dev",
     "drizzle-kit": "catalog:backend",
     "mysql2": "catalog:backend",
     "postgres": "catalog:backend",

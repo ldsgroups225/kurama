@@ -86,6 +86,9 @@ catalogs:
     dotenv:
       specifier: ^17.2.3
       version: 17.2.3
+    dotenv-cli:
+      specifier: ^11.0.0
+      version: 11.0.0
     tsx:
       specifier: ^4.21.0
       version: 4.21.0
@@ -149,6 +152,9 @@ catalogs:
       specifier: ^0.4.1
       version: 0.4.1
   lint:
+    '@antfu/eslint-config':
+      specifier: ^6.2.0
+      version: 6.6.1
     '@eslint-react/eslint-plugin':
       specifier: ^2.3.13
       version: 2.3.13
@@ -164,9 +170,18 @@ catalogs:
     eslint-plugin-format:
       specifier: ^1.1.0
       version: 1.1.0
+    eslint-plugin-i18n:
+      specifier: ^2.4.0
+      version: 2.4.0
+    eslint-plugin-jsx-a11y:
+      specifier: ^6.10.0
+      version: 6.10.2
     eslint-plugin-react-hooks:
       specifier: ^7.0.1
       version: 7.0.1
+    eslint-plugin-react-refresh:
+      specifier: ^0.4.24
+      version: 0.4.24
     typescript-eslint:
       specifier: ^8.49.0
       version: 8.49.0
@@ -366,6 +381,9 @@ catalogs:
     embla-carousel-react:
       specifier: ^8.6.0
       version: 8.6.0
+    framer-motion:
+      specifier: ^12.23.26
+      version: 12.23.26
     input-otp:
       specifier: ^1.4.2
       version: 1.4.2
@@ -610,7 +628,7 @@ importers:
         specifier: catalog:ui
         version: 8.6.0(react@19.2.1)
       framer-motion:
-        specifier: ^12.23.26
+        specifier: catalog:ui
         version: 12.23.26(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       input-otp:
         specifier: catalog:ui
@@ -826,6 +844,9 @@ importers:
       dexie-react-hooks:
         specifier: catalog:shared
         version: 4.2.0(@types/react@19.2.7)(dexie@4.2.1)(react@19.2.1)
+      framer-motion:
+        specifier: catalog:ui
+        version: 12.23.26(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       highlight.js:
         specifier: catalog:shared
         version: 11.11.1
@@ -1015,7 +1036,7 @@ importers:
         specifier: catalog:dev
         version: 17.2.3
       dotenv-cli:
-        specifier: ^11.0.0
+        specifier: catalog:dev
         version: 11.0.0
       drizzle-kit:
         specifier: catalog:backend
@@ -1039,31 +1060,31 @@ importers:
   packages/eslint-config:
     dependencies:
       '@antfu/eslint-config':
-        specifier: ^6.2.0
+        specifier: catalog:lint
         version: 6.6.1(@eslint-react/eslint-plugin@2.3.13(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(@vue/compiler-sfc@3.5.25)(eslint-plugin-format@1.1.0(eslint@9.39.1(jiti@2.6.1)))(eslint-plugin-jsx-a11y@6.10.2(eslint@9.39.1(jiti@2.6.1)))(eslint-plugin-react-hooks@7.0.1(eslint@9.39.1(jiti@2.6.1)))(eslint-plugin-react-refresh@0.4.24(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.15(@types/node@22.19.2)(jiti@2.6.1)(jsdom@27.3.0(postcss@8.5.6))(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       '@eslint-react/eslint-plugin':
-        specifier: ^2.3.13
+        specifier: catalog:lint
         version: 2.3.13(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
       '@vitest/eslint-plugin':
-        specifier: ^1.5.2
+        specifier: catalog:test
         version: 1.5.2(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.15(@types/node@22.19.2)(jiti@2.6.1)(jsdom@27.3.0(postcss@8.5.6))(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       eslint:
-        specifier: ^9.39.1
+        specifier: catalog:lint
         version: 9.39.1(jiti@2.6.1)
       eslint-plugin-better-tailwindcss:
-        specifier: ^3.8.0
+        specifier: catalog:lint
         version: 3.8.0(eslint@9.39.1(jiti@2.6.1))(tailwindcss@4.1.17)
       eslint-plugin-i18n:
-        specifier: ^2.4.0
+        specifier: catalog:lint
         version: 2.4.0
       eslint-plugin-jsx-a11y:
-        specifier: ^6.10.0
+        specifier: catalog:lint
         version: 6.10.2(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-react-hooks:
-        specifier: ^7.0.1
+        specifier: catalog:lint
         version: 7.0.1(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-react-refresh:
-        specifier: ^0.4.24
+        specifier: catalog:lint
         version: 0.4.24(eslint@9.39.1(jiti@2.6.1))
 
 packages:
