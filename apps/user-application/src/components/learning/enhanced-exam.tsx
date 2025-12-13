@@ -1,11 +1,10 @@
 import type { LearningQuestion, LearningSession } from '@/lib/learning-mode-gamification'
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { AlertTriangle, Clock, FileText, Flame, Timer, Zap } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CompactXPDisplay } from '@/components/gamification'
 import { MarkdownRenderer } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { calculateLearningModeXP } from '@/lib/learning-mode-gamification'
@@ -22,7 +21,7 @@ interface EnhancedExamProps {
   onXPEarned?: (xp: number, breakdown: any) => void
 }
 
-type ExamState = 'answering' | 'feedback' | 'completed'
+type ExamState = 'answering' | 'completed'
 
 export function EnhancedExam({
   card,
@@ -36,7 +35,7 @@ export function EnhancedExam({
 }: EnhancedExamProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [examState, setExamState] = useState<ExamState>('answering')
-  const [startTime] = useState(Date.now())
+
   const [timeRemaining, setTimeRemaining] = useState(timeLimit)
   const [attempts, setAttempts] = useState(0)
   const [showXPFeedback, setShowXPFeedback] = useState(false)
@@ -44,8 +43,7 @@ export function EnhancedExam({
   const [combo, setCombo] = useState(session.currentCombo || 0)
   const [isUnderPressure, setIsUnderPressure] = useState(false)
 
-  // Refs for auto-scroll functionality
-  const feedbackRef = useRef<HTMLDivElement>(null)
+  // Ref for auto-scroll functionality
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Timer effect
@@ -92,34 +90,17 @@ export function EnhancedExam({
   const correctIndex = shuffledOptions.indexOf(correctAnswer)
   const question = card?.frontContent || card?.front || 'Question'
 
-  // Auto-scroll to feedback on incorrect answer
+  // Auto-scroll to top when moving to next card
   useEffect(() => {
-    if (examState === 'feedback' && selectedAnswer !== correctIndex && feedbackRef.current) {
-      // Scroll to feedback with smooth animation
-      feedbackRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'nearest',
-      })
-    }
-  }, [examState, selectedAnswer, correctIndex])
-
-  // Auto-scroll to top when moving to next card after wrong answer
-  useEffect(() => {
-    if (examState === 'completed' && selectedAnswer !== correctIndex) {
+    if (examState === 'completed') {
       // Scroll to top of container for next card
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }, 100)
     }
-  }, [examState, selectedAnswer, correctIndex])
+  }, [examState])
 
-  const handleContinue = useCallback(() => {
-    const isCorrect = selectedAnswer === correctIndex
-    const timeUsed = timeLimit - timeRemaining
-    setExamState('completed')
-    onAnswer(isCorrect, timeUsed, attempts)
-  }, [selectedAnswer, correctIndex, timeLimit, timeRemaining, attempts, onAnswer])
+
 
   const handleAnswerSelect = useCallback((answerIndex: number) => {
     if (examState !== 'answering')
@@ -175,17 +156,10 @@ export function EnhancedExam({
       onXPEarned?.(totalXP, { ...xpResult, pressureBonus })
     }
 
-    setExamState('feedback')
-
-    // Auto-advance only for correct answers (shorter time in exam mode)
-    if (isCorrect) {
-      setTimeout(() => {
-        setExamState('completed')
-        onAnswer(isCorrect, timeUsed, attempts)
-      }, 1000)
-    }
-    // For incorrect answers, wait for user to click Continue button
-  }, [examState, correctIndex, startTime, timeLimit, timeRemaining, attempts, combo, isUnderPressure, card, cardIndex, totalCards, session, onAnswer, onXPEarned])
+    // In exam mode, immediately proceed to next question (no feedback)
+    setExamState('completed')
+    onAnswer(isCorrect, timeUsed, attempts)
+  }, [examState, timeLimit, timeRemaining, attempts, combo, isUnderPressure, card, cardIndex, totalCards, session, onAnswer, onXPEarned, correctIndex])
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -202,21 +176,9 @@ export function EnhancedExam({
   }
 
   const getOptionStyle = (index: number) => {
-    if (examState === 'answering') {
-      return selectedAnswer === index
-        ? 'border-primary bg-primary/10'
-        : 'border-border hover:border-primary/50 hover:bg-accent/50'
-    }
-
-    if (index === correctIndex) {
-      return 'border-success bg-success/10 text-success'
-    }
-
-    if (selectedAnswer === index && index !== correctIndex) {
-      return 'border-error bg-error/10 text-error'
-    }
-
-    return 'border-border bg-muted/30'
+    return selectedAnswer === index
+      ? 'border-primary bg-primary/10'
+      : 'border-border hover:border-primary/50 hover:bg-accent/50'
   }
 
   // No icons needed - using background colors instead
@@ -318,50 +280,7 @@ export function EnhancedExam({
             ))}
           </div>
 
-          {/* Feedback */}
-          <AnimatePresence>
-            {examState === 'feedback' && (
-              <motion.div
-                ref={feedbackRef}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="mt-6 p-4 rounded-lg border"
-              >
-                {selectedAnswer === correctIndex
-                  ? (
-                    <div className="flex items-center gap-3 text-success">
-                      <div className="w-6 h-6 rounded-full bg-success/10 border border-success/20 flex items-center justify-center">
-                        <span className="text-success text-sm font-bold">✓</span>
-                      </div>
-                      <div>
-                        <p className="font-semibold">Excellent !</p>
-                        <p className="text-sm opacity-80">
-                          {isUnderPressure
-                            ? 'Remarquable sous pression !'
-                            : attempts === 1 ? 'Réponse parfaite !' : 'Bonne réponse !'}
-                        </p>
-                      </div>
-                    </div>
-                  )
-                  : (
-                    <div className="flex items-center gap-3 text-error">
-                      <div className="w-6 h-6 rounded-full bg-error/10 border border-error/20 flex items-center justify-center">
-                        <span className="text-error text-sm font-bold">✗</span>
-                      </div>
-                      <div>
-                        <p className="font-semibold">Incorrect</p>
-                        <p className="text-sm opacity-80">
-                          Réponse correcte :
-                          {' '}
-                          <strong>{correctAnswer}</strong>
-                        </p>
-                      </div>
-                    </div>
-                  )}
-              </motion.div>
-            )}
-          </AnimatePresence>
+
         </CardContent>
       </Card>
 
@@ -398,16 +317,7 @@ export function EnhancedExam({
         />
       </div>
 
-      {/* Continue Button - Only show for incorrect answers */}
-      {examState === 'feedback' && selectedAnswer !== correctIndex && (
-        <Button
-          size="lg"
-          className="w-full bg-gradient-xp text-lg font-semibold"
-          onClick={handleContinue}
-        >
-          Continuer
-        </Button>
-      )}
+
     </div>
   )
 }
