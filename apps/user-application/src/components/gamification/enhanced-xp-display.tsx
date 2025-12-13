@@ -114,6 +114,36 @@ export function EnhancedXPDisplay({
       })
     }
   }
+  else if (mode === 'exam' && percentage >= 90) {
+    breakdown.push({
+      type: 'bonus',
+      label: 'Excellence en examen',
+      value: 50,
+      icon: Target,
+      color: 'text-legendary',
+      description: 'Performance exceptionnelle sous pression',
+    })
+  }
+  else if (mode === 'quiz' && correctCount >= 5) {
+    breakdown.push({
+      type: 'bonus',
+      label: 'Pensée rapide',
+      value: 25,
+      icon: Clock,
+      color: 'text-epic',
+      description: 'Réflexion efficace en quiz',
+    })
+  }
+  else if (mode === 'quick-review' && percentage >= 85) {
+    breakdown.push({
+      type: 'bonus',
+      label: 'Maîtrise améliorée',
+      value: 30,
+      icon: Star,
+      color: 'text-rare',
+      description: 'Progression sur cartes difficiles',
+    })
+  }
 
   const gradientClass = hasLevelUp
     ? 'from-legendary via-epic to-legendary'

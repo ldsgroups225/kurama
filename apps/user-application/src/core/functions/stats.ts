@@ -133,6 +133,7 @@ export interface SessionStatsResult {
     perfectBonus: number
     speedBonus: number
     passingBonus: number
+    modeBonus: number
   }
   totalXP: number
   previousLevel: number
@@ -188,9 +189,11 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
     // Calculate current streak for bonus
     const currentStreak = await calculateStreak(db, userId)
 
-    // Calculate XP breakdown based on mode
+    // Enhanced XP calculation using the new gamification system
     const baseXPRate = XP_BASE_RATES[mode] || XP_BASE_RATES.flashcards
     const baseXP = correctCount * baseXPRate
+
+    // Legacy calculation for compatibility (can be enhanced later)
     const streakMultiplier = Math.min(currentStreak * XP_STREAK_BONUS_MULTIPLIER, XP_STREAK_BONUS_MAX)
     const streakBonus = Math.round(baseXP * streakMultiplier)
     const perfectBonus = percentage === 100 ? XP_PERFECT_SCORE_BONUS : 0
@@ -198,7 +201,19 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
     const speedBonus = avgTimePerCard > 0 && avgTimePerCard <= XP_SPEED_BONUS_THRESHOLD ? XP_SPEED_BONUS : 0
     const passingBonus = isPassing ? XP_PASSING_BONUS : 0
 
-    const totalXPEarned = baseXP + streakBonus + perfectBonus + speedBonus + passingBonus
+    // Enhanced bonuses for different modes
+    let modeBonus = 0
+    if (mode === 'exam' && percentage >= 90) {
+      modeBonus = 50 // Exam excellence bonus
+    }
+    else if (mode === 'quiz' && avgTimePerCard <= 10) {
+      modeBonus = 25 // Quick thinking bonus
+    }
+    else if (mode === 'quick-review' && percentage >= 85) {
+      modeBonus = 30 // Mastery improvement bonus
+    }
+
+    const totalXPEarned = baseXP + streakBonus + perfectBonus + speedBonus + passingBonus + modeBonus
     const newTotalXP = previousXP + totalXPEarned
 
     // Update user XP
@@ -322,6 +337,7 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
         perfectBonus,
         speedBonus,
         passingBonus,
+        modeBonus,
       },
       totalXP: newTotalXP,
       previousLevel: previousLevelInfo.level,

@@ -1,3 +1,6 @@
+export { EnhancedExam } from './enhanced-exam'
+export { EnhancedModeSelection } from './enhanced-mode-selection'
+export { EnhancedQuiz } from './enhanced-quiz'
 export { Exam } from './exam'
 export { Flashcard } from './flashcard'
 export { FlashcardFace } from './flashcard-face'

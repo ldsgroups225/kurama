@@ -77,12 +77,12 @@ function TestSummaryPage() {
 
   const masteryResult = masteryCountParam !== undefined
     ? {
-      masteryCount: masteryCountParam,
-      masteryRequired: 2,
-      isCompleted: isLessonCompletedParam === 'true',
-      nextLessonUnlocked: nextLessonUnlockedParam === 'true',
-      nextLessonTitle: nextLessonTitleParam ?? null,
-    }
+        masteryCount: masteryCountParam,
+        masteryRequired: 2,
+        isCompleted: isLessonCompletedParam === 'true',
+        nextLessonUnlocked: nextLessonUnlockedParam === 'true',
+        nextLessonTitle: nextLessonTitleParam ?? null,
+      }
     : null
 
   const isSuccess = score >= 70
@@ -106,11 +106,11 @@ function TestSummaryPage() {
       <div className="fixed inset-0 pointer-events-none">
         {isSuccess
           ? (
-            <div className="absolute top-[20%] right-[50%] translate-x-1/2 w-[80%] h-[40%] rounded-full opacity-30 blur-[130px] bg-linear-to-r from-emerald-600 to-cyan-600" />
-          )
+              <div className="absolute top-[20%] right-[50%] translate-x-1/2 w-[80%] h-[40%] rounded-full opacity-30 blur-[130px] bg-linear-to-r from-emerald-600 to-cyan-600" />
+            )
           : (
-            <div className="absolute top-[20%] right-[50%] translate-x-1/2 w-[80%] h-[40%] rounded-full opacity-30 blur-[130px] bg-linear-to-r from-orange-600 to-red-600" />
-          )}
+              <div className="absolute top-[20%] right-[50%] translate-x-1/2 w-[80%] h-[40%] rounded-full opacity-30 blur-[130px] bg-linear-to-r from-orange-600 to-red-600" />
+            )}
       </div>
 
       <AppHeader title="Résultats du Test" showAvatar={false} className="bg-transparent/0 border-none relative z-20" />

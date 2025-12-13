@@ -81,9 +81,9 @@ export function useStatsUpdate(options: UseStatsUpdateOptions = {}) {
 
         // Calculate offline XP based on mode
         const baseRates = {
-          flashcards: 8,
-          quiz: 10,
-          exam: 12,
+          'flashcards': 8,
+          'quiz': 10,
+          'exam': 12,
           'quick-review': 7,
         } as const
         const baseXP = input.correctCount * (baseRates[input.mode] || baseRates.flashcards)
@@ -96,6 +96,7 @@ export function useStatsUpdate(options: UseStatsUpdateOptions = {}) {
             perfectBonus: 0,
             speedBonus: 0,
             passingBonus: percentage >= 80 ? 100 : 0,
+            modeBonus: 0,
           },
           totalXP: 0, // Unknown offline
           previousLevel: 0,
