@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
+import { useAtom } from 'jotai'
 import {
   BookOpen,
   Brain,
@@ -23,6 +24,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { getDailyChallengeStatus } from '@/core/functions/daily-challenge'
 import { getDashboardStats } from '@/core/functions/dashboard'
+import { userProfileAtom } from '@/lib/atoms'
+import { useSession } from '@/lib/auth-client'
 import { Rocket, Trophy } from '@/lib/icons'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn, isDefined } from '@/lib/utils'
@@ -34,6 +37,8 @@ export const Route = createLazyFileRoute('/_auth/app/')({
 
 function AppHome() {
   const navigate = useNavigate()
+  const { data: session } = useSession()
+  const [userProfile] = useAtom(userProfileAtom)
 
   useEffect(() => {
     const endTracking = trackRouteLoad('app-dashboard')
@@ -161,7 +166,9 @@ function AppHome() {
                     {' '}
                     <br />
                     <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400">
-                      Étudiant 👋
+                      {userProfile?.firstName || session?.user?.name || 'Étudiant'}
+                      {' '}
+                      👋
                     </span>
                   </h1>
                   <p className="text-muted-foreground font-medium mt-1">Prêt à surpasser vos limites ?</p>
@@ -216,8 +223,8 @@ function AppHome() {
           <motion.section variants={itemVariants}>
             <div className="group relative overflow-hidden rounded-3xl border border-border bg-card p-1 backdrop-blur-xl transition-all hover:bg-accent">
               <div className="p-6 relative overflow-hidden rounded-[20px]">
-                <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 to-transparent opacity-50 transition-opacity group-hover:opacity-100" />
-                <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-violet-600/20 blur-3xl" />
+                <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 to-transparent opacity-50 transition-opacity group-hover:opacity-100 pointer-events-none" />
+                <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
 
                 <div className="relative flex items-start justify-between">
                   <div>
@@ -241,7 +248,7 @@ function AppHome() {
                       <div className="flex flex-col items-end animate-pulse">
                         <div className="flex items-center gap-1 text-xs font-mono text-orange-400 bg-orange-400/10 px-2 py-1 rounded-lg border border-orange-400/20">
                           <Timer className="w-3 h-3" />
-                          <span>
+                          <span className="flex flex-row truncate">
                             {Math.floor(dailyChallengeData.timeUntilReset / 3600)}
                             h
                             {' '}
