@@ -348,44 +348,44 @@ function PricingCarouselCard({
       {/* CTA Button */}
       {isCurrentPlan
         ? (
-          <div className="space-y-3">
-            <Button
-              variant="outline"
-              className="w-full border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
-              asChild
-            >
-              <a href="/app/polar/portal">
-                <Shield className="mr-2 h-4 w-4" />
-                Gérer l'abonnement
-              </a>
-            </Button>
-          </div>
-        )
+            <div className="space-y-3">
+              <Button
+                variant="outline"
+                className="w-full border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
+                asChild
+              >
+                <a href="/app/polar/portal">
+                  <Shield className="mr-2 h-4 w-4" />
+                  Gérer l'abonnement
+                </a>
+              </Button>
+            </div>
+          )
         : (
-          <Button
-            className={cn(
-              'w-full bg-linear-to-r text-white shadow-lg transition-all hover:opacity-90 hover:scale-[1.02] hover:shadow-xl',
-              config.gradient,
-            )}
-            size="lg"
-            disabled={isCheckoutPending || !price}
-            onClick={() => price && onCheckout(price.productId)}
-          >
-            {isCheckoutPending
-              ? (
-                <>
-                  <Rocket className="mr-2 h-4 w-4 animate-pulse" />
-                  Chargement...
-                </>
-              )
-              : (
-                <>
-                  <Rocket className="mr-2 h-4 w-4" />
-                  {subscription ? 'Changer de plan' : 'Commencer l\'essai gratuit'}
-                </>
+            <Button
+              className={cn(
+                'w-full bg-linear-to-r text-white shadow-lg transition-all hover:opacity-90 hover:scale-[1.02] hover:shadow-xl',
+                config.gradient,
               )}
-          </Button>
-        )}
+              size="lg"
+              disabled={isCheckoutPending || !price}
+              onClick={() => price && onCheckout(price.productId)}
+            >
+              {isCheckoutPending
+                ? (
+                    <>
+                      <Rocket className="mr-2 h-4 w-4 animate-pulse" />
+                      Chargement...
+                    </>
+                  )
+                : (
+                    <>
+                      <Rocket className="mr-2 h-4 w-4" />
+                      {subscription ? 'Changer de plan' : 'Commencer l\'essai gratuit'}
+                    </>
+                  )}
+            </Button>
+          )}
 
       {/* Trial info */}
       {!subscription && !isCurrentPlan && (

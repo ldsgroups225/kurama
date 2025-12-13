@@ -139,19 +139,19 @@ function RouteComponent() {
           <h1 className="mb-3 text-4xl font-black tracking-tight">
             {isPremium
               ? (
-                <span className="bg-linear-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
-                  L'élite de Kurama
-                </span>
-              )
-              : (
-                <span>
-                  Deviens
-                  {' '}
-                  <span className="bg-linear-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
-                    Premium
+                  <span className="bg-linear-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
+                    L'élite de Kurama
                   </span>
-                </span>
-              )}
+                )
+              : (
+                  <span>
+                    Deviens
+                    {' '}
+                    <span className="bg-linear-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+                      Premium
+                    </span>
+                  </span>
+                )}
           </h1>
           <p className="mx-auto max-w-[280px] text-lg font-medium text-muted-foreground">
             {isPremium

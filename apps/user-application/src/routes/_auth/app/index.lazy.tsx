@@ -313,43 +313,43 @@ function AppHome() {
             <div className="space-y-3">
               {dashboardData?.recentSessions?.length
                 ? (
-                  dashboardData.recentSessions.map((session, i) => (
-                    <motion.div
-                      key={session.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      className="group flex items-center gap-4 p-4 rounded-2xl border border-border bg-card hover:bg-accent backdrop-blur-md transition-all hover:border-accent-foreground/10"
-                    >
-                      <div className="h-10 w-10 shrink-0 rounded-xl bg-muted flex items-center justify-center border border-border group-hover:border-indigo-500/30 group-hover:bg-indigo-500/10 transition-colors">
-                        <BookOpen className="w-5 h-5 text-muted-foreground group-hover:text-indigo-400" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-bold text-foreground truncate pr-2">
-                          {session.lessonTitle}
-                        </h4>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                          <span>{session.subjectName}</span>
-                          <span className="w-1 h-1 rounded-full bg-zinc-400" />
-                          <span>
-                            {session.cardsReviewed}
-                            {' '}
-                            cartes
-                          </span>
+                    dashboardData.recentSessions.map((session, i) => (
+                      <motion.div
+                        key={session.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="group flex items-center gap-4 p-4 rounded-2xl border border-border bg-card hover:bg-accent backdrop-blur-md transition-all hover:border-accent-foreground/10"
+                      >
+                        <div className="h-10 w-10 shrink-0 rounded-xl bg-muted flex items-center justify-center border border-border group-hover:border-indigo-500/30 group-hover:bg-indigo-500/10 transition-colors">
+                          <BookOpen className="w-5 h-5 text-muted-foreground group-hover:text-indigo-400" />
                         </div>
-                      </div>
-                      <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-1 rounded-lg border border-border">
-                        {new Date(session.startedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
-                      </span>
-                    </motion.div>
-                  ))
-                )
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-bold text-foreground truncate pr-2">
+                            {session.lessonTitle}
+                          </h4>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                            <span>{session.subjectName}</span>
+                            <span className="w-1 h-1 rounded-full bg-zinc-400" />
+                            <span>
+                              {session.cardsReviewed}
+                              {' '}
+                              cartes
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-1 rounded-lg border border-border">
+                          {new Date(session.startedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                        </span>
+                      </motion.div>
+                    ))
+                  )
                 : (
-                  <div className="text-center py-10 text-sm text-muted-foreground bg-muted/50 rounded-3xl border border-border border-dashed">
-                    <div className="mb-2">👻</div>
-                    Aucune activité récente.
-                  </div>
-                )}
+                    <div className="text-center py-10 text-sm text-muted-foreground bg-muted/50 rounded-3xl border border-border border-dashed">
+                      <div className="mb-2">👻</div>
+                      Aucune activité récente.
+                    </div>
+                  )}
             </div>
           </motion.section>
 

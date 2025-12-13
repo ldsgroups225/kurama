@@ -302,9 +302,9 @@ export function OnboardingScreen({
                   className={`
                     h-2 rounded-full transition-all duration-300
                     ${index === currentStep
-                      ? `w-8 ${s.gradient}`
-                      : 'w-2 bg-white/10 hover:bg-white/20'
-                    }
+                  ? `w-8 ${s.gradient}`
+                  : 'w-2 bg-white/10 hover:bg-white/20'
+                }
                   `}
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}

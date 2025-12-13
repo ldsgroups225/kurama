@@ -48,11 +48,11 @@ export function ProgressIndicator({
                 >
                   {isCompleted
                     ? (
-                      <Check className="h-5 w-5" />
-                    )
+                        <Check className="h-5 w-5" />
+                      )
                     : (
-                      <span className="text-sm font-bold">{index + 1}</span>
-                    )}
+                        <span className="text-sm font-bold">{index + 1}</span>
+                      )}
                 </div>
                 <span
                   className={cn(

@@ -148,17 +148,17 @@ function LessonsPage() {
                     <div className="shrink-0 pt-1">
                       {isCompleted
                         ? (
-                          <div className="h-6 w-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
-                            <CheckCircle2 className="h-4 w-4" />
-                          </div>
-                        )
-                        : !isLocked
-                          ? (
-                            <div className="h-6 w-6 rounded-full bg-muted text-muted-foreground group-hover:bg-indigo-500/20 group-hover:text-indigo-500 flex items-center justify-center transition-colors">
-                              <ChevronRight className="h-4 w-4" />
+                            <div className="h-6 w-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+                              <CheckCircle2 className="h-4 w-4" />
                             </div>
                           )
-                          : null}
+                        : !isLocked
+                            ? (
+                                <div className="h-6 w-6 rounded-full bg-muted text-muted-foreground group-hover:bg-indigo-500/20 group-hover:text-indigo-500 flex items-center justify-center transition-colors">
+                                  <ChevronRight className="h-4 w-4" />
+                                </div>
+                              )
+                            : null}
                     </div>
                   </div>
 
@@ -206,17 +206,17 @@ function LessonsPage() {
               <motion.div key={lesson.id} variants={itemVariants}>
                 {isLocked
                   ? (
-                    Content
-                  )
+                      Content
+                    )
                   : (
-                    <Link
-                      to="/app/lessons/$lessonId"
-                      params={{ lessonId: String(lesson.id) }}
-                      className="block outline-none"
-                    >
-                      {Content}
-                    </Link>
-                  )}
+                      <Link
+                        to="/app/lessons/$lessonId"
+                        params={{ lessonId: String(lesson.id) }}
+                        className="block outline-none"
+                      >
+                        {Content}
+                      </Link>
+                    )}
               </motion.div>
             )
           })}
