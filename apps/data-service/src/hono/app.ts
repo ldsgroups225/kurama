@@ -1,10 +1,16 @@
+import { getWorkerEnvironment } from '@kurama/config/environment'
+import { createLogger } from '@kurama/observability/logging'
+import {
+  sentryErrorHandler,
+  sentryMiddleware,
+} from '@kurama/observability/sentry/cloudflare'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { logger } from 'hono/logger'
 import { polarWebhooks } from './webhooks'
 
 // Extended Env type for the app
 interface AppEnv {
+  SENTRY_DSN?: string
   POLAR_WEBHOOK_SECRET: string
   DATABASE_HOST: string
   DATABASE_USERNAME: string
@@ -16,12 +22,29 @@ interface AppEnv {
 
 export const app = new Hono<{ Bindings: AppEnv }>()
 
-// Middleware
-app.use('*', logger())
+const logger = createLogger('api')
+
+// Sentry middleware (first!)
+app.use('*', sentryMiddleware(env => ({
+  dsn: env.SENTRY_DSN || '',
+  environment: env.ENVIRONMENT || 'development',
+  release: `kurama-backend@${env.API_VERSION || 'v1'}`,
+  tracesSampleRate: env.ENVIRONMENT === 'production' ? 0.1 : 1.0,
+})))
+
+// Request logging
+app.use('*', async (c, next) => {
+  const start = Date.now()
+  await next()
+  const duration = Date.now() - start
+  logger.info(`${c.req.method} ${c.req.path} - ${c.res.status} (${duration}ms)`)
+})
+
+// CORS
 app.use('/api/*', cors({
   origin: (origin, c) => {
-    const allowedOrigin = c.env.CORS_ORIGIN || 'https://kurama.yeko.workers.dev'
-    return origin === allowedOrigin ? origin : allowedOrigin
+    const env = getWorkerEnvironment(c.env)
+    return origin === env.frontendUrl ? origin : env.frontendUrl
   },
   credentials: true,
 }))
@@ -48,14 +71,8 @@ app.get('/api/health', (c) => {
 // Mount webhook routes
 app.route('/', polarWebhooks)
 
-// Error handling
-app.onError((err, c) => {
-  console.error('Error:', err)
-  return c.json({
-    error: 'Internal Server Error',
-    message: err.message,
-  }, 500)
-})
+// Error handling with Sentry
+app.onError(sentryErrorHandler)
 
 app.notFound((c) => {
   return c.json({ error: 'Not Found' }, 404)

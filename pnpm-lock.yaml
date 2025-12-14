@@ -434,9 +434,15 @@ importers:
 
   apps/data-service:
     dependencies:
+      '@kurama/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@kurama/data-ops':
         specifier: workspace:*
         version: link:../../packages/data-ops
+      '@kurama/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@polar-sh/hono':
         specifier: catalog:integrations
         version: 0.5.1(hono@4.10.8)

@@ -17,12 +17,16 @@
     "LOG_LEVEL": "info"
   },
   // Secrets (set via wrangler secret put):
+  // - SENTRY_DSN: Sentry DSN for error tracking
   // - POLAR_WEBHOOK_SECRET: Polar webhook signing secret
   // - DATABASE_HOST: Neon database host
   // - DATABASE_USERNAME: Neon database username
   // - DATABASE_PASSWORD: Neon database password
   "observability": {
-    "enabled": true
+    "enabled": true,
+    "logs": {
+      "enabled": true
+    }
   },
   "workers_dev": true,
   "preview_urls": true
