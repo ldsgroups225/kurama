@@ -47,7 +47,7 @@ export function sentryMiddleware(getConfig: (env: any) => SentryConfig) {
 }
 
 // Error handler for Hono
-export function sentryErrorHandler(c: Context, error: Error) {
+export function sentryErrorHandler(error: Error, c: Context) {
   const sentry = c.get('sentry') as Toucan | undefined
 
   if (sentry) {
