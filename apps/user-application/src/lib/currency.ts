@@ -10,11 +10,11 @@ export interface CurrencyRate {
 }
 
 /**
- * reliable way to get XOF rate.
- * Since client-side scraping of XE.com is blocked by CORS, we:
+ * Reliable way to get XOF rate using server function.
+ * This avoids CORS issues by fetching from the backend.
  * 1. Check local storage cache
- * 2. Attempt to fetch (will likely fail in browser without proxy)
- * 3. Use fallback rate if fetch fails
+ * 2. Fetch from server function if cache is stale
+ * 3. Use fallback rate if server fetch fails
  */
 export async function updateCurrencyRate(): Promise<number> {
   if (typeof window === 'undefined')
@@ -30,20 +30,19 @@ export async function updateCurrencyRate(): Promise<number> {
       return Number.parseFloat(cached)
     }
 
-    const url = 'http://apilayer.net/api/live?access_key=639a6a7ed805d06aa0ac27a4d257c847&format=1&currencies=EUR%2CXOF&source=USD'
-    const options = { method: 'GET' }
+    // Import server function dynamically to avoid SSR issues
+    const { getCurrencyRate } = await import('@/core/functions/currency')
 
-    const response = await fetch(url, options)
-    const data = await response.json() as { success: boolean, quotes?: { USDXOF: number } }
+    const result = await getCurrencyRate({ data: { forceRefresh: false } })
 
-    if (data.success && data.quotes && data.quotes.USDXOF) {
-      const freshRate = data.quotes.USDXOF
-      localStorage.setItem(CURRENCY_STORAGE_KEY, freshRate.toString())
+    if (result.success && result.rate) {
+      // Cache the fresh rate
+      localStorage.setItem(CURRENCY_STORAGE_KEY, result.rate.toString())
       localStorage.setItem(CURRENCY_UPDATE_KEY, now.toString())
-      return freshRate
+      return result.rate
     }
 
-    throw new Error('Invalid response structure from currency API')
+    throw new Error('Failed to get currency rate from server')
   }
   catch (error) {
     console.warn('Failed to update currency rate, using fallback', error)

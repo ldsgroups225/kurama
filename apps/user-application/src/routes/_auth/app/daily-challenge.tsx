@@ -97,7 +97,7 @@ function DailyChallengePage() {
       questionType: 'multiple-choice' | 'true-false'
       question?: string
       options?: Array<{ id: string, text: string, isCorrect: boolean }>
-      correctAnswer?: string
+      correctAnswer?: string | boolean
     }>
   >([])
 
@@ -115,12 +115,49 @@ function DailyChallengePage() {
       if (questionType === 'multiple-choice') {
         const correctAnswer = card.backContent
         const otherCards = cards.filter((_, i) => i !== index)
+
+        // Validate we have enough cards for multiple choice
+        if (otherCards.length < 3) {
+          // Fall back to true-false if not enough options
+          const isTrue = index % 3 !== 0
+          const statement = isTrue
+            ? `${card.frontContent} : ${correctAnswer}`
+            : `${card.frontContent} : Réponse incorrecte`
+
+          return {
+            ...card,
+            questionType: 'true-false' as const,
+            question: statement,
+            correctAnswer: isTrue,
+          }
+        }
+
         const shuffledOthers = [...otherCards].sort((a, b) => {
           const hashA = (a.id * 31 + index) % 1000
           const hashB = (b.id * 31 + index) % 1000
           return hashA - hashB
         })
-        const wrongAnswers = shuffledOthers.slice(0, 3).map(c => c.backContent)
+
+        // Get unique wrong answers (avoid duplicates)
+        const uniqueWrongAnswers = new Set<string>()
+        const wrongAnswers: string[] = []
+
+        for (const otherCard of shuffledOthers) {
+          if (wrongAnswers.length >= 3)
+            break
+          if (otherCard.backContent !== correctAnswer && !uniqueWrongAnswers.has(otherCard.backContent)) {
+            uniqueWrongAnswers.add(otherCard.backContent)
+            wrongAnswers.push(otherCard.backContent)
+          }
+        }
+
+        // Ensure we have at least 3 wrong answers
+        if (wrongAnswers.length < 3) {
+          // Pad with generic wrong answers if needed
+          while (wrongAnswers.length < 3) {
+            wrongAnswers.push(`Option ${wrongAnswers.length + 1}`)
+          }
+        }
 
         const options = [
           { id: 'correct', text: correctAnswer, isCorrect: true },
@@ -437,11 +474,11 @@ function DailyChallengePage() {
             >
               {startMutation.isPending
                 ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  )
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                )
                 : (
-                    <Play className="mr-2 h-5 w-5 fill-current" />
-                  )}
+                  <Play className="mr-2 h-5 w-5 fill-current" />
+                )}
               {challengeStatus?.isInProgress ? 'Reprendre le défi' : 'Commencer le défi'}
             </Button>
 

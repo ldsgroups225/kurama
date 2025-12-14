@@ -75,19 +75,27 @@ function SessionPage() {
   const [showXPFeedback, setShowXPFeedback] = useState(false)
   const [currentXPResult, setCurrentXPResult] = useState<XPCalculationResult | null>(null)
 
-  // Enhanced session tracking
-  const [enhancedSession, setEnhancedSession] = useState<Partial<LearningSession>>(() => ({
-    mode: mode as 'flashcards' | 'quiz' | 'exam',
-    streakDays: 0, // This would come from user stats
-    currentCombo: 0,
-    totalQuestions: 0,
-    correctAnswers: 0,
-    incorrectAnswers: 0,
-    sessionStartTime: new Date(),
-    averageTimePerQuestion: 0,
-    perfectAnswers: 0,
-    struggledAnswers: 0,
-  }))
+  // Enhanced session tracking with proper type safety
+  const [enhancedSession, setEnhancedSession] = useState<LearningSession>(() => {
+    // Validate mode parameter
+    const validModes = ['flashcards', 'quiz', 'exam', 'quick-review'] as const
+    const sessionMode = validModes.includes(mode as any)
+      ? (mode as LearningSession['mode'])
+      : 'flashcards' // fallback to safe default
+
+    return {
+      mode: sessionMode,
+      streakDays: 0, // This would come from user stats
+      currentCombo: 0,
+      totalQuestions: 0,
+      correctAnswers: 0,
+      incorrectAnswers: 0,
+      sessionStartTime: new Date(),
+      averageTimePerQuestion: 0,
+      perfectAnswers: 0,
+      struggledAnswers: 0,
+    }
+  })
 
   const { updateStats } = useStatsUpdate({
     onLevelUp: (newLevel) => {
