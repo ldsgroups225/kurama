@@ -13,6 +13,7 @@ export const getSubjects = createServerFn()
     const db = getDb()
 
     return db.query.subjects.findMany({
+      where: eq(subjects.isActive, true),
       orderBy: [asc(subjects.displayOrder)],
     })
   })
