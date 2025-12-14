@@ -4,6 +4,11 @@
  * Tracks PWA-specific metrics and errors for debugging and optimization
  */
 
+import { createLogger } from '@kurama/observability/logging'
+import { captureException, captureMessage } from '@kurama/observability/sentry/browser'
+
+const logger = createLogger('pwa')
+
 export interface PWAMetrics {
   /** Service worker errors */
   serviceWorkerErrors: ErrorLog[]
@@ -315,14 +320,22 @@ class PWAMonitoringManager {
 
   /**
    * Send error to monitoring service
-   * In production, this would send to a service like Sentry, LogRocket, etc.
    */
   private sendToMonitoringService(log: ErrorLog): void {
-    // TODO: Implement actual monitoring service integration
-    // For now, just log to console
-    if (import.meta.env.PROD) {
-      console.error('[PWA Monitoring] Error logged:', log)
+    // Send to Sentry
+    if (log.type === 'service-worker' || log.type === 'cache') {
+      captureException(new Error(log.message), {
+        type: log.type,
+        stack: log.stack,
+        ...log.context,
+      })
     }
+    else {
+      captureMessage(`[PWA] ${log.type}: ${log.message}`, 'warning')
+    }
+
+    // Also log via LogTape
+    logger.error(log.message, { type: log.type, context: log.context })
   }
 }
 

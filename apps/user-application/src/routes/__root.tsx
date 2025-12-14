@@ -17,6 +17,9 @@ import { initPerformanceMonitoring } from '@/lib/performance-monitor'
 import { initPreloading } from '@/lib/preload'
 import appCss from '@/styles.css?url'
 import { seo } from '@/utils/seo'
+import { initBrowserSentry } from '@kurama/observability/sentry/browser'
+import { setupLogging, createLogger } from '@kurama/observability/logging'
+import { getBrowserEnvironment } from '@kurama/config/environment'
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -90,6 +93,32 @@ export const Route = createRootRouteWithContext<{
 
 function RootComponent() {
   const location = useLocation()
+
+  // Initialize observability on mount
+  React.useEffect(() => {
+    const env = getBrowserEnvironment()
+
+    // Initialize Sentry
+    initBrowserSentry({
+      dsn: env.sentryDsn || '',
+      environment: env.environment,
+      release: `kurama-frontend@${import.meta.env.VITE_APP_VERSION || 'dev'}`,
+      tracesSampleRate: env.isProduction ? 0.1 : 1.0,
+      replaysSessionSampleRate: 0.1,
+      replaysOnErrorSampleRate: 1.0,
+    })
+
+    // Initialize LogTape
+    void setupLogging({
+      level: env.isDevelopment ? 'debug' : 'info',
+      environment: env.environment,
+      sentryDsn: env.sentryDsn,
+      enableConsole: env.isDevelopment,
+    })
+
+    const logger = createLogger('app')
+    logger.info('Application initialized', { environment: env.environment })
+  }, [])
 
   // Initialize performance monitoring on mount
   React.useEffect(() => {

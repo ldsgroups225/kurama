@@ -8,21 +8,13 @@
  * - Data clearing on logout
  */
 
+import { getBrowserSecurityConfig } from '@kurama/config/security'
 import { db } from './db'
 
 /**
  * Security configuration
  */
-const SECURITY_CONFIG = {
-  /** Days of inactivity before data expiration */
-  INACTIVITY_EXPIRATION_DAYS: 7,
-  /** Maximum failed auth attempts before clearing data */
-  MAX_FAILED_AUTH_ATTEMPTS: 5,
-  /** Key for storing last activity timestamp */
-  LAST_ACTIVITY_KEY: 'last_activity_timestamp',
-  /** Key for storing failed auth attempts */
-  FAILED_AUTH_ATTEMPTS_KEY: 'failed_auth_attempts',
-}
+const SECURITY_CONFIG = getBrowserSecurityConfig()
 
 /**
  * Encrypt sensitive data using Web Crypto API
@@ -110,7 +102,7 @@ export async function decryptData(
  */
 export async function updateLastActivity(): Promise<void> {
   await db.appState.put({
-    key: SECURITY_CONFIG.LAST_ACTIVITY_KEY,
+    key: SECURITY_CONFIG.lastActivityKey,
     value: Date.now(),
   })
 }
@@ -120,7 +112,7 @@ export async function updateLastActivity(): Promise<void> {
  * @returns True if data has expired
  */
 export async function hasDataExpired(): Promise<boolean> {
-  const lastActivity = await db.appState.get(SECURITY_CONFIG.LAST_ACTIVITY_KEY)
+  const lastActivity = await db.appState.get(SECURITY_CONFIG.lastActivityKey)
 
   if (!lastActivity) {
     return false // No activity recorded yet
@@ -130,7 +122,7 @@ export async function hasDataExpired(): Promise<boolean> {
   const now = Date.now()
   const daysSinceActivity = (now - lastActivityTime) / (1000 * 60 * 60 * 24)
 
-  return daysSinceActivity > SECURITY_CONFIG.INACTIVITY_EXPIRATION_DAYS
+  return daysSinceActivity > SECURITY_CONFIG.inactivityExpirationDays
 }
 
 /**
@@ -175,8 +167,8 @@ export async function clearPersonalData(): Promise<void> {
     // Keep app state (settings, preferences)
     // Only clear sensitive app state
     const sensitiveKeys = [
-      SECURITY_CONFIG.LAST_ACTIVITY_KEY,
-      SECURITY_CONFIG.FAILED_AUTH_ATTEMPTS_KEY,
+      SECURITY_CONFIG.lastActivityKey,
+      SECURITY_CONFIG.failedAuthAttemptsKey,
     ]
 
     for (const key of sensitiveKeys) {
@@ -196,17 +188,17 @@ export async function clearPersonalData(): Promise<void> {
  * @returns Number of failed attempts
  */
 export async function recordFailedAuthAttempt(): Promise<number> {
-  const attemptsRecord = await db.appState.get(SECURITY_CONFIG.FAILED_AUTH_ATTEMPTS_KEY)
+  const attemptsRecord = await db.appState.get(SECURITY_CONFIG.failedAuthAttemptsKey)
   const currentAttempts = (attemptsRecord?.value as number) || 0
   const newAttempts = currentAttempts + 1
 
   await db.appState.put({
-    key: SECURITY_CONFIG.FAILED_AUTH_ATTEMPTS_KEY,
+    key: SECURITY_CONFIG.failedAuthAttemptsKey,
     value: newAttempts,
   })
 
   // Check if max attempts exceeded
-  if (newAttempts >= SECURITY_CONFIG.MAX_FAILED_AUTH_ATTEMPTS) {
+  if (newAttempts >= SECURITY_CONFIG.maxFailedAuthAttempts) {
     console.warn('[Data Security] Max failed auth attempts exceeded, clearing data')
     await clearAllCachedData()
   }
@@ -219,7 +211,7 @@ export async function recordFailedAuthAttempt(): Promise<number> {
  * Should be called on successful authentication
  */
 export async function resetFailedAuthAttempts(): Promise<void> {
-  await db.appState.delete(SECURITY_CONFIG.FAILED_AUTH_ATTEMPTS_KEY)
+  await db.appState.delete(SECURITY_CONFIG.failedAuthAttemptsKey)
 }
 
 /**
@@ -227,7 +219,7 @@ export async function resetFailedAuthAttempts(): Promise<void> {
  * @returns Number of failed attempts
  */
 export async function getFailedAuthAttempts(): Promise<number> {
-  const attemptsRecord = await db.appState.get(SECURITY_CONFIG.FAILED_AUTH_ATTEMPTS_KEY)
+  const attemptsRecord = await db.appState.get(SECURITY_CONFIG.failedAuthAttemptsKey)
   return (attemptsRecord?.value as number) || 0
 }
 

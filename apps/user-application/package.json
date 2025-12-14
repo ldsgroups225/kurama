@@ -24,6 +24,8 @@
   },
   "dependencies": {
     "@kurama/data-ops": "workspace:^",
+    "@kurama/observability": "workspace:^",
+    "@kurama/config": "workspace:^",
     "@polar-sh/sdk": "catalog:integrations",
     "@polar-sh/tanstack-start": "catalog:integrations",
     "@radix-ui/react-avatar": "catalog:ui",

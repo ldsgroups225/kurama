@@ -751,9 +751,15 @@ importers:
 
   apps/user-application:
     dependencies:
+      '@kurama/config':
+        specifier: workspace:^
+        version: link:../../packages/config
       '@kurama/data-ops':
         specifier: workspace:^
         version: link:../../packages/data-ops
+      '@kurama/observability':
+        specifier: workspace:^
+        version: link:../../packages/observability
       '@polar-sh/sdk':
         specifier: catalog:integrations
         version: 0.41.5
