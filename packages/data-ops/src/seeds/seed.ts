@@ -141,78 +141,91 @@ export const SERIES: InsertSeries[] = [
 // ============================================================================
 
 export const SUBJECTS: InsertSubject[] = [
-  // Core subjects
+  // Core subjects - Active ones
   {
     name: "Mathématiques",
     abbreviation: "MATH",
     description: "Mathématiques",
     displayOrder: 1,
+    isActive: true,
   },
   {
     name: "Français",
     abbreviation: "FR",
     description: "Langue française",
     displayOrder: 2,
+    isActive: true,
   },
   {
     name: "Anglais",
     abbreviation: "ANG",
     description: "Langue anglaise",
     displayOrder: 3,
+    isActive: true,
   },
   {
     name: "Physique-Chimie",
     abbreviation: "PC",
     description: "Sciences physiques et chimiques",
     displayOrder: 4,
+    isActive: true,
   },
   {
     name: "Sciences de la Vie et de la Terre",
     abbreviation: "SVT",
     description: "Biologie et géologie",
     displayOrder: 5,
+    isActive: true,
   },
   {
     name: "Histoire-Géographie",
     abbreviation: "HG",
     description: "Histoire et géographie",
     displayOrder: 6,
+    isActive: true,
   },
   {
     name: "Philosophie",
     abbreviation: "PHILO",
     description: "Philosophie",
     displayOrder: 7,
+    isActive: true,
   },
+  // Inactive subjects
   {
     name: "Éducation Civique et Morale",
     abbreviation: "ECM",
     description: "Éducation civique",
     displayOrder: 8,
+    isActive: false,
   },
   {
     name: "Espagnol",
     abbreviation: "ESP",
     description: "Langue espagnole",
     displayOrder: 9,
+    isActive: false,
   },
   {
     name: "Allemand",
     abbreviation: "ALL",
     description: "Langue allemande",
     displayOrder: 10,
+    isActive: false,
   },
   {
     name: "Économie",
     abbreviation: "ECO",
     description: "Sciences économiques",
     displayOrder: 11,
+    isActive: false,
   },
   {
     name: "Comptabilité",
     abbreviation: "COMPTA",
     description: "Comptabilité et gestion",
     displayOrder: 12,
+    isActive: false,
   },
 ];
 

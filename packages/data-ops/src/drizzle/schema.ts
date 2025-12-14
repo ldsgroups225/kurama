@@ -121,6 +121,7 @@ export const subjects = pgTable("subjects", {
 	abbreviation: text().notNull(),
 	description: text(),
 	displayOrder: integer("display_order").notNull(),
+	isActive: boolean("is_active").default(false).notNull(),
 }, (table) => [
 	unique("subjects_name_unique").on(table.name),
 	unique("subjects_abbreviation_unique").on(table.abbreviation),
