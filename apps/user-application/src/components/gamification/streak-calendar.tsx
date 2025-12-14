@@ -80,9 +80,9 @@ export function StreakCalendar({
                 flex h-14 w-14 items-center justify-center rounded-2xl shadow-xl
                 transition-all duration-500
                 ${currentStreak > 0
-      ? 'bg-linear-to-br from-orange-500 to-red-600 border border-orange-400/50'
-      : 'bg-muted/50 border border-border'
-    }
+                    ? 'bg-linear-to-br from-orange-500 to-red-600 border border-orange-400/50'
+                    : 'bg-muted/50 border border-border'
+                  }
                 `}
               >
                 <Flame
@@ -130,7 +130,7 @@ export function StreakCalendar({
           <div className="grid grid-cols-7 gap-3">
             {weekDays.map(day => (
               <div
-                key={`weekday-${day}`}
+                key={`weekday-${generateUUID()}`}
                 className="text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
               >
                 {day}
@@ -150,7 +150,7 @@ export function StreakCalendar({
 
                 return (
                   <div
-                    key={`day-${day?.date}`}
+                    key={`day-${generateUUID()}`}
                     className={cn(
                       'relative flex aspect-square items-center justify-center rounded-xl transition-all duration-300 group',
                       isCompleted
@@ -162,15 +162,15 @@ export function StreakCalendar({
                   >
                     {isCompleted
                       ? (
-                          <Flame className="h-4 w-4 text-white fill-white/20 drop-shadow-md" />
-                        )
+                        <Flame className="h-4 w-4 text-white fill-white/20 drop-shadow-md" />
+                      )
                       : isToday
                         ? (
-                            <div className="h-2 w-2 rounded-full bg-orange-500/50" />
-                          )
+                          <div className="h-2 w-2 rounded-full bg-orange-500/50" />
+                        )
                         : (
-                            <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50 group-hover:bg-muted-foreground transition-colors" />
-                          )}
+                          <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50 group-hover:bg-muted-foreground transition-colors" />
+                        )}
                   </div>
                 )
               })}

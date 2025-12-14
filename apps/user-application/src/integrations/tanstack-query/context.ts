@@ -1,10 +1,9 @@
 import type { Persister } from '@tanstack/react-query-persist-client'
-import { QueryClient } from '@tanstack/react-query'
+import { isServer, QueryClient } from '@tanstack/react-query'
 import { createDexiePersister } from '@/lib/query-persister'
 
-export function getContext() {
-  // Create QueryClient with appropriate settings for persistence
-  const queryClient = new QueryClient({
+function makeQueryClient() {
+  return new QueryClient({
     defaultOptions: {
       queries: {
         // Cache data for 24 hours
@@ -24,12 +23,42 @@ export function getContext() {
       },
     },
   })
+}
 
-  // Create persister only on client-side (not during SSR)
-  let persister: Persister | undefined
-  if (typeof window !== 'undefined') {
-    persister = createDexiePersister()
+// Browser singleton - prevents creating new QueryClient on each render
+// This is critical to avoid "Invalid hook call" errors with SSR
+let browserQueryClient: QueryClient | undefined
+let browserPersister: Persister | undefined
+
+function getQueryClient() {
+  if (isServer) {
+    // Server: always make a new query client
+    return makeQueryClient()
   }
+  else {
+    // Browser: reuse the same query client
+    // This prevents re-creating the client if React suspends during initial render
+    if (!browserQueryClient) {
+      browserQueryClient = makeQueryClient()
+    }
+    return browserQueryClient
+  }
+}
+
+function getPersister(): Persister | undefined {
+  if (isServer) {
+    return undefined
+  }
+  // Browser: reuse the same persister
+  if (!browserPersister) {
+    browserPersister = createDexiePersister()
+  }
+  return browserPersister
+}
+
+export function getContext() {
+  const queryClient = getQueryClient()
+  const persister = getPersister()
 
   return {
     queryClient,
