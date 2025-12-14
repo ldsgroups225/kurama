@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "Plateforme d'étude intelligente pour les étudiants préparant BEPC/BAC en Côte d'Ivoire",
   "scripts": {
-    "setup": "pnpm i && pnpm run build:data-ops",
+    "setup": "pnpm i && pnpm run build:packages",
+    "build:packages": "pnpm run build:config && pnpm run build:observability && pnpm run build:data-ops",
+    "build:config": "pnpm run --filter @kurama/config build",
+    "build:observability": "pnpm run --filter @kurama/observability build",
     "build:data-ops": "pnpm run --filter data-ops build",
     "dev:kurama-frontend": "pnpm run --filter kurama-frontend dev",
     "deploy:kurama-frontend": "pnpm run build:data-ops && pnpm run --filter kurama-frontend deploy",
