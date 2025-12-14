@@ -1,9 +1,10 @@
 import type { MotionValue, PanInfo } from 'motion/react'
+import { ANIMATION_CONFIG } from '@kurama/config/animation'
 
-const SWIPE_THRESHOLD = 80
-const VELOCITY_THRESHOLD = 500
-const VELOCITY_DISTANCE_THRESHOLD = 50
-const DRAG_END_DELAY = 100
+const SWIPE_THRESHOLD = ANIMATION_CONFIG.swipe.threshold
+const VELOCITY_THRESHOLD = ANIMATION_CONFIG.swipe.velocityThreshold
+const VELOCITY_DISTANCE_THRESHOLD = ANIMATION_CONFIG.swipe.velocityDistanceThreshold
+const DRAG_END_DELAY = ANIMATION_CONFIG.swipe.dragEndDelay
 
 interface SwipeHandlerOptions {
   x: MotionValue<number>

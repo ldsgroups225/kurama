@@ -1,6 +1,7 @@
+import { ANIMATION_CONFIG } from '@kurama/config/animation'
 import { useMotionValue, useTransform } from 'motion/react'
 
-const SWIPE_THRESHOLD = 80
+const SWIPE_THRESHOLD = ANIMATION_CONFIG.swipe.threshold
 
 /**
  * Semantic color tokens for swipe animations using CSS variables

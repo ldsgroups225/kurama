@@ -1,10 +1,11 @@
 import type { MotionValue } from 'motion/react'
+import { ANIMATION_CONFIG } from '@kurama/config/animation'
 import { useEffect } from 'react'
 
-const FLIP_DELAY = 4000
-const NEXT_CARD_DELAY = 4000
-const SWIPE_ANIMATION_DURATION = 600
-const SWIPE_TARGET_X = 250
+const FLIP_DELAY = ANIMATION_CONFIG.autoplay.flipDelay
+const NEXT_CARD_DELAY = ANIMATION_CONFIG.autoplay.nextCardDelay
+const SWIPE_ANIMATION_DURATION = ANIMATION_CONFIG.autoplay.swipeAnimationDuration
+const SWIPE_TARGET_X = ANIMATION_CONFIG.swipe.targetX
 
 interface UseAutoplayOptions {
   isAutoPlaying: boolean
