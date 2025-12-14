@@ -33,8 +33,12 @@ export function AuthScreen() {
       <div className="w-full max-w-md relative z-10">
         {/* Logo and Title */}
         <div className="mb-8 text-center animate-in fade-in slide-in-from-bottom-5 duration-700">
-          <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-linear-to-br from-indigo-500 to-purple-600 shadow-2xl shadow-indigo-500/20">
-            <span className="text-4xl font-black text-white tracking-tighter">K</span>
+          <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-white shadow-2xl shadow-indigo-500/20">
+            <img
+              src="/pwa-192x192.png"
+              alt="Kurama Logo"
+              className="h-16 w-16 rounded-2xl"
+            />
           </div>
           <h1 className="mb-2 text-3xl font-bold text-foreground tracking-tight">
             Bienvenue sur Kurama
@@ -55,11 +59,11 @@ export function AuthScreen() {
           >
             {step === 'email'
               ? (
-                  <EmailStep onSubmit={handleEmailSubmit} />
-                )
+                <EmailStep onSubmit={handleEmailSubmit} />
+              )
               : (
-                  <OtpStep email={email} onBack={handleBackToEmail} />
-                )}
+                <OtpStep email={email} onBack={handleBackToEmail} />
+              )}
           </Suspense>
 
           {/* Divider */}

@@ -27,8 +27,12 @@ export function GoogleLogin() {
       <div className="w-full max-w-md relative z-10 animate-in fade-in zoom-in-95 duration-500">
         <Card className="border-border bg-card backdrop-blur-xl shadow-2xl">
           <CardHeader className="text-center pb-2">
-            <div className="mb-6 mx-auto inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 shadow-xl shadow-indigo-500/20">
-              <span className="text-3xl font-black text-white tracking-tighter">K</span>
+            <div className="mb-6 mx-auto inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-xl shadow-indigo-500/20">
+              <img
+                src="/pwa-192x192.png"
+                alt="Kurama Logo"
+                className="h-12 w-12 rounded-xl"
+              />
             </div>
             <CardTitle className="text-2xl font-bold text-foreground">Content de vous revoir</CardTitle>
             <CardDescription className="text-muted-foreground">Connectez-vous à votre compte pour continuer</CardDescription>

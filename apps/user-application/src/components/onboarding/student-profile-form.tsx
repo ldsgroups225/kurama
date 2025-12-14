@@ -232,8 +232,12 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
 
       <div className="w-full max-w-md relative z-10 animate-in fade-in slide-in-from-bottom-5 duration-700">
         <div className="mb-8 text-center">
-          <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 shadow-xl shadow-indigo-500/20">
-            <span className="text-3xl font-black text-white tracking-tighter">K</span>
+          <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-xl shadow-indigo-500/20">
+            <img
+              src="/pwa-192x192.png"
+              alt="Kurama Logo"
+              className="h-12 w-12 rounded-xl"
+            />
           </div>
         </div>
 
@@ -510,9 +514,9 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                           className={`
                             justify-start border transition-all duration-200
                             ${formData.favoriteSubjects?.includes(subject)
-                          ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400'
-                          : 'border-input bg-background/50 text-muted-foreground hover:bg-accent hover:text-foreground'
-                        }
+                              ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400'
+                              : 'border-input bg-background/50 text-muted-foreground hover:bg-accent hover:text-foreground'
+                            }
                           `}
                         >
                           {subject}
@@ -571,14 +575,14 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                   >
                     {submitMutation.isPending
                       ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Enregistrement...
-                          </>
-                        )
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Enregistrement...
+                        </>
+                      )
                       : (
-                          'Terminer'
-                        )}
+                        'Terminer'
+                      )}
                   </Button>
                 </>
               )}
