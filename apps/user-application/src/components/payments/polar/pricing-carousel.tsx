@@ -8,7 +8,6 @@ import {
   Gift,
   Rocket,
   Shield,
-  Sparkles,
   Star,
   Zap,
 } from 'lucide-react'
@@ -51,7 +50,7 @@ const PLAN_CONFIGS: Record<string, {
   quarter: {
     gradient: 'from-violet-500 to-purple-600',
     bgGradient: 'from-violet-500/10 to-purple-600/10',
-    icon: Sparkles,
+    icon: Star,
     badge: 'Populaire',
     badgeClass: 'bg-linear-to-r from-violet-500 to-fuchsia-500',
     xpBonus: '+75% XP',

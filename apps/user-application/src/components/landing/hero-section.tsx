@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, BookOpen, Github, Sparkles, Trophy } from '@/lib/icons'
+import { ArrowRight, BookOpen, Brain, Github, Trophy } from '@/lib/icons'
 
 export function HeroSection() {
   return (
@@ -14,7 +14,7 @@ export function HeroSection() {
       <div className="mx-auto max-w-4xl text-center">
         <div className="mb-8 flex flex-wrap justify-center gap-2">
           <Badge variant="secondary" className="mb-4">
-            <Sparkles className="mr-1 h-3 w-3" />
+            <Brain className="mr-1 h-3 w-3" />
             Répétition Espacée
           </Badge>
           <Badge variant="secondary" className="mb-4">

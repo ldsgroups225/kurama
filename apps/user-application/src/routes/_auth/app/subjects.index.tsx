@@ -13,7 +13,6 @@ import {
   Megaphone,
   Pi,
   Scale,
-  Sparkles,
   TrendingUp,
 } from 'lucide-react'
 import { motion } from 'motion/react'
@@ -118,7 +117,7 @@ function SubjectsPage() {
         {/* Header */}
         <div className="py-4">
           <Badge className="mb-3 bg-muted text-muted-foreground border-border hover:bg-muted/80 transition-colors">
-            <Sparkles className="w-3 h-3 mr-1.5 text-yellow-500" />
+            <BookOpen className="w-3 h-3 mr-1.5 text-blue-500" />
             Parcours Scolaire
           </Badge>
           <h2 className="mb-2 text-2xl font-bold text-foreground">Quelle matière travailler ?</h2>

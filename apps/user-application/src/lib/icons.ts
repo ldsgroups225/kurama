@@ -48,13 +48,13 @@ export {
   Play,
   Rocket,
   Shield,
-  Sparkles,
   Star,
   Trophy,
 } from 'lucide-react'
 
 // Communication Icons
 export {
+  Heart,
   Mail,
   MessageCircle,
   Quote,

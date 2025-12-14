@@ -5,7 +5,7 @@ import {
   ArrowRight,
   BookOpen,
   Brain,
-  Sparkles,
+  Star,
   Users,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
@@ -92,7 +92,7 @@ const iconVariants = {
   },
 }
 
-const sparkleVariants = {
+const starVariants = {
   animate: {
     rotate: [0, 360],
     scale: [1, 1.2, 1],
@@ -262,13 +262,13 @@ export function OnboardingScreen({
                 >
                   <Icon className="h-20 w-20 text-white drop-shadow-lg" strokeWidth={1.5} />
                 </motion.div>
-                {/* Decorative sparkle */}
+                {/* Decorative star */}
                 <motion.div
                   className="absolute -top-4 -right-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-900 border border-white/10 shadow-lg"
-                  variants={sparkleVariants}
+                  variants={starVariants}
                   animate="animate"
                 >
-                  <Sparkles className="h-5 w-5 text-yellow-500" fill="currentColor" />
+                  <Star className="h-5 w-5 text-yellow-500" fill="currentColor" />
                 </motion.div>
               </div>
             </div>

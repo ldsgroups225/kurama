@@ -59,11 +59,11 @@ export function AuthScreen() {
           >
             {step === 'email'
               ? (
-                <EmailStep onSubmit={handleEmailSubmit} />
-              )
+                  <EmailStep onSubmit={handleEmailSubmit} />
+                )
               : (
-                <OtpStep email={email} onBack={handleBackToEmail} />
-              )}
+                  <OtpStep email={email} onBack={handleBackToEmail} />
+                )}
           </Suspense>
 
           {/* Divider */}

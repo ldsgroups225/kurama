@@ -1,7 +1,9 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
+  Award,
   Bell,
+  BookOpen,
   ChevronRight,
   Crown,
   Flame,
@@ -9,7 +11,6 @@ import {
   LogOut,
   Settings,
   Shield,
-  Sparkles,
   User,
   Zap,
 } from 'lucide-react'
@@ -96,7 +97,7 @@ function ProfilePage() {
       bgColor: 'bg-yellow-500/10 dark:bg-yellow-400/10',
     },
     {
-      icon: isPremium ? Sparkles : Crown,
+      icon: isPremium ? Award : Crown,
       label: isPremium ? 'Gérer mon abonnement' : 'Passer à Premium',
       href: '/app/polar/subscriptions',
       badge: isPremium ? undefined : 'Nouveau',
@@ -190,7 +191,7 @@ function ProfilePage() {
             {/* Stats Grid */}
             <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3">
               {[
-                { label: 'Cartes', value: stats?.totalCardsStudied ?? 0, icon: Sparkles, color: 'text-cyan-400' },
+                { label: 'Cartes', value: stats?.totalCardsStudied ?? 0, icon: BookOpen, color: 'text-cyan-400' },
                 { label: 'Points XP', value: stats?.totalXP ?? 0, icon: Zap, color: 'text-amber-400' },
                 { label: 'Série', value: `${stats?.currentStreak ?? 0}j`, icon: Flame, color: 'text-orange-500' },
               ].map(stat => (

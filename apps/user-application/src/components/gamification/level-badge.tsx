@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { useVibration, VibrationPatterns } from '@/hooks'
-import { Sparkles, TrendingUp } from '@/lib/icons'
+import { Star, TrendingUp } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 interface LevelBadgeProps {
@@ -55,7 +55,7 @@ export function LevelBadge({
           </div>
 
           <div className="absolute -top-1 -right-1 z-20 animate-pulse">
-            <Sparkles className="text-yellow-100 h-4 w-4 drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
+            <Star className="text-yellow-100 h-4 w-4 drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
           </div>
         </div>
 
@@ -112,7 +112,7 @@ export function LevelBadge({
             </div>
 
             <div className="absolute -top-2 -right-2 z-20">
-              <Sparkles className="text-yellow-100 h-6 w-6 drop-shadow-[0_0_12px_rgba(255,255,255,1)] animate-pulse" />
+              <Star className="text-yellow-100 h-6 w-6 drop-shadow-[0_0_12px_rgba(255,255,255,1)] animate-pulse" />
             </div>
           </div>
 

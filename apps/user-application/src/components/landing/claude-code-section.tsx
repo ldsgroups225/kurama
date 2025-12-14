@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react'
+import { Zap } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 
 export function ClaudeCodeSection() {
@@ -6,7 +6,7 @@ export function ClaudeCodeSection() {
     <section
       id="claude-code"
       className={`
-        bg-gradient-to-b from-background to-muted/20
+        bg-linear-to-b from-background to-muted/20
         sm:py-6
       `}
     >
@@ -17,7 +17,7 @@ export function ClaudeCodeSection() {
       >
         <div className="mx-auto max-w-2xl text-center">
           <Badge variant="outline" className="mb-4">
-            <Sparkles className="mr-1 h-3 w-3" />
+            <Zap className="mr-1 h-3 w-3" />
             AI-Powered Setup
           </Badge>
           <h2 className={`

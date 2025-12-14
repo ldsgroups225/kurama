@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, Sparkles } from '@/lib/icons'
+import { ArrowRight, Heart } from '@/lib/icons'
 
 export function CTASection() {
   return (
@@ -40,7 +40,7 @@ export function CTASection() {
           py-2
         `}
         >
-          <Sparkles className="h-4 w-4 text-primary" />
+          <Heart className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium text-primary">
             Gratuit pour tous les étudiants
           </span>

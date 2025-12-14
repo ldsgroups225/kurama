@@ -1,4 +1,4 @@
-import { Flame, Sparkles, Target, Timer, Trophy, Zap } from 'lucide-react'
+import { Flame, Target, Timer, Trophy, Zap } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -19,7 +19,7 @@ export function XPBreakdown({ breakdown, totalXP, className }: XPBreakdownProps)
   const items = [
     { label: 'Réponses correctes', value: breakdown.base, icon: Target, show: breakdown.base > 0 },
     { label: 'Bonus série', value: breakdown.streakBonus, icon: Flame, show: breakdown.streakBonus > 0 },
-    { label: 'Score parfait', value: breakdown.perfectBonus, icon: Sparkles, show: breakdown.perfectBonus > 0 },
+    { label: 'Score parfait', value: breakdown.perfectBonus, icon: Trophy, show: breakdown.perfectBonus > 0 },
     { label: 'Bonus rapidité', value: breakdown.speedBonus, icon: Timer, show: breakdown.speedBonus > 0 },
     { label: 'Bonus réussite', value: breakdown.passingBonus, icon: Trophy, show: breakdown.passingBonus > 0 },
   ].filter(item => item.show)

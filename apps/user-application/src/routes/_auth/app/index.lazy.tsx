@@ -7,9 +7,9 @@ import {
   FileText,
   Flame,
   Gamepad2,
-  Sparkles,
   Timer,
   TrendingUp,
+  Trophy,
   Zap,
 } from 'lucide-react'
 
@@ -22,7 +22,7 @@ import { Button } from '@/components/ui/button'
 import { getDailyChallengeStatus } from '@/core/functions/daily-challenge'
 import { getDashboardStats } from '@/core/functions/dashboard'
 import { getReviewCardsCount } from '@/core/functions/review'
-import { Rocket, Trophy } from '@/lib/icons'
+import { Rocket } from '@/lib/icons'
 
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn, isDefined } from '@/lib/utils'
@@ -209,7 +209,7 @@ function AppHome() {
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <Badge className="bg-violet-500/10 text-violet-400 border-violet-500/20 hover:bg-violet-500/20">
-                        <Sparkles className="w-3 h-3 mr-1" />
+                        <Trophy className="w-3 h-3 mr-1" />
                         Défi du jour
                       </Badge>
                     </div>

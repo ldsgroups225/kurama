@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Sparkles, Star, Trophy, Zap } from '@/lib/icons'
+import { Star, Trophy, Zap } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { generateUUID } from '@/utils/generateUUID'
 
@@ -20,13 +20,13 @@ interface RewardAnimationProps {
 
 interface AnimationState {
   isVisible: boolean
-  sparkleStyles: (React.CSSProperties & { id: string })[]
+  starStyles: (React.CSSProperties & { id: string })[]
 }
 
 export function RewardAnimation({ reward, onClose, show }: RewardAnimationProps) {
   const [animation, setAnimation] = useState<AnimationState>(() => ({
     isVisible: false,
-    sparkleStyles: [],
+    starStyles: [],
   }))
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export function RewardAnimation({ reward, onClose, show }: RewardAnimationProps)
           animationDelay: `${Math.random() * 2}s`,
           animationDuration: `${2 + Math.random() * 2}s`,
         }))
-        setAnimation({ isVisible: true, sparkleStyles: styles })
+        setAnimation({ isVisible: true, starStyles: styles })
       })
     }
   }, [show])
@@ -72,7 +72,7 @@ export function RewardAnimation({ reward, onClose, show }: RewardAnimationProps)
       case 'level_up':
         return <Star className="h-12 w-12 text-white" />
       case 'streak':
-        return <Sparkles className="h-12 w-12 text-white" />
+        return <Star className="h-12 w-12 text-white" />
       default:
         return <Trophy className="h-12 w-12 text-white" />
     }
@@ -129,15 +129,15 @@ export function RewardAnimation({ reward, onClose, show }: RewardAnimationProps)
             getRewardGradient(),
           )}
           >
-            {/* Sparkles Animation */}
+            {/* Stars Animation */}
             <div className="absolute inset-0 overflow-hidden">
-              {animation.sparkleStyles.map(style => (
+              {animation.starStyles.map(style => (
                 <div
                   key={style.id}
                   className="animate-float absolute"
                   style={style}
                 >
-                  <Sparkles className="h-4 w-4 text-white/30" />
+                  <Star className="h-4 w-4 text-white/30" />
                 </div>
               ))}
             </div>

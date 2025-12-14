@@ -5,7 +5,7 @@
  */
 
 import type { SubscriptionTier } from '@kurama/data-ops/drizzle/schema'
-import { Crown, Sparkles, Star, Zap } from 'lucide-react'
+import { Award, Crown, Star, Zap } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
@@ -33,7 +33,7 @@ const TIER_CONFIG: Record<SubscriptionTier, {
   },
   quarterly: {
     label: 'Premium+',
-    icon: Sparkles,
+    icon: Award,
     className: 'bg-gradient-rare text-white border-transparent',
   },
   annual: {

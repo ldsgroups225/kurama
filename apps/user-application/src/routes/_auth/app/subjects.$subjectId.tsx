@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate, useParams } from '@tanstack/react-router'
-import { BookOpen, CheckCircle2, ChevronRight, Clock, Lock, Sparkles } from 'lucide-react'
+import { BookOpen, CheckCircle2, ChevronRight, Clock, Lock } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useEffect, useMemo } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
@@ -196,7 +196,7 @@ function LessonsPage() {
 
                     {isCompleted && (
                       <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 gap-1">
-                        <Sparkles className="w-3 h-3" />
+                        <CheckCircle2 className="w-3 h-3" />
                         Complété
                       </Badge>
                     )}
