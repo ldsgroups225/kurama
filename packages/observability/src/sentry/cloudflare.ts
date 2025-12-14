@@ -19,6 +19,7 @@ export function createSentryClient(
     request,
     environment: config.environment,
     release: config.release,
+    sendDefaultPii: true,
     tracesSampleRate: config.tracesSampleRate ?? 0.1,
     integrations: [rewriteFramesIntegration({ root: '/' })],
   })
