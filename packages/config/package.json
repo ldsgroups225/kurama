@@ -1,0 +1,20 @@
+{
+  "name": "@kurama/config",
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    "./security": "./dist/security.js",
+    "./animation": "./dist/animation.js",
+    "./environment": "./dist/environment.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^6.0.0"
+  }
+}

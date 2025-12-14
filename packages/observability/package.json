@@ -1,0 +1,29 @@
+{
+  "name": "@kurama/observability",
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    "./sentry/cloudflare": "./dist/sentry/cloudflare.js",
+    "./sentry/browser": "./dist/sentry/browser.js",
+    "./logging": "./dist/logging/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@logtape/logtape": "^1.2.2",
+    "@sentry/browser": "^10.30.0",
+    "@sentry/cloudflare": "^10.30.0",
+    "toucan-js": "^4.1.1"
+  },
+  "peerDependencies": {
+    "hono": "^4.x"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251213.0",
+    "hono": "^4.11.0",
+    "typescript": "^5.9.3"
+  }
+}
