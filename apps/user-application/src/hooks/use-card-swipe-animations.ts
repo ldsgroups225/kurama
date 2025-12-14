@@ -3,30 +3,25 @@ import { useMotionValue, useTransform } from 'motion/react'
 const SWIPE_THRESHOLD = 80
 
 /**
- * Semantic color tokens for swipe animations
- * These match the CSS variables in styles.css:
- * - warning-from: oklch(0.7 0.19 45) ≈ rgb(234, 88, 12) - Orange
- * - success-from: oklch(0.65 0.17 145) ≈ rgb(34, 197, 94) - Green
- * - secondary: oklch(0.274 0.006 286.033) ≈ rgb(39, 39, 42) - Zinc
+ * Semantic color tokens for swipe animations using CSS variables
+ * These use CSS custom properties to support light/dark themes automatically
  */
 const COLORS = {
-  // Warning/incorrect swipe - matches --warning-from
-  warningOpaque: 'rgba(234, 88, 12, 1)',
-  warningSemiOpaque: 'rgba(234, 88, 12, 0.8)',
-  warningSemiTransparent: 'rgba(234, 88, 12, 0.5)',
-  warningLight: 'rgba(251, 146, 60, 1)',
-  warningLightTransparent: 'rgba(251, 146, 60, 0.1)',
-  // Success/correct swipe - matches --success-from
-  successOpaque: 'rgba(34, 197, 94, 1)',
-  successSemiOpaque: 'rgba(34, 197, 94, 0.8)',
-  successSemiTransparent: 'rgba(34, 197, 94, 0.5)',
-  successTransparent: 'rgba(34, 197, 94, 0.1)',
+  // Warning/incorrect swipe - uses CSS variables with opacity
+  warningOpaque: 'oklch(from var(--warning-from) l c h / 1)',
+  warningSemiOpaque: 'oklch(from var(--warning-from) l c h / 0.8)',
+  warningSemiTransparent: 'oklch(from var(--warning-from) l c h / 0.5)',
+  warningLight: 'oklch(from var(--warning-to) l c h / 1)',
+  warningLightTransparent: 'oklch(from var(--warning-to) l c h / 0.1)',
+  // Success/correct swipe - uses CSS variables with opacity
+  successOpaque: 'oklch(from var(--success-from) l c h / 1)',
+  successSemiOpaque: 'oklch(from var(--success-from) l c h / 0.8)',
+  successSemiTransparent: 'oklch(from var(--success-from) l c h / 0.5)',
+  successTransparent: 'oklch(from var(--success-from) l c h / 0.1)',
   // Neutral - Transparent to let CSS bg-card/bg-background show through
-  neutralCard: 'rgba(0, 0, 0, 0)',
-  // Neutral Border - Generic grey that works on both light/dark or transparent to let border-border show (requires component change)
-  // Using a subtle grey that works decently for both if we must hardcode, but ideally we want transparent if we can fallback to CSS.
-  // However, since we can't easily fallback to CSS border when using style prop, we'll use a balanced grey.
-  neutralBorder: 'rgba(127, 127, 127, 0.2)',
+  neutralCard: 'transparent',
+  // Neutral Border - Uses CSS border variable with opacity
+  neutralBorder: 'oklch(from var(--border) l c h / 0.2)',
 } as const
 
 /**
