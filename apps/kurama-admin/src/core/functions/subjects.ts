@@ -35,6 +35,7 @@ export const getSubjects = createServerFn({ method: 'GET' })
         abbreviation: subjects.abbreviation,
         description: subjects.description,
         displayOrder: subjects.displayOrder,
+        isActive: subjects.isActive,
         lessonCount: sql<number>`(SELECT COUNT(*) FROM "lessons" WHERE "lessons"."subject_id" = "subjects"."id")`,
         cardCount: sql<number>`(SELECT COUNT(*) FROM "cards" c JOIN "lessons" l ON c."lesson_id" = l."id" WHERE l."subject_id" = "subjects"."id")`,
       })
@@ -193,6 +194,30 @@ export const getSubjectsSimple = createServerFn({ method: 'GET' })
       .orderBy(asc(subjects.displayOrder))
 
     return subjectList
+  })
+
+// Toggle subject active status
+export const toggleSubjectActive = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((data: { id: number; isActive: boolean }) => data)
+  .handler(async ({ data, context }) => {
+    initAdminDb()
+    const db = getDb()
+
+    const result = await db
+      .update(subjects)
+      .set({ isActive: data.isActive })
+      .where(eq(subjects.id, data.id))
+      .returning()
+
+    const subject = result[0]
+    if (!subject) {
+      throw new Error('Matière non trouvée')
+    }
+
+    console.warn(`[AUDIT] Subject ${data.isActive ? 'activated' : 'deactivated'} by ${context.email}:`, data.id)
+
+    return subject
   })
 
 // Reorder subjects

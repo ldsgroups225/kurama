@@ -10,10 +10,12 @@ import { ConfirmDialog, DataTable, PageHeader } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
 import {
   createSubject,
   deleteSubject,
   getSubjects,
+  toggleSubjectActive,
   updateSubject,
 } from '@/core/functions/subjects'
 
@@ -27,6 +29,7 @@ interface Subject {
   abbreviation: string
   description: string | null
   displayOrder: number
+  isActive: boolean
   lessonCount: number
   cardCount: number
 }
@@ -80,6 +83,18 @@ function SubjectsPage() {
     },
   })
 
+  const toggleActiveMutation = useMutation({
+    mutationFn: ({ id, isActive }: { id: number, isActive: boolean }) =>
+      toggleSubjectActive({ data: { id, isActive } }),
+    onSuccess: (_, { isActive }) => {
+      queryClient.invalidateQueries({ queryKey: ['subjects'] })
+      toast.success(`Matière ${isActive ? 'activée' : 'désactivée'} avec succès`)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erreur lors de la modification')
+    },
+  })
+
   const columns = [
     {
       key: 'name',
@@ -118,6 +133,25 @@ function SubjectsPage() {
         </div>
       ),
       className: 'w-36',
+    },
+    {
+      key: 'active',
+      header: 'Actif',
+      cell: (subject: Subject) => (
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={subject.isActive}
+            onCheckedChange={(checked) =>
+              toggleActiveMutation.mutate({ id: subject.id, isActive: checked })
+            }
+            disabled={toggleActiveMutation.isPending}
+          />
+          <span className="text-sm text-muted-foreground">
+            {subject.isActive ? 'Actif' : 'Inactif'}
+          </span>
+        </div>
+      ),
+      className: 'w-28',
     },
     {
       key: 'order',
@@ -219,6 +253,7 @@ function SubjectsPage() {
             abbreviation: editingSubject.abbreviation,
             description: editingSubject.description ?? undefined,
             displayOrder: editingSubject.displayOrder,
+            isActive: editingSubject.isActive,
           }}
           isEditing
           isLoading={updateMutation.isPending}

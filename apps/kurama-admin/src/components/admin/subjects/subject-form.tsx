@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { createSubjectSchema } from '@/lib/schemas'
 
@@ -36,6 +37,7 @@ export function SubjectForm({
   const [abbreviation, setAbbreviation] = useState(defaultValues?.abbreviation || '')
   const [description, setDescription] = useState(defaultValues?.description || '')
   const [displayOrder, setDisplayOrder] = useState(defaultValues?.displayOrder || 0)
+  const [isActive, setIsActive] = useState(defaultValues?.isActive ?? false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,6 +49,7 @@ export function SubjectForm({
       abbreviation,
       description: description || undefined,
       displayOrder,
+      isActive,
     }
 
     const result = createSubjectSchema.safeParse(data)
@@ -136,6 +139,19 @@ export function SubjectForm({
               min={0}
               value={displayOrder}
               onChange={e => setDisplayOrder(Number.parseInt(e.target.value) || 0)}
+            />
+          </motion.div>
+          <motion.div variants={item} className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="isActive">Matière active</Label>
+              <p className="text-sm text-muted-foreground">
+                Les matières actives sont visibles par les étudiants
+              </p>
+            </div>
+            <Switch
+              id="isActive"
+              checked={isActive}
+              onCheckedChange={setIsActive}
             />
           </motion.div>
           <motion.div variants={item} className="flex justify-end gap-2 pt-4">

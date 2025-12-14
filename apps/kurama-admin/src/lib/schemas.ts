@@ -6,6 +6,7 @@ export const createSubjectSchema = z.object({
   abbreviation: z.string().min(1, 'L\'abréviation est requise').max(10, 'L\'abréviation doit faire moins de 10 caractères'),
   description: z.string().optional(),
   displayOrder: z.number().int().min(0).default(0),
+  isActive: z.boolean().default(false),
 })
 
 export const updateSubjectSchema = createSubjectSchema.extend({
