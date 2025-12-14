@@ -1,7 +1,7 @@
 import type { CreateLessonInput, UpdateLessonInput } from '@/lib/schemas'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ExternalLink, Eye, EyeOff, FileText, Pencil, Plus, Search, Sparkles, Trash2, Zap } from 'lucide-react'
+import { ExternalLink, Eye, EyeOff, FileText, Pencil, Plus, Search, Sparkles, Trash2, X, Zap } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {
+  bulkDeleteLessons,
+  bulkToggleLessonsPublish,
   createLesson,
   deleteLesson,
   getLessons,
@@ -70,6 +72,8 @@ function LessonsPage() {
   const [bulkCardsOpen, setBulkCardsOpen] = useState(false)
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null)
   const [deletingLesson, setDeletingLesson] = useState<Lesson | null>(null)
+  const [selectedIds, setSelectedIds] = useState(() => new Set<number>())
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
 
   const { data: subjectsData } = useQuery({
     queryKey: ['subjects-simple'],
@@ -136,6 +140,31 @@ function LessonsPage() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Erreur lors de la suppression')
+    },
+  })
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (ids: number[]) => bulkDeleteLessons({ data: ids }),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['lessons'] })
+      setBulkDeleteOpen(false)
+      setSelectedIds(new Set())
+      toast.success(`${result.deleted} leçon(s) supprimée(s) avec succès`)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erreur lors de la suppression')
+    },
+  })
+
+  const bulkPublishMutation = useMutation({
+    mutationFn: (data: { ids: number[], isPublished: boolean }) => bulkToggleLessonsPublish({ data }),
+    onSuccess: (result, { isPublished }) => {
+      queryClient.invalidateQueries({ queryKey: ['lessons'] })
+      setSelectedIds(new Set())
+      toast.success(`${result.updated} leçon(s) ${isPublished ? 'publiée(s)' : 'dépubliée(s)'} avec succès`)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erreur lors de la modification')
     },
   })
 
@@ -306,30 +335,79 @@ function LessonsPage() {
       <PageHeader
         title="Leçons"
         description="Gérer les leçons et leur contenu"
-        actions={(
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setBulkGenerateOpen(true)}
-              className="gap-2"
-            >
-              <Zap className="h-4 w-4" />
-              Plans en lot
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setBulkCardsOpen(true)}
-              className="gap-2"
-            >
-              <FileText className="h-4 w-4" />
-              Cartes en lot
-            </Button>
-            <Button onClick={() => setFormOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Nouvelle leçon
-            </Button>
-          </div>
-        )}
+        actions={
+          selectedIds.size > 0
+            ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {selectedIds.size}
+                  {' '}
+                  sélectionné
+                  {selectedIds.size > 1 ? 's' : ''}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedIds(new Set())}
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  Annuler
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => bulkPublishMutation.mutate({ ids: Array.from(selectedIds), isPublished: true })}
+                  disabled={bulkPublishMutation.isPending}
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  Publier
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => bulkPublishMutation.mutate({ ids: Array.from(selectedIds), isPublished: false })}
+                  disabled={bulkPublishMutation.isPending}
+                >
+                  <EyeOff className="mr-2 h-4 w-4" />
+                  Dépublier
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setBulkDeleteOpen(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Supprimer (
+                  {selectedIds.size}
+                  )
+                </Button>
+              </div>
+            )
+            : (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setBulkGenerateOpen(true)}
+                  className="gap-2"
+                >
+                  <Zap className="h-4 w-4" />
+                  Plans en lot
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setBulkCardsOpen(true)}
+                  className="gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  Cartes en lot
+                </Button>
+                <Button onClick={() => setFormOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nouvelle leçon
+                </Button>
+              </div>
+            )
+        }
       />
 
       <div className="flex flex-wrap items-center gap-4">
@@ -423,6 +501,10 @@ function LessonsPage() {
         onPageChange={setPage}
         isLoading={isLoading}
         emptyMessage="Aucune leçon trouvée"
+        selectable
+        selectedIds={selectedIds}
+        onSelectionChange={setSelectedIds}
+        getRowId={lesson => lesson.id}
       />
 
       {formOpen && (
@@ -486,6 +568,18 @@ function LessonsPage() {
         confirmLabel="Supprimer"
         onConfirm={() => deletingLesson && deleteMutation.mutate(deletingLesson.id)}
         isLoading={deleteMutation.isPending}
+        variant="destructive"
+      />
+
+      {/* Bulk Delete Confirmation */}
+      <ConfirmDialog
+        open={bulkDeleteOpen}
+        onOpenChange={setBulkDeleteOpen}
+        title="Supprimer les leçons sélectionnées"
+        description={`Êtes-vous sûr de vouloir supprimer ${selectedIds.size} leçon${selectedIds.size > 1 ? 's' : ''} ? Cette action est irréversible. Les leçons avec des cartes ne seront pas supprimées.`}
+        confirmLabel={`Supprimer (${selectedIds.size})`}
+        onConfirm={() => bulkDeleteMutation.mutate(Array.from(selectedIds))}
+        isLoading={bulkDeleteMutation.isPending}
         variant="destructive"
       />
     </motion.div>

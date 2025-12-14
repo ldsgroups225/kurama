@@ -296,6 +296,60 @@ export const deleteLesson = createServerFn({ method: 'POST' })
     return { success: true }
   })
 
+// Bulk delete lessons
+export const bulkDeleteLessons = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((ids: number[]) => ids)
+  .handler(async ({ data: ids, context }) => {
+    initAdminDb()
+    const db = getDb()
+
+    // Check if any lesson has cards
+    const lessonsWithCards = await db
+      .select({ id: lessons.id, cardCount: sql<number>`(SELECT COUNT(*) FROM "cards" WHERE "cards"."lesson_id" = "lessons"."id")` })
+      .from(lessons)
+      .where(sql`${lessons.id} IN ${ids}`)
+
+    const hasCards = lessonsWithCards.filter(l => Number(l.cardCount) > 0)
+    if (hasCards.length > 0) {
+      throw new Error(`${hasCards.length} leçon(s) ont des cartes et ne peuvent pas être supprimées`)
+    }
+
+    const result = await db
+      .delete(lessons)
+      .where(sql`${lessons.id} IN ${ids}`)
+      .returning({ id: lessons.id })
+
+    console.warn(`[AUDIT] Bulk delete lessons by ${context.email}:`, ids)
+
+    return { deleted: result.length }
+  })
+
+// Bulk publish/unpublish lessons
+export const bulkToggleLessonsPublish = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((data: { ids: number[], isPublished: boolean }) => data)
+  .handler(async ({ data, context }) => {
+    initAdminDb()
+    const db = getDb()
+
+    const { ids, isPublished } = data
+
+    const result = await db
+      .update(lessons)
+      .set({
+        isPublished,
+        publishedAt: isPublished ? new Date().toISOString() : null,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(sql`${lessons.id} IN ${ids}`)
+      .returning({ id: lessons.id })
+
+    console.warn(`[AUDIT] Bulk ${isPublished ? 'publish' : 'unpublish'} lessons by ${context.email}:`, ids)
+
+    return { updated: result.length }
+  })
+
 // Reorder lessons
 export const reorderLessons = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])

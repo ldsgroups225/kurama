@@ -199,7 +199,7 @@ export const getSubjectsSimple = createServerFn({ method: 'GET' })
 // Toggle subject active status
 export const toggleSubjectActive = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])
-  .inputValidator((data: { id: number; isActive: boolean }) => data)
+  .inputValidator((data: { id: number, isActive: boolean }) => data)
   .handler(async ({ data, context }) => {
     initAdminDb()
     const db = getDb()
@@ -218,6 +218,56 @@ export const toggleSubjectActive = createServerFn({ method: 'POST' })
     console.warn(`[AUDIT] Subject ${data.isActive ? 'activated' : 'deactivated'} by ${context.email}:`, data.id)
 
     return subject
+  })
+
+// Bulk delete subjects
+export const bulkDeleteSubjects = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((ids: number[]) => ids)
+  .handler(async ({ data: ids, context }) => {
+    initAdminDb()
+    const db = getDb()
+
+    // Check if any subject has lessons
+    const subjectsWithLessons = await db
+      .select({ id: subjects.id, lessonCount: sql<number>`(SELECT COUNT(*) FROM "lessons" WHERE "lessons"."subject_id" = "subjects"."id")` })
+      .from(subjects)
+      .where(sql`${subjects.id} IN ${ids}`)
+
+    const hasLessons = subjectsWithLessons.filter(s => Number(s.lessonCount) > 0)
+    if (hasLessons.length > 0) {
+      throw new Error(`${hasLessons.length} matière(s) ont des leçons et ne peuvent pas être supprimées`)
+    }
+
+    const result = await db
+      .delete(subjects)
+      .where(sql`${subjects.id} IN ${ids}`)
+      .returning({ id: subjects.id })
+
+    console.warn(`[AUDIT] Bulk delete subjects by ${context.email}:`, ids)
+
+    return { deleted: result.length }
+  })
+
+// Bulk toggle subjects active status
+export const bulkToggleSubjectsActive = createServerFn({ method: 'POST' })
+  .middleware([adminMiddleware])
+  .inputValidator((data: { ids: number[], isActive: boolean }) => data)
+  .handler(async ({ data, context }) => {
+    initAdminDb()
+    const db = getDb()
+
+    const { ids, isActive } = data
+
+    const result = await db
+      .update(subjects)
+      .set({ isActive })
+      .where(sql`${subjects.id} IN ${ids}`)
+      .returning({ id: subjects.id })
+
+    console.warn(`[AUDIT] Bulk ${isActive ? 'activate' : 'deactivate'} subjects by ${context.email}:`, ids)
+
+    return { updated: result.length }
   })
 
 // Reorder subjects

@@ -1,7 +1,7 @@
 import type { CreateSubjectInput, UpdateSubjectInput } from '@/lib/schemas'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { BookOpen, FileText, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { BookOpen, Check, FileText, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import {
+  bulkDeleteSubjects,
+  bulkToggleSubjectsActive,
   createSubject,
   deleteSubject,
   getSubjects,
@@ -41,6 +43,8 @@ function SubjectsPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null)
   const [deletingSubject, setDeletingSubject] = useState<Subject | null>(null)
+  const [selectedIds, setSelectedIds] = useState(() => new Set<number>())
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
 
   const { data, isLoading } = useQuery({
     queryKey: ['subjects', { page, search }],
@@ -95,6 +99,31 @@ function SubjectsPage() {
     },
   })
 
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (ids: number[]) => bulkDeleteSubjects({ data: ids }),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['subjects'] })
+      setBulkDeleteOpen(false)
+      setSelectedIds(new Set())
+      toast.success(`${result.deleted} matière(s) supprimée(s) avec succès`)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erreur lors de la suppression')
+    },
+  })
+
+  const bulkActiveMutation = useMutation({
+    mutationFn: (data: { ids: number[], isActive: boolean }) => bulkToggleSubjectsActive({ data }),
+    onSuccess: (result, { isActive }) => {
+      queryClient.invalidateQueries({ queryKey: ['subjects'] })
+      setSelectedIds(new Set())
+      toast.success(`${result.updated} matière(s) ${isActive ? 'activée(s)' : 'désactivée(s)'} avec succès`)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erreur lors de la modification')
+    },
+  })
+
   const columns = [
     {
       key: 'name',
@@ -141,9 +170,8 @@ function SubjectsPage() {
         <div className="flex items-center gap-2">
           <Switch
             checked={subject.isActive}
-            onCheckedChange={(checked) =>
-              toggleActiveMutation.mutate({ id: subject.id, isActive: checked })
-            }
+            onCheckedChange={checked =>
+              toggleActiveMutation.mutate({ id: subject.id, isActive: checked })}
             disabled={toggleActiveMutation.isPending}
           />
           <span className="text-sm text-muted-foreground">
@@ -195,12 +223,61 @@ function SubjectsPage() {
       <PageHeader
         title="Matières"
         description="Gérer les matières du programme"
-        actions={(
-          <Button onClick={() => setFormOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nouvelle matière
-          </Button>
-        )}
+        actions={
+          selectedIds.size > 0
+            ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {selectedIds.size}
+                  {' '}
+                  sélectionné
+                  {selectedIds.size > 1 ? 's' : ''}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedIds(new Set())}
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  Annuler
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => bulkActiveMutation.mutate({ ids: Array.from(selectedIds), isActive: true })}
+                  disabled={bulkActiveMutation.isPending}
+                >
+                  <Check className="mr-2 h-4 w-4" />
+                  Activer
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => bulkActiveMutation.mutate({ ids: Array.from(selectedIds), isActive: false })}
+                  disabled={bulkActiveMutation.isPending}
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  Désactiver
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setBulkDeleteOpen(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Supprimer (
+                  {selectedIds.size}
+                  )
+                </Button>
+              </div>
+            )
+            : (
+              <Button onClick={() => setFormOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nouvelle matière
+              </Button>
+            )
+        }
       />
 
       <div className="flex items-center gap-4">
@@ -227,6 +304,10 @@ function SubjectsPage() {
         onPageChange={setPage}
         isLoading={isLoading}
         emptyMessage="Aucune matière trouvée"
+        selectable
+        selectedIds={selectedIds}
+        onSelectionChange={setSelectedIds}
+        getRowId={subject => subject.id}
       />
 
       {formOpen && (
@@ -268,6 +349,18 @@ function SubjectsPage() {
         confirmLabel="Supprimer"
         onConfirm={() => deletingSubject && deleteMutation.mutate(deletingSubject.id)}
         isLoading={deleteMutation.isPending}
+        variant="destructive"
+      />
+
+      {/* Bulk Delete Confirmation */}
+      <ConfirmDialog
+        open={bulkDeleteOpen}
+        onOpenChange={setBulkDeleteOpen}
+        title="Supprimer les matières sélectionnées"
+        description={`Êtes-vous sûr de vouloir supprimer ${selectedIds.size} matière${selectedIds.size > 1 ? 's' : ''} ? Cette action est irréversible. Les matières avec des leçons ne seront pas supprimées.`}
+        confirmLabel={`Supprimer (${selectedIds.size})`}
+        onConfirm={() => bulkDeleteMutation.mutate(Array.from(selectedIds))}
+        isLoading={bulkDeleteMutation.isPending}
         variant="destructive"
       />
     </motion.div>

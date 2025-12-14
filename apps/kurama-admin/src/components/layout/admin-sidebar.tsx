@@ -6,6 +6,7 @@ import {
   Layers,
   LayoutDashboard,
   LogOut,
+  Target,
   Users,
 } from 'lucide-react'
 import {
@@ -26,7 +27,8 @@ import { authClient } from '@/lib/auth'
 const navItems = [
   { href: '/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
   { href: '/subjects', label: 'Matières', icon: BookOpen },
-  { href: '/grades', label: 'Niveau & Série', icon: GraduationCap },
+  { href: '/grades', label: 'Niveaux', icon: GraduationCap },
+  { href: '/series', label: 'Séries', icon: Target },
   { href: '/lessons', label: 'Leçons', icon: Layers },
   { href: '/cards', label: 'Cartes', icon: FileText },
   { href: '/users', label: 'Utilisateurs', icon: Users },
@@ -65,7 +67,7 @@ export function AdminSidebar() {
                 const Icon = item.icon
                 const isActive
                   = location.pathname === item.href
-                    || location.pathname.startsWith(`${item.href}/`)
+                  || location.pathname.startsWith(`${item.href}/`)
 
                 return (
                   <SidebarMenuItem key={item.href}>

@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminDashboardRouteImport } from './routes/_admin/dashboard'
 import { Route as AdminUsersIndexRouteImport } from './routes/_admin/users.index'
 import { Route as AdminSubjectsIndexRouteImport } from './routes/_admin/subjects.index'
+import { Route as AdminSeriesIndexRouteImport } from './routes/_admin/series.index'
 import { Route as AdminLessonsIndexRouteImport } from './routes/_admin/lessons.index'
 import { Route as AdminGradesIndexRouteImport } from './routes/_admin/grades.index'
 import { Route as AdminCardsIndexRouteImport } from './routes/_admin/cards.index'
@@ -43,6 +44,11 @@ const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
 const AdminSubjectsIndexRoute = AdminSubjectsIndexRouteImport.update({
   id: '/subjects/',
   path: '/subjects/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminSeriesIndexRoute = AdminSeriesIndexRouteImport.update({
+  id: '/series/',
+  path: '/series/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminLessonsIndexRoute = AdminLessonsIndexRouteImport.update({
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/cards': typeof AdminCardsIndexRoute
   '/grades': typeof AdminGradesIndexRoute
   '/lessons': typeof AdminLessonsIndexRoute
+  '/series': typeof AdminSeriesIndexRoute
   '/subjects': typeof AdminSubjectsIndexRoute
   '/users': typeof AdminUsersIndexRoute
 }
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/cards': typeof AdminCardsIndexRoute
   '/grades': typeof AdminGradesIndexRoute
   '/lessons': typeof AdminLessonsIndexRoute
+  '/series': typeof AdminSeriesIndexRoute
   '/subjects': typeof AdminSubjectsIndexRoute
   '/users': typeof AdminUsersIndexRoute
 }
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/_admin/cards/': typeof AdminCardsIndexRoute
   '/_admin/grades/': typeof AdminGradesIndexRoute
   '/_admin/lessons/': typeof AdminLessonsIndexRoute
+  '/_admin/series/': typeof AdminSeriesIndexRoute
   '/_admin/subjects/': typeof AdminSubjectsIndexRoute
   '/_admin/users/': typeof AdminUsersIndexRoute
 }
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/cards'
     | '/grades'
     | '/lessons'
+    | '/series'
     | '/subjects'
     | '/users'
   fileRoutesByTo: FileRoutesByTo
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/cards'
     | '/grades'
     | '/lessons'
+    | '/series'
     | '/subjects'
     | '/users'
   id:
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/_admin/cards/'
     | '/_admin/grades/'
     | '/_admin/lessons/'
+    | '/_admin/series/'
     | '/_admin/subjects/'
     | '/_admin/users/'
   fileRoutesById: FileRoutesById
@@ -195,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/subjects'
       fullPath: '/subjects'
       preLoaderRoute: typeof AdminSubjectsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/_admin/series/': {
+      id: '/_admin/series/'
+      path: '/series'
+      fullPath: '/series'
+      preLoaderRoute: typeof AdminSeriesIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/_admin/lessons/': {
@@ -249,6 +268,7 @@ interface AdminRouteRouteChildren {
   AdminCardsIndexRoute: typeof AdminCardsIndexRoute
   AdminGradesIndexRoute: typeof AdminGradesIndexRoute
   AdminLessonsIndexRoute: typeof AdminLessonsIndexRoute
+  AdminSeriesIndexRoute: typeof AdminSeriesIndexRoute
   AdminSubjectsIndexRoute: typeof AdminSubjectsIndexRoute
   AdminUsersIndexRoute: typeof AdminUsersIndexRoute
 }
@@ -260,6 +280,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminCardsIndexRoute: AdminCardsIndexRoute,
   AdminGradesIndexRoute: AdminGradesIndexRoute,
   AdminLessonsIndexRoute: AdminLessonsIndexRoute,
+  AdminSeriesIndexRoute: AdminSeriesIndexRoute,
   AdminSubjectsIndexRoute: AdminSubjectsIndexRoute,
   AdminUsersIndexRoute: AdminUsersIndexRoute,
 }
