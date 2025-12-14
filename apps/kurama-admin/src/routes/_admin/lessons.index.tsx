@@ -1,11 +1,11 @@
 import type { CreateLessonInput, UpdateLessonInput } from '@/lib/schemas'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ExternalLink, Eye, EyeOff, FileText, Pencil, Plus, Search, Sparkles, Trash2 } from 'lucide-react'
+import { ExternalLink, Eye, EyeOff, FileText, Pencil, Plus, Search, Sparkles, Trash2, Zap } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { LessonForm } from '@/components/admin/lessons'
+import { BulkCardsDialog, BulkGenerateDialog, LessonForm } from '@/components/admin/lessons'
 import { ConfirmDialog, DataTable, PageHeader } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -63,7 +63,11 @@ function LessonsPage() {
   const [search, setSearch] = useState('')
   const [subjectFilter, setSubjectFilter] = useState<string>('')
   const [publishedFilter, setPublishedFilter] = useState<string>('')
+  const [teachPlanFilter, setTeachPlanFilter] = useState<string>('')
+  const [cardsFilter, setCardsFilter] = useState<string>('')
   const [formOpen, setFormOpen] = useState(false)
+  const [bulkGenerateOpen, setBulkGenerateOpen] = useState(false)
+  const [bulkCardsOpen, setBulkCardsOpen] = useState(false)
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null)
   const [deletingLesson, setDeletingLesson] = useState<Lesson | null>(null)
 
@@ -73,7 +77,7 @@ function LessonsPage() {
   })
 
   const { data, isLoading } = useQuery({
-    queryKey: ['lessons', { page, search, subjectFilter, publishedFilter }],
+    queryKey: ['lessons', { page, search, subjectFilter, publishedFilter, teachPlanFilter, cardsFilter }],
     queryFn: () =>
       getLessons({
         data: {
@@ -81,7 +85,9 @@ function LessonsPage() {
           limit: 20,
           search: search || undefined,
           subjectId: subjectFilter ? Number.parseInt(subjectFilter) : undefined,
-          isPublished: publishedFilter === '' ? undefined : publishedFilter === 'true',
+          isPublished: publishedFilter === '' || publishedFilter === 'all' ? undefined : publishedFilter === 'true',
+          hasTeachPlan: teachPlanFilter === '' || teachPlanFilter === 'all' ? undefined : teachPlanFilter === 'true',
+          hasCards: cardsFilter === '' || cardsFilter === 'all' ? undefined : cardsFilter === 'true',
         },
       }),
   })
@@ -178,20 +184,20 @@ function LessonsPage() {
         <div className="text-sm">
           {lesson.gradeName
             ? (
-                <div>
-                  <span className="font-medium">{lesson.gradeName}</span>
-                  {lesson.seriesName && (
-                    <span className="text-muted-foreground ml-1">
-                      (
-                      {lesson.seriesName}
-                      )
-                    </span>
-                  )}
-                </div>
-              )
+              <div>
+                <span className="font-medium">{lesson.gradeName}</span>
+                {lesson.seriesName && (
+                  <span className="text-muted-foreground ml-1">
+                    (
+                    {lesson.seriesName}
+                    )
+                  </span>
+                )}
+              </div>
+            )
             : (
-                <span className="text-muted-foreground">-</span>
-              )}
+              <span className="text-muted-foreground">-</span>
+            )}
         </div>
       ),
     },
@@ -201,14 +207,14 @@ function LessonsPage() {
       cell: (lesson: Lesson) => (
         lesson.hasTeachPlan
           ? (
-              <Badge variant="outline" className="gap-1 text-green-600 border-green-600">
-                <Sparkles className="h-3 w-3" />
-                Généré
-              </Badge>
-            )
+            <Badge variant="outline" className="gap-1 text-green-600 border-green-600">
+              <Sparkles className="h-3 w-3" />
+              Généré
+            </Badge>
+          )
           : (
-              <span className="text-muted-foreground text-sm">-</span>
-            )
+            <span className="text-muted-foreground text-sm">-</span>
+          )
       ),
     },
     {
@@ -217,13 +223,13 @@ function LessonsPage() {
       cell: (lesson: Lesson) =>
         lesson.difficulty
           ? (
-              <Badge variant="outline">
-                {difficultyLabels[lesson.difficulty] || lesson.difficulty}
-              </Badge>
-            )
+            <Badge variant="outline">
+              {difficultyLabels[lesson.difficulty] || lesson.difficulty}
+            </Badge>
+          )
           : (
-              '-'
-            ),
+            '-'
+          ),
     },
     {
       key: 'duration',
@@ -263,11 +269,11 @@ function LessonsPage() {
           >
             {lesson.isPublished
               ? (
-                  <EyeOff className="h-4 w-4" />
-                )
+                <EyeOff className="h-4 w-4" />
+              )
               : (
-                  <Eye className="h-4 w-4" />
-                )}
+                <Eye className="h-4 w-4" />
+              )}
           </Button>
           <Button
             variant="ghost"
@@ -301,10 +307,28 @@ function LessonsPage() {
         title="Leçons"
         description="Gérer les leçons et leur contenu"
         actions={(
-          <Button onClick={() => setFormOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nouvelle leçon
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setBulkGenerateOpen(true)}
+              className="gap-2"
+            >
+              <Zap className="h-4 w-4" />
+              Plans en lot
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setBulkCardsOpen(true)}
+              className="gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              Cartes en lot
+            </Button>
+            <Button onClick={() => setFormOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nouvelle leçon
+            </Button>
+          </div>
         )}
       />
 
@@ -356,6 +380,38 @@ function LessonsPage() {
             <SelectItem value="false">Brouillon</SelectItem>
           </SelectContent>
         </Select>
+        <Select
+          value={teachPlanFilter || 'all'}
+          onValueChange={(value) => {
+            setTeachPlanFilter(value === 'all' ? '' : value)
+            setPage(1)
+          }}
+        >
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Plan IA" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous les plans</SelectItem>
+            <SelectItem value="true">Avec plan IA</SelectItem>
+            <SelectItem value="false">Sans plan IA</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
+          value={cardsFilter || 'all'}
+          onValueChange={(value) => {
+            setCardsFilter(value === 'all' ? '' : value)
+            setPage(1)
+          }}
+        >
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Cartes" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toutes</SelectItem>
+            <SelectItem value="true">Avec cartes</SelectItem>
+            <SelectItem value="false">Sans cartes</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <DataTable
@@ -405,6 +461,22 @@ function LessonsPage() {
           isLoading={updateMutation.isPending}
         />
       )}
+
+      <BulkGenerateDialog
+        open={bulkGenerateOpen}
+        onOpenChange={setBulkGenerateOpen}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['lessons'] })
+        }}
+      />
+
+      <BulkCardsDialog
+        open={bulkCardsOpen}
+        onOpenChange={setBulkCardsOpen}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['lessons'] })
+        }}
+      />
 
       <ConfirmDialog
         open={!!deletingLesson}

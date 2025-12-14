@@ -20,7 +20,7 @@ export const getLessons = createServerFn({ method: 'GET' })
   .handler(async ({ data }) => {
     initAdminDb()
     const db = getDb()
-    const { subjectId, isPublished, search, page, limit } = data
+    const { subjectId, isPublished, hasTeachPlan, search, page, limit } = data
 
     const offset = (page - 1) * limit
 
@@ -30,6 +30,22 @@ export const getLessons = createServerFn({ method: 'GET' })
       conditions.push(eq(lessons.subjectId, subjectId))
     if (isPublished !== undefined)
       conditions.push(eq(lessons.isPublished, isPublished))
+    if (hasTeachPlan !== undefined) {
+      if (hasTeachPlan) {
+        conditions.push(sql`${lessons.teachPlan} IS NOT NULL`)
+      }
+      else {
+        conditions.push(sql`${lessons.teachPlan} IS NULL`)
+      }
+    }
+    if (data.hasCards !== undefined) {
+      if (data.hasCards) {
+        conditions.push(sql`(SELECT COUNT(*) FROM "cards" WHERE "cards"."lesson_id" = "lessons"."id") > 0`)
+      }
+      else {
+        conditions.push(sql`(SELECT COUNT(*) FROM "cards" WHERE "cards"."lesson_id" = "lessons"."id") = 0`)
+      }
+    }
     if (search)
       conditions.push(like(lessons.title, `%${search}%`))
 

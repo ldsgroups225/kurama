@@ -46,6 +46,8 @@ export const subjectFiltersSchema = z.object({
 export const lessonFiltersSchema = z.object({
   subjectId: z.number().int().positive().optional(),
   isPublished: z.boolean().optional(),
+  hasTeachPlan: z.boolean().optional(),
+  hasCards: z.boolean().optional(),
   search: z.string().optional(),
   page: z.number().int().min(1).default(1),
   limit: z.number().int().min(1).max(100).default(20),
@@ -128,6 +130,23 @@ export const saveGeneratedCardsSchema = z.object({
   cards: z.array(createCardSchema),
 })
 
+export const bulkGenerateTeachPlansSchema = z.object({
+  country: z.string().default('Côte d\'Ivoire'),
+  language: z.enum(['French', 'English']).default('French'),
+  schoolYear: z.string().default('2025-2026'),
+  customInstructions: z.string().optional(),
+  subjectId: z.number().int().positive().optional(),
+  gradeId: z.number().int().positive().optional(),
+})
+
+export const bulkGenerateCardsSchema = z.object({
+  amount: z.number().int().min(5).max(30).default(15),
+  subjectId: z.number().int().positive().optional(),
+  gradeId: z.number().int().positive().optional(),
+})
+
 export type GenerateTeachPlanInput = z.infer<typeof generateTeachPlanSchema>
 export type GenerateCardsInput = z.infer<typeof generateCardsSchema>
 export type SaveGeneratedCardsInput = z.infer<typeof saveGeneratedCardsSchema>
+export type BulkGenerateTeachPlansInput = z.infer<typeof bulkGenerateTeachPlansSchema>
+export type BulkGenerateCardsInput = z.infer<typeof bulkGenerateCardsSchema>
