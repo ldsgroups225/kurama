@@ -30,6 +30,7 @@ app.use('*', sentryMiddleware(env => ({
   environment: env.ENVIRONMENT || 'development',
   release: `kurama-backend@${env.API_VERSION || 'v1'}`,
   tracesSampleRate: env.ENVIRONMENT === 'production' ? 0.1 : 1.0,
+  sendDefaultPii: env.ENVIRONMENT === 'development',
 })))
 
 // Request logging

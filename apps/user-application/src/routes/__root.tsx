@@ -1,5 +1,8 @@
 /* eslint-disable react-dom/no-dangerously-set-innerhtml */
 import type { QueryClient } from '@tanstack/react-query'
+import { getBrowserEnvironment } from '@kurama/config/environment'
+import { createLogger, setupLogging } from '@kurama/observability/logging'
+import { initBrowserSentry } from '@kurama/observability/sentry/browser'
 /// <reference types="vite/client" />
 import {
   createRootRouteWithContext,
@@ -17,9 +20,6 @@ import { initPerformanceMonitoring } from '@/lib/performance-monitor'
 import { initPreloading } from '@/lib/preload'
 import appCss from '@/styles.css?url'
 import { seo } from '@/utils/seo'
-import { initBrowserSentry } from '@kurama/observability/sentry/browser'
-import { setupLogging, createLogger } from '@kurama/observability/logging'
-import { getBrowserEnvironment } from '@kurama/config/environment'
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -106,6 +106,7 @@ function RootComponent() {
       tracesSampleRate: env.isProduction ? 0.1 : 1.0,
       replaysSessionSampleRate: 0.1,
       replaysOnErrorSampleRate: 1.0,
+      sendDefaultPii: env.isDevelopment,
     })
 
     // Initialize LogTape

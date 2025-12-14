@@ -7,6 +7,7 @@ export interface BrowserSentryConfig {
   tracesSampleRate?: number
   replaysSessionSampleRate?: number
   replaysOnErrorSampleRate?: number
+  sendDefaultPii?: boolean
 }
 
 export function initBrowserSentry(config: BrowserSentryConfig) {
@@ -19,7 +20,7 @@ export function initBrowserSentry(config: BrowserSentryConfig) {
     dsn: config.dsn,
     environment: config.environment,
     release: config.release,
-    sendDefaultPii: true,
+    sendDefaultPii: config.sendDefaultPii ?? false,
     tracesSampleRate: config.tracesSampleRate ?? 0.1,
     replaysSessionSampleRate: config.replaysSessionSampleRate ?? 0.1,
     replaysOnErrorSampleRate: config.replaysOnErrorSampleRate ?? 1.0,

@@ -6,6 +6,7 @@ export interface SentryConfig {
   environment: string
   release?: string
   tracesSampleRate?: number
+  sendDefaultPii?: boolean
 }
 
 export function createSentryClient(
@@ -19,7 +20,7 @@ export function createSentryClient(
     request,
     environment: config.environment,
     release: config.release,
-    sendDefaultPii: true,
+    sendDefaultPii: config.sendDefaultPii ?? false,
     tracesSampleRate: config.tracesSampleRate ?? 0.1,
     integrations: [rewriteFramesIntegration({ root: '/' })],
   })
@@ -35,13 +36,21 @@ export function sentryMiddleware(getConfig: (env: any) => SentryConfig) {
       return next()
     }
 
-    const sentry = createSentryClient(c.req.raw, c.executionCtx, config)
-    c.set('sentry', sentry)
+    let sentry: Toucan | undefined
+    try {
+      sentry = createSentryClient(c.req.raw, c.executionCtx, config)
+      c.set('sentry', sentry)
+    } catch (error) {
+      console.error('[Sentry] Failed to initialize:', error)
+      // Continue without Sentry if initialization fails
+    }
 
     try {
       await next()
     } catch (error) {
-      sentry.captureException(error)
+      if (sentry) {
+        sentry.captureException(error)
+      }
       throw error
     }
   }
@@ -52,10 +61,14 @@ export function sentryErrorHandler(error: Error, c: Context) {
   const sentry = c.get('sentry') as Toucan | undefined
 
   if (sentry) {
-    sentry.setExtra('url', c.req.url)
-    sentry.setExtra('method', c.req.method)
-    sentry.setExtra('headers', Object.fromEntries(c.req.raw.headers))
-    sentry.captureException(error)
+    try {
+      sentry.setExtra('url', c.req.url)
+      sentry.setExtra('method', c.req.method)
+      sentry.setExtra('headers', Object.fromEntries(c.req.raw.headers))
+      sentry.captureException(error)
+    } catch (captureError) {
+      console.error('[Sentry] Failed to capture exception:', captureError)
+    }
   }
 
   console.error('[Sentry] Captured exception:', error.message)
@@ -63,7 +76,7 @@ export function sentryErrorHandler(error: Error, c: Context) {
   return c.json({
     error: 'Internal Server Error',
     message: error.message,
-    // Include event ID for support reference
+    // Include event ID for support reference if available
     eventId: sentry?.lastEventId?.() ?? null,
   }, 500)
 }
