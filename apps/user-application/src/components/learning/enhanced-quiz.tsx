@@ -1,6 +1,6 @@
 import type { LearningQuestion, LearningSession } from '@/lib/learning-mode-gamification'
-import { AnimatePresence, motion } from 'framer-motion'
 import { Clock, Flame, Target, Zap } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CompactXPDisplay } from '@/components/gamification'
 import { MarkdownRenderer } from '@/components/shared'
@@ -78,9 +78,10 @@ export function EnhancedQuiz({
   useEffect(() => {
     if (questionState === 'completed' && selectedAnswer !== correctIndex) {
       // Scroll to top of container for next card
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }, 100)
+      return () => clearTimeout(timeoutId)
     }
   }, [questionState, selectedAnswer, correctIndex])
 
@@ -90,6 +91,8 @@ export function EnhancedQuiz({
     setQuestionState('completed')
     onAnswer(isCorrect, timeSpent, attempts)
   }, [selectedAnswer, correctIndex, startTime, attempts, onAnswer])
+
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const handleAnswerSelect = useCallback((answerIndex: number) => {
     if (questionState !== 'answering')
@@ -141,7 +144,9 @@ export function EnhancedQuiz({
 
     // Auto-advance only for correct answers
     if (isCorrect) {
-      setTimeout(() => {
+      if (timeoutRef.current)
+        clearTimeout(timeoutRef.current)
+      timeoutRef.current = setTimeout(() => {
         setQuestionState('completed')
         onAnswer(isCorrect, timeSpent, attempts)
       }, 1500)
@@ -224,7 +229,7 @@ export function EnhancedQuiz({
           <div className="space-y-3">
             {shuffledOptions.map((option, index) => (
               <motion.button
-                key={index}
+                key={`${option.slice(0, 20)}}`}
                 type="button"
                 onClick={() => handleAnswerSelect(index)}
                 disabled={questionState !== 'answering'}
@@ -255,33 +260,33 @@ export function EnhancedQuiz({
               >
                 {selectedAnswer === correctIndex
                   ? (
-                    <div className="flex items-center gap-3 text-success">
-                      <div className="w-6 h-6 rounded-full bg-success border border-success/20 flex items-center justify-center">
-                        <span className="text-success text-sm font-bold">✓</span>
+                      <div className="flex items-center gap-3 text-success">
+                        <div className="w-6 h-6 rounded-full bg-success border border-success/20 flex items-center justify-center">
+                          <span className="text-success text-sm font-bold">✓</span>
+                        </div>
+                        <div>
+                          <p className="font-semibold">Correct !</p>
+                          <p className="text-sm opacity-80">
+                            {attempts === 1 ? 'Excellente réponse du premier coup !' : 'Bonne réponse !'}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold">Correct !</p>
-                        <p className="text-sm opacity-80">
-                          {attempts === 1 ? 'Excellente réponse du premier coup !' : 'Bonne réponse !'}
-                        </p>
-                      </div>
-                    </div>
-                  )
+                    )
                   : (
-                    <div className="flex items-center gap-3 text-error">
-                      <div className="w-6 h-6 rounded-full bg-error border border-error/20 flex items-center justify-center">
-                        <span className="text-error text-sm font-bold">✗</span>
+                      <div className="flex items-center gap-3 text-error">
+                        <div className="w-6 h-6 rounded-full bg-error border border-error/20 flex items-center justify-center">
+                          <span className="text-error text-sm font-bold">✗</span>
+                        </div>
+                        <div>
+                          <p className="font-semibold">Incorrect</p>
+                          <p className="text-sm opacity-80">
+                            La bonne réponse était :
+                            {' '}
+                            <strong>{correctAnswer}</strong>
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold">Incorrect</p>
-                        <p className="text-sm opacity-80">
-                          La bonne réponse était :
-                          {' '}
-                          <strong>{correctAnswer}</strong>
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                    )}
               </motion.div>
             )}
           </AnimatePresence>

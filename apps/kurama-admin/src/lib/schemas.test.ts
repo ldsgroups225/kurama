@@ -1,18 +1,18 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, test } from 'vitest'
 import {
-  createSubjectSchema,
-  updateSubjectSchema,
-  createLessonSchema,
-  createCardSchema,
-  subjectFiltersSchema,
-  lessonFiltersSchema,
   cardFiltersSchema,
+  createCardSchema,
+  createLessonSchema,
+  createSubjectSchema,
+  lessonFiltersSchema,
+  subjectFiltersSchema,
+  updateSubjectSchema,
   userFiltersSchema,
 } from './schemas'
 
-describe('Subject Schemas', () => {
+describe('subject Schemas', () => {
   describe('createSubjectSchema', () => {
-    it('should validate a valid subject', () => {
+    test('should validate a valid subject', () => {
       const validSubject = {
         name: 'Mathématiques',
         abbreviation: 'MATH',
@@ -23,7 +23,7 @@ describe('Subject Schemas', () => {
       expect(result.success).toBe(true)
     })
 
-    it('should reject empty name', () => {
+    test('should reject empty name', () => {
       const invalidSubject = {
         name: '',
         abbreviation: 'MATH',
@@ -32,7 +32,7 @@ describe('Subject Schemas', () => {
       expect(result.success).toBe(false)
     })
 
-    it('should reject abbreviation longer than 10 characters', () => {
+    test('should reject abbreviation longer than 10 characters', () => {
       const invalidSubject = {
         name: 'Mathématiques',
         abbreviation: 'MATHEMATICS',
@@ -43,7 +43,7 @@ describe('Subject Schemas', () => {
   })
 
   describe('updateSubjectSchema', () => {
-    it('should require an id', () => {
+    test('should require an id', () => {
       const subject = {
         name: 'Mathématiques',
         abbreviation: 'MATH',
@@ -52,7 +52,7 @@ describe('Subject Schemas', () => {
       expect(result.success).toBe(false)
     })
 
-    it('should validate with id', () => {
+    test('should validate with id', () => {
       const subject = {
         id: 1,
         name: 'Mathématiques',
@@ -64,9 +64,9 @@ describe('Subject Schemas', () => {
   })
 })
 
-describe('Lesson Schemas', () => {
+describe('lesson Schemas', () => {
   describe('createLessonSchema', () => {
-    it('should validate a valid lesson', () => {
+    test('should validate a valid lesson', () => {
       const validLesson = {
         subjectId: 1,
         title: 'Introduction aux équations',
@@ -80,7 +80,7 @@ describe('Lesson Schemas', () => {
       expect(result.success).toBe(true)
     })
 
-    it('should reject invalid difficulty', () => {
+    test('should reject invalid difficulty', () => {
       const invalidLesson = {
         subjectId: 1,
         title: 'Introduction',
@@ -90,7 +90,7 @@ describe('Lesson Schemas', () => {
       expect(result.success).toBe(false)
     })
 
-    it('should require subjectId', () => {
+    test('should require subjectId', () => {
       const invalidLesson = {
         title: 'Introduction',
       }
@@ -100,9 +100,9 @@ describe('Lesson Schemas', () => {
   })
 })
 
-describe('Card Schemas', () => {
+describe('card Schemas', () => {
   describe('createCardSchema', () => {
-    it('should validate a basic card', () => {
+    test('should validate a basic card', () => {
       const validCard = {
         lessonId: 1,
         cardType: 'basic' as const,
@@ -115,7 +115,7 @@ describe('Card Schemas', () => {
       expect(result.success).toBe(true)
     })
 
-    it('should validate a multichoice card', () => {
+    test('should validate a multichoice card', () => {
       const validCard = {
         lessonId: 1,
         cardType: 'multichoice' as const,
@@ -132,7 +132,7 @@ describe('Card Schemas', () => {
       expect(result.success).toBe(true)
     })
 
-    it('should reject invalid card type', () => {
+    test('should reject invalid card type', () => {
       const invalidCard = {
         lessonId: 1,
         cardType: 'invalid_type',
@@ -143,7 +143,7 @@ describe('Card Schemas', () => {
       expect(result.success).toBe(false)
     })
 
-    it('should reject difficulty outside range', () => {
+    test('should reject difficulty outside range', () => {
       const invalidCard = {
         lessonId: 1,
         cardType: 'basic' as const,
@@ -157,22 +157,22 @@ describe('Card Schemas', () => {
   })
 })
 
-describe('Filter Schemas', () => {
+describe('filter Schemas', () => {
   describe('subjectFiltersSchema', () => {
-    it('should use default values', () => {
+    test('should use default values', () => {
       const result = subjectFiltersSchema.parse({})
       expect(result.page).toBe(1)
       expect(result.limit).toBe(20)
     })
 
-    it('should accept search parameter', () => {
+    test('should accept search parameter', () => {
       const result = subjectFiltersSchema.parse({ search: 'math' })
       expect(result.search).toBe('math')
     })
   })
 
   describe('lessonFiltersSchema', () => {
-    it('should accept all filter parameters', () => {
+    test('should accept all filter parameters', () => {
       const filters = {
         subjectId: 1,
         isPublished: true,
@@ -181,12 +181,12 @@ describe('Filter Schemas', () => {
         limit: 10,
       }
       const result = lessonFiltersSchema.parse(filters)
-      expect(result).toEqual(filters)
+      expect(result).toStrictEqual(filters)
     })
   })
 
   describe('cardFiltersSchema', () => {
-    it('should accept cardType filter', () => {
+    test('should accept cardType filter', () => {
       const filters = {
         cardType: 'multichoice' as const,
         lessonId: 1,
@@ -197,7 +197,7 @@ describe('Filter Schemas', () => {
   })
 
   describe('userFiltersSchema', () => {
-    it('should accept userType filter', () => {
+    test('should accept userType filter', () => {
       const filters = {
         userType: 'student' as const,
         gradeId: 5,
@@ -209,7 +209,7 @@ describe('Filter Schemas', () => {
       expect(result.isCompleted).toBe(true)
     })
 
-    it('should use default pagination', () => {
+    test('should use default pagination', () => {
       const result = userFiltersSchema.parse({})
       expect(result.page).toBe(1)
       expect(result.limit).toBe(20)

@@ -381,9 +381,6 @@ catalogs:
     embla-carousel-react:
       specifier: ^8.6.0
       version: 8.6.0
-    framer-motion:
-      specifier: ^12.23.26
-      version: 12.23.26
     input-otp:
       specifier: ^1.4.2
       version: 1.4.2
@@ -627,9 +624,6 @@ importers:
       embla-carousel-react:
         specifier: catalog:ui
         version: 8.6.0(react@19.2.1)
-      framer-motion:
-        specifier: catalog:ui
-        version: 12.23.26(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       input-otp:
         specifier: catalog:ui
         version: 1.4.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -639,6 +633,9 @@ importers:
       lucide-react:
         specifier: catalog:ui
         version: 0.559.0(react@19.2.1)
+      motion:
+        specifier: catalog:ui
+        version: 12.23.26(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       next-themes:
         specifier: catalog:ui
         version: 0.4.6(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -844,9 +841,6 @@ importers:
       dexie-react-hooks:
         specifier: catalog:shared
         version: 4.2.0(@types/react@19.2.7)(dexie@4.2.1)(react@19.2.1)
-      framer-motion:
-        specifier: catalog:ui
-        version: 12.23.26(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       highlight.js:
         specifier: catalog:shared
         version: 11.11.1

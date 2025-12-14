@@ -1,11 +1,11 @@
+import { useRouter } from '@tanstack/react-router'
+import { ArrowLeft, Loader2, Mail } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { authClient } from '@/lib/auth'
-import { Loader2, Mail, ArrowLeft } from 'lucide-react'
-import { useRouter } from '@tanstack/react-router'
 
 export function LoginForm() {
   const [step, setStep] = useState<'email' | 'otp'>('email')
@@ -34,7 +34,8 @@ export function LoginForm() {
 
       setStep('otp')
       setIsLoading(false)
-    } catch {
+    }
+    catch {
       setError('Impossible d\'envoyer le code. Veuillez réessayer.')
       setIsLoading(false)
     }
@@ -60,7 +61,8 @@ export function LoginForm() {
       // Success
       await router.invalidate()
       await router.navigate({ to: '/dashboard' })
-    } catch {
+    }
+    catch {
       setError('Une erreur s\'est produite. Veuillez réessayer.')
       setIsLoading(false)
     }
@@ -84,7 +86,7 @@ export function LoginForm() {
                   type="email"
                   placeholder="admin@kurama.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   className="pl-10"
                   disabled={isLoading}
                   required
@@ -105,7 +107,10 @@ export function LoginForm() {
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Code de Vérification</CardTitle>
-        <CardDescription>Entrez le code envoyé à {email}</CardDescription>
+        <CardDescription>
+          Entrez le code envoyé à
+          {email}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleOtpSubmit} className="space-y-4">
@@ -116,7 +121,7 @@ export function LoginForm() {
               type="text"
               placeholder="123456"
               value={otp}
-              onChange={(e) => setOtp(e.target.value)}
+              onChange={e => setOtp(e.target.value)}
               disabled={isLoading}
               required
               maxLength={6}
@@ -134,7 +139,9 @@ export function LoginForm() {
             onClick={() => setStep('email')}
             disabled={isLoading}
           >
-            <ArrowLeft className="mr-2 h-4 w-4" /> Retour à l'e-mail
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            {' '}
+            Retour à l'e-mail
           </Button>
         </form>
       </CardContent>

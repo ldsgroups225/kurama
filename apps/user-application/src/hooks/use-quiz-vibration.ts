@@ -9,26 +9,32 @@ export function useQuizVibration() {
   const lastComboRef = useRef<number>(0)
 
   const triggerQuestionAdvance = useCallback(() => {
-    if (!isSupported) return
+    if (!isSupported)
+      return
     vibrate(VibrationPatterns.questionAdvance)
   }, [isSupported, vibrate])
 
   const triggerTimeWarning = useCallback(() => {
-    if (!isSupported) return
+    if (!isSupported)
+      return
     vibrate(VibrationPatterns.timeWarning)
   }, [isSupported, vibrate])
 
   const triggerComboVibration = useCallback((currentCombo: number) => {
-    if (!isSupported || currentCombo <= lastComboRef.current) return
+    if (!isSupported || currentCombo <= lastComboRef.current)
+      return
 
     // Trigger vibration for specific combo milestones
     if (currentCombo === 2) {
       vibrate(VibrationPatterns.combo.x2)
-    } else if (currentCombo === 3) {
+    }
+    else if (currentCombo === 3) {
       vibrate(VibrationPatterns.combo.x3)
-    } else if (currentCombo === 5) {
+    }
+    else if (currentCombo === 5) {
       vibrate(VibrationPatterns.combo.x5)
-    } else if (currentCombo > 5 && currentCombo % 3 === 0) {
+    }
+    else if (currentCombo > 5 && currentCombo % 3 === 0) {
       // Every 3 after 5 (6, 9, 12, etc.)
       vibrate(VibrationPatterns.combo.x5)
     }
@@ -41,7 +47,8 @@ export function useQuizVibration() {
   }, [])
 
   const triggerQuizComplete = useCallback((score: number) => {
-    if (!isSupported) return
+    if (!isSupported)
+      return
     vibrate(VibrationPatterns.quizComplete(score))
   }, [isSupported, vibrate])
 

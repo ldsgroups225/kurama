@@ -1,7 +1,17 @@
-import { useState, useEffect } from 'react'
+import type { CardOption, CreateCardInput } from '@/lib/schemas'
+import { Loader2, Plus, Trash2 } from 'lucide-react'
+import { motion } from 'motion/react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -10,17 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { createCardSchema, type CreateCardInput, type CardOption } from '@/lib/schemas'
-import { Loader2, Plus, Trash2 } from 'lucide-react'
-import { Checkbox } from '@/components/ui/checkbox'
-import { motion } from 'framer-motion'
+import { Textarea } from '@/components/ui/textarea'
+import { createCardSchema } from '@/lib/schemas'
 
 interface Lesson {
   id: number
@@ -54,48 +55,17 @@ export function CardForm({
   isEditing,
   isLoading,
 }: CardFormProps) {
-  const [lessonId, setLessonId] = useState<number>(0)
-  const [cardType, setCardType] = useState<'basic' | 'multichoice' | 'true_false' | 'fill_blank'>('basic')
-  const [frontContent, setFrontContent] = useState('')
-  const [backContent, setBackContent] = useState('')
-  const [question, setQuestion] = useState('')
-  const [options, setOptions] = useState<CardOption[]>([])
-  const [correctAnswer, setCorrectAnswer] = useState('')
-  const [explanation, setExplanation] = useState('')
-  const [points, setPoints] = useState(10)
-  const [difficulty, setDifficulty] = useState(0)
+  const [lessonId, setLessonId] = useState<number>(defaultValues?.lessonId || 0)
+  const [cardType, setCardType] = useState<'basic' | 'multichoice' | 'true_false' | 'fill_blank'>(defaultValues?.cardType || 'basic')
+  const [frontContent, setFrontContent] = useState(defaultValues?.frontContent || '')
+  const [backContent, setBackContent] = useState(defaultValues?.backContent || '')
+  const [question] = useState(defaultValues?.question || '')
+  const [options, setOptions] = useState<CardOption[]>(defaultValues?.options || [])
+  const [correctAnswer, setCorrectAnswer] = useState(defaultValues?.correctAnswer || '')
+  const [explanation, setExplanation] = useState(defaultValues?.explanation || '')
+  const [points, setPoints] = useState(defaultValues?.points || 10)
+  const [difficulty, setDifficulty] = useState(defaultValues?.difficulty || 0)
   const [errors, setErrors] = useState<Record<string, string>>({})
-
-  useEffect(() => {
-    if (open && defaultValues) {
-      setLessonId(defaultValues.lessonId || 0)
-      setCardType(defaultValues.cardType || 'basic')
-      setFrontContent(defaultValues.frontContent || '')
-      setBackContent(defaultValues.backContent || '')
-      setQuestion(defaultValues.question || '')
-      setOptions(defaultValues.options || [])
-      setCorrectAnswer(defaultValues.correctAnswer || '')
-      setExplanation(defaultValues.explanation || '')
-      setPoints(defaultValues.points || 10)
-      setDifficulty(defaultValues.difficulty || 0)
-    } else if (!open) {
-      resetForm()
-    }
-  }, [open, defaultValues])
-
-  const resetForm = () => {
-    setLessonId(0)
-    setCardType('basic')
-    setFrontContent('')
-    setBackContent('')
-    setQuestion('')
-    setOptions([])
-    setCorrectAnswer('')
-    setExplanation('')
-    setPoints(10)
-    setDifficulty(0)
-    setErrors({})
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -136,14 +106,14 @@ export function CardForm({
   }
 
   const removeOption = (id: string) => {
-    setOptions(options.filter((opt) => opt.id !== id))
+    setOptions(options.filter(opt => opt.id !== id))
   }
 
   const updateOption = (id: string, field: 'text' | 'isCorrect', value: string | boolean) => {
     setOptions(
-      options.map((opt) =>
-        opt.id === id ? { ...opt, [field]: value } : opt
-      )
+      options.map(opt =>
+        opt.id === id ? { ...opt, [field]: value } : opt,
+      ),
     )
   }
 
@@ -151,18 +121,18 @@ export function CardForm({
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
+      transition: { staggerChildren: 0.1 },
+    },
   }
 
   const item = {
     hidden: { opacity: 0, y: 10 },
-    show: { opacity: 1, y: 0 }
+    show: { opacity: 1, y: 0 },
   }
 
   const fadeIn = {
     hidden: { opacity: 0, height: 0, overflow: 'hidden' },
-    show: { opacity: 1, height: 'auto', transition: { duration: 0.3 } }
+    show: { opacity: 1, height: 'auto', transition: { duration: 0.3 } },
   }
 
   return (
@@ -190,13 +160,13 @@ export function CardForm({
               <Label htmlFor="lessonId">Leçon</Label>
               <Select
                 value={lessonId?.toString() || ''}
-                onValueChange={(value) => setLessonId(parseInt(value))}
+                onValueChange={value => setLessonId(Number.parseInt(value))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner une leçon" />
                 </SelectTrigger>
                 <SelectContent>
-                  {lessons.map((lesson) => (
+                  {lessons.map(lesson => (
                     <SelectItem key={lesson.id} value={lesson.id.toString()}>
                       {lesson.title}
                     </SelectItem>
@@ -210,7 +180,7 @@ export function CardForm({
               <Label htmlFor="cardType">Type de carte</Label>
               <Select
                 value={cardType}
-                onValueChange={(value) => setCardType(value as typeof cardType)}
+                onValueChange={value => setCardType(value as typeof cardType)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -232,7 +202,7 @@ export function CardForm({
               id="frontContent"
               placeholder="Question ou terme à apprendre..."
               value={frontContent}
-              onChange={(e) => setFrontContent(e.target.value)}
+              onChange={e => setFrontContent(e.target.value)}
               rows={3}
             />
             {errors.frontContent && <p className="text-sm text-destructive">{errors.frontContent}</p>}
@@ -244,7 +214,7 @@ export function CardForm({
               id="backContent"
               placeholder="Réponse ou définition..."
               value={backContent}
-              onChange={(e) => setBackContent(e.target.value)}
+              onChange={e => setBackContent(e.target.value)}
               rows={3}
             />
             {errors.backContent && <p className="text-sm text-destructive">{errors.backContent}</p>}
@@ -254,18 +224,17 @@ export function CardForm({
             <motion.div variants={fadeIn} initial="hidden" animate="show" className="space-y-2">
               <Label>Options</Label>
               <div className="space-y-2">
-                {options.map((option) => (
+                {options.map(option => (
                   <div key={option.id} className="flex items-center gap-2">
                     <Checkbox
                       checked={option.isCorrect}
-                      onCheckedChange={(checked) =>
-                        updateOption(option.id, 'isCorrect', checked === true)
-                      }
+                      onCheckedChange={checked =>
+                        updateOption(option.id, 'isCorrect', checked === true)}
                     />
                     <Input
                       placeholder="Texte de l'option..."
                       value={option.text}
-                      onChange={(e) => updateOption(option.id, 'text', e.target.value)}
+                      onChange={e => updateOption(option.id, 'text', e.target.value)}
                       className="flex-1"
                     />
                     <Button
@@ -308,7 +277,7 @@ export function CardForm({
                 id="correctAnswer"
                 placeholder="Mot ou phrase à compléter..."
                 value={correctAnswer}
-                onChange={(e) => setCorrectAnswer(e.target.value)}
+                onChange={e => setCorrectAnswer(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
                 Utilisez ___ dans le contenu recto pour indiquer le blanc à remplir.
@@ -322,7 +291,7 @@ export function CardForm({
               id="explanation"
               placeholder="Explication supplémentaire..."
               value={explanation}
-              onChange={(e) => setExplanation(e.target.value)}
+              onChange={e => setExplanation(e.target.value)}
               rows={2}
             />
           </motion.div>
@@ -335,7 +304,7 @@ export function CardForm({
                 type="number"
                 min={1}
                 value={points}
-                onChange={(e) => setPoints(parseInt(e.target.value) || 10)}
+                onChange={e => setPoints(Number.parseInt(e.target.value) || 10)}
               />
             </div>
             <div className="space-y-2">
@@ -346,7 +315,7 @@ export function CardForm({
                 min={0}
                 max={5}
                 value={difficulty}
-                onChange={(e) => setDifficulty(parseInt(e.target.value) || 0)}
+                onChange={e => setDifficulty(Number.parseInt(e.target.value) || 0)}
               />
             </div>
           </motion.div>

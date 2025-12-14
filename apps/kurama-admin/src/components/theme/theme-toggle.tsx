@@ -43,7 +43,9 @@ export function ThemeToggle({
         <Button variant={variant} size={size} className="aspect-square" aria-label="Toggle theme">
           {getCurrentIcon()}
           <span className="sr-only">
-            Current theme: {theme === 'system' ? `System (${resolvedTheme})` : theme}
+            Current theme:
+            {' '}
+            {theme === 'system' ? `System (${resolvedTheme})` : theme}
           </span>
         </Button>
       </DropdownMenuTrigger>

@@ -1,11 +1,15 @@
+import type { CreateLessonInput, UpdateLessonInput } from '@/lib/schemas'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { ExternalLink, Eye, EyeOff, FileText, Pencil, Plus, Search, Sparkles, Trash2 } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
-import { Plus, Pencil, Trash2, FileText, Search, Eye, EyeOff, Sparkles, ExternalLink } from 'lucide-react'
+import { toast } from 'sonner'
+import { LessonForm } from '@/components/admin/lessons'
+import { ConfirmDialog, DataTable, PageHeader } from '@/components/shared'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import {
   Select,
   SelectContent,
@@ -13,24 +17,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { PageHeader, DataTable, ConfirmDialog } from '@/components/shared'
-import { LessonForm } from '@/components/admin/lessons'
 import {
-  getLessons,
   createLesson,
-  updateLesson,
   deleteLesson,
+  getLessons,
   toggleLessonPublish,
+  updateLesson,
 } from '@/core/functions/lessons'
 import { getSubjectsSimple } from '@/core/functions/subjects'
-import type { CreateLessonInput, UpdateLessonInput } from '@/lib/schemas'
-import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_admin/lessons/')({
   component: LessonsPage,
 })
 
-type Lesson = {
+interface Lesson {
   id: number
   title: string
   description: string | null
@@ -51,7 +51,7 @@ type Lesson = {
   hasTeachPlan: boolean
 }
 
-type Subject = {
+interface Subject {
   id: number
   name: string
   abbreviation: string
@@ -80,7 +80,7 @@ function LessonsPage() {
           page,
           limit: 20,
           search: search || undefined,
-          subjectId: subjectFilter ? parseInt(subjectFilter) : undefined,
+          subjectId: subjectFilter ? Number.parseInt(subjectFilter) : undefined,
           isPublished: publishedFilter === '' ? undefined : publishedFilter === 'true',
         },
       }),
@@ -162,7 +162,11 @@ function LessonsPage() {
             <ExternalLink className="h-3 w-3" />
           </Link>
           <div className="text-sm text-muted-foreground">
-            {lesson.subjectName} ({lesson.subjectAbbreviation})
+            {lesson.subjectName}
+            {' '}
+            (
+            {lesson.subjectAbbreviation}
+            )
           </div>
         </div>
       ),
@@ -172,16 +176,22 @@ function LessonsPage() {
       header: 'Niveau',
       cell: (lesson: Lesson) => (
         <div className="text-sm">
-          {lesson.gradeName ? (
-            <div>
-              <span className="font-medium">{lesson.gradeName}</span>
-              {lesson.seriesName && (
-                <span className="text-muted-foreground ml-1">({lesson.seriesName})</span>
+          {lesson.gradeName
+            ? (
+                <div>
+                  <span className="font-medium">{lesson.gradeName}</span>
+                  {lesson.seriesName && (
+                    <span className="text-muted-foreground ml-1">
+                      (
+                      {lesson.seriesName}
+                      )
+                    </span>
+                  )}
+                </div>
+              )
+            : (
+                <span className="text-muted-foreground">-</span>
               )}
-            </div>
-          ) : (
-            <span className="text-muted-foreground">-</span>
-          )}
         </div>
       ),
     },
@@ -189,27 +199,31 @@ function LessonsPage() {
       key: 'teachPlan',
       header: 'Plan IA',
       cell: (lesson: Lesson) => (
-        lesson.hasTeachPlan ? (
-          <Badge variant="outline" className="gap-1 text-green-600 border-green-600">
-            <Sparkles className="h-3 w-3" />
-            Généré
-          </Badge>
-        ) : (
-          <span className="text-muted-foreground text-sm">-</span>
-        )
+        lesson.hasTeachPlan
+          ? (
+              <Badge variant="outline" className="gap-1 text-green-600 border-green-600">
+                <Sparkles className="h-3 w-3" />
+                Généré
+              </Badge>
+            )
+          : (
+              <span className="text-muted-foreground text-sm">-</span>
+            )
       ),
     },
     {
       key: 'difficulty',
       header: 'Difficulté',
       cell: (lesson: Lesson) =>
-        lesson.difficulty ? (
-          <Badge variant="outline">
-            {difficultyLabels[lesson.difficulty] || lesson.difficulty}
-          </Badge>
-        ) : (
-          '-'
-        ),
+        lesson.difficulty
+          ? (
+              <Badge variant="outline">
+                {difficultyLabels[lesson.difficulty] || lesson.difficulty}
+              </Badge>
+            )
+          : (
+              '-'
+            ),
     },
     {
       key: 'duration',
@@ -247,11 +261,13 @@ function LessonsPage() {
             onClick={() => togglePublishMutation.mutate(lesson.id)}
             title={lesson.isPublished ? 'Dépublier' : 'Publier'}
           >
-            {lesson.isPublished ? (
-              <EyeOff className="h-4 w-4" />
-            ) : (
-              <Eye className="h-4 w-4" />
-            )}
+            {lesson.isPublished
+              ? (
+                  <EyeOff className="h-4 w-4" />
+                )
+              : (
+                  <Eye className="h-4 w-4" />
+                )}
           </Button>
           <Button
             variant="ghost"
@@ -284,12 +300,12 @@ function LessonsPage() {
       <PageHeader
         title="Leçons"
         description="Gérer les leçons et leur contenu"
-        actions={
+        actions={(
           <Button onClick={() => setFormOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Nouvelle leçon
           </Button>
-        }
+        )}
       />
 
       <div className="flex flex-wrap items-center gap-4">
@@ -353,20 +369,23 @@ function LessonsPage() {
         emptyMessage="Aucune leçon trouvée"
       />
 
-      <LessonForm
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        onSubmit={async (data) => {
-          await createMutation.mutateAsync(data)
-        }}
-        subjects={subjectsData || []}
-        isLoading={createMutation.isPending}
-      />
+      {formOpen && (
+        <LessonForm
+          open={formOpen}
+          onOpenChange={setFormOpen}
+          onSubmit={async (data) => {
+            await createMutation.mutateAsync(data)
+          }}
+          subjects={subjectsData || []}
+          isLoading={createMutation.isPending}
+        />
+      )}
 
       {editingLesson && (
         <LessonForm
+          key={editingLesson.id}
           open={!!editingLesson}
-          onOpenChange={(open) => !open && setEditingLesson(null)}
+          onOpenChange={open => !open && setEditingLesson(null)}
           onSubmit={async (data) => {
             await updateMutation.mutateAsync({ ...data, id: editingLesson.id })
           }}
@@ -389,7 +408,7 @@ function LessonsPage() {
 
       <ConfirmDialog
         open={!!deletingLesson}
-        onOpenChange={(open) => !open && setDeletingLesson(null)}
+        onOpenChange={open => !open && setDeletingLesson(null)}
         title="Supprimer la leçon"
         description={`Êtes-vous sûr de vouloir supprimer "${deletingLesson?.title}" ? Cette action est irréversible.`}
         confirmLabel="Supprimer"

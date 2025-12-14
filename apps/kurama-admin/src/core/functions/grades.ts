@@ -1,9 +1,9 @@
+import { asc, eq, sql } from '@kurama/data-ops/database/drizzle-orm'
+import { grades, levelSeries, series } from '@kurama/data-ops/drizzle/schema'
 import { createServerFn } from '@tanstack/react-start'
-import { eq, sql, asc } from '@kurama/data-ops/database/drizzle-orm'
-import { grades, series, levelSeries } from '@kurama/data-ops/drizzle/schema'
-import { adminMiddleware } from '../middleware/admin-auth'
-import { initAdminDb, getDb } from '@/lib/db'
 import { z } from 'zod'
+import { getDb, initAdminDb } from '@/lib/db'
+import { adminMiddleware } from '../middleware/admin-auth'
 
 // Schemas
 const updateGradeSchema = z.object({
@@ -112,7 +112,7 @@ export const updateGrade = createServerFn({ method: 'POST' })
       throw new Error('Niveau non trouvé')
     }
 
-    console.log(`[AUDIT] Grade updated by ${context.email}:`, id)
+    console.warn(`[AUDIT] Grade updated by ${context.email}:`, id)
     return grade
   })
 
@@ -143,7 +143,7 @@ export const toggleGradeActive = createServerFn({ method: 'POST' })
       .where(eq(grades.id, id))
       .returning()
 
-    console.log(`[AUDIT] Grade ${newStatus ? 'activated' : 'deactivated'} by ${context.email}:`, id)
+    console.warn(`[AUDIT] Grade ${newStatus ? 'activated' : 'deactivated'} by ${context.email}:`, id)
     return result[0]
   })
 
@@ -168,7 +168,7 @@ export const updateSeries = createServerFn({ method: 'POST' })
       throw new Error('Série non trouvée')
     }
 
-    console.log(`[AUDIT] Series updated by ${context.email}:`, id)
+    console.warn(`[AUDIT] Series updated by ${context.email}:`, id)
     return s
   })
 
@@ -188,15 +188,16 @@ export const toggleLevelSeries = createServerFn({ method: 'POST' })
         .insert(levelSeries)
         .values({ gradeId, seriesId })
         .onConflictDoNothing()
-    } else {
+    }
+    else {
       // Remove mapping
       await db
         .delete(levelSeries)
         .where(
-          sql`${levelSeries.gradeId} = ${gradeId} AND ${levelSeries.seriesId} = ${seriesId}`
+          sql`${levelSeries.gradeId} = ${gradeId} AND ${levelSeries.seriesId} = ${seriesId}`,
         )
     }
 
-    console.log(`[AUDIT] Level-series mapping ${enabled ? 'added' : 'removed'} by ${context.email}: grade=${gradeId}, series=${seriesId}`)
+    console.warn(`[AUDIT] Level-series mapping ${enabled ? 'added' : 'removed'} by ${context.email}: grade=${gradeId}, series=${seriesId}`)
     return { success: true }
   })

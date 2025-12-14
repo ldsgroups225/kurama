@@ -1,6 +1,6 @@
 import type { LearningQuestion, LearningSession } from '@/lib/learning-mode-gamification'
-import { motion } from 'framer-motion'
 import { AlertTriangle, Clock, FileText, Flame, Timer, Zap } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CompactXPDisplay } from '@/components/gamification'
 import { MarkdownRenderer } from '@/components/shared'
@@ -79,7 +79,7 @@ export function EnhancedExam({
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [examState, timeLimit, onTimeUp])
+  }, [examState, timeLimit, onTimeUp, hasTriggeredTimeWarning, triggerTimeWarning])
 
   // Generate exam options (stable across re-renders to maintain position)
   const correctAnswer = card?.backContent || card?.back || 'Réponse correcte'
@@ -105,9 +105,10 @@ export function EnhancedExam({
   useEffect(() => {
     if (examState === 'completed') {
       // Scroll to top of container for next card
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }, 100)
+      return () => clearTimeout(timeoutId)
     }
   }, [examState])
 
@@ -270,7 +271,7 @@ export function EnhancedExam({
           <div className="space-y-3">
             {shuffledOptions.map((option, index) => (
               <motion.button
-                key={index}
+                key={`${option.slice(0, 20)}`}
                 type="button"
                 onClick={() => handleAnswerSelect(index)}
                 disabled={examState !== 'answering'}

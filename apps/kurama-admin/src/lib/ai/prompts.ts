@@ -17,7 +17,7 @@ export interface CardGenerationPromptParams {
 
 export interface RAGContext {
   lessonPlan: string
-  attachmentChunks: { text: string; source: string; pageNumber?: number | null }[]
+  attachmentChunks: { text: string, source: string, pageNumber?: number | null }[]
   metadata: {
     subject: string
     grade?: string
@@ -50,10 +50,12 @@ export function getLessonPlanPrompt(params: LessonPlanPromptParams): string {
 </context>
 
 <search_priority>
-${isIvoryCoast ? `1. dpfc-ci.net (Direction de la Pedagogie et de la Formation Continue - OFFICIEL)
+${isIvoryCoast
+  ? `1. dpfc-ci.net (Direction de la Pedagogie et de la Formation Continue - OFFICIEL)
 2. men-dpes.org (Ministere de l'Education Nationale)
 3. ecoleweb.ci (ressources pedagogiques ivoiriennes)
-4. scribd.com/documents educatifs Cote d'Ivoire` : `1. Sites officiels du ministere de l'education de ${country}
+4. scribd.com/documents educatifs Cote d'Ivoire`
+  : `1. Sites officiels du ministere de l'education de ${country}
 2. Ressources pedagogiques officielles
 3. Documents curriculaires nationaux`}
 </search_priority>
@@ -142,7 +144,6 @@ ${customInstructions}
   return prompt
 }
 
-
 /**
  * Generate the prompt for complete card generation (flashcard + quiz in one)
  * Optimized for structured output with Gemini
@@ -209,7 +210,6 @@ JSON array de ${amount} cartes:
 }
 </output_format>`
 }
-
 
 /**
  * Generate the prompt for RAG-enhanced card generation

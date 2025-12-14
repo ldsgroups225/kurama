@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
-import { motion } from 'framer-motion'
 import {
   BookOpen,
   Clock,
   CreditCard,
 } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useEffect } from 'react'
 import { EnhancedModeSelection } from '@/components/learning/enhanced-mode-selection'
 import { AppHeader, BottomNav } from '@/components/main'

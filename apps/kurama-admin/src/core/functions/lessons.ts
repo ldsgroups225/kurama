@@ -1,16 +1,17 @@
+import type { CreateLessonInput, LessonFilters, UpdateLessonInput } from '@/lib/schemas'
+import { and, asc, eq, like, sql } from '@kurama/data-ops/database/drizzle-orm'
+import { cards, grades, lessons, series, subjects } from '@kurama/data-ops/drizzle/schema'
 import { createServerFn } from '@tanstack/react-start'
-import { eq, like, sql, asc, and } from '@kurama/data-ops/database/drizzle-orm'
-import { lessons, subjects, cards, grades, series } from '@kurama/data-ops/drizzle/schema'
-import { adminMiddleware } from '../middleware/admin-auth'
-import { initAdminDb, getDb } from '@/lib/db'
+import { getDb, initAdminDb } from '@/lib/db'
 import {
+
   createLessonSchema,
-  updateLessonSchema,
+
   lessonFiltersSchema,
-  type CreateLessonInput,
-  type UpdateLessonInput,
-  type LessonFilters,
+
+  updateLessonSchema,
 } from '@/lib/schemas'
+import { adminMiddleware } from '../middleware/admin-auth'
 
 // Get lessons with filters
 export const getLessons = createServerFn({ method: 'GET' })
@@ -25,9 +26,12 @@ export const getLessons = createServerFn({ method: 'GET' })
 
     // Build where conditions
     const conditions = []
-    if (subjectId) conditions.push(eq(lessons.subjectId, subjectId))
-    if (isPublished !== undefined) conditions.push(eq(lessons.isPublished, isPublished))
-    if (search) conditions.push(like(lessons.title, `%${search}%`))
+    if (subjectId)
+      conditions.push(eq(lessons.subjectId, subjectId))
+    if (isPublished !== undefined)
+      conditions.push(eq(lessons.isPublished, isPublished))
+    if (search)
+      conditions.push(like(lessons.title, `%${search}%`))
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
@@ -159,7 +163,7 @@ export const createLesson = createServerFn({ method: 'POST' })
       throw new Error('Erreur lors de la création')
     }
 
-    console.log(`[AUDIT] Lesson created by ${context.email}:`, lesson.id)
+    console.warn(`[AUDIT] Lesson created by ${context.email}:`, lesson.id)
 
     return lesson
   })
@@ -200,7 +204,7 @@ export const updateLesson = createServerFn({ method: 'POST' })
       throw new Error('Leçon non trouvée')
     }
 
-    console.log(`[AUDIT] Lesson updated by ${context.email}:`, id)
+    console.warn(`[AUDIT] Lesson updated by ${context.email}:`, id)
 
     return lesson
   })
@@ -237,7 +241,7 @@ export const toggleLessonPublish = createServerFn({ method: 'POST' })
       .returning()
 
     const lesson = result[0]
-    console.log(`[AUDIT] Lesson ${newStatus ? 'published' : 'unpublished'} by ${context.email}:`, id)
+    console.warn(`[AUDIT] Lesson ${newStatus ? 'published' : 'unpublished'} by ${context.email}:`, id)
 
     return lesson
   })
@@ -271,16 +275,15 @@ export const deleteLesson = createServerFn({ method: 'POST' })
       throw new Error('Leçon non trouvée')
     }
 
-    console.log(`[AUDIT] Lesson deleted by ${context.email}:`, id)
+    console.warn(`[AUDIT] Lesson deleted by ${context.email}:`, id)
 
     return { success: true }
   })
 
-
 // Reorder lessons
 export const reorderLessons = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])
-  .inputValidator((data: { lessonId: number; newOrder: number }) => data)
+  .inputValidator((data: { lessonId: number, newOrder: number }) => data)
   .handler(async ({ data, context }) => {
     initAdminDb()
     const db = getDb()
@@ -322,10 +325,11 @@ export const reorderLessons = createServerFn({ method: 'POST' })
           and(
             eq(lessons.subjectId, current.subjectId),
             sql`${lessons.displayOrder} > ${oldOrder}`,
-            sql`${lessons.displayOrder} <= ${newOrder}`
-          )
+            sql`${lessons.displayOrder} <= ${newOrder}`,
+          ),
         )
-    } else {
+    }
+    else {
       // Moving up: increase order of lessons between new and old position
       await db
         .update(lessons)
@@ -337,8 +341,8 @@ export const reorderLessons = createServerFn({ method: 'POST' })
           and(
             eq(lessons.subjectId, current.subjectId),
             sql`${lessons.displayOrder} >= ${newOrder}`,
-            sql`${lessons.displayOrder} < ${oldOrder}`
-          )
+            sql`${lessons.displayOrder} < ${oldOrder}`,
+          ),
         )
     }
 
@@ -351,7 +355,7 @@ export const reorderLessons = createServerFn({ method: 'POST' })
       })
       .where(eq(lessons.id, lessonId))
 
-    console.log(`[AUDIT] Lesson reordered by ${context.email}: ${lessonId} from ${oldOrder} to ${newOrder}`)
+    console.warn(`[AUDIT] Lesson reordered by ${context.email}: ${lessonId} from ${oldOrder} to ${newOrder}`)
 
     return { success: true }
   })

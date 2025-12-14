@@ -11,7 +11,8 @@ export const Route = createFileRoute('/')({
       throw redirect({
         to: '/dashboard',
       })
-    } catch (e) {
+    }
+    catch (e) {
       // If it's a redirect (from the line above), rethrow it
       if (e instanceof Response || (typeof e === 'object' && e !== null && 'to' in e)) {
         throw e

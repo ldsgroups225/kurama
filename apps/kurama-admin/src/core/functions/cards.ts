@@ -1,16 +1,17 @@
-import { createServerFn } from '@tanstack/react-start'
-import { eq, like, sql, asc, and } from '@kurama/data-ops/database/drizzle-orm'
+import type { CardFilters, CreateCardInput, UpdateCardInput } from '@/lib/schemas'
+import { and, asc, eq, like, sql } from '@kurama/data-ops/database/drizzle-orm'
 import { cards, lessons } from '@kurama/data-ops/drizzle/schema'
-import { adminMiddleware } from '../middleware/admin-auth'
-import { initAdminDb, getDb } from '@/lib/db'
+import { createServerFn } from '@tanstack/react-start'
+import { getDb, initAdminDb } from '@/lib/db'
 import {
-  createCardSchema,
-  updateCardSchema,
+
   cardFiltersSchema,
-  type CreateCardInput,
-  type UpdateCardInput,
-  type CardFilters,
+
+  createCardSchema,
+
+  updateCardSchema,
 } from '@/lib/schemas'
+import { adminMiddleware } from '../middleware/admin-auth'
 
 // Get cards with filters
 export const getCards = createServerFn({ method: 'GET' })
@@ -25,9 +26,12 @@ export const getCards = createServerFn({ method: 'GET' })
 
     // Build where conditions
     const conditions = []
-    if (lessonId) conditions.push(eq(cards.lessonId, lessonId))
-    if (cardType) conditions.push(eq(cards.cardType, cardType))
-    if (search) conditions.push(like(cards.frontContent, `%${search}%`))
+    if (lessonId)
+      conditions.push(eq(cards.lessonId, lessonId))
+    if (cardType)
+      conditions.push(eq(cards.cardType, cardType))
+    if (search)
+      conditions.push(like(cards.frontContent, `%${search}%`))
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
@@ -161,7 +165,7 @@ export const createCard = createServerFn({ method: 'POST' })
       throw new Error('Erreur lors de la création')
     }
 
-    console.log(`[AUDIT] Card created by ${context.email}:`, card.id)
+    console.warn(`[AUDIT] Card created by ${context.email}:`, card.id)
 
     return card
   })
@@ -207,7 +211,7 @@ export const updateCard = createServerFn({ method: 'POST' })
       throw new Error('Carte non trouvée')
     }
 
-    console.log(`[AUDIT] Card updated by ${context.email}:`, id)
+    console.warn(`[AUDIT] Card updated by ${context.email}:`, id)
 
     return card
   })
@@ -230,7 +234,7 @@ export const deleteCard = createServerFn({ method: 'POST' })
       throw new Error('Carte non trouvée')
     }
 
-    console.log(`[AUDIT] Card deleted by ${context.email}:`, id)
+    console.warn(`[AUDIT] Card deleted by ${context.email}:`, id)
 
     return { success: true }
   })
@@ -318,7 +322,7 @@ export const duplicateCard = createServerFn({ method: 'POST' })
       throw new Error('Erreur lors de la duplication')
     }
 
-    console.log(`[AUDIT] Card duplicated by ${context.email}:`, id, '->', card.id)
+    console.warn(`[AUDIT] Card duplicated by ${context.email}:`, id, '->', card.id)
 
     return card
   })
@@ -342,11 +346,10 @@ export const getLessonsSimple = createServerFn({ method: 'GET' })
     return lessonList
   })
 
-
 // Bulk create cards (for import)
 export const bulkCreateCards = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])
-  .inputValidator((data: { lessonId: number; cards: CreateCardInput[] }) => data)
+  .inputValidator((data: { lessonId: number, cards: CreateCardInput[] }) => data)
   .handler(async ({ data, context }) => {
     initAdminDb()
     const db = getDb()
@@ -366,7 +369,7 @@ export const bulkCreateCards = createServerFn({ method: 'POST' })
     let currentOrder = Number(maxOrderResult[0]?.max ?? 0)
 
     // Insert cards with incremental display order
-    const cardsWithOrder = cardsToCreate.map((card) => ({
+    const cardsWithOrder = cardsToCreate.map(card => ({
       ...card,
       lessonId,
       displayOrder: ++currentOrder,
@@ -377,7 +380,7 @@ export const bulkCreateCards = createServerFn({ method: 'POST' })
       .values(cardsWithOrder)
       .returning({ id: cards.id })
 
-    console.log(`[AUDIT] Bulk cards created by ${context.email}: ${result.length} cards for lesson ${lessonId}`)
+    console.warn(`[AUDIT] Bulk cards created by ${context.email}: ${result.length} cards for lesson ${lessonId}`)
 
     return { created: result.length }
   })
@@ -399,7 +402,7 @@ export const bulkDeleteCards = createServerFn({ method: 'POST' })
       .where(sql`${cards.id} IN ${ids}`)
       .returning({ id: cards.id })
 
-    console.log(`[AUDIT] Bulk cards deleted by ${context.email}: ${result.length} cards`)
+    console.warn(`[AUDIT] Bulk cards deleted by ${context.email}: ${result.length} cards`)
 
     return { deleted: result.length }
   })

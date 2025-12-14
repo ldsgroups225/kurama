@@ -1,15 +1,15 @@
-import { createServerFn } from '@tanstack/react-start'
-import { eq, sql, gte } from '@kurama/data-ops/database/drizzle-orm'
+import { eq, gte, sql } from '@kurama/data-ops/database/drizzle-orm'
 import {
   authUser,
-  userProfiles,
-  subjects,
-  lessons,
   cards,
+  lessons,
   studySessions,
+  subjects,
+  userProfiles,
 } from '@kurama/data-ops/drizzle/schema'
+import { createServerFn } from '@tanstack/react-start'
+import { getDb, initAdminDb } from '@/lib/db'
 import { adminMiddleware } from '../middleware/admin-auth'
-import { initAdminDb, getDb } from '@/lib/db'
 
 // Get dashboard statistics
 export const getDashboardStats = createServerFn({ method: 'GET' })
@@ -146,7 +146,7 @@ export const getContentStats = createServerFn({ method: 'GET' })
       .from(subjects)
       .orderBy(subjects.displayOrder)
 
-    return subjectStats.map((s) => ({
+    return subjectStats.map(s => ({
       ...s,
       lessonCount: Number(s.lessonCount),
       cardCount: Number(s.cardCount),
@@ -207,7 +207,7 @@ export const getUserGrowth = createServerFn({ method: 'GET' })
       .groupBy(sql`DATE(${authUser.createdAt})`)
       .orderBy(sql`DATE(${authUser.createdAt})`)
 
-    return growth.map((g) => ({
+    return growth.map(g => ({
       date: g.date,
       count: Number(g.count),
     }))
@@ -235,7 +235,7 @@ export const getSessionGrowth = createServerFn({ method: 'GET' })
       .groupBy(sql`DATE(${studySessions.startedAt})`)
       .orderBy(sql`DATE(${studySessions.startedAt})`)
 
-    return growth.map((g) => ({
+    return growth.map(g => ({
       date: g.date,
       count: Number(g.count),
       cardsReviewed: Number(g.cardsReviewed),

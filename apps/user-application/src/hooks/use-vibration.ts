@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 /**
  * Vibration pattern - can be a single duration in milliseconds
@@ -59,9 +59,9 @@ export type UseVibrationReturn = [VibrationState, VibrationControls]
  * stop();
  * ```
  */
-const useVibration = (): UseVibrationReturn => {
-  const isSupported =
-    typeof navigator !== "undefined" && typeof navigator.vibrate === "function"
+function useVibration(): UseVibrationReturn {
+  const isSupported
+    = typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function'
 
   const [isVibrating, setIsVibrating] = useState<boolean>(false)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -81,7 +81,8 @@ const useVibration = (): UseVibrationReturn => {
 
   const vibrate = useCallback(
     (pattern: VibrationPattern = 200) => {
-      if (!isSupported) return
+      if (!isSupported)
+        return
 
       clearVibrationTimeout()
 
@@ -95,36 +96,40 @@ const useVibration = (): UseVibrationReturn => {
             setIsVibrating(false)
             timeoutRef.current = null
           }, totalDuration)
-        } else if (pattern > 0) {
+        }
+        else if (pattern > 0) {
           timeoutRef.current = setTimeout(() => {
             setIsVibrating(false)
             timeoutRef.current = null
           }, pattern)
         }
-      } catch (error) {
-        console.error("An error occurred while trying to use the Vibration API:", error)
+      }
+      catch (error) {
+        console.error('An error occurred while trying to use the Vibration API:', error)
         setIsVibrating(false)
       }
     },
-    [isSupported, clearVibrationTimeout]
+    [isSupported, clearVibrationTimeout],
   )
 
   const stop = useCallback(() => {
-    if (!isSupported) return
+    if (!isSupported)
+      return
 
     clearVibrationTimeout()
 
     try {
       navigator.vibrate(0)
       setIsVibrating(false)
-    } catch (error) {
-      console.error("An error occurred while stopping vibration:", error)
+    }
+    catch (error) {
+      console.error('An error occurred while stopping vibration:', error)
     }
   }, [isSupported, clearVibrationTimeout])
 
   return [
     { isSupported, isVibrating },
-    { vibrate, stop }
+    { vibrate, stop },
   ]
 }
 

@@ -1,5 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { BarChart3, BookOpen, Home, User, Users } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
  *
  * Features:
  * - Floating glassmorphism design
- * - Smooth framer-motion animations
+ * - Smooth motion animations
  * - Dynamic active states with glow effects
  * - Haptic-like visual feedback on touch
  */

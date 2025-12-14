@@ -156,7 +156,8 @@
   --color-info-to: var(--info-to);
   --color-info-bg: var(--info-bg);
 
-  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  --font-sans:
+    'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
 }
 
 @layer base {
@@ -186,13 +187,12 @@
   }
 
   button:not(:disabled),
-  [role="button"]:not(:disabled) {
+  [role='button']:not(:disabled) {
     cursor: pointer;
   }
 }
 
 @layer utilities {
-
   /* Status Gradients */
   .bg-gradient-success {
     background: linear-gradient(to bottom right, var(--success-from), var(--success-to));

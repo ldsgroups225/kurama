@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { motion } from 'framer-motion'
 import { ArrowRight, MessageCircle, Plus, Users } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useEffect } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'

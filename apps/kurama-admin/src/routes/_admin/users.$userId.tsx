@@ -1,19 +1,20 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import {
   ArrowLeft,
-  User,
-  Mail,
-  Calendar,
-  GraduationCap,
   BookOpen,
-  Trophy,
+  Calendar,
   Clock,
+  GraduationCap,
   Loader2,
+  Mail,
+  Trophy,
+  User,
 } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
+import { motion } from 'motion/react'
+import { PageHeader } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -22,7 +23,6 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { PageHeader } from '@/components/shared'
 import { getUserDetail, getUserSessions } from '@/core/functions/users'
 
 export const Route = createFileRoute('/_admin/users/$userId')({
@@ -71,14 +71,14 @@ function UserDetailPage() {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   }
 
   const item = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
+    show: { opacity: 1, y: 0 },
   }
 
   return (
@@ -86,14 +86,14 @@ function UserDetailPage() {
       <PageHeader
         title={user.name || 'Utilisateur'}
         description={user.email}
-        actions={
+        actions={(
           <Button variant="outline" asChild>
             <Link to="/users">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Retour
             </Link>
           </Button>
-        }
+        )}
       />
 
       {/* User Info Cards */}
@@ -152,7 +152,11 @@ function UserDetailPage() {
                 <div className="bg-primary/10 p-2 rounded-full">
                   <Trophy className="h-4 w-4 text-primary" />
                 </div>
-                <span className="font-medium text-lg">{user.profile?.xp || 0} XP</span>
+                <span className="font-medium text-lg">
+                  {user.profile?.xp || 0}
+                  {' '}
+                  XP
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -245,41 +249,55 @@ function UserDetailPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {sessions && sessions.length > 0 ? (
-                  <div className="space-y-3">
-                    {sessions.map((session) => (
-                      <div
-                        key={session.id}
-                        className="flex items-center justify-between p-4 border border-border/50 rounded-lg hover:bg-muted/30 transition-colors"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="bg-primary/10 p-2 rounded-full">
-                            <BookOpen className="h-5 w-5 text-primary" />
+                {sessions && sessions.length > 0
+                  ? (
+                      <div className="space-y-3">
+                        {sessions.map(session => (
+                          <div
+                            key={session.id}
+                            className="flex items-center justify-between p-4 border border-border/50 rounded-lg hover:bg-muted/30 transition-colors"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="bg-primary/10 p-2 rounded-full">
+                                <BookOpen className="h-5 w-5 text-primary" />
+                              </div>
+                              <div>
+                                <p className="font-medium">{session.lessonTitle || 'Leçon inconnue'}</p>
+                                <p className="text-sm text-muted-foreground mt-0.5">
+                                  Mode:
+                                  {' '}
+                                  <span className="text-foreground">{session.mode}</span>
+                                  {' '}
+                                  •
+                                  {' '}
+                                  {session.cardsReviewed}
+                                  {' '}
+                                  cartes
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <Badge variant="outline" className="mb-1">
+                                {session.cardsCorrect}
+                                /
+                                {session.cardsReviewed}
+                                {' '}
+                                correctes
+                              </Badge>
+                              <p className="text-sm text-muted-foreground flex items-center gap-1 justify-end">
+                                <Clock className="h-3 w-3" />
+                                {session.duration ? `${Math.round(session.duration / 60)} min` : '-'}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium">{session.lessonTitle || 'Leçon inconnue'}</p>
-                            <p className="text-sm text-muted-foreground mt-0.5">
-                              Mode: <span className="text-foreground">{session.mode}</span> • {session.cardsReviewed} cartes
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <Badge variant="outline" className="mb-1">
-                            {session.cardsCorrect}/{session.cardsReviewed} correctes
-                          </Badge>
-                          <p className="text-sm text-muted-foreground flex items-center gap-1 justify-end">
-                            <Clock className="h-3 w-3" />
-                            {session.duration ? `${Math.round(session.duration / 60)} min` : '-'}
-                          </p>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-12">
-                    Aucune session d'étude
-                  </p>
-                )}
+                    )
+                  : (
+                      <p className="text-center text-muted-foreground py-12">
+                        Aucune session d'étude
+                      </p>
+                    )}
               </CardContent>
             </Card>
           </TabsContent>

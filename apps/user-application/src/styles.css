@@ -86,8 +86,6 @@
   --info-from: oklch(0.65 0.18 230);
   --info-to: oklch(0.55 0.2 240);
   --info-bg: oklch(0.95 0.02 230);
-
-
 }
 
 .dark {
@@ -173,8 +171,6 @@
   --info-from: oklch(0.6 0.2 230);
   --info-to: oklch(0.5 0.22 240);
   --info-bg: oklch(0.2 0.03 230);
-
-
 }
 
 @theme inline {
@@ -260,7 +256,6 @@
 }
 
 @layer base {
-
   /* NATIVE APP GLOBAL RESET */
   :root {
     /* App-like sizing */
@@ -346,7 +341,6 @@
 }
 
 @layer utilities {
-
   /* XP System Gradients */
   .bg-gradient-xp {
     background: linear-gradient(to bottom right, var(--xp-from), var(--xp-to));

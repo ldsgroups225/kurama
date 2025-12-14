@@ -1,9 +1,9 @@
 import type { Reward } from '@/components/gamification'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { motion } from 'framer-motion'
 import { ArrowLeft, Brain, SlidersHorizontal, WifiOff } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { motion } from 'motion/react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { RewardAnimation } from '@/components/gamification'
 import { FlashcardFace } from '@/components/learning/flashcard-face'
 import { SessionControls } from '@/components/learning/session-controls'
@@ -100,7 +100,7 @@ function QuickReviewPage() {
     staleTime: 0, // Always fetch fresh data
   })
 
-  const cards = reviewData?.cards ?? []
+  const cards = useMemo(() => reviewData?.cards ?? [], [reviewData?.cards])
   const currentCard = cards[currentCardIndex]
   const progress = cards.length > 0 ? ((currentCardIndex + 1) / cards.length) * 100 : 0
   const isLastCard = currentCardIndex === cards.length - 1
@@ -110,7 +110,11 @@ function QuickReviewPage() {
   }, [navigate])
 
   const navigateToSummary = useCallback(
-    async (finalCorrect?: number, finalIncorrect?: number) => {
+    async (
+      cards: any[],
+      finalCorrect?: number,
+      finalIncorrect?: number,
+    ) => {
       const duration = Math.floor((Date.now() - startTime) / 1000)
       const correct = finalCorrect ?? sessionStats.correct
       const incorrect = finalIncorrect ?? sessionStats.incorrect
@@ -142,7 +146,7 @@ function QuickReviewPage() {
         },
       })
     },
-    [navigate, startTime, sessionStats, cards, updateStats],
+    [navigate, startTime, sessionStats, updateStats],
   )
 
   const handleFlip = useCallback(() => {
@@ -158,7 +162,7 @@ function QuickReviewPage() {
       if (isLastCard) {
         const finalCorrect = response === 'correct' ? sessionStats.correct + 1 : sessionStats.correct
         const finalIncorrect = response === 'incorrect' ? sessionStats.incorrect + 1 : sessionStats.incorrect
-        navigateToSummary(finalCorrect, finalIncorrect)
+        navigateToSummary(cards, finalCorrect, finalIncorrect)
       }
       else {
         setCurrentCardIndex(prev => prev + 1)
@@ -167,6 +171,7 @@ function QuickReviewPage() {
       }
     },
     [
+      cards,
       incrementStat,
       isLastCard,
       navigateToSummary,

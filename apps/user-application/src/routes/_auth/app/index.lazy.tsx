@@ -1,7 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
-import { motion } from 'framer-motion'
-
 import {
   BookOpen,
   Brain,
@@ -14,6 +12,8 @@ import {
   TrendingUp,
   Zap,
 } from 'lucide-react'
+
+import { motion } from 'motion/react'
 import { useEffect } from 'react'
 import { StreakCalendar } from '@/components/gamification'
 import { AppHeader, BottomNav } from '@/components/main'

@@ -1,23 +1,26 @@
+import type { LessonTeachPlanMetadata } from '@kurama/data-ops/drizzle/schema'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   ArrowLeft,
   BookOpen,
   Clock,
-  Sparkles,
+  ExternalLink,
   FileText,
+  GraduationCap,
+  Loader2,
   Pencil,
   Save,
+  Sparkles,
   X,
-  ExternalLink,
-  Loader2,
-  GraduationCap,
 } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
+import { motion } from 'motion/react'
+import { useState } from 'react'
+import { toast } from 'sonner'
+import { AttachmentsSheet } from '@/components/admin/lessons/attachments-sheet'
+import { MarkdownRenderer, PageHeader } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
-import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -33,6 +36,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -40,22 +45,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
-import { PageHeader, MarkdownRenderer } from '@/components/shared'
-import { AttachmentsSheet } from '@/components/admin/lessons/attachments-sheet'
-import { getLesson } from '@/core/functions/lessons'
-import { getCards } from '@/core/functions/cards'
-import { getGradesSimple } from '@/core/functions/users'
+import { Textarea } from '@/components/ui/textarea'
 import {
-  generateTeachPlan,
   generateCardsFromPlan,
+  generateTeachPlan,
   saveGeneratedCards,
   updateTeachPlan,
 } from '@/core/functions/ai-generation'
-import { toast } from 'sonner'
-import type { LessonTeachPlanMetadata } from '@kurama/data-ops/drizzle/schema'
+import { getCards } from '@/core/functions/cards'
+import { getLesson } from '@/core/functions/lessons'
+import { getGradesSimple } from '@/core/functions/users'
+import { generateUUID } from '@/utils/generateUUID'
 
 export const Route = createFileRoute('/_admin/lessons/$lessonId')({
   component: LessonDetailPage,
@@ -63,27 +64,32 @@ export const Route = createFileRoute('/_admin/lessons/$lessonId')({
 
 // Fallback grades if API fails
 const defaultGrades = [
-  '6ème', '5ème', '4ème', '3ème',
-  'Seconde', 'Première', 'Terminale',
+  '6ème',
+  '5ème',
+  '4ème',
+  '3ème',
+  'Seconde',
+  'Première',
+  'Terminale',
 ]
 
 const container = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 }
-  }
+    transition: { staggerChildren: 0.1 },
+  },
 }
 
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
+  show: { opacity: 1, y: 0 },
 }
 
 function LessonDetailPage() {
   const { lessonId } = Route.useParams()
   const queryClient = useQueryClient()
-  const lessonIdNum = parseInt(lessonId)
+  const lessonIdNum = Number.parseInt(lessonId)
 
   // State
   const [isEditing, setIsEditing] = useState(false)
@@ -91,7 +97,7 @@ function LessonDetailPage() {
   const [generateDialogOpen, setGenerateDialogOpen] = useState(false)
   const [cardGenerateDialogOpen, setCardGenerateDialogOpen] = useState(false)
   const [generationParams, setGenerationParams] = useState({
-    country: "Côte d'Ivoire",
+    country: 'Côte d\'Ivoire',
     grade: '', // Will be set when dialog opens
     language: 'French' as 'French' | 'English',
     schoolYear: '2025-2026',
@@ -104,7 +110,7 @@ function LessonDetailPage() {
     frontContent: string
     backContent: string
     question?: string
-    options?: Array<{ id: string; text: string; isCorrect: boolean }>
+    options?: Array<{ id: string, text: string, isCorrect: boolean }>
     correctAnswer?: string
     explanation?: string
     displayOrder: number
@@ -162,7 +168,7 @@ function LessonDetailPage() {
         },
       }),
     onSuccess: (result) => {
-      const data = result as { success: boolean; cards: typeof generatedCards }
+      const data = result as { success: boolean, cards: typeof generatedCards }
       setGeneratedCards(data.cards)
       setCardGenerateDialogOpen(false)
       setPreviewDialogOpen(true)
@@ -178,7 +184,7 @@ function LessonDetailPage() {
       saveGeneratedCards({
         data: {
           lessonId: lessonIdNum,
-          cards: generatedCards.map((card) => ({
+          cards: generatedCards.map(card => ({
             lessonId: card.lessonId,
             cardType: card.cardType as 'basic' | 'multichoice' | 'true_false' | 'fill_blank',
             frontContent: card.frontContent,
@@ -194,7 +200,7 @@ function LessonDetailPage() {
         },
       }),
     onSuccess: (result) => {
-      const data = result as { success: boolean; savedCount: number }
+      const data = result as { success: boolean, savedCount: number }
       queryClient.invalidateQueries({ queryKey: ['cards', { lessonId: lessonIdNum }] })
       queryClient.invalidateQueries({ queryKey: ['lessons'] })
       setPreviewDialogOpen(false)
@@ -271,7 +277,7 @@ function LessonDetailPage() {
       <PageHeader
         title={lesson.title}
         description={lesson.description || 'Aucune description'}
-        actions={
+        actions={(
           <div className="flex gap-2">
             <AttachmentsSheet
               lessonId={lessonIdNum}
@@ -287,7 +293,7 @@ function LessonDetailPage() {
               </Link>
             </Button>
           </div>
-        }
+        )}
       />
 
       {/* Lesson metadata */}
@@ -304,7 +310,9 @@ function LessonDetailPage() {
         {lesson.estimatedDuration && (
           <Badge variant="outline" className="gap-2 px-3 py-1.5 text-base border-primary/20 bg-primary/5">
             <Clock className="h-4 w-4 text-primary" />
-            {lesson.estimatedDuration} min
+            {lesson.estimatedDuration}
+            {' '}
+            min
           </Badge>
         )}
         <Badge
@@ -315,7 +323,9 @@ function LessonDetailPage() {
         </Badge>
         <Badge variant="outline" className="gap-2 px-3 py-1.5 text-base border-primary/20 bg-primary/5">
           <FileText className="h-4 w-4 text-primary" />
-          {cardsData?.total || 0} cartes
+          {cardsData?.total || 0}
+          {' '}
+          cartes
         </Badge>
       </motion.div>
 
@@ -360,15 +370,16 @@ function LessonDetailPage() {
                   const prevMetadata = lesson.teachPlanMetadata as LessonTeachPlanMetadata | null
                   if (prevMetadata) {
                     setGenerationParams({
-                      country: prevMetadata.country || "Côte d'Ivoire",
+                      country: prevMetadata.country || 'Côte d\'Ivoire',
                       grade: prevMetadata.grade || grades[0] || '3ème',
                       language: (prevMetadata.language as 'French' | 'English') || 'French',
                       schoolYear: '2025-2026',
                       customInstructions: '',
                     })
-                  } else {
+                  }
+                  else {
                     // Set default grade to first available
-                    setGenerationParams((prev) => ({
+                    setGenerationParams(prev => ({
                       ...prev,
                       grade: grades[0] || '3ème',
                     }))
@@ -383,67 +394,73 @@ function LessonDetailPage() {
             </div>
           </CardHeader>
           <CardContent>
-            {isEditing ? (
-              <div className="space-y-4">
-                <Textarea
-                  value={editedTeachPlan}
-                  onChange={(e) => setEditedTeachPlan(e.target.value)}
-                  className="min-h-[400px] font-mono text-sm"
-                  placeholder="Contenu Markdown du plan de leçon..."
-                />
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={handleCancelEdit}>
-                    <X className="mr-2 h-4 w-4" />
-                    Annuler
-                  </Button>
-                  <Button
-                    onClick={() => updatePlanMutation.mutate()}
-                    disabled={updatePlanMutation.isPending}
-                  >
-                    {updatePlanMutation.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Save className="mr-2 h-4 w-4" />
-                    )}
-                    Enregistrer
-                  </Button>
-                </div>
-              </div>
-            ) : lesson.teachPlan ? (
-              <div className="space-y-6">
-                <MarkdownRenderer content={lesson.teachPlan} />
-
-                {/* Sources */}
-                {metadata?.sources && metadata.sources.length > 0 && (
-                  <div className="border-t pt-6">
-                    <h4 className="text-sm font-semibold mb-3">Sources</h4>
-                    <ul className="space-y-2">
-                      {metadata.sources.map((source, index) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <ExternalLink className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
-                          <a
-                            href={source.uri}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-primary hover:underline break-all"
-                          >
-                            {source.title || source.uri}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
+            {isEditing
+              ? (
+                  <div className="space-y-4">
+                    <Textarea
+                      value={editedTeachPlan}
+                      onChange={e => setEditedTeachPlan(e.target.value)}
+                      className="min-h-[400px] font-mono text-sm"
+                      placeholder="Contenu Markdown du plan de leçon..."
+                    />
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={handleCancelEdit}>
+                        <X className="mr-2 h-4 w-4" />
+                        Annuler
+                      </Button>
+                      <Button
+                        onClick={() => updatePlanMutation.mutate()}
+                        disabled={updatePlanMutation.isPending}
+                      >
+                        {updatePlanMutation.isPending
+                          ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            )
+                          : (
+                              <Save className="mr-2 h-4 w-4" />
+                            )}
+                        Enregistrer
+                      </Button>
+                    </div>
                   </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <Sparkles className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-4 text-lg font-semibold">Aucun plan d'enseignement</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Cliquez sur "Générer avec IA" pour créer un plan de leçon basé sur le curriculum ivoirien.
-                </p>
-              </div>
-            )}
+                )
+              : lesson.teachPlan
+                ? (
+                    <div className="space-y-6">
+                      <MarkdownRenderer content={lesson.teachPlan} />
+
+                      {/* Sources */}
+                      {metadata?.sources && metadata.sources.length > 0 && (
+                        <div className="border-t pt-6">
+                          <h4 className="text-sm font-semibold mb-3">Sources</h4>
+                          <ul className="space-y-2">
+                            {metadata.sources.map(source => (
+                              <li key={generateUUID()} className="flex items-start gap-2">
+                                <ExternalLink className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                                <a
+                                  href={source.uri}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-primary hover:underline break-all"
+                                >
+                                  {source.title || source.uri}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )
+                : (
+                    <div className="text-center py-12">
+                      <Sparkles className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                      <h3 className="mt-4 text-lg font-semibold">Aucun plan d'enseignement</h3>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Cliquez sur "Générer avec IA" pour créer un plan de leçon basé sur le curriculum ivoirien.
+                      </p>
+                    </div>
+                  )}
           </CardContent>
         </Card>
       </motion.div>
@@ -462,24 +479,22 @@ function LessonDetailPage() {
               <Label>Pays</Label>
               <Input
                 value={generationParams.country}
-                onChange={(e) =>
-                  setGenerationParams({ ...generationParams, country: e.target.value })
-                }
+                onChange={e =>
+                  setGenerationParams({ ...generationParams, country: e.target.value })}
               />
             </div>
             <div className="space-y-2">
               <Label>Niveau scolaire</Label>
               <Select
                 value={generationParams.grade}
-                onValueChange={(value) =>
-                  setGenerationParams({ ...generationParams, grade: value })
-                }
+                onValueChange={value =>
+                  setGenerationParams({ ...generationParams, grade: value })}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {grades.map((grade) => (
+                  {grades.map(grade => (
                     <SelectItem key={grade} value={grade}>
                       {grade}
                     </SelectItem>
@@ -492,8 +507,7 @@ function LessonDetailPage() {
               <Select
                 value={generationParams.language}
                 onValueChange={(value: 'French' | 'English') =>
-                  setGenerationParams({ ...generationParams, language: value })
-                }
+                  setGenerationParams({ ...generationParams, language: value })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -508,21 +522,19 @@ function LessonDetailPage() {
               <Label>Année scolaire</Label>
               <Input
                 value={generationParams.schoolYear}
-                onChange={(e) =>
-                  setGenerationParams({ ...generationParams, schoolYear: e.target.value })
-                }
+                onChange={e =>
+                  setGenerationParams({ ...generationParams, schoolYear: e.target.value })}
               />
             </div>
             <div className="space-y-2">
               <Label>Instructions personnalisées (optionnel)</Label>
               <Textarea
                 value={generationParams.customInstructions}
-                onChange={(e) =>
+                onChange={e =>
                   setGenerationParams({
                     ...generationParams,
                     customInstructions: e.target.value,
-                  })
-                }
+                  })}
                 placeholder="Ex: Inclure des exemples pratiques..."
                 className="min-h-[80px]"
               />
@@ -536,17 +548,19 @@ function LessonDetailPage() {
               onClick={() => generatePlanMutation.mutate()}
               disabled={generatePlanMutation.isPending}
             >
-              {generatePlanMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Génération...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Générer
-                </>
-              )}
+              {generatePlanMutation.isPending
+                ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Génération...
+                    </>
+                  )
+                : (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Générer
+                    </>
+                  )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -587,17 +601,19 @@ function LessonDetailPage() {
               onClick={() => generateCardsMutation.mutate()}
               disabled={generateCardsMutation.isPending}
             >
-              {generateCardsMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Génération...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Générer
-                </>
-              )}
+              {generateCardsMutation.isPending
+                ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Génération...
+                    </>
+                  )
+                : (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Générer
+                    </>
+                  )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -609,14 +625,19 @@ function LessonDetailPage() {
           <DialogHeader>
             <DialogTitle>Aperçu des cartes générées</DialogTitle>
             <DialogDescription>
-              {generatedCards.length} cartes ont été générées. Vérifiez-les avant de les enregistrer.
+              {generatedCards.length}
+              {' '}
+              cartes ont été générées. Vérifiez-les avant de les enregistrer.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {generatedCards.map((card, index) => (
-              <Card key={index}>
+              <Card key={generateUUID()}>
                 <CardHeader className="py-3">
-                  <CardTitle className="text-sm">Carte {index + 1}</CardTitle>
+                  <CardTitle className="text-sm">
+                    Carte
+                    {index + 1}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="py-2 space-y-4">
                   {/* Flashcard section */}
@@ -642,12 +663,16 @@ function LessonDetailPage() {
                     <div>
                       <span className="text-xs font-medium text-muted-foreground">Options:</span>
                       <ul className="mt-1 space-y-1">
-                        {card.options?.map((opt) => (
+                        {card.options?.map(opt => (
                           <li
                             key={opt.id}
                             className={`text-sm ${opt.isCorrect ? 'text-green-600 font-medium' : ''}`}
                           >
-                            {opt.id}. {opt.text} {opt.isCorrect && '✓'}
+                            {opt.id}
+                            .
+                            {opt.text}
+                            {' '}
+                            {opt.isCorrect && '✓'}
                           </li>
                         ))}
                       </ul>
@@ -673,17 +698,23 @@ function LessonDetailPage() {
               onClick={() => saveCardsMutation.mutate()}
               disabled={saveCardsMutation.isPending}
             >
-              {saveCardsMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Enregistrement...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Enregistrer {generatedCards.length} cartes
-                </>
-              )}
+              {saveCardsMutation.isPending
+                ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Enregistrement...
+                    </>
+                  )
+                : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Enregistrer
+                      {' '}
+                      {generatedCards.length}
+                      {' '}
+                      cartes
+                    </>
+                  )}
             </Button>
           </DialogFooter>
         </DialogContent>

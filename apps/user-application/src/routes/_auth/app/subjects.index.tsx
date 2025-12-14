@@ -1,7 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { motion } from 'framer-motion'
 import {
   Atom,
   BookOpen,
@@ -17,6 +16,7 @@ import {
   Sparkles,
   TrendingUp,
 } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useEffect } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
 import { Badge } from '@/components/ui/badge'

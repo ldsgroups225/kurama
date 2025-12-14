@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer'
 import { GoogleGenAI } from '@google/genai'
 
 const EMBEDDING_MODEL = 'text-embedding-004'
@@ -10,7 +11,7 @@ const RETRY_DELAY_MS = 2000
  * Sleep utility for retry delays
  */
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 /**
@@ -27,12 +28,13 @@ export async function generateEmbedding(apiKey: string, text: string): Promise<n
       })
 
       return result.embeddings?.[0]?.values || []
-    } catch (error) {
-      const isRetryable =
-        error instanceof Error &&
-        (error.message.includes('503') ||
-          error.message.includes('overloaded') ||
-          error.message.includes('UNAVAILABLE'))
+    }
+    catch (error) {
+      const isRetryable
+        = error instanceof Error
+          && (error.message.includes('503')
+            || error.message.includes('overloaded')
+            || error.message.includes('UNAVAILABLE'))
 
       if (isRetryable && attempt < MAX_RETRIES) {
         console.warn(`Embedding attempt ${attempt} failed, retrying in ${RETRY_DELAY_MS}ms...`)
@@ -52,7 +54,7 @@ export async function generateEmbedding(apiKey: string, text: string): Promise<n
  */
 export async function generateEmbeddings(
   apiKey: string,
-  texts: string[]
+  texts: string[],
 ): Promise<number[][]> {
   const ai = new GoogleGenAI({ apiKey })
   const embeddings: number[][] = []
@@ -67,7 +69,7 @@ export async function generateEmbeddings(
           contents: text,
         })
         return result.embeddings?.[0]?.values || []
-      })
+      }),
     )
     embeddings.push(...batchResults)
   }
@@ -99,7 +101,7 @@ export function chunkText(text: string, chunkSize = CHUNK_SIZE, overlap = CHUNK_
  */
 export async function extractTextFromPdf(
   apiKey: string,
-  pdfBuffer: ArrayBuffer
+  pdfBuffer: ArrayBuffer,
 ): Promise<{ text: string }> {
   const ai = new GoogleGenAI({ apiKey })
   const base64Data = Buffer.from(pdfBuffer).toString('base64')
@@ -124,12 +126,13 @@ export async function extractTextFromPdf(
       return {
         text: response.text || '',
       }
-    } catch (error) {
-      const isRetryable =
-        error instanceof Error &&
-        (error.message.includes('503') ||
-          error.message.includes('overloaded') ||
-          error.message.includes('UNAVAILABLE'))
+    }
+    catch (error) {
+      const isRetryable
+        = error instanceof Error
+          && (error.message.includes('503')
+            || error.message.includes('overloaded')
+            || error.message.includes('UNAVAILABLE'))
 
       if (isRetryable && attempt < MAX_RETRIES) {
         console.warn(`PDF extraction attempt ${attempt} failed, retrying in ${RETRY_DELAY_MS}ms...`)

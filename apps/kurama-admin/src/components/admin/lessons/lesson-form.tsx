@@ -1,9 +1,17 @@
-import { useState, useEffect } from 'react'
+import type { CreateLessonInput } from '@/lib/schemas'
 import { useQuery } from '@tanstack/react-query'
+import { Loader2 } from 'lucide-react'
+import { motion } from 'motion/react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -12,17 +20,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { createLessonSchema, type CreateLessonInput } from '@/lib/schemas'
+import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
 import { getGradesSimple, getSeriesSimple } from '@/core/functions/users'
-import { Loader2 } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { createLessonSchema } from '@/lib/schemas'
 
 interface Subject {
   id: number
@@ -55,7 +56,8 @@ function loadStoredFormData(): StoredFormData | null {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
     return stored ? JSON.parse(stored) : null
-  } catch {
+  }
+  catch {
     return null
   }
 }
@@ -63,7 +65,8 @@ function loadStoredFormData(): StoredFormData | null {
 function saveFormData(data: StoredFormData) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-  } catch {
+  }
+  catch {
     // Ignore storage errors
   }
 }
@@ -77,15 +80,44 @@ export function LessonForm({
   isEditing,
   isLoading,
 }: LessonFormProps) {
-  const [subjectId, setSubjectId] = useState<number>(0)
-  const [gradeId, setGradeId] = useState<number | undefined>()
-  const [seriesId, setSeriesId] = useState<number | undefined>()
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [difficulty, setDifficulty] = useState<string>('')
-  const [estimatedDuration, setEstimatedDuration] = useState<number | undefined>()
-  const [isPublished, setIsPublished] = useState(false)
-  const [displayOrder, setDisplayOrder] = useState(0)
+  const [initialState] = useState(() => {
+    if (defaultValues) { // Editing mode: use provided values
+      return {
+        subjectId: defaultValues.subjectId || 0,
+        gradeId: defaultValues.gradeId,
+        seriesId: defaultValues.seriesId,
+        title: defaultValues.title || '',
+        description: defaultValues.description || '',
+        difficulty: defaultValues.difficulty || '',
+        estimatedDuration: defaultValues.estimatedDuration,
+        isPublished: defaultValues.isPublished || false,
+        displayOrder: defaultValues.displayOrder || 0,
+      }
+    }
+    // Creating mode: restore from localStorage (except title/description)
+    const stored = loadStoredFormData()
+    return {
+      subjectId: stored?.subjectId || 0,
+      gradeId: stored?.gradeId,
+      seriesId: stored?.seriesId,
+      title: '', // Always start with empty title
+      description: '', // Always start with empty description
+      difficulty: stored?.difficulty || '',
+      estimatedDuration: stored?.estimatedDuration,
+      isPublished: stored?.isPublished || false,
+      displayOrder: 0,
+    }
+  })
+
+  const [subjectId, setSubjectId] = useState<number>(initialState.subjectId)
+  const [gradeId, setGradeId] = useState<number | undefined>(initialState.gradeId)
+  const [seriesId, setSeriesId] = useState<number | undefined>(initialState.seriesId)
+  const [title, setTitle] = useState(initialState.title)
+  const [description, setDescription] = useState(initialState.description)
+  const [difficulty, setDifficulty] = useState<string>(initialState.difficulty)
+  const [estimatedDuration, setEstimatedDuration] = useState<number | undefined>(initialState.estimatedDuration)
+  const [isPublished, setIsPublished] = useState(initialState.isPublished)
+  const [displayOrder, setDisplayOrder] = useState(initialState.displayOrder)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Fetch grades and series
@@ -102,54 +134,8 @@ export function LessonForm({
   })
 
   // Check if selected grade is Lycée (needs series)
-  const selectedGrade = gradesData?.find((g) => g.id === gradeId)
+  const selectedGrade = gradesData?.find(g => g.id === gradeId)
   const isLycee = selectedGrade?.category === 'LYCEE'
-
-  useEffect(() => {
-    if (open && defaultValues) {
-      // Editing mode: use provided values
-      setSubjectId(defaultValues.subjectId || 0)
-      setGradeId(defaultValues.gradeId)
-      setSeriesId(defaultValues.seriesId)
-      setTitle(defaultValues.title || '')
-      setDescription(defaultValues.description || '')
-      setDifficulty(defaultValues.difficulty || '')
-      setEstimatedDuration(defaultValues.estimatedDuration)
-      setIsPublished(defaultValues.isPublished || false)
-      setDisplayOrder(defaultValues.displayOrder || 0)
-    } else if (open && !isEditing) {
-      // Creating mode: restore from localStorage (except title/description)
-      const stored = loadStoredFormData()
-      if (stored) {
-        setSubjectId(stored.subjectId || 0)
-        setGradeId(stored.gradeId)
-        setSeriesId(stored.seriesId)
-        setDifficulty(stored.difficulty || '')
-        setEstimatedDuration(stored.estimatedDuration)
-        setIsPublished(stored.isPublished || false)
-      }
-      setTitle('')
-      setDescription('')
-    } else if (!open) {
-      setSubjectId(0)
-      setGradeId(undefined)
-      setSeriesId(undefined)
-      setTitle('')
-      setDescription('')
-      setDifficulty('')
-      setEstimatedDuration(undefined)
-      setIsPublished(false)
-      setDisplayOrder(0)
-      setErrors({})
-    }
-  }, [open, defaultValues, isEditing])
-
-  // Clear series when grade changes to non-Lycée
-  useEffect(() => {
-    if (!isLycee && seriesId) {
-      setSeriesId(undefined)
-    }
-  }, [isLycee, seriesId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -198,13 +184,13 @@ export function LessonForm({
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
+      transition: { staggerChildren: 0.1 },
+    },
   }
 
   const item = {
     hidden: { opacity: 0, y: 10 },
-    show: { opacity: 1, y: 0 }
+    show: { opacity: 1, y: 0 },
   }
 
   return (
@@ -231,15 +217,19 @@ export function LessonForm({
             <Label htmlFor="subjectId">Matière</Label>
             <Select
               value={subjectId?.toString() || ''}
-              onValueChange={(value) => setSubjectId(parseInt(value))}
+              onValueChange={value => setSubjectId(Number.parseInt(value))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner une matière" />
               </SelectTrigger>
               <SelectContent>
-                {subjects.map((subject) => (
+                {subjects.map(subject => (
                   <SelectItem key={subject.id} value={subject.id.toString()}>
-                    {subject.name} ({subject.abbreviation})
+                    {subject.name}
+                    {' '}
+                    (
+                    {subject.abbreviation}
+                    )
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -252,14 +242,21 @@ export function LessonForm({
               <Label htmlFor="gradeId">Niveau (optionnel)</Label>
               <Select
                 value={gradeId?.toString() || 'none'}
-                onValueChange={(value) => setGradeId(value === 'none' ? undefined : parseInt(value))}
+                onValueChange={(value) => {
+                  const newGradeId = value === 'none' ? undefined : Number.parseInt(value)
+                  setGradeId(newGradeId)
+                  const selected = gradesData?.find(g => g.id === newGradeId)
+                  if (selected?.category !== 'LYCEE') {
+                    setSeriesId(undefined)
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner un niveau" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Aucun</SelectItem>
-                  {gradesData?.map((grade) => (
+                  {gradesData?.map(grade => (
                     <SelectItem key={grade.id} value={grade.id.toString()}>
                       {grade.name}
                     </SelectItem>
@@ -273,14 +270,14 @@ export function LessonForm({
                 <Label htmlFor="seriesId">Série</Label>
                 <Select
                   value={seriesId?.toString() || 'none'}
-                  onValueChange={(value) => setSeriesId(value === 'none' ? undefined : parseInt(value))}
+                  onValueChange={value => setSeriesId(value === 'none' ? undefined : Number.parseInt(value))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner une série" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Aucune</SelectItem>
-                    {seriesData?.map((s) => (
+                    {seriesData?.map(s => (
                       <SelectItem key={s.id} value={s.id.toString()}>
                         {s.name}
                       </SelectItem>
@@ -297,7 +294,7 @@ export function LessonForm({
               id="title"
               placeholder="Introduction aux équations"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={e => setTitle(e.target.value)}
             />
             {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
           </motion.div>
@@ -308,7 +305,7 @@ export function LessonForm({
               id="description"
               placeholder="Description de la leçon..."
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={e => setDescription(e.target.value)}
             />
           </motion.div>
 
@@ -335,7 +332,7 @@ export function LessonForm({
                 min={1}
                 placeholder="15"
                 value={estimatedDuration || ''}
-                onChange={(e) => setEstimatedDuration(e.target.value ? parseInt(e.target.value) : undefined)}
+                onChange={e => setEstimatedDuration(e.target.value ? Number.parseInt(e.target.value) : undefined)}
               />
             </div>
           </motion.div>
@@ -348,7 +345,7 @@ export function LessonForm({
               min={0}
               placeholder="0"
               value={displayOrder || ''}
-              onChange={(e) => setDisplayOrder(e.target.value ? parseInt(e.target.value) : 0)}
+              onChange={e => setDisplayOrder(e.target.value ? Number.parseInt(e.target.value) : 0)}
             />
             <p className="text-sm text-muted-foreground">
               Position de la leçon dans la liste (0 = premier)

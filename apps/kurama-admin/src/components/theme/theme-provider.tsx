@@ -28,7 +28,8 @@ export function ThemeProvider({
     try {
       const stored = localStorage.getItem(storageKey) as Theme
       return stored || defaultTheme
-    } catch {
+    }
+    catch {
       return defaultTheme
     }
   })
@@ -48,7 +49,8 @@ export function ThemeProvider({
     (newTheme: Theme) => {
       try {
         localStorage.setItem(storageKey, newTheme)
-      } catch {
+      }
+      catch {
         // Ignore localStorage errors
       }
       setThemeState(newTheme)
@@ -58,7 +60,8 @@ export function ThemeProvider({
 
   const applyTheme = React.useCallback(
     (targetTheme: 'light' | 'dark' | undefined) => {
-      if (!targetTheme || typeof document === 'undefined') return
+      if (!targetTheme || typeof document === 'undefined')
+        return
 
       const root = document.documentElement
 
@@ -70,7 +73,7 @@ export function ThemeProvider({
           ),
         )
         document.head.appendChild(css)
-          ; (() => window.getComputedStyle(document.body))()
+        ; (() => window.getComputedStyle(document.body))()
         setTimeout(() => {
           document.head.removeChild(css)
         }, 1)
@@ -79,7 +82,8 @@ export function ThemeProvider({
       if (attribute === 'class') {
         root.classList.remove('light', 'dark')
         root.classList.add(targetTheme)
-      } else {
+      }
+      else {
         root.setAttribute(attribute, targetTheme)
       }
     },
@@ -93,7 +97,8 @@ export function ThemeProvider({
   }, [resolvedTheme, applyTheme, isMounted])
 
   React.useEffect(() => {
-    if (!enableSystem || typeof window === 'undefined') return
+    if (!enableSystem || typeof window === 'undefined')
+      return
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
 

@@ -1,9 +1,10 @@
+import type { UserFilters } from '@/lib/schemas'
+import { and, desc, eq, like, or, sql } from '@kurama/data-ops/database/drizzle-orm'
+import { authUser, grades, series, studySessions, userProfiles } from '@kurama/data-ops/drizzle/schema'
 import { createServerFn } from '@tanstack/react-start'
-import { eq, like, sql, desc, and, or } from '@kurama/data-ops/database/drizzle-orm'
-import { authUser, userProfiles, grades, series, studySessions } from '@kurama/data-ops/drizzle/schema'
+import { getDb, initAdminDb } from '@/lib/db'
+import { userFiltersSchema } from '@/lib/schemas'
 import { adminMiddleware } from '../middleware/admin-auth'
-import { initAdminDb, getDb } from '@/lib/db'
-import { userFiltersSchema, type UserFilters } from '@/lib/schemas'
 
 // Get users with filters
 export const getUsers = createServerFn({ method: 'GET' })
@@ -18,9 +19,12 @@ export const getUsers = createServerFn({ method: 'GET' })
 
     // Build where conditions for profiles
     const profileConditions = []
-    if (userType) profileConditions.push(eq(userProfiles.userType, userType))
-    if (gradeId) profileConditions.push(eq(userProfiles.gradeId, gradeId))
-    if (isCompleted !== undefined) profileConditions.push(eq(userProfiles.isCompleted, isCompleted))
+    if (userType)
+      profileConditions.push(eq(userProfiles.userType, userType))
+    if (gradeId)
+      profileConditions.push(eq(userProfiles.gradeId, gradeId))
+    if (isCompleted !== undefined)
+      profileConditions.push(eq(userProfiles.isCompleted, isCompleted))
 
     // Build where conditions for users (search)
     const userConditions = []
@@ -28,8 +32,8 @@ export const getUsers = createServerFn({ method: 'GET' })
       userConditions.push(
         or(
           like(authUser.name, `%${search}%`),
-          like(authUser.email, `%${search}%`)
-        )
+          like(authUser.email, `%${search}%`),
+        ),
       )
     }
 
@@ -65,8 +69,8 @@ export const getUsers = createServerFn({ method: 'GET' })
       .where(
         and(
           ...(userConditions.length > 0 ? userConditions : []),
-          ...(profileConditions.length > 0 ? profileConditions : [])
-        )
+          ...(profileConditions.length > 0 ? profileConditions : []),
+        ),
       )
       .orderBy(desc(authUser.createdAt))
       .limit(limit)
@@ -80,8 +84,8 @@ export const getUsers = createServerFn({ method: 'GET' })
       .where(
         and(
           ...(userConditions.length > 0 ? userConditions : []),
-          ...(profileConditions.length > 0 ? profileConditions : [])
-        )
+          ...(profileConditions.length > 0 ? profileConditions : []),
+        ),
       )
 
     const count = countResult[0]?.count ?? 0
@@ -220,7 +224,6 @@ export const getSeriesSimple = createServerFn({ method: 'GET' })
     return seriesList
   })
 
-
 // Get user detail (alias for getUser with profile info)
 export const getUserDetail = createServerFn({ method: 'GET' })
   .middleware([adminMiddleware])
@@ -272,7 +275,7 @@ export const getUserDetail = createServerFn({ method: 'GET' })
 // Get user study sessions
 export const getUserSessions = createServerFn({ method: 'GET' })
   .middleware([adminMiddleware])
-  .inputValidator((data: { userId: string; limit?: number }) => data)
+  .inputValidator((data: { userId: string, limit?: number }) => data)
   .handler(async ({ data }) => {
     initAdminDb()
     const db = getDb()

@@ -1,3 +1,6 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Table,
   TableBody,
@@ -6,9 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { generateUUID } from '@/utils/generateUUID'
 
 interface Column<T> {
   key: string
@@ -43,31 +44,36 @@ export function DataTable<T>({
   isLoading,
   emptyMessage = 'Aucune donnée',
   selectable = false,
-  selectedIds = new Set(),
+  selectedIds: selectedIdsProp,
   onSelectionChange,
   getRowId,
 }: DataTableProps<T>) {
+  const selectedIds = selectedIdsProp || new Set()
   const allPageIds = selectable && getRowId ? data.map(getRowId) : []
-  const allSelected = allPageIds.length > 0 && allPageIds.every((id) => selectedIds.has(id))
-  const someSelected = allPageIds.some((id) => selectedIds.has(id))
+  const allSelected = allPageIds.length > 0 && allPageIds.every(id => selectedIds.has(id))
+  const someSelected = allPageIds.some(id => selectedIds.has(id))
 
   const handleSelectAll = (checked: boolean) => {
-    if (!onSelectionChange) return
+    if (!onSelectionChange)
+      return
     const newSelection = new Set(selectedIds)
     if (checked) {
-      allPageIds.forEach((id) => newSelection.add(id))
-    } else {
-      allPageIds.forEach((id) => newSelection.delete(id))
+      allPageIds.forEach(id => newSelection.add(id))
+    }
+    else {
+      allPageIds.forEach(id => newSelection.delete(id))
     }
     onSelectionChange(newSelection)
   }
 
   const handleSelectRow = (id: number, checked: boolean) => {
-    if (!onSelectionChange) return
+    if (!onSelectionChange)
+      return
     const newSelection = new Set(selectedIds)
     if (checked) {
       newSelection.add(id)
-    } else {
+    }
+    else {
       newSelection.delete(id)
     }
     onSelectionChange(newSelection)
@@ -92,7 +98,7 @@ export function DataTable<T>({
                     />
                   </TableHead>
                 )}
-                {columns.map((column) => (
+                {columns.map(column => (
                   <TableHead key={column.key} className={column.className}>
                     {column.header}
                   </TableHead>
@@ -100,42 +106,46 @@ export function DataTable<T>({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={colSpan} className="h-24 text-center">
-                    Chargement...
-                  </TableCell>
-                </TableRow>
-              ) : data.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={colSpan} className="h-24 text-center">
-                    {emptyMessage}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                data.map((item, index) => {
-                  const rowId = getRowId?.(item)
-                  const isSelected = rowId !== undefined && selectedIds.has(rowId)
-                  return (
-                    <TableRow key={index} data-state={isSelected ? 'selected' : undefined}>
-                      {selectable && rowId !== undefined && (
-                        <TableCell className="w-12">
-                          <Checkbox
-                            checked={isSelected}
-                            onCheckedChange={(checked) => handleSelectRow(rowId, !!checked)}
-                            aria-label="Sélectionner la ligne"
-                          />
-                        </TableCell>
-                      )}
-                      {columns.map((column) => (
-                        <TableCell key={column.key} className={column.className}>
-                          {column.cell(item)}
-                        </TableCell>
-                      ))}
+              {isLoading
+                ? (
+                    <TableRow>
+                      <TableCell colSpan={colSpan} className="h-24 text-center">
+                        Chargement...
+                      </TableCell>
                     </TableRow>
                   )
-                })
-              )}
+                : data.length === 0
+                  ? (
+                      <TableRow>
+                        <TableCell colSpan={colSpan} className="h-24 text-center">
+                          {emptyMessage}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  : (
+                      data.map((item) => {
+                        const rowId = getRowId?.(item)
+                        const isSelected = rowId !== undefined && selectedIds.has(rowId)
+                        return (
+                          <TableRow key={generateUUID()} data-state={isSelected ? 'selected' : undefined}>
+                            {selectable && rowId !== undefined && (
+                              <TableCell className="w-12">
+                                <Checkbox
+                                  checked={isSelected}
+                                  onCheckedChange={checked => handleSelectRow(rowId, !!checked)}
+                                  aria-label="Sélectionner la ligne"
+                                />
+                              </TableCell>
+                            )}
+                            {columns.map(column => (
+                              <TableCell key={column.key} className={column.className}>
+                                {column.cell(item)}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        )
+                      })
+                    )}
             </TableBody>
           </Table>
         </div>
@@ -143,10 +153,23 @@ export function DataTable<T>({
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-sm text-muted-foreground">
-          {selectable && selectedIds.size > 0 ? (
-            <span>{selectedIds.size} sélectionné{selectedIds.size > 1 ? 's' : ''} · </span>
-          ) : null}
-          {total} résultat{total > 1 ? 's' : ''}
+          {selectable && selectedIds.size > 0
+            ? (
+                <span>
+                  {selectedIds.size}
+                  {' '}
+                  sélectionné
+                  {selectedIds.size > 1 ? 's' : ''}
+                  {' '}
+                  ·
+                  {' '}
+                </span>
+              )
+            : null}
+          {total}
+          {' '}
+          résultat
+          {total > 1 ? 's' : ''}
         </p>
         {totalPages > 1 && (
           <div className="flex items-center gap-2">
@@ -160,7 +183,13 @@ export function DataTable<T>({
               Précédent
             </Button>
             <span className="text-sm">
-              Page {page} sur {totalPages}
+              Page
+              {' '}
+              {page}
+              {' '}
+              sur
+              {' '}
+              {totalPages}
             </span>
             <Button
               variant="outline"

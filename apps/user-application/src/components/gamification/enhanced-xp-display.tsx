@@ -1,5 +1,5 @@
-import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, Clock, Flame, Star, Target, Zap } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'

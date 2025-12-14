@@ -1,37 +1,38 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
+import { createFileRoute } from '@tanstack/react-router'
 import {
-  Users,
-  GraduationCap,
-  BookOpen,
-  Layers,
   Activity,
-  TrendingUp,
-  Clock,
+  BookOpen,
   CheckCircle,
+  Clock,
+  GraduationCap,
+  Layers,
+  TrendingUp,
+  Users,
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
+import { motion } from 'motion/react'
 import {
-  getDashboardStats,
-  getContentStats,
-  getRecentActivity,
-  getUserGrowth,
-  getSessionGrowth,
-} from '@/core/functions/analytics'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
   Area,
   AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  getContentStats,
+  getDashboardStats,
+  getRecentActivity,
+  getSessionGrowth,
+  getUserGrowth,
+} from '@/core/functions/analytics'
+import { generateUUID } from '@/utils/generateUUID'
 
 export const Route = createFileRoute('/_admin/dashboard')({
   component: DashboardPage,
@@ -42,17 +43,17 @@ const container = {
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 }
 
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
+  show: { opacity: 1, y: 0 },
 }
 
-type StatCardProps = {
+interface StatCardProps {
   title: string
   value: string | number
   description?: string
@@ -84,7 +85,10 @@ function StatCard({ title, value, description, icon, trend }: StatCardProps) {
           {trend && (
             <div className="flex items-center gap-1 mt-2">
               <TrendingUp className="h-3 w-3 text-success" />
-              <span className="text-xs font-medium text-success">+{trend.value}</span>
+              <span className="text-xs font-medium text-success">
+                +
+                {trend.value}
+              </span>
               <span className="text-xs text-muted-foreground">{trend.label}</span>
             </div>
           )}
@@ -109,7 +113,7 @@ function StatCardSkeleton() {
   )
 }
 
-type SubjectStat = {
+interface SubjectStat {
   id: number
   name: string
   abbreviation: string
@@ -118,7 +122,7 @@ type SubjectStat = {
   publishedLessonCount: number
 }
 
-type RecentSession = {
+interface RecentSession {
   id: number
   userId: string
   userName: string | null
@@ -177,71 +181,75 @@ function DashboardPage() {
 
       {/* Main Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {statsLoading ? (
-          <>
-            <StatCardSkeleton />
-            <StatCardSkeleton />
-            <StatCardSkeleton />
-            <StatCardSkeleton />
-          </>
-        ) : (
-          <>
-            <StatCard
-              title="Utilisateurs"
-              value={stats?.users.total || 0}
-              description={`${stats?.users.students || 0} élèves, ${stats?.users.parents || 0} parents`}
-              icon={<Users className="h-4 w-4" />}
-              trend={
-                stats?.users.newThisWeek
-                  ? { value: stats.users.newThisWeek, label: 'cette semaine' }
-                  : undefined
-              }
-            />
-            <StatCard
-              title="Leçons"
-              value={stats?.content.lessons || 0}
-              description={`${stats?.content.publishedLessons || 0} publiées`}
-              icon={<BookOpen className="h-4 w-4" />}
-            />
-            <StatCard
-              title="Cartes"
-              value={stats?.content.cards || 0}
-              description={`${stats?.content.subjects || 0} matières`}
-              icon={<Layers className="h-4 w-4" />}
-            />
-            <StatCard
-              title="Sessions d'étude"
-              value={stats?.sessions.total || 0}
-              description={`${stats?.sessions.today || 0} aujourd'hui`}
-              icon={<Activity className="h-4 w-4" />}
-            />
-          </>
-        )}
+        {statsLoading
+          ? (
+              <>
+                <StatCardSkeleton />
+                <StatCardSkeleton />
+                <StatCardSkeleton />
+                <StatCardSkeleton />
+              </>
+            )
+          : (
+              <>
+                <StatCard
+                  title="Utilisateurs"
+                  value={stats?.users.total || 0}
+                  description={`${stats?.users.students || 0} élèves, ${stats?.users.parents || 0} parents`}
+                  icon={<Users className="h-4 w-4" />}
+                  trend={
+                    stats?.users.newThisWeek
+                      ? { value: stats.users.newThisWeek, label: 'cette semaine' }
+                      : undefined
+                  }
+                />
+                <StatCard
+                  title="Leçons"
+                  value={stats?.content.lessons || 0}
+                  description={`${stats?.content.publishedLessons || 0} publiées`}
+                  icon={<BookOpen className="h-4 w-4" />}
+                />
+                <StatCard
+                  title="Cartes"
+                  value={stats?.content.cards || 0}
+                  description={`${stats?.content.subjects || 0} matières`}
+                  icon={<Layers className="h-4 w-4" />}
+                />
+                <StatCard
+                  title="Sessions d'étude"
+                  value={stats?.sessions.total || 0}
+                  description={`${stats?.sessions.today || 0} aujourd'hui`}
+                  icon={<Activity className="h-4 w-4" />}
+                />
+              </>
+            )}
       </div>
 
       {/* Secondary Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {statsLoading ? (
-          <>
-            <StatCardSkeleton />
-            <StatCardSkeleton />
-          </>
-        ) : (
-          <>
-            <StatCard
-              title="Profils complétés"
-              value={`${stats?.users.total ? Math.round((stats.users.completedProfiles / stats.users.total) * 100) : 0}%`}
-              description="des utilisateurs inscrits"
-              icon={<CheckCircle className="h-4 w-4" />}
-            />
-            <StatCard
-              title="Matières actives"
-              value={stats?.content.subjects || 0}
-              description="Matières avec contenu"
-              icon={<GraduationCap className="h-4 w-4" />}
-            />
-          </>
-        )}
+        {statsLoading
+          ? (
+              <>
+                <StatCardSkeleton />
+                <StatCardSkeleton />
+              </>
+            )
+          : (
+              <>
+                <StatCard
+                  title="Profils complétés"
+                  value={`${stats?.users.total ? Math.round((stats.users.completedProfiles / stats.users.total) * 100) : 0}%`}
+                  description="des utilisateurs inscrits"
+                  icon={<CheckCircle className="h-4 w-4" />}
+                />
+                <StatCard
+                  title="Matières actives"
+                  value={stats?.content.subjects || 0}
+                  description="Matières avec contenu"
+                  icon={<GraduationCap className="h-4 w-4" />}
+                />
+              </>
+            )}
       </div>
 
       {/* Charts */}
@@ -255,69 +263,71 @@ function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {userGrowthLoading ? (
-              <Skeleton className="h-[200px] w-full" />
-            ) : userGrowth && userGrowth.length > 0 ? (
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={userGrowth}>
-                  <defs>
-                    <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" vertical={false} />
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={(value) =>
-                      new Date(value).toLocaleDateString('fr-FR', {
-                        day: 'numeric',
-                        month: 'short',
-                      })
-                    }
-                    className="text-xs text-muted-foreground"
-                    axisLine={false}
-                    tickLine={false}
-                    tickMargin={10}
-                  />
-                  <YAxis
-                    className="text-xs text-muted-foreground"
-                    axisLine={false}
-                    tickLine={false}
-                    tickMargin={10}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--popover))',
-                      borderRadius: 'var(--radius)',
-                      border: '1px solid hsl(var(--border))',
-                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-                    }}
-                    labelStyle={{ color: 'hsl(var(--muted-foreground))' }}
-                    labelFormatter={(value) =>
-                      new Date(value).toLocaleDateString('fr-FR', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })
-                    }
-                    formatter={(value: number) => [value, 'Inscriptions']}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="count"
-                    stroke="hsl(var(--primary))"
-                    fillOpacity={1}
-                    fill="url(#colorUsers)"
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                Aucune donnée disponible
-              </p>
-            )}
+            {userGrowthLoading
+              ? (
+                  <Skeleton className="h-[200px] w-full" />
+                )
+              : userGrowth && userGrowth.length > 0
+                ? (
+                    <ResponsiveContainer width="100%" height={200}>
+                      <AreaChart data={userGrowth}>
+                        <defs>
+                          <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" vertical={false} />
+                        <XAxis
+                          dataKey="date"
+                          tickFormatter={value =>
+                            new Date(value).toLocaleDateString('fr-FR', {
+                              day: 'numeric',
+                              month: 'short',
+                            })}
+                          className="text-xs text-muted-foreground"
+                          axisLine={false}
+                          tickLine={false}
+                          tickMargin={10}
+                        />
+                        <YAxis
+                          className="text-xs text-muted-foreground"
+                          axisLine={false}
+                          tickLine={false}
+                          tickMargin={10}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'hsl(var(--popover))',
+                            borderRadius: 'var(--radius)',
+                            border: '1px solid hsl(var(--border))',
+                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                          }}
+                          labelStyle={{ color: 'hsl(var(--muted-foreground))' }}
+                          labelFormatter={value =>
+                            new Date(value).toLocaleDateString('fr-FR', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                            })}
+                          formatter={(value: number) => [value, 'Inscriptions']}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="count"
+                          stroke="hsl(var(--primary))"
+                          fillOpacity={1}
+                          fill="url(#colorUsers)"
+                          strokeWidth={2}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  )
+                : (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      Aucune donnée disponible
+                    </p>
+                  )}
           </CardContent>
         </Card>
 
@@ -330,65 +340,67 @@ function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {sessionGrowthLoading ? (
-              <Skeleton className="h-[200px] w-full" />
-            ) : sessionGrowth && sessionGrowth.length > 0 ? (
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={sessionGrowth}>
-                  <defs>
-                    <linearGradient id="colorSessions" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
-                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" vertical={false} />
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={(value) =>
-                      new Date(value).toLocaleDateString('fr-FR', {
-                        day: 'numeric',
-                        month: 'short',
-                      })
-                    }
-                    className="text-xs text-muted-foreground"
-                    axisLine={false}
-                    tickLine={false}
-                    tickMargin={10}
-                  />
-                  <YAxis
-                    className="text-xs text-muted-foreground"
-                    axisLine={false}
-                    tickLine={false}
-                    tickMargin={10}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--popover))',
-                      borderRadius: 'var(--radius)',
-                      border: '1px solid hsl(var(--border))',
-                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-                    }}
-                    labelStyle={{ color: 'hsl(var(--muted-foreground))' }}
-                    labelFormatter={(value) =>
-                      new Date(value).toLocaleDateString('fr-FR', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })
-                    }
-                    formatter={(value: number, name: string) => [
-                      value,
-                      name === 'count' ? 'Sessions' : 'Cartes révisées',
-                    ]}
-                  />
-                  <Bar dataKey="count" fill="url(#colorSessions)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                Aucune donnée disponible
-              </p>
-            )}
+            {sessionGrowthLoading
+              ? (
+                  <Skeleton className="h-[200px] w-full" />
+                )
+              : sessionGrowth && sessionGrowth.length > 0
+                ? (
+                    <ResponsiveContainer width="100%" height={200}>
+                      <BarChart data={sessionGrowth}>
+                        <defs>
+                          <linearGradient id="colorSessions" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
+                            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" vertical={false} />
+                        <XAxis
+                          dataKey="date"
+                          tickFormatter={value =>
+                            new Date(value).toLocaleDateString('fr-FR', {
+                              day: 'numeric',
+                              month: 'short',
+                            })}
+                          className="text-xs text-muted-foreground"
+                          axisLine={false}
+                          tickLine={false}
+                          tickMargin={10}
+                        />
+                        <YAxis
+                          className="text-xs text-muted-foreground"
+                          axisLine={false}
+                          tickLine={false}
+                          tickMargin={10}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'hsl(var(--popover))',
+                            borderRadius: 'var(--radius)',
+                            border: '1px solid hsl(var(--border))',
+                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                          }}
+                          labelStyle={{ color: 'hsl(var(--muted-foreground))' }}
+                          labelFormatter={value =>
+                            new Date(value).toLocaleDateString('fr-FR', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                            })}
+                          formatter={(value: number, name: string) => [
+                            value,
+                            name === 'count' ? 'Sessions' : 'Cartes révisées',
+                          ]}
+                        />
+                        <Bar dataKey="count" fill="url(#colorSessions)" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )
+                : (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      Aucune donnée disponible
+                    </p>
+                  )}
           </CardContent>
         </Card>
       </motion.div>
@@ -403,47 +415,51 @@ function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {contentLoading ? (
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-16" />
+            {contentLoading
+              ? (
+                  <div className="space-y-3">
+                    {[...Array.from({ length: 5 })].map(() => (
+                      <div key={generateUUID()} className="flex items-center justify-between">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-4 w-16" />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            ) : contentStats && contentStats.length > 0 ? (
-              <div className="space-y-4">
-                {contentStats.map((subject: SubjectStat) => (
-                  <div
-                    key={subject.id}
-                    className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
-                        {subject.abbreviation}
-                      </Badge>
-                      <span className="font-medium">{subject.name}</span>
+                )
+              : contentStats && contentStats.length > 0
+                ? (
+                    <div className="space-y-4">
+                      {contentStats.map((subject: SubjectStat) => (
+                        <div
+                          key={subject.id}
+                          className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                              {subject.abbreviation}
+                            </Badge>
+                            <span className="font-medium">{subject.name}</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <BookOpen className="h-3 w-3" />
+                              {subject.lessonCount}
+                            </span>
+                            <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+                            <span className="flex items-center gap-1">
+                              <Layers className="h-3 w-3" />
+                              {subject.cardCount}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <BookOpen className="h-3 w-3" />
-                        {subject.lessonCount}
-                      </span>
-                      <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                      <span className="flex items-center gap-1">
-                        <Layers className="h-3 w-3" />
-                        {subject.cardCount}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                Aucune matière trouvée
-              </p>
-            )}
+                  )
+                : (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      Aucune matière trouvée
+                    </p>
+                  )}
           </CardContent>
         </Card>
 
@@ -456,55 +472,61 @@ function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {activityLoading ? (
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                    <div className="flex-1">
-                      <Skeleton className="h-4 w-32 mb-1" />
-                      <Skeleton className="h-3 w-24" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : recentActivity && recentActivity.length > 0 ? (
-              <div className="space-y-4">
-                {recentActivity.map((session: RecentSession) => (
-                  <div
-                    key={session.id}
-                    className="flex items-center gap-4 group cursor-default"
-                  >
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-                      <GraduationCap className="h-5 w-5 text-primary group-hover:text-primary-foreground transition-colors" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
-                        {session.userName || session.userEmail || 'Utilisateur'}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
-                        <span className="truncate max-w-[150px]">{session.lessonTitle || 'Leçon'}</span>
-                        <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                        {session.cardsReviewed} cartes
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-1 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-full">
-                        <Clock className="h-3 w-3" />
-                        {new Date(session.startedAt).toLocaleDateString('fr-FR', {
-                          day: 'numeric',
-                          month: 'short',
-                        })}
+            {activityLoading
+              ? (
+                  <div className="space-y-3">
+                    {[...Array.from({ length: 5 })].map(() => (
+                      <div key={generateUUID()} className="flex items-center gap-3">
+                        <Skeleton className="h-8 w-8 rounded-full" />
+                        <div className="flex-1">
+                          <Skeleton className="h-4 w-32 mb-1" />
+                          <Skeleton className="h-3 w-24" />
+                        </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                Aucune activité récente
-              </p>
-            )}
+                )
+              : recentActivity && recentActivity.length > 0
+                ? (
+                    <div className="space-y-4">
+                      {recentActivity.map((session: RecentSession) => (
+                        <div
+                          key={session.id}
+                          className="flex items-center gap-4 group cursor-default"
+                        >
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                            <GraduationCap className="h-5 w-5 text-primary group-hover:text-primary-foreground transition-colors" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
+                              {session.userName || session.userEmail || 'Utilisateur'}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
+                              <span className="truncate max-w-[150px]">{session.lessonTitle || 'Leçon'}</span>
+                              <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+                              {session.cardsReviewed}
+                              {' '}
+                              cartes
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-1 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-full">
+                              <Clock className="h-3 w-3" />
+                              {new Date(session.startedAt).toLocaleDateString('fr-FR', {
+                                day: 'numeric',
+                                month: 'short',
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                : (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      Aucune activité récente
+                    </p>
+                  )}
           </CardContent>
         </Card>
       </motion.div>

@@ -1,7 +1,8 @@
-import { Component, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import { AlertTriangle, RefreshCw } from 'lucide-react'
+import { Component } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertTriangle, RefreshCw } from 'lucide-react'
 
 interface ErrorBoundaryProps {
   children: ReactNode

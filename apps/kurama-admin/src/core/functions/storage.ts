@@ -1,7 +1,7 @@
 import process from 'node:process'
 
-import { eq, desc, and, sql } from '@kurama/data-ops/database/drizzle-orm'
-import { lessonsContentFile, lessonsContentChunks } from '@kurama/data-ops/drizzle/schema'
+import { and, desc, eq, sql } from '@kurama/data-ops/database/drizzle-orm'
+import { lessonsContentChunks, lessonsContentFile } from '@kurama/data-ops/drizzle/schema'
 import {
   generatePresignedUploadUrl,
   initR2,
@@ -31,7 +31,8 @@ function isValidAttachmentType(contentType: string): boolean {
 
 // Auto-initialize R2 from environment variables if available
 function ensureR2Initialized() {
-  if (isR2Configured()) return true
+  if (isR2Configured())
+    return true
 
   const accountId = process.env.R2_ACCOUNT_ID
   const accessKeyId = process.env.R2_ACCESS_KEY_ID
@@ -173,7 +174,8 @@ export const getLessonAttachments = createServerFn({ method: 'GET' })
             AND ${lessonsContentFile.gradeId} = ${data.gradeId}
             AND (${lessonsContentFile.seriesId} = ${data.seriesId} OR ${lessonsContentFile.seriesId} IS NULL)`)
           .orderBy(desc(lessonsContentFile.createdAt))
-      } else {
+      }
+      else {
         subjectWideAttachments = await db
           .select({
             id: lessonsContentFile.id,
@@ -384,10 +386,10 @@ export const getAvailableSubjectAttachments = createServerFn({ method: 'GET' })
               AND ${lessonsContentFile.gradeId} = ${data.gradeId}
               AND (${lessonsContentFile.seriesId} = ${data.seriesId} OR ${lessonsContentFile.seriesId} IS NULL)`
           : and(
-            eq(lessonsContentFile.isSubjectWide, true),
-            eq(lessonsContentFile.subjectId, data.subjectId),
-            eq(lessonsContentFile.gradeId, data.gradeId)
-          )
+              eq(lessonsContentFile.isSubjectWide, true),
+              eq(lessonsContentFile.subjectId, data.subjectId),
+              eq(lessonsContentFile.gradeId, data.gradeId),
+            ),
       )
       .orderBy(desc(lessonsContentFile.createdAt))
 
@@ -453,7 +455,8 @@ export const generateAttachmentEmbeddings = createServerFn({ method: 'POST' })
 
     for (let i = 0; i < chunks.length; i++) {
       const chunk = chunks[i]
-      if (!chunk) continue
+      if (!chunk)
+        continue
 
       // Generate embedding
       const embedding = await generateEmbedding(geminiApiKey, chunk)
@@ -463,7 +466,7 @@ export const generateAttachmentEmbeddings = createServerFn({ method: 'POST' })
         fileId: id,
         chunkText: chunk,
         chunkIndex: i,
-        embedding: embedding,
+        embedding,
         metadata: { totalChunks: chunks.length } as Record<string, unknown>,
       })
 

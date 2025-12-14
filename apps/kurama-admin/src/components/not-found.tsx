@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
-import { ArrowLeft, FileQuestion, Home, Search } from '@/lib/icons'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { ArrowLeft, FileQuestion, Home, Search } from '@/lib/icons'
 
 export function NotFound({ children }: { children?: React.ReactNode }) {
   return (

@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate, useParams } from '@tanstack/react-router'
-import { motion } from 'framer-motion'
 import { BookOpen, CheckCircle2, ChevronRight, Clock, Lock, Sparkles } from 'lucide-react'
-import { useEffect } from 'react'
+import { motion } from 'motion/react'
+import { useEffect, useMemo } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
 import { Badge } from '@/components/ui/badge'
 import { LogoLoader } from '@/components/ui/logo-loader'
@@ -34,7 +34,10 @@ function LessonsPage() {
     queryFn: () => getLessonsBySubject({ data: Number(subjectId) }),
   })
 
-  const subjectName = lessons?.[0]?.subject?.name || 'Leçons'
+  const subjectName = useMemo(
+    () => lessons?.[0]?.subject?.name || 'Leçons',
+    [lessons],
+  )
 
   // Animation variants
   const containerVariants = {

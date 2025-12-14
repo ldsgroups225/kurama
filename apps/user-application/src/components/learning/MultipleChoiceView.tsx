@@ -1,6 +1,6 @@
 import type { LearningCardProps } from './types'
 import { CheckCircle2, Star, Volume2, XCircle } from 'lucide-react'
-import { animate } from 'motion'
+import { animate } from 'motion/react'
 
 import { useEffect, useRef, useState } from 'react'
 

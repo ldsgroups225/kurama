@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import type { CreateSubjectInput } from '@/lib/schemas'
+import { Loader2 } from 'lucide-react'
+import { motion } from 'motion/react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
@@ -10,9 +10,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { createSubjectSchema, type CreateSubjectInput } from '@/lib/schemas'
-import { Loader2 } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { createSubjectSchema } from '@/lib/schemas'
 
 interface SubjectFormProps {
   open: boolean
@@ -31,26 +32,11 @@ export function SubjectForm({
   isEditing,
   isLoading,
 }: SubjectFormProps) {
-  const [name, setName] = useState('')
-  const [abbreviation, setAbbreviation] = useState('')
-  const [description, setDescription] = useState('')
-  const [displayOrder, setDisplayOrder] = useState(0)
+  const [name, setName] = useState(defaultValues?.name || '')
+  const [abbreviation, setAbbreviation] = useState(defaultValues?.abbreviation || '')
+  const [description, setDescription] = useState(defaultValues?.description || '')
+  const [displayOrder, setDisplayOrder] = useState(defaultValues?.displayOrder || 0)
   const [errors, setErrors] = useState<Record<string, string>>({})
-
-  useEffect(() => {
-    if (open && defaultValues) {
-      setName(defaultValues.name || '')
-      setAbbreviation(defaultValues.abbreviation || '')
-      setDescription(defaultValues.description || '')
-      setDisplayOrder(defaultValues.displayOrder || 0)
-    } else if (!open) {
-      setName('')
-      setAbbreviation('')
-      setDescription('')
-      setDisplayOrder(0)
-      setErrors({})
-    }
-  }, [open, defaultValues])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -84,13 +70,13 @@ export function SubjectForm({
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
+      transition: { staggerChildren: 0.1 },
+    },
   }
 
   const item = {
     hidden: { opacity: 0, y: 10 },
-    show: { opacity: 1, y: 0 }
+    show: { opacity: 1, y: 0 },
   }
 
   return (
@@ -119,7 +105,7 @@ export function SubjectForm({
               id="name"
               placeholder="Mathématiques"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={e => setName(e.target.value)}
             />
             {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
           </motion.div>
@@ -129,7 +115,7 @@ export function SubjectForm({
               id="abbreviation"
               placeholder="MATH"
               value={abbreviation}
-              onChange={(e) => setAbbreviation(e.target.value)}
+              onChange={e => setAbbreviation(e.target.value)}
             />
             {errors.abbreviation && <p className="text-sm text-destructive">{errors.abbreviation}</p>}
           </motion.div>
@@ -139,7 +125,7 @@ export function SubjectForm({
               id="description"
               placeholder="Description de la matière..."
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={e => setDescription(e.target.value)}
             />
           </motion.div>
           <motion.div variants={item} className="space-y-2">
@@ -149,7 +135,7 @@ export function SubjectForm({
               type="number"
               min={0}
               value={displayOrder}
-              onChange={(e) => setDisplayOrder(parseInt(e.target.value) || 0)}
+              onChange={e => setDisplayOrder(Number.parseInt(e.target.value) || 0)}
             />
           </motion.div>
           <motion.div variants={item} className="flex justify-end gap-2 pt-4">

@@ -1,11 +1,11 @@
 import type { ErrorComponentProps } from '@tanstack/react-router'
 import { Link, rootRouteId, useMatch, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
-import { AlertTriangle, ArrowLeft, Bug, ChevronDown, Home, Mail, RefreshCw } from '@/lib/icons'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { AlertTriangle, ArrowLeft, Bug, ChevronDown, Home, Mail, RefreshCw } from '@/lib/icons'
 
 export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
   const router = useRouter()
@@ -58,19 +58,21 @@ export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
               Try Again
             </Button>
 
-            {isRoot ? (
-              <Button variant="outline" asChild>
-                <Link to="/">
-                  <Home className="h-4 w-4" />
-                  Go to Home
-                </Link>
-              </Button>
-            ) : (
-              <Button variant="outline" onClick={() => window.history.back()}>
-                <ArrowLeft className="h-4 w-4" />
-                Go Back
-              </Button>
-            )}
+            {isRoot
+              ? (
+                  <Button variant="outline" asChild>
+                    <Link to="/">
+                      <Home className="h-4 w-4" />
+                      Go to Home
+                    </Link>
+                  </Button>
+                )
+              : (
+                  <Button variant="outline" onClick={() => window.history.back()}>
+                    <ArrowLeft className="h-4 w-4" />
+                    Go Back
+                  </Button>
+                )}
           </div>
 
           {hasStack && (

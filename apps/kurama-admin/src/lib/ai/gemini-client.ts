@@ -1,28 +1,29 @@
+import type { LessonPlanPromptParams } from './prompts'
 import { GoogleGenAI, Type } from '@google/genai'
 import {
-  getLessonPlanPrompt,
-  getCompleteCardPrompt,
-  getRAGCardPrompt,
-  type LessonPlanPromptParams,
-} from './prompts'
-import {
-  GEMINI_MODEL,
-  GEMINI_EMBEDDING_MODEL,
   AI_CONFIG,
-  SIMILARITY_THRESHOLDS,
   FUNCTION_CALLING_CONFIG,
+  GEMINI_EMBEDDING_MODEL,
+  GEMINI_MODEL,
+  SIMILARITY_THRESHOLDS,
 } from './constants'
+import {
+  getCompleteCardPrompt,
+  getLessonPlanPrompt,
+  getRAGCardPrompt,
+
+} from './prompts'
 
 // Re-export constants for convenience
 export {
-  GEMINI_MODEL,
-  GEMINI_EMBEDDING_MODEL,
   AI_CONFIG,
+  CARD_GENERATION_DEFAULTS,
+  FUNCTION_CALLING_CONFIG,
+  GEMINI_EMBEDDING_MODEL,
+  GEMINI_MODEL,
+  LESSON_PLAN_DEFAULTS,
   RAG_THRESHOLDS,
   SIMILARITY_THRESHOLDS,
-  FUNCTION_CALLING_CONFIG,
-  CARD_GENERATION_DEFAULTS,
-  LESSON_PLAN_DEFAULTS,
 } from './constants'
 
 // Types for AI responses
@@ -45,7 +46,7 @@ export interface CompleteCardResult {
   frontContent: string
   backContent: string
   question: string
-  options: { id: string; text: string; isCorrect: boolean }[]
+  options: { id: string, text: string, isCorrect: boolean }[]
   explanation: string
   hints: string[]
   difficulty?: number
@@ -56,7 +57,7 @@ export interface CompleteCardResult {
 // RAG context for card generation
 export interface RAGContext {
   lessonPlan: string
-  attachmentChunks: { text: string; source: string; pageNumber?: number | null }[]
+  attachmentChunks: { text: string, source: string, pageNumber?: number | null }[]
   metadata: {
     subject: string
     grade?: string
@@ -78,19 +79,20 @@ export function createGeminiClient(apiKey: string) {
  */
 async function withRetry<T>(
   fn: () => Promise<T>,
-  maxAttempts: number = AI_CONFIG.retry.maxAttempts
+  maxAttempts: number = AI_CONFIG.retry.maxAttempts,
 ): Promise<T> {
   let lastError: Error | undefined
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       return await fn()
-    } catch (error) {
+    }
+    catch (error) {
       lastError = error as Error
       console.warn(`[AI] Attempt ${attempt}/${maxAttempts} failed:`, error)
 
       if (attempt < maxAttempts) {
-        const delay = AI_CONFIG.retry.delayMs * Math.pow(2, attempt - 1)
+        const delay = AI_CONFIG.retry.delayMs * 2 ** (attempt - 1)
         await new Promise(resolve => setTimeout(resolve, delay))
       }
     }
@@ -105,7 +107,7 @@ async function withRetry<T>(
  */
 export async function generateLessonPlan(
   apiKey: string,
-  params: LessonPlanPromptParams
+  params: LessonPlanPromptParams,
 ): Promise<LessonPlanResult> {
   const ai = createGeminiClient(apiKey)
   const prompt = getLessonPlanPrompt(params)
@@ -131,7 +133,7 @@ export async function generateLessonPlan(
 
     if (groundingMetadata?.groundingChunks) {
       for (const chunk of groundingMetadata.groundingChunks) {
-        const web = (chunk as { web?: { uri: string; title?: string } }).web
+        const web = (chunk as { web?: { uri: string, title?: string } }).web
         if (web) {
           sources.push({
             uri: web.uri,
@@ -143,7 +145,7 @@ export async function generateLessonPlan(
 
     // Deduplicate sources by URI
     const uniqueSources = sources.filter(
-      (source, index, self) => index === self.findIndex(s => s.uri === source.uri)
+      (source, index, self) => index === self.findIndex(s => s.uri === source.uri),
     )
 
     return {
@@ -152,10 +154,10 @@ export async function generateLessonPlan(
       model: GEMINI_MODEL,
       generatedAt: new Date().toISOString(),
     }
-  }).catch(error => {
+  }).catch((error) => {
     console.error('Error generating lesson plan:', error)
     throw new Error(
-      "Échec de la génération du plan de leçon. L'API a peut-être rejeté la requête. Vérifiez votre clé API et votre connexion réseau."
+      'Échec de la génération du plan de leçon. L\'API a peut-être rejeté la requête. Vérifiez votre clé API et votre connexion réseau.',
     )
   })
 }
@@ -166,19 +168,19 @@ const cardSchema = {
   properties: {
     title: {
       type: Type.STRING,
-      description: 'Titre concis du concept (max 60 caractères)'
+      description: 'Titre concis du concept (max 60 caractères)',
     },
     frontContent: {
       type: Type.STRING,
-      description: 'Question ou terme à mémoriser, format Markdown supporté'
+      description: 'Question ou terme à mémoriser, format Markdown supporté',
     },
     backContent: {
       type: Type.STRING,
-      description: 'Réponse ou définition détaillée, format Markdown supporté'
+      description: 'Réponse ou définition détaillée, format Markdown supporté',
     },
     question: {
       type: Type.STRING,
-      description: 'Question reformulée pour le mode quiz'
+      description: 'Question reformulée pour le mode quiz',
     },
     options: {
       type: Type.ARRAY,
@@ -187,32 +189,32 @@ const cardSchema = {
         type: Type.OBJECT,
         properties: {
           id: { type: Type.STRING, description: 'Identifiant: A, B, C ou D' },
-          text: { type: Type.STRING, description: "Texte de l'option (max 150 caractères)" },
-          isCorrect: { type: Type.BOOLEAN, description: "true si c'est la bonne réponse" },
+          text: { type: Type.STRING, description: 'Texte de l\'option (max 150 caractères)' },
+          isCorrect: { type: Type.BOOLEAN, description: 'true si c\'est la bonne réponse' },
         },
         required: ['id', 'text', 'isCorrect'],
       },
     },
     explanation: {
       type: Type.STRING,
-      description: 'Explication détaillée de pourquoi la réponse est correcte'
+      description: 'Explication détaillée de pourquoi la réponse est correcte',
     },
     hints: {
       type: Type.ARRAY,
-      description: "2-3 indices progressifs pour aider l'étudiant",
+      description: '2-3 indices progressifs pour aider l\'étudiant',
       items: { type: Type.STRING },
     },
     difficulty: {
       type: Type.INTEGER,
-      description: 'Niveau de difficulté: 0=facile, 1=moyen, 2=difficile'
+      description: 'Niveau de difficulté: 0=facile, 1=moyen, 2=difficile',
     },
     sourceReference: {
       type: Type.STRING,
-      description: 'Référence au document source (nom du fichier ou section)'
+      description: 'Référence au document source (nom du fichier ou section)',
     },
     bloomsLevel: {
       type: Type.STRING,
-      description: 'Niveau taxonomie de Bloom: remember, understand, apply, analyze'
+      description: 'Niveau taxonomie de Bloom: remember, understand, apply, analyze',
     },
   },
   required: [
@@ -223,7 +225,7 @@ const cardSchema = {
     'options',
     'explanation',
     'hints',
-    'difficulty'
+    'difficulty',
   ],
 }
 
@@ -234,7 +236,7 @@ const cardSchema = {
 export async function generateCompleteCards(
   apiKey: string,
   lessonContent: string,
-  amount: number
+  amount: number,
 ): Promise<CompleteCardResult[]> {
   const ai = createGeminiClient(apiKey)
   const prompt = getCompleteCardPrompt({ lessonContent, amount })
@@ -257,12 +259,12 @@ export async function generateCompleteCards(
 
     // Validate cards have required fields
     const validCards = cards.filter(card =>
-      card.title &&
-      card.frontContent &&
-      card.backContent &&
-      card.question &&
-      Array.isArray(card.options) &&
-      card.options.length === 4
+      card.title
+      && card.frontContent
+      && card.backContent
+      && card.question
+      && Array.isArray(card.options)
+      && card.options.length === 4,
     )
 
     if (validCards.length === 0) {
@@ -270,10 +272,10 @@ export async function generateCompleteCards(
     }
 
     return validCards
-  }).catch(error => {
+  }).catch((error) => {
     console.error('Error generating complete cards:', error)
     throw new Error(
-      "Échec de la génération des cartes. L'API a peut-être rejeté la requête ou retourné des données invalides."
+      'Échec de la génération des cartes. L\'API a peut-être rejeté la requête ou retourné des données invalides.',
     )
   })
 }
@@ -286,7 +288,7 @@ export async function generateCompleteCards(
 export async function generateCardsWithRAG(
   apiKey: string,
   context: RAGContext,
-  amount: number
+  amount: number,
 ): Promise<CompleteCardResult[]> {
   const ai = createGeminiClient(apiKey)
   const prompt = getRAGCardPrompt(context, amount)
@@ -309,12 +311,12 @@ export async function generateCardsWithRAG(
 
     // Validate cards have required fields
     const validCards = cards.filter(card =>
-      card.title &&
-      card.frontContent &&
-      card.backContent &&
-      card.question &&
-      Array.isArray(card.options) &&
-      card.options.length === 4
+      card.title
+      && card.frontContent
+      && card.backContent
+      && card.question
+      && Array.isArray(card.options)
+      && card.options.length === 4,
     )
 
     if (validCards.length === 0) {
@@ -322,10 +324,10 @@ export async function generateCardsWithRAG(
     }
 
     return validCards
-  }).catch(error => {
+  }).catch((error) => {
     console.error('Error generating cards with RAG:', error)
     throw new Error(
-      "Échec de la génération des cartes avec contexte enrichi. Vérifiez votre clé API et réessayez."
+      'Échec de la génération des cartes avec contexte enrichi. Vérifiez votre clé API et réessayez.',
     )
   })
 }
@@ -336,7 +338,7 @@ export async function generateCardsWithRAG(
  */
 export async function generateEmbedding(
   apiKey: string,
-  text: string
+  text: string,
 ): Promise<number[]> {
   const ai = createGeminiClient(apiKey)
 
@@ -353,9 +355,9 @@ export async function generateEmbedding(
     }
 
     return embedding
-  }).catch(error => {
+  }).catch((error) => {
     console.error('Error generating embedding:', error)
-    throw new Error("Échec de la génération de l'embedding.")
+    throw new Error('Échec de la génération de l\'embedding.')
   })
 }
 
@@ -365,7 +367,7 @@ export async function generateEmbedding(
 export async function extractKeyConcepts(
   apiKey: string,
   lessonPlan: string,
-  maxConcepts: number = 5
+  maxConcepts: number = 5,
 ): Promise<string[]> {
   const ai = createGeminiClient(apiKey)
 
@@ -388,7 +390,8 @@ ${lessonPlan}`,
 
     const concepts = JSON.parse(result.text || '[]') as string[]
     return concepts.slice(0, maxConcepts)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error extracting key concepts:', error)
     return [] // Return empty array on failure, don't block generation
   }
@@ -411,7 +414,7 @@ export interface QueryExpansion {
 export async function expandSearchQuery(
   apiKey: string,
   query: string,
-  context?: string
+  context?: string,
 ): Promise<QueryExpansion> {
   const ai = createGeminiClient(apiKey)
 
@@ -453,13 +456,14 @@ Format JSON:
       },
     })
 
-    const parsed = JSON.parse(result.text || '{}') as { variations: string[]; keywords: string[] }
+    const parsed = JSON.parse(result.text || '{}') as { variations: string[], keywords: string[] }
     return {
       original: query,
       variations: parsed.variations || [],
       keywords: parsed.keywords || [],
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error expanding query:', error)
     return { original: query, variations: [], keywords: [] }
   }
@@ -472,7 +476,7 @@ Format JSON:
 export async function generateSearchQueries(
   apiKey: string,
   lessonPlan: string,
-  targetCount: number = 5
+  targetCount: number = 5,
 ): Promise<string[]> {
   const ai = createGeminiClient(apiKey)
 
@@ -504,7 +508,8 @@ Retourne un JSON array de ${targetCount} requêtes de recherche (phrases courtes
 
     const queries = JSON.parse(result.text || '[]') as string[]
     return queries.slice(0, targetCount)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error generating search queries:', error)
     return []
   }
@@ -516,11 +521,11 @@ Retourne un JSON array de ${targetCount} requêtes de recherche (phrases courtes
  */
 export async function generateEmbeddings(
   apiKey: string,
-  texts: string[]
-): Promise<{ text: string; embedding: number[] }[]> {
+  texts: string[],
+): Promise<{ text: string, embedding: number[] }[]> {
   const ai = createGeminiClient(apiKey)
 
-  const results: { text: string; embedding: number[] }[] = []
+  const results: { text: string, embedding: number[] }[] = []
 
   // Process in batches to avoid rate limits
   const batchSize = AI_CONFIG.batch.embeddingSize
@@ -538,11 +543,12 @@ export async function generateEmbeddings(
             text,
             embedding: result.embeddings?.[0]?.values || [],
           }
-        } catch (error) {
+        }
+        catch (error) {
           console.error(`Error embedding text: ${text.slice(0, 50)}...`, error)
           return { text, embedding: [] }
         }
-      })
+      }),
     )
 
     results.push(...batchResults)
@@ -558,9 +564,10 @@ export async function generateEmbeddings(
 export async function analyzeChunkRelevance(
   apiKey: string,
   query: string,
-  chunks: { text: string; source: string }[]
-): Promise<{ chunkIndex: number; relevance: 'high' | 'medium' | 'low'; reason: string }[]> {
-  if (chunks.length === 0) return []
+  chunks: { text: string, source: string }[],
+): Promise<{ chunkIndex: number, relevance: 'high' | 'medium' | 'low', reason: string }[]> {
+  if (chunks.length === 0)
+    return []
 
   const ai = createGeminiClient(apiKey)
 
@@ -601,7 +608,8 @@ Retourne un JSON array.`,
     })
 
     return JSON.parse(result.text || '[]')
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error analyzing chunk relevance:', error)
     return []
   }
@@ -619,7 +627,7 @@ export const functionDeclarations = {
   searchDocuments: {
     name: 'search_lesson_documents',
     description:
-      "Recherche des informations spécifiques dans les documents attachés à la leçon. Utilise cette fonction quand tu as besoin de détails précis sur un concept, une définition, une date, ou un fait.",
+      'Recherche des informations spécifiques dans les documents attachés à la leçon. Utilise cette fonction quand tu as besoin de détails précis sur un concept, une définition, une date, ou un fait.',
     parameters: {
       type: Type.OBJECT,
       properties: {
@@ -651,13 +659,13 @@ export const functionDeclarations = {
   validateFact: {
     name: 'validate_fact',
     description:
-      "Vérifie si une information ou un fait est présent dans les documents sources avant de l'utiliser dans une carte. Retourne la confiance et le texte de support.",
+      'Vérifie si une information ou un fait est présent dans les documents sources avant de l\'utiliser dans une carte. Retourne la confiance et le texte de support.',
     parameters: {
       type: Type.OBJECT,
       properties: {
         statement: {
           type: Type.STRING,
-          description: "L'affirmation ou le fait à vérifier dans les documents",
+          description: 'L\'affirmation ou le fait à vérifier dans les documents',
         },
       },
       required: ['statement'],
@@ -667,7 +675,7 @@ export const functionDeclarations = {
   getDocumentSection: {
     name: 'get_document_section',
     description:
-      "Récupère une section spécifique d'un document par son nom de fichier et numéro de page approximatif.",
+      'Récupère une section spécifique d\'un document par son nom de fichier et numéro de page approximatif.',
     parameters: {
       type: Type.OBJECT,
       properties: {
@@ -709,8 +717,8 @@ export interface FunctionCallContext {
   >
   getChunksByFile: (
     fileName: string,
-    pageNumber?: number
-  ) => Promise<{ text: string; pageNumber: number | null }[]>
+    pageNumber?: number,
+  ) => Promise<{ text: string, pageNumber: number | null }[]>
 }
 
 /**
@@ -727,7 +735,7 @@ export interface FunctionCallResult {
 export async function executeFunctionCall(
   functionName: string,
   args: Record<string, unknown>,
-  ctx: FunctionCallContext
+  ctx: FunctionCallContext,
 ): Promise<FunctionCallResult> {
   switch (functionName) {
     case 'search_lesson_documents': {
@@ -741,7 +749,7 @@ export async function executeFunctionCall(
         result: {
           found: results.length > 0,
           count: results.length,
-          results: results.map((r) => ({
+          results: results.map(r => ({
             text: r.text,
             source: r.source,
             page: r.pageNumber,
@@ -796,7 +804,7 @@ export async function executeFunctionCall(
         result: {
           found: chunks.length > 0,
           fileName,
-          sections: chunks.map((c) => ({
+          sections: chunks.map(c => ({
             text: c.text,
             page: c.pageNumber,
           })),
@@ -820,8 +828,8 @@ export async function generateCardsWithFunctionCalling(
   apiKey: string,
   lessonPlan: string,
   amount: number,
-  ctx: FunctionCallContext
-): Promise<{ cards: CompleteCardResult[]; functionCalls: string[] }> {
+  ctx: FunctionCallContext,
+): Promise<{ cards: CompleteCardResult[], functionCalls: string[] }> {
   const ai = createGeminiClient(apiKey)
 
   // Build tools array with function declarations
@@ -886,12 +894,12 @@ Commence par explorer le contexte avec les fonctions disponibles.`
         for (const fc of functionCalls) {
           const name = fc.name || 'unknown'
           const args = fc.args || {}
-          console.log(`[FunctionCall] ${name}(${JSON.stringify(args)})`)
+          console.warn(`[FunctionCall] ${name}(${JSON.stringify(args)})`)
           functionCallsLog.push(`${name}(${JSON.stringify(args)})`)
 
           // Execute the function
           const result = await executeFunctionCall(name, args as Record<string, unknown>, ctx)
-          console.log(`[FunctionResult] ${name}:`, JSON.stringify(result.result).slice(0, 200))
+          console.warn(`[FunctionResult] ${name}:`, JSON.stringify(result.result).slice(0, 200))
 
           // Add to conversation context
           conversationContext += `\n\n[Résultat de ${name}]: ${JSON.stringify(result.result)}`
@@ -899,7 +907,8 @@ Commence par explorer le contexte avec les fonctions disponibles.`
 
         // Ask model to continue
         conversationContext += `\n\nContinue avec les informations obtenues. Si tu as assez d'informations, génère les ${amount} cartes en JSON.`
-      } else {
+      }
+      else {
         // No more function calls - try to parse the final response
         const text = response.text || ''
 
@@ -908,18 +917,21 @@ Commence par explorer le contexte avec les fonctions disponibles.`
         if (jsonMatch) {
           try {
             const cards = JSON.parse(jsonMatch[0]) as CompleteCardResult[]
-            console.log(`[FunctionCalling] Generated ${cards.length} cards after ${iteration} iterations`)
+            console.warn(`[FunctionCalling] Generated ${cards.length} cards after ${iteration} iterations`)
             return { cards, functionCalls: functionCallsLog }
-          } catch {
+          }
+          catch {
             // JSON parsing failed, ask model to format correctly
             conversationContext += `\n\n${text}\n\nLe JSON n'est pas valide. Génère uniquement un JSON array valide avec ${amount} cartes, sans texte supplémentaire.`
           }
-        } else {
+        }
+        else {
           // No JSON found, prompt for final output
           conversationContext += `\n\n${text}\n\nMaintenant génère le JSON array final avec ${amount} cartes basées sur les informations collectées.`
         }
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error(`[FunctionCalling] Error at iteration ${iteration}:`, error)
       throw error
     }

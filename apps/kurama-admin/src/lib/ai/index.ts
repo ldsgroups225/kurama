@@ -7,46 +7,46 @@ export * from './constants'
 
 // Gemini Client
 export {
+  analyzeChunkRelevance,
+
+  type CompleteCardResult,
+
   // Client
   createGeminiClient,
-
-  // Lesson Plan Generation
-  generateLessonPlan,
-
-  // Card Generation
-  generateCompleteCards,
-  generateCardsWithRAG,
-  generateCardsWithFunctionCalling,
-
-  // Embeddings
-  generateEmbedding,
-  generateEmbeddings,
+  executeFunctionCall,
+  expandSearchQuery,
 
   // Query Utilities
   extractKeyConcepts,
-  generateSearchQueries,
-  expandSearchQuery,
-  analyzeChunkRelevance,
+  type FunctionCallContext,
 
+  type FunctionCallResult,
   // Function Calling
   functionDeclarations,
-  executeFunctionCall,
+  generateCardsWithFunctionCalling,
+  generateCardsWithRAG,
 
+  // Card Generation
+  generateCompleteCards,
+  // Embeddings
+  generateEmbedding,
+
+  generateEmbeddings,
+  // Lesson Plan Generation
+  generateLessonPlan,
+  generateSearchQueries,
+  type LessonPlanResult,
+  type QueryExpansion,
+  type RAGContext,
   // Types
   type WebSource,
-  type LessonPlanResult,
-  type CompleteCardResult,
-  type RAGContext,
-  type QueryExpansion,
-  type FunctionCallContext,
-  type FunctionCallResult,
 } from './gemini-client'
 
 // Prompts
 export {
-  getLessonPlanPrompt,
+  type CardGenerationPromptParams,
   getCompleteCardPrompt,
+  getLessonPlanPrompt,
   getRAGCardPrompt,
   type LessonPlanPromptParams,
-  type CardGenerationPromptParams,
 } from './prompts'

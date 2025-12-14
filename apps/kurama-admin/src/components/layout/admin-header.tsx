@@ -1,4 +1,7 @@
+import { useRouter } from '@tanstack/react-router'
+import { LogOut, Settings, User } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -8,12 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
-import { User, LogOut, Settings } from 'lucide-react'
+import { SidebarTrigger } from '@/components/ui/sidebar'
 import { authClient } from '@/lib/auth'
-import { useRouter } from '@tanstack/react-router'
 
 interface AdminHeaderProps {
   user?: {

@@ -1,16 +1,17 @@
+import type { CreateSubjectInput, SubjectFilters, UpdateSubjectInput } from '@/lib/schemas'
+import { asc, eq, like, sql } from '@kurama/data-ops/database/drizzle-orm'
+import { lessons, subjects } from '@kurama/data-ops/drizzle/schema'
 import { createServerFn } from '@tanstack/react-start'
-import { eq, like, sql, asc } from '@kurama/data-ops/database/drizzle-orm'
-import { subjects, lessons } from '@kurama/data-ops/drizzle/schema'
-import { adminMiddleware } from '../middleware/admin-auth'
-import { initAdminDb, getDb } from '@/lib/db'
+import { getDb, initAdminDb } from '@/lib/db'
 import {
+
   createSubjectSchema,
-  updateSubjectSchema,
+
   subjectFiltersSchema,
-  type CreateSubjectInput,
-  type UpdateSubjectInput,
-  type SubjectFilters,
+
+  updateSubjectSchema,
 } from '@/lib/schemas'
+import { adminMiddleware } from '../middleware/admin-auth'
 
 // Get all subjects with stats
 export const getSubjects = createServerFn({ method: 'GET' })
@@ -110,7 +111,7 @@ export const createSubject = createServerFn({ method: 'POST' })
       throw new Error('Erreur lors de la création')
     }
 
-    console.log(`[AUDIT] Subject created by ${context.email}:`, subject.id)
+    console.warn(`[AUDIT] Subject created by ${context.email}:`, subject.id)
 
     return subject
   })
@@ -136,7 +137,7 @@ export const updateSubject = createServerFn({ method: 'POST' })
       throw new Error('Matière non trouvée')
     }
 
-    console.log(`[AUDIT] Subject updated by ${context.email}:`, id)
+    console.warn(`[AUDIT] Subject updated by ${context.email}:`, id)
 
     return subject
   })
@@ -170,7 +171,7 @@ export const deleteSubject = createServerFn({ method: 'POST' })
       throw new Error('Matière non trouvée')
     }
 
-    console.log(`[AUDIT] Subject deleted by ${context.email}:`, id)
+    console.warn(`[AUDIT] Subject deleted by ${context.email}:`, id)
 
     return { success: true }
   })
@@ -194,7 +195,6 @@ export const getSubjectsSimple = createServerFn({ method: 'GET' })
     return subjectList
   })
 
-
 // Reorder subjects
 export const reorderSubjects = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])
@@ -211,7 +211,7 @@ export const reorderSubjects = createServerFn({ method: 'POST' })
         .where(eq(subjects.id, data.orderedIds[i]!))
     }
 
-    console.log(`[AUDIT] Subjects reordered by ${context.email}:`, data.orderedIds)
+    console.warn(`[AUDIT] Subjects reordered by ${context.email}:`, data.orderedIds)
 
     return { success: true }
   })

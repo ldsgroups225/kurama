@@ -1,11 +1,15 @@
+import type { CardOption, CreateCardInput, UpdateCardInput } from '@/lib/schemas'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { Copy, Eye, Pencil, Plus, Search, Trash2, Upload, X } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
-import { Plus, Pencil, Trash2, Copy, Search, Eye, Upload, X } from 'lucide-react'
+import { toast } from 'sonner'
+import { BulkImportDialog, CardForm, CardPreview } from '@/components/admin/cards'
+import { ConfirmDialog, DataTable, PageHeader } from '@/components/shared'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import {
   Select,
   SelectContent,
@@ -19,26 +23,23 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { PageHeader, DataTable, ConfirmDialog } from '@/components/shared'
-import { CardForm, CardPreview, BulkImportDialog } from '@/components/admin/cards'
 import {
-  getCards,
-  createCard,
-  updateCard,
-  deleteCard,
-  duplicateCard,
-  getLessonsSimple,
   bulkCreateCards,
   bulkDeleteCards,
+  createCard,
+  deleteCard,
+  duplicateCard,
+  getCards,
+  getLessonsSimple,
+  updateCard,
 } from '@/core/functions/cards'
-import type { CreateCardInput, UpdateCardInput, CardOption } from '@/lib/schemas'
-import { toast } from 'sonner'
+import { generateUUID } from '@/utils/generateUUID'
 
 export const Route = createFileRoute('/_admin/cards/')({
   component: CardsPage,
 })
 
-type Card = {
+interface Card {
   id: number
   lessonId: number
   lessonTitle: string | null
@@ -58,7 +59,7 @@ type Card = {
   updatedAt: string
 }
 
-type Lesson = {
+interface Lesson {
   id: number
   title: string
   subjectId: number
@@ -82,7 +83,7 @@ function CardsPage() {
   const [deletingCard, setDeletingCard] = useState<Card | null>(null)
   const [previewCard, setPreviewCard] = useState<Card | null>(null)
   const [importOpen, setImportOpen] = useState(false)
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const [selectedIds, setSelectedIds] = useState(() => new Set<number>())
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
 
   const { data: lessonsData } = useQuery({
@@ -98,7 +99,7 @@ function CardsPage() {
           page,
           limit: 20,
           search: search || undefined,
-          lessonId: lessonFilter ? parseInt(lessonFilter) : undefined,
+          lessonId: lessonFilter ? Number.parseInt(lessonFilter) : undefined,
           cardType: typeFilter ? (typeFilter as 'basic' | 'multichoice' | 'true_false' | 'fill_blank') : undefined,
         },
       }),
@@ -152,7 +153,7 @@ function CardsPage() {
   })
 
   const bulkImportMutation = useMutation({
-    mutationFn: (data: { lessonId: number; cards: CreateCardInput[] }) =>
+    mutationFn: (data: { lessonId: number, cards: CreateCardInput[] }) =>
       bulkCreateCards({ data }),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['cards'] })
@@ -203,7 +204,11 @@ function CardsPage() {
       key: 'points',
       header: 'Points',
       cell: (card: Card) => (
-        <Badge variant="secondary">{card.points || 10} pts</Badge>
+        <Badge variant="secondary">
+          {card.points || 10}
+          {' '}
+          pts
+        </Badge>
       ),
     },
     {
@@ -213,11 +218,11 @@ function CardsPage() {
         const diff = card.difficulty || 0
         return (
           <div className="flex gap-0.5">
-            {[...Array(5)].map((_, i) => (
+            {[...Array.from({ length: 5 })].map((_, i) => (
               <div
-                key={i}
+                key={generateUUID()}
                 className={`w-2 h-2 rounded-full ${i < diff ? 'bg-primary' : 'bg-muted'
-                  }`}
+                }`}
               />
             ))}
           </div>
@@ -278,40 +283,47 @@ function CardsPage() {
         title="Cartes"
         description="Gérer les cartes de révision"
         actions={
-          selectedIds.size > 0 ? (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">
-                {selectedIds.size} sélectionné{selectedIds.size > 1 ? 's' : ''}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedIds(new Set())}
-              >
-                <X className="mr-2 h-4 w-4" />
-                Annuler
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setBulkDeleteOpen(true)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Supprimer ({selectedIds.size})
-              </Button>
-            </div>
-          ) : (
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setImportOpen(true)}>
-                <Upload className="mr-2 h-4 w-4" />
-                Import JSON
-              </Button>
-              <Button onClick={() => setFormOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Nouvelle carte
-              </Button>
-            </div>
-          )
+          selectedIds.size > 0
+            ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {selectedIds.size}
+                    {' '}
+                    sélectionné
+                    {selectedIds.size > 1 ? 's' : ''}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedIds(new Set())}
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Annuler
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setBulkDeleteOpen(true)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Supprimer (
+                    {selectedIds.size}
+                    )
+                  </Button>
+                </div>
+              )
+            : (
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setImportOpen(true)}>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Import JSON
+                  </Button>
+                  <Button onClick={() => setFormOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Nouvelle carte
+                  </Button>
+                </div>
+              )
         }
       />
 
@@ -380,23 +392,26 @@ function CardsPage() {
         selectable
         selectedIds={selectedIds}
         onSelectionChange={setSelectedIds}
-        getRowId={(card) => card.id}
+        getRowId={card => card.id}
       />
 
-      <CardForm
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        onSubmit={async (data) => {
-          await createMutation.mutateAsync(data)
-        }}
-        lessons={lessonsData || []}
-        isLoading={createMutation.isPending}
-      />
+      {formOpen && (
+        <CardForm
+          open={formOpen}
+          onOpenChange={setFormOpen}
+          onSubmit={async (data) => {
+            await createMutation.mutateAsync(data)
+          }}
+          lessons={lessonsData || []}
+          isLoading={createMutation.isPending}
+        />
+      )}
 
       {editingCard && (
         <CardForm
+          key={editingCard.id}
           open={!!editingCard}
-          onOpenChange={(open) => !open && setEditingCard(null)}
+          onOpenChange={open => !open && setEditingCard(null)}
           onSubmit={async (data) => {
             await updateMutation.mutateAsync({ ...data, id: editingCard.id })
           }}
@@ -421,9 +436,9 @@ function CardsPage() {
 
       <ConfirmDialog
         open={!!deletingCard}
-        onOpenChange={(open) => !open && setDeletingCard(null)}
+        onOpenChange={open => !open && setDeletingCard(null)}
         title="Supprimer la carte"
-        description={`Êtes-vous sûr de vouloir supprimer cette carte ? Cette action est irréversible.`}
+        description="Êtes-vous sûr de vouloir supprimer cette carte ? Cette action est irréversible."
         confirmLabel="Supprimer"
         onConfirm={() => deletingCard && deleteMutation.mutate(deletingCard.id)}
         isLoading={deleteMutation.isPending}
@@ -431,7 +446,7 @@ function CardsPage() {
       />
 
       {/* Preview Sheet */}
-      <Sheet open={!!previewCard} onOpenChange={(open) => !open && setPreviewCard(null)}>
+      <Sheet open={!!previewCard} onOpenChange={open => !open && setPreviewCard(null)}>
         <SheetContent className="sm:max-w-lg">
           <SheetHeader>
             <SheetTitle>Aperçu de la carte</SheetTitle>
@@ -458,16 +473,16 @@ function CardsPage() {
       <BulkImportDialog
         open={importOpen}
         onOpenChange={setImportOpen}
-        lessonId={lessonFilter ? parseInt(lessonFilter) : 0}
+        lessonId={lessonFilter ? Number.parseInt(lessonFilter) : 0}
         onImport={async (cards) => {
           if (!lessonFilter) {
             toast.error('Veuillez sélectionner une leçon pour l\'import')
             return
           }
-          const lessonIdNum = parseInt(lessonFilter)
+          const lessonIdNum = Number.parseInt(lessonFilter)
           await bulkImportMutation.mutateAsync({
             lessonId: lessonIdNum,
-            cards: cards.map((card) => ({
+            cards: cards.map(card => ({
               lessonId: lessonIdNum,
               cardType: card.cardType,
               frontContent: card.frontContent || '',

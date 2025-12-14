@@ -1,6 +1,6 @@
 import type { LearningCardProps } from './types'
 import { CheckCircle2, Volume2, XCircle } from 'lucide-react'
-import { animate } from 'motion'
+import { animate } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { MarkdownRenderer } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'

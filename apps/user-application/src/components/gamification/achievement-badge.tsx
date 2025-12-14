@@ -58,7 +58,8 @@ export function AchievementBadge({
 
   // Trigger vibration when achievement is newly unlocked
   useEffect(() => {
-    if (!isSupported || !isNewlyUnlocked || !achievement.unlocked) return
+    if (!isSupported || !isNewlyUnlocked || !achievement.unlocked)
+      return
 
     const rarity = achievement.rarity || 'common'
     vibrate(VibrationPatterns.achievement[rarity])
@@ -98,11 +99,11 @@ export function AchievementBadge({
       onClick={onClick}
       onKeyDown={onClick
         ? (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            onClick()
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              onClick()
+            }
           }
-        }
         : undefined}
       type={onClick ? 'button' : undefined}
       aria-label={onClick ? `${achievement.name} - ${achievement.unlocked ? 'Débloqué' : 'Verrouillé'}` : undefined}
@@ -125,11 +126,11 @@ export function AchievementBadge({
             >
               {isLocked
                 ? (
-                  <Lock className={cn(iconSizes[size], 'text-muted-foreground')} />
-                )
+                    <Lock className={cn(iconSizes[size], 'text-muted-foreground')} />
+                  )
                 : (
-                  <Icon className={cn(iconSizes[size], 'text-white')} />
-                )}
+                    <Icon className={cn(iconSizes[size], 'text-white')} />
+                  )}
             </div>
 
             {/* Rarity Badge */}

@@ -1,32 +1,35 @@
+import type { FunctionCallContext, RAGContext } from '@/lib/ai/gemini-client'
+import type { GenerateCardsInput, GenerateTeachPlanInput, SaveGeneratedCardsInput } from '@/lib/schemas'
+import process from 'node:process'
+import { desc, eq, sql } from '@kurama/data-ops/database/drizzle-orm'
+import { cards, grades, lessons, lessonsContentChunks, lessonsContentFile, series, subjects } from '@kurama/data-ops/drizzle/schema'
 import { createServerFn } from '@tanstack/react-start'
-import { eq, desc, sql } from '@kurama/data-ops/database/drizzle-orm'
-import { lessons, subjects, grades, series, cards, lessonsContentChunks, lessonsContentFile } from '@kurama/data-ops/drizzle/schema'
-import { adminMiddleware } from '../middleware/admin-auth'
-import { initAdminDb, getDb } from '@/lib/db'
 import {
-  generateTeachPlanSchema,
-  generateCardsSchema,
-  saveGeneratedCardsSchema,
-  type GenerateTeachPlanInput,
-  type GenerateCardsInput,
-  type SaveGeneratedCardsInput,
-} from '@/lib/schemas'
-import {
-  generateLessonPlan,
-  generateCompleteCards,
-  generateCardsWithRAG,
+  CARD_GENERATION_DEFAULTS,
+  extractKeyConcepts,
+
+  GEMINI_MODEL,
   generateCardsWithFunctionCalling,
+  generateCardsWithRAG,
+  generateCompleteCards,
   generateEmbedding,
   generateEmbeddings,
-  extractKeyConcepts,
+  generateLessonPlan,
   generateSearchQueries,
-  GEMINI_MODEL,
   RAG_THRESHOLDS,
+
   SIMILARITY_THRESHOLDS,
-  CARD_GENERATION_DEFAULTS,
-  type RAGContext,
-  type FunctionCallContext,
 } from '@/lib/ai/gemini-client'
+import { getDb, initAdminDb } from '@/lib/db'
+import {
+
+  generateCardsSchema,
+
+  generateTeachPlanSchema,
+
+  saveGeneratedCardsSchema,
+} from '@/lib/schemas'
+import { adminMiddleware } from '../middleware/admin-auth'
 
 // RAG helper types
 interface ChunkSearchResult {
@@ -83,7 +86,7 @@ async function searchRelevantChunks(
   db: ReturnType<typeof getDb>,
   lessonId: number,
   queryEmbedding: number[],
-  topK: number = 5
+  topK: number = 5,
 ): Promise<ChunkSearchResult[]> {
   const similarity = sql<number>`1 - (${lessonsContentChunks.embedding} <=> ${JSON.stringify(queryEmbedding)}::vector)`
 
@@ -108,14 +111,15 @@ async function searchRelevantChunks(
 function deduplicateChunks(chunks: ChunkSearchResult[], similarityThreshold: number = SIMILARITY_THRESHOLDS.deduplication): ChunkSearchResult[] {
   const unique: ChunkSearchResult[] = []
   for (const chunk of chunks) {
-    const isDuplicate = unique.some(existing => {
+    const isDuplicate = unique.some((existing) => {
       const words1 = new Set(existing.chunkText.toLowerCase().split(/\s+/))
       const words2 = new Set(chunk.chunkText.toLowerCase().split(/\s+/))
       const intersection = new Set([...words1].filter(w => words2.has(w)))
       const union = new Set([...words1, ...words2])
       return intersection.size / union.size > similarityThreshold
     })
-    if (!isDuplicate) unique.push(chunk)
+    if (!isDuplicate)
+      unique.push(chunk)
   }
   return unique
 }
@@ -132,7 +136,7 @@ async function hybridSearch(
   lessonId: number,
   queryEmbedding: number[],
   keywords: string[],
-  options: { vectorTopK?: number; keywordTopK?: number; vectorWeight?: number; minSimilarity?: number } = {}
+  options: { vectorTopK?: number, keywordTopK?: number, vectorWeight?: number, minSimilarity?: number } = {},
 ): Promise<RankedChunk[]> {
   const {
     vectorTopK = 10,
@@ -147,7 +151,8 @@ async function hybridSearch(
   const chunkMap = new Map<number, RankedChunk>()
 
   for (const chunk of vectorResults) {
-    if (chunk.similarity < minSimilarity) continue
+    if (chunk.similarity < minSimilarity)
+      continue
 
     const keywordScore = calculateKeywordScore(chunk.chunkText, keywords)
     const keywordWeight = 1 - vectorWeight
@@ -165,9 +170,10 @@ async function hybridSearch(
 
 function selectDiverseChunks(
   chunks: ChunkSearchResult[],
-  targetCount: number
+  targetCount: number,
 ): ChunkSearchResult[] {
-  if (chunks.length <= targetCount) return chunks
+  if (chunks.length <= targetCount)
+    return chunks
 
   const selected: ChunkSearchResult[] = []
   const remaining = [...chunks]
@@ -185,17 +191,18 @@ function selectDiverseChunks(
 
     for (let i = 0; i < remaining.length; i++) {
       const current = remaining[i]
-      if (!current) continue
+      if (!current)
+        continue
 
       // Calculate max overlap with selected chunks
       const maxOverlap = Math.max(
-        ...selected.map(s => {
+        ...selected.map((s) => {
           const words1 = new Set(s.chunkText.toLowerCase().split(/\s+/))
           const words2 = new Set(current.chunkText.toLowerCase().split(/\s+/))
           const intersection = new Set([...words1].filter(w => words2.has(w)))
           const union = new Set([...words1, ...words2])
           return intersection.size / union.size
-        })
+        }),
       )
 
       const diversity = 1 - maxOverlap
@@ -289,7 +296,7 @@ export const generateTeachPlan = createServerFn({ method: 'POST' })
       })
 
     const updated = updateResult[0]
-    console.log(`[AUDIT] Teach plan generated by ${context.email} for lesson:`, data.lessonId)
+    console.warn(`[AUDIT] Teach plan generated by ${context.email} for lesson:`, data.lessonId)
 
     return {
       success: true,
@@ -335,39 +342,40 @@ export const generateCardsFromPlan = createServerFn({ method: 'POST' })
     }
 
     if (!lesson.teachPlan) {
-      throw new Error("Cette leçon n'a pas de plan d'enseignement. Veuillez d'abord générer un plan.")
+      throw new Error('Cette leçon n\'a pas de plan d\'enseignement. Veuillez d\'abord générer un plan.')
     }
 
     // Check for attachment chunks (RAG context)
     const chunkCount = await getLessonChunkCount(db, data.lessonId)
-    console.log(`[RAG] Lesson ${data.lessonId} has ${chunkCount} chunks`)
+    console.warn(`[RAG] Lesson ${data.lessonId} has ${chunkCount} chunks`)
 
-    let attachmentChunks: { text: string; source: string; pageNumber?: number | null }[] = []
+    let attachmentChunks: { text: string, source: string, pageNumber?: number | null }[] = []
     let searchStrategy = 'none'
 
     if (chunkCount > 0) {
       if (chunkCount > ADVANCED_SEARCH_THRESHOLD) {
         // Phase 4: Advanced multi-query search with hybrid retrieval
         searchStrategy = 'advanced'
-        console.log(`[RAG] Using ADVANCED search (${chunkCount} chunks > ${ADVANCED_SEARCH_THRESHOLD})`)
+        console.warn(`[RAG] Using ADVANCED search (${chunkCount} chunks > ${ADVANCED_SEARCH_THRESHOLD})`)
 
         // Generate multiple diverse search queries from lesson plan
         const searchQueries = await generateSearchQueries(apiKey, lesson.teachPlan, 5)
-        console.log(`[RAG] Generated ${searchQueries.length} search queries`)
+        console.warn(`[RAG] Generated ${searchQueries.length} search queries`)
 
         // Extract keywords for hybrid search
         const keyConcepts = await extractKeyConcepts(apiKey, lesson.teachPlan, 8)
         const keywords = keyConcepts.flatMap(c => c.toLowerCase().split(/\s+/))
-        console.log(`[RAG] Extracted ${keywords.length} keywords for hybrid search`)
+        console.warn(`[RAG] Extracted ${keywords.length} keywords for hybrid search`)
 
         // Generate embeddings for all queries in batch
         const queryEmbeddings = await generateEmbeddings(apiKey, searchQueries)
-        console.log(`[RAG] Generated ${queryEmbeddings.length} query embeddings`)
+        console.warn(`[RAG] Generated ${queryEmbeddings.length} query embeddings`)
 
         // Multi-query search with result fusion
         const allResults: ChunkSearchResult[] = []
         for (const { embedding } of queryEmbeddings) {
-          if (embedding.length === 0) continue
+          if (embedding.length === 0)
+            continue
 
           // Hybrid search combining vector + keyword
           const results = await hybridSearch(db, data.lessonId, embedding, keywords, {
@@ -382,22 +390,22 @@ export const generateCardsFromPlan = createServerFn({ method: 'POST' })
         const uniqueChunks = deduplicateChunks(allResults, 0.8)
         const diverseChunks = selectDiverseChunks(uniqueChunks, 12)
 
-        console.log(`[RAG] Advanced search: ${allResults.length} total → ${uniqueChunks.length} unique → ${diverseChunks.length} diverse`)
+        console.warn(`[RAG] Advanced search: ${allResults.length} total → ${uniqueChunks.length} unique → ${diverseChunks.length} diverse`)
 
         attachmentChunks = diverseChunks.map(c => ({
           text: c.chunkText,
           source: c.fileName,
           pageNumber: c.pageNumber,
         }))
-
-      } else if (chunkCount > VECTOR_SEARCH_THRESHOLD) {
+      }
+      else if (chunkCount > VECTOR_SEARCH_THRESHOLD) {
         // Standard vector search for medium document sets
         searchStrategy = 'vector'
-        console.log(`[RAG] Using vector search (${chunkCount} chunks > ${VECTOR_SEARCH_THRESHOLD})`)
+        console.warn(`[RAG] Using vector search (${chunkCount} chunks > ${VECTOR_SEARCH_THRESHOLD})`)
 
         // Extract key concepts from lesson plan
         const keyConcepts = await extractKeyConcepts(apiKey, lesson.teachPlan, 5)
-        console.log(`[RAG] Extracted concepts:`, keyConcepts)
+        console.warn(`[RAG] Extracted concepts:`, keyConcepts)
 
         // Vector search for each concept
         const allResults: ChunkSearchResult[] = []
@@ -406,7 +414,8 @@ export const generateCardsFromPlan = createServerFn({ method: 'POST' })
             const embedding = await generateEmbedding(apiKey, concept)
             const results = await searchRelevantChunks(db, data.lessonId, embedding, 3)
             allResults.push(...results)
-          } catch (err) {
+          }
+          catch (err) {
             console.warn(`[RAG] Failed to search for concept "${concept}":`, err)
           }
         }
@@ -418,10 +427,11 @@ export const generateCardsFromPlan = createServerFn({ method: 'POST' })
           source: c.fileName,
           pageNumber: c.pageNumber,
         }))
-      } else {
+      }
+      else {
         // Load all chunks for smaller document sets
         searchStrategy = 'direct'
-        console.log(`[RAG] Loading all ${chunkCount} chunks directly`)
+        console.warn(`[RAG] Loading all ${chunkCount} chunks directly`)
         const chunks = await getLessonChunks(db, data.lessonId, 10)
         attachmentChunks = chunks.map(c => ({
           text: c.chunkText,
@@ -449,7 +459,7 @@ export const generateCardsFromPlan = createServerFn({ method: 'POST' })
       ? await generateCardsWithRAG(apiKey, ragContext, data.amount)
       : await generateCompleteCards(apiKey, lesson.teachPlan, data.amount)
 
-    console.log(`[AUDIT] ${completeCards.length} cards generated by ${context.email} for lesson ${data.lessonId} (strategy: ${searchStrategy}, chunks: ${attachmentChunks.length})`)
+    console.warn(`[AUDIT] ${completeCards.length} cards generated by ${context.email} for lesson ${data.lessonId} (strategy: ${searchStrategy}, chunks: ${attachmentChunks.length})`)
 
     return {
       success: true,
@@ -457,7 +467,7 @@ export const generateCardsFromPlan = createServerFn({ method: 'POST' })
       searchStrategy,
       chunksUsed: attachmentChunks.length,
       cards: completeCards.map((card, index) => {
-        const correctOption = card.options.find((o: { id: string; text: string; isCorrect: boolean }) => o.isCorrect)
+        const correctOption = card.options.find((o: { id: string, text: string, isCorrect: boolean }) => o.isCorrect)
         return {
           lessonId: data.lessonId,
           cardType: 'multichoice' as const,
@@ -527,7 +537,7 @@ export const saveGeneratedCards = createServerFn({ method: 'POST' })
       }
     }
 
-    console.log(`[AUDIT] ${insertedCards.length} cards saved by ${context.email} for lesson:`, data.lessonId)
+    console.warn(`[AUDIT] ${insertedCards.length} cards saved by ${context.email} for lesson:`, data.lessonId)
 
     return {
       success: true,
@@ -538,7 +548,7 @@ export const saveGeneratedCards = createServerFn({ method: 'POST' })
 // Update teach plan manually
 export const updateTeachPlan = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])
-  .inputValidator((data: { lessonId: number; teachPlan: string }) => data)
+  .inputValidator((data: { lessonId: number, teachPlan: string }) => data)
   .handler(async ({ data, context }) => {
     initAdminDb()
     const db = getDb()
@@ -560,7 +570,7 @@ export const updateTeachPlan = createServerFn({ method: 'POST' })
       throw new Error('Leçon non trouvée')
     }
 
-    console.log(`[AUDIT] Teach plan updated manually by ${context.email} for lesson:`, data.lessonId)
+    console.warn(`[AUDIT] Teach plan updated manually by ${context.email} for lesson:`, data.lessonId)
 
     return { success: true, lesson: updated }
   })
@@ -608,15 +618,15 @@ export const generateCardsWithDynamicContext = createServerFn({ method: 'POST' }
     }
 
     if (!lesson.teachPlan) {
-      throw new Error("Cette leçon n'a pas de plan d'enseignement. Veuillez d'abord générer un plan.")
+      throw new Error('Cette leçon n\'a pas de plan d\'enseignement. Veuillez d\'abord générer un plan.')
     }
 
     // Check for attachment chunks
     const chunkCount = await getLessonChunkCount(db, data.lessonId)
-    console.log(`[FunctionCalling] Lesson ${data.lessonId} has ${chunkCount} chunks`)
+    console.warn(`[FunctionCalling] Lesson ${data.lessonId} has ${chunkCount} chunks`)
 
     if (chunkCount === 0) {
-      throw new Error("Cette leçon n'a pas de documents attachés. Le mode function calling nécessite des documents.")
+      throw new Error('Cette leçon n\'a pas de documents attachés. Le mode function calling nécessite des documents.')
     }
 
     // Build function call context with database query functions
@@ -641,7 +651,8 @@ export const generateCardsWithDynamicContext = createServerFn({ method: 'POST' }
             pageNumber: r.pageNumber,
             similarity: r.similarity,
           }))
-        } catch (err) {
+        }
+        catch (err) {
           console.error('[FunctionCalling] Search error:', err)
           return []
         }
@@ -649,7 +660,7 @@ export const generateCardsWithDynamicContext = createServerFn({ method: 'POST' }
       // Get chunks by file function
       getChunksByFile: async (fileName: string, pageNumber?: number) => {
         try {
-          let query = db
+          const query = db
             .select({
               chunkText: lessonsContentChunks.chunkText,
               pageNumber: lessonsContentChunks.pageNumber,
@@ -671,7 +682,8 @@ export const generateCardsWithDynamicContext = createServerFn({ method: 'POST' }
             text: r.chunkText,
             pageNumber: r.pageNumber,
           }))
-        } catch (err) {
+        }
+        catch (err) {
           console.error('[FunctionCalling] Get chunks by file error:', err)
           return []
         }
@@ -679,15 +691,15 @@ export const generateCardsWithDynamicContext = createServerFn({ method: 'POST' }
     }
 
     // Generate cards with function calling
-    console.log(`[FunctionCalling] Starting generation with dynamic context retrieval`)
+    console.warn(`[FunctionCalling] Starting generation with dynamic context retrieval`)
     const { cards: generatedCards, functionCalls } = await generateCardsWithFunctionCalling(
       apiKey,
       lesson.teachPlan,
       data.amount,
-      functionCallContext
+      functionCallContext,
     )
 
-    console.log(`[AUDIT] ${generatedCards.length} cards generated by ${context.email} for lesson ${data.lessonId} (strategy: function-calling, calls: ${functionCalls.length})`)
+    console.warn(`[AUDIT] ${generatedCards.length} cards generated by ${context.email} for lesson ${data.lessonId} (strategy: function-calling, calls: ${functionCalls.length})`)
 
     return {
       success: true,
@@ -696,7 +708,7 @@ export const generateCardsWithDynamicContext = createServerFn({ method: 'POST' }
       functionCallsCount: functionCalls.length,
       functionCalls,
       cards: generatedCards.map((card, index) => {
-        const correctOption = card.options.find((o: { id: string; text: string; isCorrect: boolean }) => o.isCorrect)
+        const correctOption = card.options.find((o: { id: string, text: string, isCorrect: boolean }) => o.isCorrect)
         return {
           lessonId: data.lessonId,
           cardType: 'multichoice' as const,
@@ -738,13 +750,15 @@ export const generateCardsAuto = createServerFn({ method: 'POST' })
 
     if (data.preferFunctionCalling && chunkCount > 0) {
       strategy = 'function-calling'
-    } else if (chunkCount > FUNCTION_CALLING_THRESHOLD) {
+    }
+    else if (chunkCount > FUNCTION_CALLING_THRESHOLD) {
       strategy = 'function-calling'
-    } else {
+    }
+    else {
       strategy = 'standard'
     }
 
-    console.log(`[AutoGenerate] Selected strategy: ${strategy} (chunks: ${chunkCount}, preferFC: ${data.preferFunctionCalling})`)
+    console.warn(`[AutoGenerate] Selected strategy: ${strategy} (chunks: ${chunkCount}, preferFC: ${data.preferFunctionCalling})`)
 
     // Build the input with required cardType
     const input: GenerateCardsInput = {
@@ -756,7 +770,8 @@ export const generateCardsAuto = createServerFn({ method: 'POST' })
     // Route to appropriate handler
     if (strategy === 'function-calling') {
       return generateCardsWithDynamicContext({ data: input })
-    } else {
+    }
+    else {
       return generateCardsFromPlan({ data: input })
     }
   })

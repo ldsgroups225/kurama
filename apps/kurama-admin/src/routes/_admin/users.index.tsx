@@ -1,12 +1,14 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
-import { Search, Download, GraduationCap, Users as UsersIcon, Eye } from 'lucide-react'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { Download, Eye, GraduationCap, Search, Users as UsersIcon } from 'lucide-react'
+import { motion } from 'motion/react'
+import { useState } from 'react'
+import { toast } from 'sonner'
+import { DataTable, PageHeader } from '@/components/shared'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Select,
   SelectContent,
@@ -14,15 +16,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { PageHeader, DataTable } from '@/components/shared'
-import { getUsers, getGradesSimple } from '@/core/functions/users'
-import { toast } from 'sonner'
+import { getGradesSimple, getUsers } from '@/core/functions/users'
 
 export const Route = createFileRoute('/_admin/users/')({
   component: UsersPage,
 })
 
-type UserData = {
+interface UserData {
   id: string
   name: string
   email: string
@@ -46,7 +46,7 @@ type UserData = {
   seriesName: string | null
 }
 
-type Grade = {
+interface Grade {
   id: number
   name: string
   category: string
@@ -78,7 +78,7 @@ function UsersPage() {
           limit: 20,
           search: search || undefined,
           userType: userTypeFilter ? (userTypeFilter as 'student' | 'parent') : undefined,
-          gradeId: gradeFilter ? parseInt(gradeFilter) : undefined,
+          gradeId: gradeFilter ? Number.parseInt(gradeFilter) : undefined,
           isCompleted: completedFilter === 'true' ? true : completedFilter === 'false' ? false : undefined,
         },
       }),
@@ -107,7 +107,7 @@ function UsersPage() {
 
     const csvContent = [
       headers.join(','),
-      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
     ].join('\n')
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
@@ -146,11 +146,13 @@ function UsersPage() {
         }
         return (
           <Badge variant={user.profile.userType === 'student' ? 'default' : 'secondary'}>
-            {user.profile.userType === 'student' ? (
-              <GraduationCap className="mr-1 h-3 w-3" />
-            ) : (
-              <UsersIcon className="mr-1 h-3 w-3" />
-            )}
+            {user.profile.userType === 'student'
+              ? (
+                  <GraduationCap className="mr-1 h-3 w-3" />
+                )
+              : (
+                  <UsersIcon className="mr-1 h-3 w-3" />
+                )}
             {userTypeLabels[user.profile.userType]}
           </Badge>
         )
@@ -180,11 +182,13 @@ function UsersPage() {
       header: 'Statut',
       cell: (user: UserData) => (
         <div className="flex flex-col gap-1">
-          {user.profile?.isCompleted ? (
-            <Badge className="bg-success text-success-foreground">Profil complet</Badge>
-          ) : (
-            <Badge variant="outline">Profil incomplet</Badge>
-          )}
+          {user.profile?.isCompleted
+            ? (
+                <Badge className="bg-success text-success-foreground">Profil complet</Badge>
+              )
+            : (
+                <Badge variant="outline">Profil incomplet</Badge>
+              )}
           {user.emailVerified && (
             <Badge variant="secondary" className="text-xs">Email vérifié</Badge>
           )}
@@ -227,12 +231,12 @@ function UsersPage() {
       <PageHeader
         title="Utilisateurs"
         description="Gérer les utilisateurs de la plateforme"
-        actions={
+        actions={(
           <Button variant="outline" onClick={handleExportCSV}>
             <Download className="mr-2 h-4 w-4" />
             Exporter CSV
           </Button>
-        }
+        )}
       />
 
       <div className="flex flex-wrap items-center gap-4">

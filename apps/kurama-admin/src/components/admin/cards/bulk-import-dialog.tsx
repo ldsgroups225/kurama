@@ -1,7 +1,9 @@
+import { AlertCircle, CheckCircle2, FileJson, Upload } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useState } from 'react'
-import { Upload, FileJson, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { motion } from 'framer-motion'
 import {
   Dialog,
   DialogContent,
@@ -10,10 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
+import { Textarea } from '@/components/ui/textarea'
 
 interface CardImportData {
   cardType: 'basic' | 'multichoice' | 'true_false' | 'fill_blank'
@@ -61,7 +61,6 @@ export function BulkImportDialog({
   const [jsonInput, setJsonInput] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [parsedCards, setParsedCards] = useState<CardImportData[] | null>(null)
-
 
   const validateAndParse = () => {
     setError(null)
@@ -132,20 +131,23 @@ export function BulkImportDialog({
       }
 
       setParsedCards(validatedCards)
-    } catch {
+    }
+    catch {
       setError('JSON invalide. Vérifiez la syntaxe.')
     }
   }
 
   const handleImport = async () => {
-    if (!parsedCards) return
+    if (!parsedCards)
+      return
 
     try {
       await onImport(parsedCards)
       setJsonInput('')
       setParsedCards(null)
       onOpenChange(false)
-    } catch (err) {
+    }
+    catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors de l\'import')
     }
   }
@@ -160,13 +162,13 @@ export function BulkImportDialog({
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
+      transition: { staggerChildren: 0.1 },
+    },
   }
 
   const item = {
     hidden: { opacity: 0, y: 10 },
-    show: { opacity: 1, y: 0 }
+    show: { opacity: 1, y: 0 },
   }
 
   return (
@@ -221,16 +223,22 @@ export function BulkImportDialog({
             <Alert>
               <CheckCircle2 className="h-4 w-4 text-green-600" />
               <AlertDescription className="flex items-center gap-2">
-                <span>{parsedCards.length} carte(s) validée(s)</span>
+                <span>
+                  {parsedCards.length}
+                  {' '}
+                  carte(s) validée(s)
+                </span>
                 <div className="flex gap-1">
                   {Object.entries(
                     parsedCards.reduce((acc, card) => {
                       acc[card.cardType] = (acc[card.cardType] || 0) + 1
                       return acc
-                    }, {} as Record<string, number>)
+                    }, {} as Record<string, number>),
                   ).map(([type, count]) => (
                     <Badge key={type} variant="secondary">
-                      {type}: {count}
+                      {type}
+                      :
+                      {count}
                     </Badge>
                   ))}
                 </div>
@@ -241,10 +249,22 @@ export function BulkImportDialog({
           <motion.div variants={item} className="text-xs text-muted-foreground space-y-1">
             <p><strong>Types de cartes supportés:</strong></p>
             <ul className="list-disc list-inside space-y-0.5">
-              <li><code>basic</code>: frontContent, backContent</li>
-              <li><code>multichoice</code>: question, options[], correctAnswer (index)</li>
-              <li><code>true_false</code>: question, correctAnswer (true/false)</li>
-              <li><code>fill_blank</code>: question, correctAnswer (texte)</li>
+              <li>
+                <code>basic</code>
+                : frontContent, backContent
+              </li>
+              <li>
+                <code>multichoice</code>
+                : question, options[], correctAnswer (index)
+              </li>
+              <li>
+                <code>true_false</code>
+                : question, correctAnswer (true/false)
+              </li>
+              <li>
+                <code>fill_blank</code>
+                : question, correctAnswer (texte)
+              </li>
             </ul>
           </motion.div>
         </motion.div>
@@ -253,15 +273,17 @@ export function BulkImportDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuler
           </Button>
-          {!parsedCards ? (
-            <Button onClick={validateAndParse} disabled={!jsonInput.trim()}>
-              Valider JSON
-            </Button>
-          ) : (
-            <Button onClick={handleImport} disabled={isLoading}>
-              {isLoading ? 'Import...' : `Importer ${parsedCards.length} carte(s)`}
-            </Button>
-          )}
+          {!parsedCards
+            ? (
+                <Button onClick={validateAndParse} disabled={!jsonInput.trim()}>
+                  Valider JSON
+                </Button>
+              )
+            : (
+                <Button onClick={handleImport} disabled={isLoading}>
+                  {isLoading ? 'Import...' : `Importer ${parsedCards.length} carte(s)`}
+                </Button>
+              )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

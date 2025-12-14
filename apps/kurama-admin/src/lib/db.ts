@@ -1,4 +1,5 @@
-import { initDatabase, getDb } from '@kurama/data-ops/database/setup'
+import process from 'node:process'
+import { getDb, initDatabase } from '@kurama/data-ops/database/setup'
 
 // Initialize database with environment variables
 export function initAdminDb() {

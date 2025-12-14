@@ -1,27 +1,27 @@
+import type { CreateSubjectInput, UpdateSubjectInput } from '@/lib/schemas'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { BookOpen, FileText, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
-import { Plus, Pencil, Trash2, BookOpen, FileText, Search } from 'lucide-react'
+import { toast } from 'sonner'
+import { SubjectForm } from '@/components/admin/subjects'
+import { ConfirmDialog, DataTable, PageHeader } from '@/components/shared'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { PageHeader, DataTable, ConfirmDialog } from '@/components/shared'
-import { SubjectForm } from '@/components/admin/subjects'
 import {
-  getSubjects,
   createSubject,
-  updateSubject,
   deleteSubject,
+  getSubjects,
+  updateSubject,
 } from '@/core/functions/subjects'
-import type { CreateSubjectInput, UpdateSubjectInput } from '@/lib/schemas'
-import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_admin/subjects/')({
   component: SubjectsPage,
 })
 
-type Subject = {
+interface Subject {
   id: number
   name: string
   abbreviation: string
@@ -161,12 +161,12 @@ function SubjectsPage() {
       <PageHeader
         title="Matières"
         description="Gérer les matières du programme"
-        actions={
+        actions={(
           <Button onClick={() => setFormOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Nouvelle matière
           </Button>
-        }
+        )}
       />
 
       <div className="flex items-center gap-4">
@@ -195,19 +195,22 @@ function SubjectsPage() {
         emptyMessage="Aucune matière trouvée"
       />
 
-      <SubjectForm
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        onSubmit={async (data) => {
-          await createMutation.mutateAsync(data)
-        }}
-        isLoading={createMutation.isPending}
-      />
+      {formOpen && (
+        <SubjectForm
+          open={formOpen}
+          onOpenChange={setFormOpen}
+          onSubmit={async (data) => {
+            await createMutation.mutateAsync(data)
+          }}
+          isLoading={createMutation.isPending}
+        />
+      )}
 
       {editingSubject && (
         <SubjectForm
+          key={editingSubject.id}
           open={!!editingSubject}
-          onOpenChange={(open) => !open && setEditingSubject(null)}
+          onOpenChange={open => !open && setEditingSubject(null)}
           onSubmit={async (data) => {
             await updateMutation.mutateAsync({ ...data, id: editingSubject.id })
           }}
@@ -224,7 +227,7 @@ function SubjectsPage() {
 
       <ConfirmDialog
         open={!!deletingSubject}
-        onOpenChange={(open) => !open && setDeletingSubject(null)}
+        onOpenChange={open => !open && setDeletingSubject(null)}
         title="Supprimer la matière"
         description={`Êtes-vous sûr de vouloir supprimer "${deletingSubject?.name}" ? Cette action est irréversible.`}
         confirmLabel="Supprimer"

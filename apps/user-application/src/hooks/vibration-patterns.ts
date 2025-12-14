@@ -25,7 +25,7 @@ export const VibrationPatterns = {
   streak: {
     x3: [50, 30, 50, 30, 50],
     x5: [100, 50, 100, 50, 100],
-    x10: [200, 100, 200]
+    x10: [200, 100, 200],
   },
   /** Session completion victory pattern */
   sessionComplete: [100, 50, 150],
@@ -39,12 +39,14 @@ export const VibrationPatterns = {
   combo: {
     x2: [80, 40, 80],
     x3: [100, 50, 100, 50, 100],
-    x5: [150, 75, 150, 75, 150]
+    x5: [150, 75, 150, 75, 150],
   },
   /** Quiz completion based on score */
   quizComplete: (score: number): number[] => {
-    if (score >= 90) return [200, 100, 200, 100, 250]
-    if (score >= 70) return [150, 75, 150]
+    if (score >= 90)
+      return [200, 100, 200, 100, 250]
+    if (score >= 70)
+      return [150, 75, 150]
     return [100]
   },
 
@@ -59,12 +61,12 @@ export const VibrationPatterns = {
     common: [100],
     rare: [100, 100, 100],
     epic: [150, 100, 200],
-    legendary: [200, 150, 250, 150, 300]
+    legendary: [200, 150, 250, 150, 300],
   },
 
   // Additional utility patterns
   /** Pattern for notifications */
   notification: [200, 100, 100],
   /** Heartbeat-like pattern */
-  heartbeat: [100, 100, 100, 400]
+  heartbeat: [100, 100, 100, 400],
 }

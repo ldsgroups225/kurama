@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion'
 import { ChevronRight, Clock, CreditCard, FileText, ListChecks, Star, Target, Zap } from 'lucide-react'
+import { motion } from 'motion/react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { calculatePotentialXP, getModeDifficultyDescription, getModeXPRate } from '@/lib/learning-mode-gamification'
@@ -96,8 +96,14 @@ export function EnhancedModeSelection({ cardCount, onModeSelect, className }: En
               whileTap={{ scale: 0.98 }}
             >
               <Card
+                role="button"
+                tabIndex={0}
                 className="cursor-pointer transition-all hover:bg-accent/50 hover:border-primary/20 overflow-hidden"
                 onClick={() => onModeSelect(mode.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter')
+                    onModeSelect(mode.id)
+                }}
               >
                 <CardContent className="p-0">
                   <div className="flex items-center gap-4 p-4">

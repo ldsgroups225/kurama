@@ -109,7 +109,7 @@ export type UserFilters = z.infer<typeof userFiltersSchema>
 // AI Generation schemas
 export const generateTeachPlanSchema = z.object({
   lessonId: z.number().int().positive(),
-  country: z.string().default("Côte d'Ivoire"),
+  country: z.string().default('Côte d\'Ivoire'),
   grade: z.string(),
   language: z.enum(['French', 'English']).default('French'),
   schoolYear: z.string().default('2025-2026'),

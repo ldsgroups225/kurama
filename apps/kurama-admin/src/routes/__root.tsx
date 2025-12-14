@@ -139,7 +139,8 @@ function DevTools() {
     })
   }, [])
 
-  if (!mounted) return null
+  if (!mounted)
+    return null
 
   return (
     <React.Suspense fallback={null}>

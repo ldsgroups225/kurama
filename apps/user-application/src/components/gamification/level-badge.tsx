@@ -27,7 +27,8 @@ export function LevelBadge({
 
   // Trigger vibration when reaching a new level
   useEffect(() => {
-    if (!isSupported || !isNewLevel) return
+    if (!isSupported || !isNewLevel)
+      return
     vibrate(VibrationPatterns.levelUp)
   }, [isSupported, vibrate, isNewLevel])
   const progress = (currentXP / nextLevelXP) * 100

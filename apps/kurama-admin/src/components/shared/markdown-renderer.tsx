@@ -1,7 +1,7 @@
 import ReactMarkdown from 'react-markdown'
+import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
-import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 
 interface MarkdownRendererProps {
@@ -42,17 +42,19 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
           ),
           // Custom code blocks
           code: ({ className, children, ...props }) => {
-            const match = /language-(\w+)/.exec(className || '')
+            const match = /language-\w+/.exec(className || '')
             const isInline = !match
-            return isInline ? (
-              <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
-                {children}
-              </code>
-            ) : (
-              <code className={`block bg-muted p-4 rounded-lg overflow-x-auto text-sm font-mono ${className}`} {...props}>
-                {children}
-              </code>
-            )
+            return isInline
+              ? (
+                  <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+                    {children}
+                  </code>
+                )
+              : (
+                  <code className={`block bg-muted p-4 rounded-lg overflow-x-auto text-sm font-mono ${className}`} {...props}>
+                    {children}
+                  </code>
+                )
           },
           // Custom blockquote
           blockquote: ({ children }) => (

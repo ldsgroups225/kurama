@@ -4,8 +4,8 @@ import type { XPCalculationResult } from '@/lib/flashcard-gamification'
 import type { LearningSession } from '@/lib/learning-mode-gamification'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router'
-import { motion } from 'framer-motion'
 import { ArrowLeft, SlidersHorizontal, WifiOff } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { RewardAnimation, XPFeedback } from '@/components/gamification'
 import { CardFactory } from '@/components/learning/CardFactory'
@@ -76,7 +76,7 @@ function SessionPage() {
   const [currentXPResult, setCurrentXPResult] = useState<XPCalculationResult | null>(null)
 
   // Enhanced session tracking
-  const [enhancedSession, setEnhancedSession] = useState<Partial<LearningSession>>({
+  const [enhancedSession, setEnhancedSession] = useState<Partial<LearningSession>>(() => ({
     mode: mode as 'flashcards' | 'quiz' | 'exam',
     streakDays: 0, // This would come from user stats
     currentCombo: 0,
@@ -87,7 +87,7 @@ function SessionPage() {
     averageTimePerQuestion: 0,
     perfectAnswers: 0,
     struggledAnswers: 0,
-  })
+  }))
 
   const { updateStats } = useStatsUpdate({
     onLevelUp: (newLevel) => {
@@ -233,7 +233,7 @@ function SessionPage() {
         },
       })
     },
-    [navigate, lessonId, startTime, sessionStats, activeCards.length, mode, updateStats],
+    [activeCards.length, lessonId, mode, navigate, sessionStats, startTime, updateStats],
   )
 
   const handleFlip = useCallback(() => {
@@ -363,6 +363,8 @@ function SessionPage() {
       currentCard,
       currentCardIndex,
       enhancedSession,
+      quizVibration,
+      streakVibration,
     ],
   )
 
@@ -491,7 +493,7 @@ function SessionPage() {
     setHasStartedQuiz(true)
     setShowQuizSettings(false)
     setCurrentCardIndex(0)
-  }, [setCurrentCardIndex, cards])
+  }, [cards, setCurrentCardIndex])
 
   // Handle test start
   const handleStartTest = useCallback((settings: TestSettings) => {
@@ -581,9 +583,8 @@ function SessionPage() {
               onAnswer={(isCorrect: boolean, timeSpent: number) => {
                 handleResponse(isCorrect ? 'correct' : 'incorrect', timeSpent)
               }}
-              onXPEarned={(xp, breakdown) => {
+              onXPEarned={() => {
                 // Handle XP feedback for quiz mode
-                console.log('Quiz XP earned:', xp, breakdown)
               }}
             />
           )
@@ -610,9 +611,8 @@ function SessionPage() {
                 // Handle time up - auto-submit as incorrect
                 handleResponse('incorrect', 60)
               }}
-              onXPEarned={(xp, breakdown) => {
+              onXPEarned={() => {
                 // Handle XP feedback for exam mode
-                console.log('Exam XP earned:', xp, breakdown)
               }}
             />
           )

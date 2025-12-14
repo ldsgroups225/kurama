@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
-import { AdminSidebar, AdminHeader } from '@/components/layout'
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
+import { AdminHeader, AdminSidebar } from '@/components/layout'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { checkAuth } from '@/core/functions/auth'
 
 export const Route = createFileRoute('/_admin')({
@@ -8,7 +8,8 @@ export const Route = createFileRoute('/_admin')({
     try {
       const result = await checkAuth()
       return { user: result.user }
-    } catch {
+    }
+    catch {
       throw redirect({ to: '/' })
     }
   },

@@ -74,25 +74,30 @@ export function StreakCalendar({
               {/* Fire Glow Base */}
               <div className={`absolute inset-0 rounded-full blur-[20px] ${currentStreak > 0 ? 'bg-orange-600/50' : 'bg-transparent'}`} />
 
-              <div className={`
+              <div
+                className={`
                 relative z-10
                 flex h-14 w-14 items-center justify-center rounded-2xl shadow-xl
                 transition-all duration-500
                 ${currentStreak > 0
       ? 'bg-linear-to-br from-orange-500 to-red-600 border border-orange-400/50'
-      : 'bg-muted/50 border border-border'}
+      : 'bg-muted/50 border border-border'
+    }
                 `}
               >
-                <Flame className={cn(
-                  'h-7 w-7 transition-all duration-500',
-                  currentStreak > 0 ? 'text-white fill-white/20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]' : 'text-muted-foreground',
-                )}
+                <Flame
+                  className={cn(
+                    'h-7 w-7 transition-all duration-500',
+                    currentStreak > 0
+                      ? 'text-white fill-white/20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]'
+                      : 'text-muted-foreground',
+                  )}
                 />
               </div>
 
               {currentStreak > 0 && (
                 <div className="absolute -top-1 -right-1 z-20 flex h-5 w-5 items-center justify-center rounded-full bg-white border-2 border-orange-500 shadow-sm animate-bounce">
-                  <span className="text-[10px] role='img'">🔥</span>
+                  <span className="text-[10px]" role="img">🔥</span>
                 </div>
               )}
             </div>
@@ -125,7 +130,7 @@ export function StreakCalendar({
           <div className="grid grid-cols-7 gap-3">
             {weekDays.map(day => (
               <div
-                key={`weekday-${generateUUID()}`}
+                key={`weekday-${day}`}
                 className="text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
               >
                 {day}
@@ -145,7 +150,7 @@ export function StreakCalendar({
 
                 return (
                   <div
-                    key={`day-${generateUUID()}`}
+                    key={`day-${day?.date}`}
                     className={cn(
                       'relative flex aspect-square items-center justify-center rounded-xl transition-all duration-300 group',
                       isCompleted
@@ -159,15 +164,13 @@ export function StreakCalendar({
                       ? (
                           <Flame className="h-4 w-4 text-white fill-white/20 drop-shadow-md" />
                         )
-                      : (
-                          isToday
-                            ? (
-                                <div className="h-2 w-2 rounded-full bg-orange-500/50" />
-                              )
-                            : (
-                                <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50 group-hover:bg-muted-foreground transition-colors" />
-                              )
-                        )}
+                      : isToday
+                        ? (
+                            <div className="h-2 w-2 rounded-full bg-orange-500/50" />
+                          )
+                        : (
+                            <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50 group-hover:bg-muted-foreground transition-colors" />
+                          )}
                   </div>
                 )
               })}

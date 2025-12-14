@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { motion } from 'framer-motion'
 import {
   Award,
   BookOpen,
@@ -11,6 +10,7 @@ import {
   TrendingUp,
   Trophy,
 } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useEffect } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
 import { LogoLoader } from '@/components/ui/logo-loader'

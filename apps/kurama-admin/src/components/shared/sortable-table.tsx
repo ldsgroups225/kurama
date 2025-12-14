@@ -1,12 +1,12 @@
-import { useState } from 'react'
+import type { DragEndEvent } from '@dnd-kit/core'
 import {
-  DndContext,
   closestCenter,
+  DndContext,
+
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  type DragEndEvent,
 } from '@dnd-kit/core'
 import {
   arrayMove,
@@ -17,6 +17,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
+import { useState } from 'react'
 import {
   Table,
   TableBody,
@@ -67,6 +68,7 @@ function SortableRow<T extends { id: number | string }>({
     <TableRow ref={setNodeRef} style={style} className={isDragging ? 'bg-muted' : ''}>
       <TableCell className="w-10">
         <button
+          type="button"
           {...attributes}
           {...listeners}
           className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded"
@@ -74,7 +76,7 @@ function SortableRow<T extends { id: number | string }>({
           <GripVertical className="h-4 w-4 text-muted-foreground" />
         </button>
       </TableCell>
-      {columns.map((column) => (
+      {columns.map(column => (
         <TableCell key={column.key} className={column.className}>
           {column.cell(item)}
         </TableCell>
@@ -82,7 +84,6 @@ function SortableRow<T extends { id: number | string }>({
     </TableRow>
   )
 }
-
 
 export function SortableTable<T extends { id: number | string }>({
   columns,
@@ -102,15 +103,15 @@ export function SortableTable<T extends { id: number | string }>({
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   )
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
 
     if (over && active.id !== over.id) {
-      const oldIndex = items.findIndex((item) => item.id === active.id)
-      const newIndex = items.findIndex((item) => item.id === over.id)
+      const oldIndex = items.findIndex(item => item.id === active.id)
+      const newIndex = items.findIndex(item => item.id === over.id)
 
       const newItems = arrayMove(items, oldIndex, newIndex)
       setItems(newItems)
@@ -124,7 +125,7 @@ export function SortableTable<T extends { id: number | string }>({
         <TableHeader>
           <TableRow>
             <TableHead className="w-10"></TableHead>
-            {columns.map((column) => (
+            {columns.map(column => (
               <TableHead key={column.key} className={column.className}>
                 {column.header}
               </TableHead>
@@ -132,34 +133,38 @@ export function SortableTable<T extends { id: number | string }>({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {isLoading ? (
-            <TableRow>
-              <TableCell colSpan={columns.length + 1} className="h-24 text-center">
-                Chargement...
-              </TableCell>
-            </TableRow>
-          ) : items.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length + 1} className="h-24 text-center">
-                {emptyMessage}
-              </TableCell>
-            </TableRow>
-          ) : (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={items.map((item) => item.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                {items.map((item) => (
-                  <SortableRow key={item.id} item={item} columns={columns} />
-                ))}
-              </SortableContext>
-            </DndContext>
-          )}
+          {isLoading
+            ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length + 1} className="h-24 text-center">
+                    Chargement...
+                  </TableCell>
+                </TableRow>
+              )
+            : items.length === 0
+              ? (
+                  <TableRow>
+                    <TableCell colSpan={columns.length + 1} className="h-24 text-center">
+                      {emptyMessage}
+                    </TableCell>
+                  </TableRow>
+                )
+              : (
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <SortableContext
+                      items={items.map(item => item.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {items.map(item => (
+                        <SortableRow key={item.id} item={item} columns={columns} />
+                      ))}
+                    </SortableContext>
+                  </DndContext>
+                )}
         </TableBody>
       </Table>
     </div>

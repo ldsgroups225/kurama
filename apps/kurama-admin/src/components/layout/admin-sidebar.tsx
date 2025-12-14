@@ -1,14 +1,13 @@
 import { Link, useLocation, useRouter } from '@tanstack/react-router'
 import {
-  LayoutDashboard,
   BookOpen,
-  Layers,
   FileText,
-  Users,
-  LogOut,
   GraduationCap,
+  Layers,
+  LayoutDashboard,
+  LogOut,
+  Users,
 } from 'lucide-react'
-import { authClient } from '@/lib/auth'
 import {
   Sidebar,
   SidebarContent,
@@ -22,6 +21,7 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from '@/components/ui/sidebar'
+import { authClient } from '@/lib/auth'
 
 const navItems = [
   { href: '/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
@@ -63,9 +63,9 @@ export function AdminSidebar() {
             <SidebarMenu>
               {navItems.map((item) => {
                 const Icon = item.icon
-                const isActive =
-                  location.pathname === item.href ||
-                  location.pathname.startsWith(item.href + '/')
+                const isActive
+                  = location.pathname === item.href
+                    || location.pathname.startsWith(`${item.href}/`)
 
                 return (
                   <SidebarMenuItem key={item.href}>
