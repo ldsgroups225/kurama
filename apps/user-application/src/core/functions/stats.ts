@@ -291,7 +291,10 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
       if (nextLessonUnlocked) {
         const { lessons } = await import('@kurama/data-ops/drizzle/schema')
         const currentLesson = await db.query.lessons.findFirst({
-          where: eq(lessons.id, lessonId),
+          where: and(
+            eq(lessons.id, lessonId),
+            eq(lessons.isPublished, true)
+          ),
         })
 
         if (currentLesson) {
@@ -299,6 +302,7 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
             where: and(
               eq(lessons.subjectId, currentLesson.subjectId),
               eq(lessons.displayOrder, currentLesson.displayOrder + 1),
+              eq(lessons.isPublished, true)
             ),
           })
           nextLessonTitle = nextLesson?.title ?? null

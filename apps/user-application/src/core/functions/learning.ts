@@ -33,9 +33,12 @@ export const getLessonsBySubject = createServerFn({ method: 'GET' })
     const db = getDb()
     const userId = context.userId
 
-    // Fetch all lessons for the subject, ordered by displayOrder
+    // Fetch all published lessons for the subject, ordered by displayOrder
     const lessonsData = await db.query.lessons.findMany({
-      where: eq(lessons.subjectId, subjectId),
+      where: and(
+        eq(lessons.subjectId, subjectId),
+        eq(lessons.isPublished, true),
+      ),
       orderBy: [asc(lessons.displayOrder)],
       with: {
         subject: true,
@@ -105,7 +108,10 @@ export const getLessonDetails = createServerFn({ method: 'GET' })
     const db = getDb()
 
     const lesson = await db.query.lessons.findFirst({
-      where: eq(lessons.id, lessonId),
+      where: and(
+        eq(lessons.id, lessonId),
+        eq(lessons.isPublished, true),
+      ),
       with: {
         subject: true,
         cards: {
@@ -201,7 +207,10 @@ export const submitTestResult = createServerFn({ method: 'POST' })
 
     // Check if next lesson should be unlocked
     const currentLesson = await db.query.lessons.findFirst({
-      where: eq(lessons.id, lessonId),
+      where: and(
+        eq(lessons.id, lessonId),
+        eq(lessons.isPublished, true),
+      ),
     })
 
     let nextLessonUnlocked = false
@@ -213,6 +222,7 @@ export const submitTestResult = createServerFn({ method: 'POST' })
         where: and(
           eq(lessons.subjectId, currentLesson.subjectId),
           eq(lessons.displayOrder, currentLesson.displayOrder + 1),
+          eq(lessons.isPublished, true),
         ),
       })
 
