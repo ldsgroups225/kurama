@@ -260,33 +260,38 @@ export function EnhancedQuiz({
               >
                 {selectedAnswer === correctIndex
                   ? (
-                      <div className="flex items-center gap-3 text-success">
-                        <div className="w-6 h-6 rounded-full bg-success border border-success/20 flex items-center justify-center">
-                          <span className="text-success text-sm font-bold">✓</span>
-                        </div>
-                        <div>
-                          <p className="font-semibold">Correct !</p>
-                          <p className="text-sm opacity-80">
-                            {attempts === 1 ? 'Excellente réponse du premier coup !' : 'Bonne réponse !'}
-                          </p>
-                        </div>
+                    <div className="flex items-center gap-3 text-success">
+                      <div className="w-6 h-6 rounded-full bg-success border border-success/20 flex items-center justify-center">
+                        <span className="text-success text-sm font-bold">✓</span>
                       </div>
-                    )
+                      <div>
+                        <p className="font-semibold">Correct !</p>
+                        <p className="text-sm opacity-80">
+                          {attempts === 1 ? 'Excellente réponse du premier coup !' : 'Bonne réponse !'}
+                        </p>
+                      </div>
+                    </div>
+                  )
                   : (
-                      <div className="flex items-center gap-3 text-error">
-                        <div className="w-6 h-6 rounded-full bg-error border border-error/20 flex items-center justify-center">
+                    <div className="flex flex-col gap-3 text-error">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-full bg-error border border-error/20 flex items-center justify-center shrink-0">
                           <span className="text-error text-sm font-bold">✗</span>
                         </div>
-                        <div>
-                          <p className="font-semibold">Incorrect</p>
-                          <p className="text-sm opacity-80">
-                            La bonne réponse était :
-                            {' '}
-                            <strong>{correctAnswer}</strong>
-                          </p>
+                        <p className="font-semibold">Incorrect</p>
+                      </div>
+                      <div className="rounded-lg bg-background/50 p-3">
+                        <p className="mb-1 text-xs font-medium text-muted-foreground">La bonne réponse était :</p>
+                        <div className="font-medium text-foreground">
+                          <MarkdownRenderer
+                            content={correctAnswer}
+                            compact
+                            className="[&_p]:my-0 [&_p]:text-foreground"
+                          />
                         </div>
                       </div>
-                    )}
+                    </div>
+                  )}
               </motion.div>
             )}
           </AnimatePresence>
