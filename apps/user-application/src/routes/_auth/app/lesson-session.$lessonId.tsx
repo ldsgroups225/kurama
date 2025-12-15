@@ -323,9 +323,11 @@ function SessionPage() {
 
         const xpResult = calculateFlashcardXP(flashcardCard, flashcardSession, true)
 
+        // Don't show XP feedback during flashcard sessions to avoid distraction
+        // XP is still calculated and applied, just not shown
         if (xpResult.totalXP > 0) {
           setCurrentXPResult(xpResult)
-          setShowXPFeedback(true)
+          // setShowXPFeedback(true) // Disabled for flashcards mode
         }
       }
 
