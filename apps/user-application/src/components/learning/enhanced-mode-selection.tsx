@@ -1,5 +1,6 @@
 import { ChevronRight, Clock, CreditCard, FileText, ListChecks, Star, Target, Zap } from 'lucide-react'
 import { motion } from 'motion/react'
+import { MarkdownRenderer } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { calculatePotentialXP, getModeDifficultyDescription, getModeXPRate } from '@/lib/learning-mode-gamification'
@@ -220,34 +221,23 @@ export function EnhancedModeSelection({ cardCount, onModeSelect, className }: En
         })}
       </div>
 
-      {/* XP Legend */}
+      {/* XP Bonus Guide */}
       <motion.div
         variants={itemVariants}
         className="mt-6 p-4 bg-muted/30 rounded-lg border border-border"
       >
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2 mb-3">
           <Zap className="w-4 h-4 text-xp" />
-          <span className="text-sm font-medium text-foreground">Système XP amélioré</span>
+          <span className="text-sm font-medium text-foreground">Comment gagner plus d'XP ?</span>
         </div>
-        <div className="text-xs text-muted-foreground space-y-1">
-          <p>
-            •
-            <strong>Flashcards:</strong>
-            {' '}
-            Bonus de série, multiplicateurs de difficulté
-          </p>
-          <p>
-            •
-            <strong>Quiz:</strong>
-            {' '}
-            Bonus de vitesse, combos de réponses correctes
-          </p>
-          <p>
-            •
-            <strong>Examen:</strong>
-            {' '}
-            Récompenses maximales, bonus sous pression
-          </p>
+        <div className="text-xs text-muted-foreground [&_p]:my-1 [&_strong]:text-foreground">
+          <MarkdownRenderer
+            content={`- **Flashcards:** Enchaîne les bonnes réponses pour des bonus de série
+- **Quiz:** Réponds vite et correctement pour des combos XP
+- **Examen:** Récompenses maximales pour les sessions complètes`}
+            compact
+            className="[&_ul]:my-0 [&_ul]:pl-4 [&_li]:text-muted-foreground [&_li]:text-xs [&_strong]:text-foreground"
+          />
         </div>
       </motion.div>
     </motion.div>
