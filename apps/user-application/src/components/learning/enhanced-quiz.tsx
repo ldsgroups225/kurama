@@ -42,25 +42,49 @@ export function EnhancedQuiz({
   const feedbackRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Generate quiz options (stable across re-renders to maintain position)
-  const correctAnswer = card?.backContent || card?.back || 'Réponse correcte'
-  const [shuffledOptions] = useState(() => {
-    const opts = [
-      correctAnswer,
-      'Option incorrecte A',
-      'Option incorrecte B',
-      'Option incorrecte C',
-    ]
-    // Shuffle once and keep stable
-    for (let i = opts.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [opts[i], opts[j]] = [opts[j], opts[i]]
+  // Use real options from card data, or fallback to generated options
+  const hasRealOptions = card?.options && Array.isArray(card.options) && card.options.length > 0
+
+  const [quizData] = useState(() => {
+    if (hasRealOptions) {
+      // Use real options from card data
+      const opts = card.options.map((opt: { id: string, text: string, isCorrect: boolean }) => ({
+        text: opt.text,
+        isCorrect: opt.isCorrect,
+      }))
+      // Shuffle options
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [opts[i], opts[j]] = [opts[j], opts[i]]
+      }
+      const correctIdx = opts.findIndex((opt: { isCorrect: boolean }) => opt.isCorrect)
+      const correctText = opts.find((opt: { isCorrect: boolean }) => opt.isCorrect)?.text || ''
+      return {
+        options: opts.map((opt: { text: string }) => opt.text),
+        correctIndex: correctIdx,
+        correctAnswer: correctText,
+      }
     }
-    return opts
+    else {
+      // Fallback: generate options from backContent
+      const correctText = card?.correctAnswer || card?.backContent || card?.back || 'Réponse correcte'
+      const opts = [correctText, 'Option A', 'Option B', 'Option C']
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [opts[i], opts[j]] = [opts[j], opts[i]]
+      }
+      return {
+        options: opts,
+        correctIndex: opts.indexOf(correctText),
+        correctAnswer: correctText,
+      }
+    }
   })
 
-  const correctIndex = shuffledOptions.indexOf(correctAnswer)
-  const question = card?.frontContent || card?.front || 'Question'
+  const shuffledOptions = quizData.options
+  const correctIndex = quizData.correctIndex
+  const correctAnswer = quizData.correctAnswer
+  const question = card?.question || card?.frontContent || card?.front || 'Question'
 
   // Auto-scroll to feedback on incorrect answer
   useEffect(() => {
@@ -227,7 +251,7 @@ export function EnhancedQuiz({
 
           {/* Options */}
           <div className="space-y-3">
-            {shuffledOptions.map((option, index) => (
+            {shuffledOptions.map((option: string, index: number) => (
               <motion.button
                 key={`${option.slice(0, 20)}}`}
                 type="button"
@@ -260,38 +284,38 @@ export function EnhancedQuiz({
               >
                 {selectedAnswer === correctIndex
                   ? (
-                    <div className="flex items-center gap-3 text-success">
-                      <div className="w-6 h-6 rounded-full bg-success border border-success/20 flex items-center justify-center">
-                        <span className="text-success text-sm font-bold">✓</span>
+                      <div className="flex items-center gap-3 text-success">
+                        <div className="w-6 h-6 rounded-full bg-success border border-success/20 flex items-center justify-center">
+                          <span className="text-success text-sm font-bold">✓</span>
+                        </div>
+                        <div>
+                          <p className="font-semibold">Correct !</p>
+                          <p className="text-sm opacity-80">
+                            {attempts === 1 ? 'Excellente réponse du premier coup !' : 'Bonne réponse !'}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold">Correct !</p>
-                        <p className="text-sm opacity-80">
-                          {attempts === 1 ? 'Excellente réponse du premier coup !' : 'Bonne réponse !'}
-                        </p>
-                      </div>
-                    </div>
-                  )
+                    )
                   : (
-                    <div className="flex flex-col gap-3 text-error">
-                      <div className="flex items-center gap-3">
-                        <div className="w-6 h-6 rounded-full bg-error border border-error/20 flex items-center justify-center shrink-0">
-                          <span className="text-error text-sm font-bold">✗</span>
+                      <div className="flex flex-col gap-3 text-error">
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 rounded-full bg-error border border-error/20 flex items-center justify-center shrink-0">
+                            <span className="text-error text-sm font-bold">✗</span>
+                          </div>
+                          <p className="font-semibold">Incorrect</p>
                         </div>
-                        <p className="font-semibold">Incorrect</p>
-                      </div>
-                      <div className="rounded-lg bg-background/50 p-3">
-                        <p className="mb-1 text-xs font-medium text-muted-foreground">La bonne réponse était :</p>
-                        <div className="font-medium text-foreground">
-                          <MarkdownRenderer
-                            content={correctAnswer}
-                            compact
-                            className="[&_p]:my-0 [&_p]:text-foreground"
-                          />
+                        <div className="rounded-lg bg-background/50 p-3">
+                          <p className="mb-1 text-xs font-medium text-muted-foreground">La bonne réponse était :</p>
+                          <div className="font-medium text-foreground">
+                            <MarkdownRenderer
+                              content={correctAnswer}
+                              compact
+                              className="[&_p]:my-0 [&_p]:text-foreground"
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
               </motion.div>
             )}
           </AnimatePresence>

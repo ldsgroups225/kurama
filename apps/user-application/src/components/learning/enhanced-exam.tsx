@@ -81,25 +81,53 @@ export function EnhancedExam({
     return () => clearInterval(timer)
   }, [examState, timeLimit, onTimeUp, hasTriggeredTimeWarning, triggerTimeWarning])
 
-  // Generate exam options (stable across re-renders to maintain position)
-  const correctAnswer = card?.backContent || card?.back || 'Réponse correcte'
-  const [shuffledOptions] = useState(() => {
-    const opts = [
-      correctAnswer,
-      'Option plausible A',
-      'Option plausible B',
-      'Option plausible C',
-    ]
-    // Shuffle once and keep stable
-    for (let i = opts.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [opts[i], opts[j]] = [opts[j], opts[i]]
+  // Use real options from card data, or fallback to generated options
+  const hasRealOptions = card?.options && Array.isArray(card.options) && card.options.length > 0
+
+  const [examData] = useState<{
+    options: string[]
+    correctIndex: number
+    correctAnswer: string
+  }>(() => {
+    if (hasRealOptions) {
+      // Use real options from card data
+      const opts = card.options.map((opt: { id: string, text: string, isCorrect: boolean }) => ({
+        text: opt.text,
+        isCorrect: opt.isCorrect,
+      }))
+      // Shuffle options
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [opts[i], opts[j]] = [opts[j], opts[i]]
+      }
+      const correctIdx = opts.findIndex((opt: { isCorrect: boolean }) => opt.isCorrect)
+      const correctText = opts.find((opt: { isCorrect: boolean }) => opt.isCorrect)?.text || ''
+      return {
+        options: opts.map((opt: { text: string }) => opt.text),
+        correctIndex: correctIdx,
+        correctAnswer: correctText,
+      }
     }
-    return opts
+    else {
+      // Fallback: generate options from backContent
+      const correctText = card?.correctAnswer || card?.backContent || card?.back || 'Réponse correcte'
+      const opts = [correctText, 'Option A', 'Option B', 'Option C']
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [opts[i], opts[j]] = [opts[j], opts[i]]
+      }
+      return {
+        options: opts,
+        correctIndex: opts.indexOf(correctText),
+        correctAnswer: correctText,
+      }
+    }
   })
 
-  const correctIndex = shuffledOptions.indexOf(correctAnswer)
-  const question = card?.frontContent || card?.front || 'Question'
+  const shuffledOptions = examData.options
+  const correctIndex = examData.correctIndex
+  // Note: correctAnswer not used in exam mode (no feedback shown)
+  const question = card?.question || card?.frontContent || card?.front || 'Question'
 
   // Auto-scroll to top when moving to next card
   useEffect(() => {
@@ -269,7 +297,7 @@ export function EnhancedExam({
 
           {/* Options */}
           <div className="space-y-3">
-            {shuffledOptions.map((option, index) => (
+            {shuffledOptions.map((option: string, index: number) => (
               <motion.button
                 key={`${option.slice(0, 20)}`}
                 type="button"

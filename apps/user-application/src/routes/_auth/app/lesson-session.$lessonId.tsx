@@ -442,9 +442,36 @@ function SessionPage() {
       }
 
       const questions = shuffled.map((card, index) => {
-        const questionType = Math.random() > 0.5 ? 'multichoice' : 'true_false'
+        // Check if card already has real options (multichoice card from database)
+        const hasRealOptions = card.options && Array.isArray(card.options) && card.options.length > 0
+        const isMultichoiceCard = card.cardType === 'multichoice' || card.card_type === 'multichoice'
+        const isTrueFalseCard = card.cardType === 'true_false' || card.card_type === 'true_false'
+
+        // Use card's native type if available, otherwise randomly assign
+        let questionType: 'multichoice' | 'true_false'
+        if (isMultichoiceCard && hasRealOptions) {
+          questionType = 'multichoice'
+        }
+        else if (isTrueFalseCard) {
+          questionType = 'true_false'
+        }
+        else {
+          questionType = Math.random() > 0.5 ? 'multichoice' : 'true_false'
+        }
 
         if (questionType === 'multichoice') {
+          // Use real options if available
+          if (hasRealOptions) {
+            return {
+              ...card,
+              cardType: 'multichoice' as const,
+              question: card.question || card.frontContent || card.front,
+              options: card.options,
+              correctAnswer: card.correctAnswer || card.correct_answer,
+            }
+          }
+
+          // Fallback: generate options from other cards
           const correctAnswer = card.backContent || card.back
           const otherCards = shuffled.filter((_, i) => i !== index)
           const wrongAnswers = otherCards
@@ -470,6 +497,7 @@ function SessionPage() {
             cardType: 'multichoice' as const,
             question: card.frontContent || card.front,
             options: allOptions,
+            correctAnswer,
           }
         }
         else {

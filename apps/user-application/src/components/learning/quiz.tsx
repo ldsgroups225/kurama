@@ -1,5 +1,5 @@
 import { CheckCircle2, Star, Volume2, XCircle } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { MarkdownRenderer } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -17,35 +17,55 @@ interface QuizProps {
 type QuestionState = 'answering' | 'correct' | 'incorrect' | 'learning'
 
 export function Quiz({ card, cardIndex, totalCards, questionType = 'multiple-choice', onAnswer }: QuizProps) {
+  const optionKey = useId()
+
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [questionState, setQuestionState] = useState<QuestionState>('answering')
   const [showAnswer, setShowAnswer] = useState(false)
   const [userAnswer, setUserAnswer] = useState('')
 
-  const correctAnswer = card?.backContent || card?.back
+  // Use real options from card data, or fallback to generated options
+  const hasRealOptions = card?.options && Array.isArray(card.options) && card.options.length > 0
 
-  // Memoize shuffled options to prevent re-shuffling on re-renders
-  // eslint-disable react-hooks/purity
-  const options = useMemo(() => {
-    if (!correctAnswer)
-      return []
-
-    // In a real implementation, you'd have actual distractors from the database
-    // For now, we'll create placeholder options
-    const opts = [
-      correctAnswer,
-      'Option incorrecte 1',
-      'Option incorrecte 2',
-      'Option incorrecte 3',
-    ]
-
-    // Fisher-Yates shuffle for proper randomization
-    for (let i = opts.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-        ;[opts[i], opts[j]] = [opts[j], opts[i]]
+  // Memoize quiz data to prevent re-shuffling on re-renders
+  const quizData = useMemo(() => {
+    if (hasRealOptions) {
+      // Use real options from card data
+      const opts = card.options.map((opt: { id: string, text: string, isCorrect: boolean }) => ({
+        text: opt.text,
+        isCorrect: opt.isCorrect,
+      }))
+      // Shuffle options
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [opts[i], opts[j]] = [opts[j], opts[i]]
+      }
+      const correctText = opts.find((opt: { isCorrect: boolean }) => opt.isCorrect)?.text || ''
+      return {
+        options: opts.map((opt: { text: string }) => opt.text),
+        correctAnswer: correctText,
+      }
     }
-    return opts
-  }, [correctAnswer])
+    else {
+      // Fallback: generate options from backContent
+      const correctText = card?.correctAnswer || card?.backContent || card?.back || ''
+      if (!correctText)
+        return { options: [], correctAnswer: '' }
+
+      const opts = [correctText, 'Option A', 'Option B', 'Option C']
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [opts[i], opts[j]] = [opts[j], opts[i]]
+      }
+      return {
+        options: opts,
+        correctAnswer: correctText,
+      }
+    }
+  }, [card?.options, card?.correctAnswer, card?.backContent, card?.back, hasRealOptions])
+
+  const options = quizData.options
+  const correctAnswer = quizData.correctAnswer
 
   if (!card) {
     return null
@@ -100,8 +120,7 @@ export function Quiz({ card, cardIndex, totalCards, questionType = 'multiple-cho
   const renderMultipleChoice = () => (
     <>
       <div className="space-y-3">
-        {options.map((option) => {
-          const optionIndex = options.indexOf(option)
+        {options.map((option: string, optionIndex: number) => {
           const isSelected = selectedAnswer === optionIndex
           const isCorrect = option === correctAnswer
           const showCorrectState = questionState !== 'answering' && isCorrect
@@ -109,7 +128,7 @@ export function Quiz({ card, cardIndex, totalCards, questionType = 'multiple-cho
 
           return (
             <button
-              key={`${option}-${optionIndex}`}
+              key={`${option}-${optionKey}`}
               type="button"
               onClick={() => handleOptionSelect(optionIndex)}
               disabled={questionState !== 'answering'}
@@ -234,24 +253,24 @@ export function Quiz({ card, cardIndex, totalCards, questionType = 'multiple-cho
             <div className="flex items-center gap-2">
               {questionState === 'correct'
                 ? (
-                    <>
-                      <CheckCircle2 className="h-5 w-5 text-success" />
-                      <span className="font-semibold text-success">Vous maîtrisez le sujet !</span>
-                    </>
-                  )
+                  <>
+                    <CheckCircle2 className="h-5 w-5 text-success" />
+                    <span className="font-semibold text-success">Vous maîtrisez le sujet !</span>
+                  </>
+                )
                 : questionState === 'learning'
                   ? (
-                      <>
-                        <span className="text-lg">📚</span>
-                        <span className="font-semibold text-warning">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
-                      </>
-                    )
+                    <>
+                      <span className="text-lg">📚</span>
+                      <span className="font-semibold text-warning">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
+                    </>
+                  )
                   : (
-                      <>
-                        <XCircle className="h-5 w-5 text-error" />
-                        <span className="font-semibold text-error">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
-                      </>
-                    )}
+                    <>
+                      <XCircle className="h-5 w-5 text-error" />
+                      <span className="font-semibold text-error">Pas d'inquiétude, vous êtes en train d'apprendre !</span>
+                    </>
+                  )}
             </div>
 
             {showAnswer && (

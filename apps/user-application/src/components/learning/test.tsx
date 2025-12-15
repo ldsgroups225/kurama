@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { MarkdownRenderer } from '@/components/shared'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -24,6 +24,8 @@ export function Test({
   cardSide = 'term',
   onAnswer,
 }: TestProps) {
+  const optionKey = useId()
+
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [userAnswer, setUserAnswer] = useState('')
   const [isAnswered, setIsAnswered] = useState(false)
@@ -33,26 +35,37 @@ export function Test({
   const question = showSide === 'term' ? card?.frontContent || card?.front : card?.backContent || card?.back
   const correctAnswer = showSide === 'term' ? card?.backContent || card?.back : card?.frontContent || card?.front
 
+  // Use real options from card data, or fallback to generated options
+  const hasRealOptions = card?.options && Array.isArray(card.options) && card.options.length > 0
+
   // Memoize shuffled options for multiple choice
-  // eslint-disable react-hooks/purity
   const options = useMemo(() => {
-    if (questionType !== 'multiple-choice' || !correctAnswer)
+    if (questionType !== 'multiple-choice')
       return []
 
-    const opts = [
-      correctAnswer,
-      'Option incorrecte 1',
-      'Option incorrecte 2',
-      'Option incorrecte 3',
-    ]
-
-    // Fisher-Yates shuffle for proper randomization
-    for (let i = opts.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-        ;[opts[i], opts[j]] = [opts[j], opts[i]]
+    if (hasRealOptions) {
+      // Use real options from card data
+      const opts = card.options.map((opt: { id: string, text: string, isCorrect: boolean }) => opt.text)
+      // Shuffle options
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [opts[i], opts[j]] = [opts[j], opts[i]]
+      }
+      return opts
     }
-    return opts
-  }, [correctAnswer, questionType])
+    else {
+      // Fallback: generate options from correctAnswer
+      if (!correctAnswer)
+        return []
+
+      const opts = [correctAnswer, 'Option A', 'Option B', 'Option C']
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [opts[i], opts[j]] = [opts[j], opts[i]]
+      }
+      return opts
+    }
+  }, [correctAnswer, questionType, hasRealOptions, card?.options])
 
   if (!card) {
     return null
@@ -65,7 +78,17 @@ export function Test({
     setSelectedAnswer(index)
     setIsAnswered(true)
 
-    const isCorrect = options[index] === correctAnswer
+    let isCorrect: boolean
+    if (hasRealOptions) {
+      // Check against the real option's isCorrect flag
+      const selectedOptionText = options[index]
+      const originalOption = card.options.find((opt: { text: string }) => opt.text === selectedOptionText)
+      isCorrect = originalOption?.isCorrect || false
+    }
+    else {
+      // Fallback: check against correctAnswer
+      isCorrect = options[index] === correctAnswer
+    }
 
     // Auto-advance with natural delay (100ms)
     setTimeout(() => {
@@ -106,13 +129,12 @@ export function Test({
 
   const renderMultipleChoice = () => (
     <div className="space-y-3">
-      {options.map((option) => {
-        const optionIndex = options.indexOf(option)
+      {options.map((option: string, optionIndex: number) => {
         const isSelected = selectedAnswer === optionIndex
 
         return (
           <motion.button
-            key={`${option}-${optionIndex}`}
+            key={`${option}-${optionKey}`}
             type="button"
             onClick={() => handleOptionSelect(optionIndex)}
             disabled={isAnswered}
