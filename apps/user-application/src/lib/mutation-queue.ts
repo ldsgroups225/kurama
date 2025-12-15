@@ -162,7 +162,7 @@ export class MutationQueueManagerImpl implements MutationQueueManager {
     }
 
     window.addEventListener('online', handleOnline)
-      ; (window as any).__mutationQueueOnlineListenerSetup = true
+    ; (window as any).__mutationQueueOnlineListenerSetup = true
     // eslint-disable-next-line no-console
     console.log('[MutationQueue] Online event fallback setup complete')
   }

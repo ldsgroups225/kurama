@@ -293,7 +293,7 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
         const currentLesson = await db.query.lessons.findFirst({
           where: and(
             eq(lessons.id, lessonId),
-            eq(lessons.isPublished, true)
+            eq(lessons.isPublished, true),
           ),
         })
 
@@ -302,7 +302,7 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
             where: and(
               eq(lessons.subjectId, currentLesson.subjectId),
               eq(lessons.displayOrder, currentLesson.displayOrder + 1),
-              eq(lessons.isPublished, true)
+              eq(lessons.isPublished, true),
             ),
           })
           nextLessonTitle = nextLesson?.title ?? null

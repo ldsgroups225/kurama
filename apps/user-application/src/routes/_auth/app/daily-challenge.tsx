@@ -474,11 +474,11 @@ function DailyChallengePage() {
             >
               {startMutation.isPending
                 ? (
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                )
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  )
                 : (
-                  <Play className="mr-2 h-5 w-5 fill-current" />
-                )}
+                    <Play className="mr-2 h-5 w-5 fill-current" />
+                  )}
               {challengeStatus?.isInProgress ? 'Reprendre le défi' : 'Commencer le défi'}
             </Button>
 

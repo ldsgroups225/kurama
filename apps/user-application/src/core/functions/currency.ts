@@ -17,7 +17,7 @@ export const fetchCurrencyRate = createServerFn({ method: 'GET' })
           headers: {
             'User-Agent': 'Kurama-App/1.0',
           },
-        }
+        },
       )
 
       if (!response.ok) {
@@ -38,7 +38,8 @@ export const fetchCurrencyRate = createServerFn({ method: 'GET' })
       }
 
       throw new Error('XOF rate not found in response')
-    } catch (error) {
+    }
+    catch (error) {
       console.warn('Failed to fetch currency rate from API:', error)
 
       // Return fallback rate
@@ -60,7 +61,7 @@ const CurrencyRateSchema = z.object({
 
 export const getCurrencyRate = createServerFn({ method: 'GET' })
   .inputValidator((data: { forceRefresh?: boolean }) =>
-    CurrencyRateSchema.parse(data)
+    CurrencyRateSchema.parse(data),
   )
   .handler(async ({ data: { forceRefresh } }) => {
     // For now, always fetch fresh rate
