@@ -2,6 +2,8 @@ import { ANIMATION_CONFIG } from '@kurama/config/animation'
 import { useMotionValue, useTransform } from 'motion/react'
 
 const SWIPE_THRESHOLD = ANIMATION_CONFIG.swipe.threshold
+// Dead zone: color only starts changing after this threshold (50% of swipe threshold)
+const COLOR_START_THRESHOLD = SWIPE_THRESHOLD * 0.65
 
 /**
  * Semantic color tokens for swipe animations using CSS variables
@@ -27,6 +29,7 @@ const COLORS = {
 
 /**
  * Hook to manage card swipe animations and visual feedback
+ * Color transitions use a function-based transform for precise threshold control
  */
 export function useCardSwipeAnimations() {
   const x = useMotionValue(0)
@@ -35,20 +38,46 @@ export function useCardSwipeAnimations() {
   const rotate = useTransform(x, [-200, 0, 200], [-15, 0, 15])
   const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0.5, 1, 1, 1, 0.5])
 
-  // Background color transitions - Glassmorphism support
-  // Base: zinc-900/60 -> Green/Orange tint on swipe
-  const cardBackgroundColor = useTransform(
-    x,
-    [-SWIPE_THRESHOLD, 0, SWIPE_THRESHOLD],
-    [COLORS.warningSemiTransparent, COLORS.neutralCard, COLORS.successSemiTransparent],
-  )
+  // Background color transitions using function for precise threshold control
+  // Color only starts changing after COLOR_START_THRESHOLD (dead zone for both directions)
+  const cardBackgroundColor = useTransform(x, (xValue) => {
+    if (xValue >= SWIPE_THRESHOLD) {
+      return COLORS.successSemiTransparent
+    }
+    if (xValue <= -SWIPE_THRESHOLD) {
+      return COLORS.warningSemiTransparent
+    }
+    // Only start color change after dead zone
+    if (xValue > COLOR_START_THRESHOLD) {
+      const progress = (xValue - COLOR_START_THRESHOLD) / (SWIPE_THRESHOLD - COLOR_START_THRESHOLD)
+      return `oklch(from var(--success-from) l c h / ${0.5 * progress})`
+    }
+    if (xValue < -COLOR_START_THRESHOLD) {
+      const progress = (Math.abs(xValue) - COLOR_START_THRESHOLD) / (SWIPE_THRESHOLD - COLOR_START_THRESHOLD)
+      return `oklch(from var(--warning-from) l c h / ${0.5 * progress})`
+    }
+    return COLORS.neutralCard
+  })
 
-  // Border color transitions
-  const cardBorderColor = useTransform(
-    x,
-    [-SWIPE_THRESHOLD, 0, SWIPE_THRESHOLD],
-    [COLORS.warningSemiOpaque, COLORS.neutralBorder, COLORS.successSemiOpaque],
-  )
+  // Border color transitions using function for precise threshold control
+  const cardBorderColor = useTransform(x, (xValue) => {
+    if (xValue >= SWIPE_THRESHOLD) {
+      return COLORS.successSemiOpaque
+    }
+    if (xValue <= -SWIPE_THRESHOLD) {
+      return COLORS.warningSemiOpaque
+    }
+    // Only start color change after dead zone
+    if (xValue > COLOR_START_THRESHOLD) {
+      const progress = (xValue - COLOR_START_THRESHOLD) / (SWIPE_THRESHOLD - COLOR_START_THRESHOLD)
+      return `oklch(from var(--success-from) l c h / ${0.2 + 0.6 * progress})`
+    }
+    if (xValue < -COLOR_START_THRESHOLD) {
+      const progress = (Math.abs(xValue) - COLOR_START_THRESHOLD) / (SWIPE_THRESHOLD - COLOR_START_THRESHOLD)
+      return `oklch(from var(--warning-from) l c h / ${0.2 + 0.6 * progress})`
+    }
+    return COLORS.neutralBorder
+  })
 
   // Correct badge animations
   const correctBadgeBg = useTransform(
