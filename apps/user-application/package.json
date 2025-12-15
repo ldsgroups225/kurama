@@ -23,9 +23,9 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@kurama/config": "workspace:^",
     "@kurama/data-ops": "workspace:^",
     "@kurama/observability": "workspace:^",
-    "@kurama/config": "workspace:^",
     "@polar-sh/sdk": "catalog:integrations",
     "@polar-sh/tanstack-start": "catalog:integrations",
     "@radix-ui/react-avatar": "catalog:ui",
@@ -33,6 +33,7 @@
     "@radix-ui/react-dialog": "catalog:ui",
     "@radix-ui/react-dropdown-menu": "catalog:ui",
     "@radix-ui/react-label": "catalog:ui",
+    "@radix-ui/react-radio-group": "catalog:ui",
     "@radix-ui/react-scroll-area": "catalog:ui",
     "@radix-ui/react-select": "catalog:ui",
     "@radix-ui/react-slider": "catalog:ui",
