@@ -1,5 +1,5 @@
 import { getWorkerEnvironment } from '@kurama/config/environment'
-import { createLogger } from '@kurama/observability/logging'
+import { createLogger, setupLogging } from '@kurama/observability/logging'
 import {
   sentryErrorHandler,
   sentryMiddleware,
@@ -22,6 +22,20 @@ interface AppEnv {
 
 export const app = new Hono<{ Bindings: AppEnv }>()
 
+// Initialize logging on first request
+let loggingInitialized = false
+async function initializeLogging(env: AppEnv) {
+  if (!loggingInitialized) {
+    await setupLogging({
+      level: env.ENVIRONMENT === 'production' ? 'info' : 'debug',
+      environment: env.ENVIRONMENT || 'development',
+      sentryDsn: env.SENTRY_DSN,
+      enableConsole: true,
+    })
+    loggingInitialized = true
+  }
+}
+
 const logger = createLogger('api')
 
 // Sentry middleware (first!)
@@ -33,8 +47,9 @@ app.use('*', sentryMiddleware(env => ({
   sendDefaultPii: env.ENVIRONMENT === 'development',
 })))
 
-// Request logging
+// Initialize logging and request logging
 app.use('*', async (c, next) => {
+  await initializeLogging(c.env)
   const start = Date.now()
   await next()
   const duration = Date.now() - start

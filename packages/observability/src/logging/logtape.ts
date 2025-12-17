@@ -26,6 +26,11 @@ export async function setupLogging(config: LogTapeConfig) {
     loggerSinks.push('sentry')
   }
 
+  // Meta logger sink (for LogTape internal errors)
+  sinks.meta = (record: LogRecord) => {
+    console.error('[LogTape Meta]', record.level.toUpperCase(), record.message)
+  }
+
   await configure({
     sinks,
     loggers: [
@@ -33,6 +38,12 @@ export async function setupLogging(config: LogTapeConfig) {
         category: ['kurama'],
         sinks: loggerSinks,
         lowestLevel: config.level,
+      },
+      // Configure meta logger with dedicated sink
+      {
+        category: ['logtape', 'meta'],
+        sinks: ['meta'],
+        lowestLevel: 'error', // Only log errors and above to reduce noise
       },
     ],
   })

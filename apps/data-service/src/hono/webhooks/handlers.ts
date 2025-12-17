@@ -31,12 +31,34 @@ interface DbConfig {
 // Metadata type for our database
 type SafeMetadata = Record<string, string | number | boolean | null>
 
-// Polar webhook payload types (simplified)
+// Polar customer object (nested in subscription/order data)
+// Supports both snake_case (raw webhook) and camelCase (SDK transformed)
+interface PolarCustomer {
+  id: string
+  externalId?: string | null
+  external_id?: string | null
+  email?: string
+  name?: string | null
+  metadata?: Record<string, unknown>
+}
+
+// Polar webhook payload types
+// Supports both snake_case (raw webhook) and camelCase (SDK transformed)
 interface PolarSubscriptionData {
   id: string
-  product_id: string
+  // camelCase (SDK)
+  productId?: string
+  priceId?: string
+  currentPeriodStart?: string
+  currentPeriodEnd?: string
+  cancelAtPeriodEnd?: boolean
+  canceledAt?: string
+  trialStart?: string
+  trialEnd?: string
+  customerId?: string
+  // snake_case (raw webhook)
+  product_id?: string
   price_id?: string
-  status: string
   current_period_start?: string
   current_period_end?: string
   cancel_at_period_end?: boolean
@@ -44,19 +66,37 @@ interface PolarSubscriptionData {
   trial_start?: string
   trial_end?: string
   customer_id?: string
+  // Common
+  status: string
+  customer?: PolarCustomer
   metadata?: Record<string, unknown>
 }
 
 interface PolarOrderData {
   id: string
-  product_id: string
+  // camelCase (SDK)
+  productId?: string
+  subscriptionId?: string
+  totalAmount?: number
+  netAmount?: number
+  subtotalAmount?: number
+  checkoutId?: string
+  billingReason?: string
+  customerId?: string
+  // snake_case (raw webhook)
+  product_id?: string
   subscription_id?: string
-  amount: number
-  currency: string
-  status: string
+  total_amount?: number
+  net_amount?: number
+  subtotal_amount?: number
   checkout_id?: string
   billing_reason?: string
   customer_id?: string
+  // Common
+  amount?: number
+  currency: string
+  status: string
+  customer?: PolarCustomer
   metadata?: Record<string, unknown>
 }
 
@@ -101,6 +141,9 @@ export async function handleWebhookEvent(
   initDatabase(dbConfig)
 
   console.warn(`Processing webhook event: ${payload.type}`)
+
+  // Log full payload for debugging (remove in production if too verbose)
+  console.warn('Webhook payload data:', JSON.stringify(payload.data, null, 2))
 
   switch (payload.type) {
     // Subscription events
@@ -151,11 +194,62 @@ export async function handleWebhookEvent(
   }
 }
 
+// Helper functions to get values from either camelCase or snake_case
+function getProductId(data: PolarSubscriptionData | PolarOrderData): string {
+  return data.productId ?? data.product_id ?? ''
+}
+
+function getPriceId(data: PolarSubscriptionData): string | undefined {
+  return data.priceId ?? data.price_id
+}
+
+function getSubscriptionId(data: PolarOrderData): string | undefined {
+  return data.subscriptionId ?? data.subscription_id
+}
+
+function getCurrentPeriodStart(data: PolarSubscriptionData): string | undefined {
+  return data.currentPeriodStart ?? data.current_period_start
+}
+
+function getCurrentPeriodEnd(data: PolarSubscriptionData): string | undefined {
+  return data.currentPeriodEnd ?? data.current_period_end
+}
+
+function getCancelAtPeriodEnd(data: PolarSubscriptionData): boolean {
+  return data.cancelAtPeriodEnd ?? data.cancel_at_period_end ?? false
+}
+
+function getCanceledAt(data: PolarSubscriptionData): string | undefined {
+  return data.canceledAt ?? data.canceled_at
+}
+
+function getTrialStart(data: PolarSubscriptionData): string | undefined {
+  return data.trialStart ?? data.trial_start
+}
+
+function getTrialEnd(data: PolarSubscriptionData): string | undefined {
+  return data.trialEnd ?? data.trial_end
+}
+
+function getCheckoutId(data: PolarOrderData): string | undefined {
+  return data.checkoutId ?? data.checkout_id
+}
+
+function getBillingReason(data: PolarOrderData): string | undefined {
+  return data.billingReason ?? data.billing_reason
+}
+
+function getCustomerExternalId(customer?: PolarCustomer): string | null {
+  if (!customer)
+    return null
+  return customer.externalId ?? customer.external_id ?? null
+}
+
 /**
  * Handle subscription creation or update
  */
 async function handleSubscriptionUpdate(data: PolarSubscriptionData): Promise<void> {
-  // Extract user ID from metadata or customer_id
+  // Extract user ID from metadata or customerId
   const userId = extractUserId(data)
 
   if (!userId) {
@@ -166,18 +260,21 @@ async function handleSubscriptionUpdate(data: PolarSubscriptionData): Promise<vo
   // Map Polar status to our status type
   const status = mapSubscriptionStatus(data.status)
 
+  const productId = getProductId(data)
+  const currentPeriodEnd = getCurrentPeriodEnd(data)
+
   // Upsert subscription record
   await upsertSubscription({
     id: data.id,
     userId,
-    productId: data.product_id,
-    priceId: data.price_id,
+    productId,
+    priceId: getPriceId(data),
     status,
-    currentPeriodStart: data.current_period_start,
-    currentPeriodEnd: data.current_period_end,
-    cancelAtPeriodEnd: data.cancel_at_period_end ?? false,
-    trialStart: data.trial_start,
-    trialEnd: data.trial_end,
+    currentPeriodStart: getCurrentPeriodStart(data),
+    currentPeriodEnd,
+    cancelAtPeriodEnd: getCancelAtPeriodEnd(data),
+    trialStart: getTrialStart(data),
+    trialEnd: getTrialEnd(data),
     metadata: toSafeMetadata(data.metadata),
   })
 
@@ -185,8 +282,8 @@ async function handleSubscriptionUpdate(data: PolarSubscriptionData): Promise<vo
   if (status === 'active' || status === 'trialing') {
     await updateUserSubscriptionTier(
       userId,
-      data.product_id,
-      data.current_period_end,
+      productId,
+      currentPeriodEnd,
     )
   }
 
@@ -200,7 +297,7 @@ async function handleSubscriptionCanceled(data: PolarSubscriptionData): Promise<
   const userId = extractUserId(data)
 
   await updateSubscriptionStatus(data.id, 'canceled', {
-    canceledAt: data.canceled_at ?? new Date().toISOString(),
+    canceledAt: getCanceledAt(data) ?? new Date().toISOString(),
     cancelAtPeriodEnd: true,
   })
 
@@ -224,6 +321,15 @@ async function handleSubscriptionUncanceled(data: PolarSubscriptionData): Promis
 }
 
 /**
+ * Extract amount from Polar order data
+ * Polar sends multiple amount fields, prefer totalAmount
+ * Supports both camelCase and snake_case
+ */
+function extractOrderAmount(data: PolarOrderData): number {
+  return data.totalAmount ?? data.total_amount ?? data.netAmount ?? data.net_amount ?? data.amount ?? 0
+}
+
+/**
  * Handle order creation
  */
 async function handleOrderCreated(data: PolarOrderData): Promise<void> {
@@ -234,16 +340,18 @@ async function handleOrderCreated(data: PolarOrderData): Promise<void> {
     return
   }
 
+  const amount = extractOrderAmount(data)
+
   await createOrder({
     id: data.id,
     userId,
-    subscriptionId: data.subscription_id,
-    productId: data.product_id,
-    amount: data.amount,
+    subscriptionId: getSubscriptionId(data),
+    productId: getProductId(data),
+    amount,
     currency: data.currency || 'usd',
     status: 'pending',
-    checkoutId: data.checkout_id,
-    billingReason: mapBillingReason(data.billing_reason),
+    checkoutId: getCheckoutId(data),
+    billingReason: mapBillingReason(getBillingReason(data)),
     metadata: toSafeMetadata(data.metadata),
   })
 
@@ -261,16 +369,18 @@ async function handleOrderPaid(data: PolarOrderData): Promise<void> {
 
   // If order doesn't exist, create it
   if (!updated && userId) {
+    const amount = extractOrderAmount(data)
+
     await createOrder({
       id: data.id,
       userId,
-      subscriptionId: data.subscription_id,
-      productId: data.product_id,
-      amount: data.amount,
+      subscriptionId: getSubscriptionId(data),
+      productId: getProductId(data),
+      amount,
       currency: data.currency || 'usd',
       status: 'paid',
-      checkoutId: data.checkout_id,
-      billingReason: mapBillingReason(data.billing_reason),
+      checkoutId: getCheckoutId(data),
+      billingReason: mapBillingReason(getBillingReason(data)),
       paidAt: new Date().toISOString(),
       metadata: toSafeMetadata(data.metadata),
     })
@@ -303,23 +413,37 @@ async function handleOrderRefunded(data: PolarOrderData): Promise<void> {
 
 /**
  * Extract user ID from webhook data
- * Polar sends user ID in metadata.userId or as external_customer_id
+ * Polar sends user ID in:
+ * 1. data.metadata.userId (set during checkout)
+ * 2. data.customer.externalId / external_id (set via externalCustomerId during checkout)
+ * 3. data.customer.metadata.userId (fallback)
+ * 4. data.customerId / customer_id (Polar's internal customer ID - not our user ID)
  */
 function extractUserId(data: PolarSubscriptionData | PolarOrderData): string | null {
-  // Check metadata first
+  // Check subscription/order metadata first (set during checkout)
   if (data.metadata?.userId && typeof data.metadata.userId === 'string') {
     return data.metadata.userId
   }
 
-  // Check external_customer_id (set during checkout)
-  if ('external_customer_id' in data && typeof data.external_customer_id === 'string') {
-    return data.external_customer_id
+  // Check customer.externalId (this is where externalCustomerId from checkout goes)
+  const customerExternalId = getCustomerExternalId(data.customer)
+  if (customerExternalId) {
+    return customerExternalId
   }
 
-  // Check customer_id as fallback
-  if (data.customer_id) {
-    return data.customer_id
+  // Check customer metadata as fallback
+  if (data.customer?.metadata?.userId && typeof data.customer.metadata.userId === 'string') {
+    return data.customer.metadata.userId
   }
+
+  // Log warning if we can't find user ID
+  console.warn('Could not extract userId from webhook data:', {
+    subscriptionId: data.id,
+    hasMetadata: !!data.metadata,
+    hasCustomer: !!data.customer,
+    customerExternalId,
+    customerId: data.customerId ?? data.customer_id,
+  })
 
   return null
 }
@@ -344,6 +468,7 @@ function mapSubscriptionStatus(polarStatus: string): SubscriptionStatus {
 
 /**
  * Map Polar billing reason to our type
+ * Note: Polar SDK uses snake_case for billing reason values
  */
 function mapBillingReason(polarReason?: string): BillingReason | undefined {
   if (!polarReason)
