@@ -4,28 +4,28 @@
   "description": "Shared utilities for Kurama - auth, database, schemas, and queries",
   "exports": {
     "./auth/*": {
-      "default": "./dist/auth/*.js",
-      "types": "./dist/auth/*.d.ts"
+      "types": "./dist/auth/*.d.ts",
+      "default": "./dist/auth/*.js"
     },
     "./database/*": {
-      "default": "./dist/database/*.js",
-      "types": "./dist/database/*.d.ts"
+      "types": "./dist/database/*.d.ts",
+      "default": "./dist/database/*.js"
     },
     "./drizzle/*": {
-      "default": "./dist/drizzle/*.js",
-      "types": "./dist/drizzle/*.d.ts"
+      "types": "./dist/drizzle/*.d.ts",
+      "default": "./dist/drizzle/*.js"
     },
     "./zod-schema/*": {
-      "default": "./dist/zod-schema/*.js",
-      "types": "./dist/zod-schema/*.d.ts"
+      "types": "./dist/zod-schema/*.d.ts",
+      "default": "./dist/zod-schema/*.js"
     },
     "./queries/*": {
-      "default": "./dist/queries/*.js",
-      "types": "./dist/queries/*.d.ts"
+      "types": "./dist/queries/*.d.ts",
+      "default": "./dist/queries/*.js"
     },
     "./storage": {
-      "default": "./dist/storage/index.js",
-      "types": "./dist/storage/index.d.ts"
+      "types": "./dist/storage/index.d.ts",
+      "default": "./dist/storage/index.js"
     }
   },
   "scripts": {
