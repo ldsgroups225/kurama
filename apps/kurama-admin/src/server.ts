@@ -17,10 +17,10 @@ export default {
     // Configure Resend for OTP emails
     const sendVerificationOTP = env.RESEND_API_KEY
       ? createSendVerificationOTP({
-        apiKey: env.RESEND_API_KEY,
-        fromEmail: env.RESEND_FROM_EMAIL ?? 'noreply@kurama.ci',
-        fromName: 'Kurama',
-      })
+          apiKey: env.RESEND_API_KEY,
+          fromEmail: env.RESEND_FROM_EMAIL ?? 'noreply@kurama.ci',
+          fromName: 'Kurama',
+        })
       : undefined
 
     setAuth({

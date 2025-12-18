@@ -67,7 +67,7 @@ export function AdminSidebar() {
                 const Icon = item.icon
                 const isActive
                   = location.pathname === item.href
-                  || location.pathname.startsWith(`${item.href}/`)
+                    || location.pathname.startsWith(`${item.href}/`)
 
                 return (
                   <SidebarMenuItem key={item.href}>

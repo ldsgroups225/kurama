@@ -271,13 +271,13 @@ export function BulkGenerateDialog({ open, onOpenChange, onSuccess }: BulkGenera
                 </div>
                 {isLoadingLessons
                   ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                  )
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    )
                   : (
-                    <Badge variant="secondary" className="font-mono">
-                      {lessonsCount}
-                    </Badge>
-                  )}
+                      <Badge variant="secondary" className="font-mono">
+                        {lessonsCount}
+                      </Badge>
+                    )}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
                 {isLoadingLessons
@@ -304,22 +304,22 @@ export function BulkGenerateDialog({ open, onOpenChange, onSuccess }: BulkGenera
               >
                 {mutation.isPending
                   ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Génération en cours...
-                    </>
-                  )
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Génération en cours...
+                      </>
+                    )
                   : (
-                    <>
-                      <Zap className="h-4 w-4" />
-                      Générer
-                      {' '}
-                      {lessonsCount}
-                      {' '}
-                      plan
-                      {lessonsCount > 1 ? 's' : ''}
-                    </>
-                  )}
+                      <>
+                        <Zap className="h-4 w-4" />
+                        Générer
+                        {' '}
+                        {lessonsCount}
+                        {' '}
+                        plan
+                        {lessonsCount > 1 ? 's' : ''}
+                      </>
+                    )}
               </Button>
             </DialogFooter>
           </form>

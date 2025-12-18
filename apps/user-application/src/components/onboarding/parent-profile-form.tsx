@@ -330,8 +330,6 @@ export function ParentProfileForm({
                     </p>
                   </div>
 
-
-
                   {/* Submit Error */}
                   {errors.submit && (
                     <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg p-3 text-sm font-medium">
@@ -359,14 +357,14 @@ export function ParentProfileForm({
                     >
                       {isSubmitting
                         ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Enregistrement...
-                          </>
-                        )
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Enregistrement...
+                            </>
+                          )
                         : (
-                          'Terminer'
-                        )}
+                            'Terminer'
+                          )}
                     </Button>
                   </div>
                 </>

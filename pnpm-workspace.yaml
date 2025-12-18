@@ -24,7 +24,7 @@ catalogs:
     cross-env: ^10.1.0
     rollup-plugin-visualizer: ^6.0.5
     tsc-alias: ^1.8.16
-    vite: 7.1.2
+    vite: ^7.3.0
     vite-plugin-pwa: ^1.2.0
     vite-tsconfig-paths: ^6.0.2
     wrangler: ^4.55.0

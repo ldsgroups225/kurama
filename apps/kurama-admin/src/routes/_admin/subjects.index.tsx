@@ -226,57 +226,57 @@ function SubjectsPage() {
         actions={
           selectedIds.size > 0
             ? (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  {selectedIds.size}
-                  {' '}
-                  sélectionné
-                  {selectedIds.size > 1 ? 's' : ''}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedIds(new Set())}
-                >
-                  <X className="mr-2 h-4 w-4" />
-                  Annuler
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => bulkActiveMutation.mutate({ ids: Array.from(selectedIds), isActive: true })}
-                  disabled={bulkActiveMutation.isPending}
-                >
-                  <Check className="mr-2 h-4 w-4" />
-                  Activer
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => bulkActiveMutation.mutate({ ids: Array.from(selectedIds), isActive: false })}
-                  disabled={bulkActiveMutation.isPending}
-                >
-                  <X className="mr-2 h-4 w-4" />
-                  Désactiver
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setBulkDeleteOpen(true)}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Supprimer (
-                  {selectedIds.size}
-                  )
-                </Button>
-              </div>
-            )
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {selectedIds.size}
+                    {' '}
+                    sélectionné
+                    {selectedIds.size > 1 ? 's' : ''}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedIds(new Set())}
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Annuler
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => bulkActiveMutation.mutate({ ids: Array.from(selectedIds), isActive: true })}
+                    disabled={bulkActiveMutation.isPending}
+                  >
+                    <Check className="mr-2 h-4 w-4" />
+                    Activer
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => bulkActiveMutation.mutate({ ids: Array.from(selectedIds), isActive: false })}
+                    disabled={bulkActiveMutation.isPending}
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Désactiver
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setBulkDeleteOpen(true)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Supprimer (
+                    {selectedIds.size}
+                    )
+                  </Button>
+                </div>
+              )
             : (
-              <Button onClick={() => setFormOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Nouvelle matière
-              </Button>
-            )
+                <Button onClick={() => setFormOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nouvelle matière
+                </Button>
+              )
         }
       />
 

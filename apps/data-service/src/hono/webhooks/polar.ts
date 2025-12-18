@@ -40,9 +40,9 @@ polarWebhooks.post('/api/webhooks/polar', async (c) => {
   // Polar API config for creating discounts
   const polarConfig = c.env.POLAR_ACCESS_TOKEN && c.env.POLAR_ORGANIZATION_ID
     ? {
-      accessToken: c.env.POLAR_ACCESS_TOKEN,
-      organizationId: c.env.POLAR_ORGANIZATION_ID,
-    }
+        accessToken: c.env.POLAR_ACCESS_TOKEN,
+        organizationId: c.env.POLAR_ORGANIZATION_ID,
+      }
     : undefined
 
   // Use the Polar Webhooks adapter

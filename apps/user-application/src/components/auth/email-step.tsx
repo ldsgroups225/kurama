@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { authClient } from '@/lib/auth-client'
 import { useReferral } from '@/hooks/use-referral'
+import { authClient } from '@/lib/auth-client'
 import { Loader2, Mail } from '@/lib/icons'
 
 interface EmailStepProps {
@@ -86,14 +86,14 @@ export function EmailStep({ onSubmit }: EmailStepProps) {
       >
         {isLoading
           ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Envoi en cours...
-            </>
-          )
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Envoi en cours...
+              </>
+            )
           : (
-            'Continuer'
-          )}
+              'Continuer'
+            )}
       </Button>
 
       <p className="text-center text-xs text-muted-foreground">

@@ -184,13 +184,13 @@ export function BulkCardsDialog({ open, onOpenChange, onSuccess }: BulkCardsDial
                 </div>
                 {isLoadingLessons
                   ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                  )
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    )
                   : (
-                    <Badge variant="secondary" className="font-mono">
-                      {lessonsCount}
-                    </Badge>
-                  )}
+                      <Badge variant="secondary" className="font-mono">
+                        {lessonsCount}
+                      </Badge>
+                    )}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
                 {isLoadingLessons
@@ -226,22 +226,22 @@ export function BulkCardsDialog({ open, onOpenChange, onSuccess }: BulkCardsDial
               >
                 {mutation.isPending
                   ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Génération en cours...
-                    </>
-                  )
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Génération en cours...
+                      </>
+                    )
                   : (
-                    <>
-                      <FileText className="h-4 w-4" />
-                      Générer pour
-                      {' '}
-                      {lessonsCount}
-                      {' '}
-                      leçon
-                      {lessonsCount > 1 ? 's' : ''}
-                    </>
-                  )}
+                      <>
+                        <FileText className="h-4 w-4" />
+                        Générer pour
+                        {' '}
+                        {lessonsCount}
+                        {' '}
+                        leçon
+                        {lessonsCount > 1 ? 's' : ''}
+                      </>
+                    )}
               </Button>
             </DialogFooter>
           </form>

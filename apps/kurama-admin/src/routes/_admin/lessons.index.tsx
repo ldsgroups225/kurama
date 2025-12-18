@@ -213,20 +213,20 @@ function LessonsPage() {
         <div className="text-sm">
           {lesson.gradeName
             ? (
-              <div>
-                <span className="font-medium">{lesson.gradeName}</span>
-                {lesson.seriesName && (
-                  <span className="text-muted-foreground ml-1">
-                    (
-                    {lesson.seriesName}
-                    )
-                  </span>
-                )}
-              </div>
-            )
+                <div>
+                  <span className="font-medium">{lesson.gradeName}</span>
+                  {lesson.seriesName && (
+                    <span className="text-muted-foreground ml-1">
+                      (
+                      {lesson.seriesName}
+                      )
+                    </span>
+                  )}
+                </div>
+              )
             : (
-              <span className="text-muted-foreground">-</span>
-            )}
+                <span className="text-muted-foreground">-</span>
+              )}
         </div>
       ),
     },
@@ -236,14 +236,14 @@ function LessonsPage() {
       cell: (lesson: Lesson) => (
         lesson.hasTeachPlan
           ? (
-            <Badge variant="outline" className="gap-1 text-green-600 border-green-600">
-              <Sparkles className="h-3 w-3" />
-              Généré
-            </Badge>
-          )
+              <Badge variant="outline" className="gap-1 text-green-600 border-green-600">
+                <Sparkles className="h-3 w-3" />
+                Généré
+              </Badge>
+            )
           : (
-            <span className="text-muted-foreground text-sm">-</span>
-          )
+              <span className="text-muted-foreground text-sm">-</span>
+            )
       ),
     },
     {
@@ -252,13 +252,13 @@ function LessonsPage() {
       cell: (lesson: Lesson) =>
         lesson.difficulty
           ? (
-            <Badge variant="outline">
-              {difficultyLabels[lesson.difficulty] || lesson.difficulty}
-            </Badge>
-          )
+              <Badge variant="outline">
+                {difficultyLabels[lesson.difficulty] || lesson.difficulty}
+              </Badge>
+            )
           : (
-            '-'
-          ),
+              '-'
+            ),
     },
     {
       key: 'duration',
@@ -298,11 +298,11 @@ function LessonsPage() {
           >
             {lesson.isPublished
               ? (
-                <EyeOff className="h-4 w-4" />
-              )
+                  <EyeOff className="h-4 w-4" />
+                )
               : (
-                <Eye className="h-4 w-4" />
-              )}
+                  <Eye className="h-4 w-4" />
+                )}
           </Button>
           <Button
             variant="ghost"
@@ -338,75 +338,75 @@ function LessonsPage() {
         actions={
           selectedIds.size > 0
             ? (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  {selectedIds.size}
-                  {' '}
-                  sélectionné
-                  {selectedIds.size > 1 ? 's' : ''}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedIds(new Set())}
-                >
-                  <X className="mr-2 h-4 w-4" />
-                  Annuler
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => bulkPublishMutation.mutate({ ids: Array.from(selectedIds), isPublished: true })}
-                  disabled={bulkPublishMutation.isPending}
-                >
-                  <Eye className="mr-2 h-4 w-4" />
-                  Publier
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => bulkPublishMutation.mutate({ ids: Array.from(selectedIds), isPublished: false })}
-                  disabled={bulkPublishMutation.isPending}
-                >
-                  <EyeOff className="mr-2 h-4 w-4" />
-                  Dépublier
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setBulkDeleteOpen(true)}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Supprimer (
-                  {selectedIds.size}
-                  )
-                </Button>
-              </div>
-            )
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {selectedIds.size}
+                    {' '}
+                    sélectionné
+                    {selectedIds.size > 1 ? 's' : ''}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedIds(new Set())}
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Annuler
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => bulkPublishMutation.mutate({ ids: Array.from(selectedIds), isPublished: true })}
+                    disabled={bulkPublishMutation.isPending}
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    Publier
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => bulkPublishMutation.mutate({ ids: Array.from(selectedIds), isPublished: false })}
+                    disabled={bulkPublishMutation.isPending}
+                  >
+                    <EyeOff className="mr-2 h-4 w-4" />
+                    Dépublier
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setBulkDeleteOpen(true)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Supprimer (
+                    {selectedIds.size}
+                    )
+                  </Button>
+                </div>
+              )
             : (
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setBulkGenerateOpen(true)}
-                  className="gap-2"
-                >
-                  <Zap className="h-4 w-4" />
-                  Plans en lot
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setBulkCardsOpen(true)}
-                  className="gap-2"
-                >
-                  <FileText className="h-4 w-4" />
-                  Cartes en lot
-                </Button>
-                <Button onClick={() => setFormOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nouvelle leçon
-                </Button>
-              </div>
-            )
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setBulkGenerateOpen(true)}
+                    className="gap-2"
+                  >
+                    <Zap className="h-4 w-4" />
+                    Plans en lot
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setBulkCardsOpen(true)}
+                    className="gap-2"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Cartes en lot
+                  </Button>
+                  <Button onClick={() => setFormOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Nouvelle leçon
+                  </Button>
+                </div>
+              )
         }
       />
 

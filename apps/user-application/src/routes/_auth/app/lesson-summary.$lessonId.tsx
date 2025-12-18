@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import {
   Check,
@@ -14,6 +15,7 @@ import { useEffect, useState } from 'react'
 import { EnhancedXPDisplay } from '@/components/gamification'
 import { AppHeader } from '@/components/main'
 import { Button } from '@/components/ui/button'
+import { getUserStats } from '@/core/functions/stats'
 import { useOnlineStatus } from '@/hooks/use-online-status'
 import { getMutationQueueManager } from '@/lib/mutation-queue'
 import { trackRouteLoad } from '@/lib/performance-monitor'
@@ -33,15 +35,23 @@ interface SearchParams {
 export const Route = createFileRoute('/_auth/app/lesson-summary/$lessonId')({
   component: SummaryPage,
   validateSearch: (search: Record<string, unknown>): SearchParams => {
+    const correct = Number(search.correct) || 0
+    const incorrect = Number(search.incorrect) || 0
+    const total = Number(search.total) || 0
+    const duration = Math.max(0, Number(search.duration) || 0)
+    const mode = ['flashcards', 'quiz', 'exam', 'quick-review'].includes(search.mode as string)
+      ? (search.mode as string)
+      : 'flashcards'
+
     return {
-      correct: Number(search.correct) || 0,
-      incorrect: Number(search.incorrect) || 0,
-      total: Number(search.total) || 0,
-      duration: Number(search.duration) || 0,
-      mode: (search.mode as string) || 'flashcards',
-      xpEarned: search.xpEarned ? Number(search.xpEarned) : undefined,
+      correct: Math.max(0, correct),
+      incorrect: Math.max(0, incorrect),
+      total: Math.max(0, total),
+      duration,
+      mode,
+      xpEarned: search.xpEarned ? Math.max(0, Number(search.xpEarned)) : undefined,
       leveledUp: search.leveledUp as string | undefined,
-      newLevel: search.newLevel ? Number(search.newLevel) : undefined,
+      newLevel: search.newLevel ? Math.max(1, Number(search.newLevel)) : undefined,
     }
   },
 })
@@ -53,9 +63,18 @@ function SummaryPage() {
   })
   const navigate = useNavigate()
 
+  // Get user stats to retrieve actual streak
+  const { data: userStats } = useQuery({
+    queryKey: ['user-stats'],
+    queryFn: () => getUserStats(),
+    staleTime: 30 * 1000, // 30 seconds
+    retry: 2,
+  })
+
   // Calculate actual XP (use server-provided value or fallback to estimate)
   const actualXpEarned = xpEarned ?? (correct ?? 0) * 10
   const didLevelUp = leveledUp === 'true'
+  const actualStreak = userStats?.currentStreak ?? 0
 
   // Offline support
   const { isOnline } = useOnlineStatus()
@@ -93,7 +112,6 @@ function SummaryPage() {
   if (score >= 90) {
     performanceLevel = 'Excellent !'
     performanceColor = 'text-emerald-400'
-    gradientClass = 'from-emerald-500 to-teal-500'
     gradientClass = 'from-emerald-500 to-teal-500'
   }
   else if (score >= 70) {
@@ -200,7 +218,7 @@ function SummaryPage() {
               mode={mode as 'flashcards' | 'quiz' | 'exam' | 'quick-review'}
               correctCount={correct ?? 0}
               totalCount={total ?? 0}
-              streakDays={7} // TODO: Get actual streak from dashboard data
+              streakDays={actualStreak}
               hasLevelUp={didLevelUp}
               newLevel={newLevel}
             />
@@ -297,13 +315,25 @@ function SummaryPage() {
                 variant="ghost"
                 size="lg"
                 className="w-full border border-border bg-card hover:bg-accent text-foreground"
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({
-                      title: 'Kurama App',
-                      text: `Je viens de terminer une session avec un score de ${score}% !`,
-                      url: window.location.href,
-                    }).catch(() => { })
+                onClick={async () => {
+                  try {
+                    if (navigator.share) {
+                      await navigator.share({
+                        title: 'Kurama App',
+                        text: `Je viens de terminer une session avec un score de ${score}% !`,
+                        url: window.location.origin,
+                      })
+                    }
+                    else {
+                      // Fallback: copy to clipboard
+                      const text = `Je viens de terminer une session Kurama avec un score de ${score}% ! ${window.location.origin}`
+                      await navigator.clipboard.writeText(text)
+                      // Could show a toast notification here
+                    }
+                  }
+                  catch (error) {
+                    // Silently handle share cancellation or clipboard errors
+                    console.debug('Share cancelled or failed:', error)
                   }
                 }}
               >

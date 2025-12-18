@@ -79,170 +79,170 @@ export function XPFeedback({ result, show, onComplete }: XPFeedbackProps) {
       <AnimatePresence mode="wait">
         {!showTotal
           ? (
-            <motion.div
-              key="breakdown"
-              initial={{ opacity: 0, scale: 0.5, x: 20 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              exit={{ opacity: 0, scale: 0.5, x: 20 }}
-              className="bg-card/95 backdrop-blur-xl border border-border rounded-xl p-3 shadow-xl max-w-xs"
-            >
-              <div className="text-center space-y-4">
-                {/* Base XP */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: currentStep >= 1 ? 1 : 0.3, y: 0 }}
-                  className="flex items-center justify-center gap-2"
-                >
-                  <Zap className="w-5 h-5 text-xp" />
-                  <span className="text-lg font-bold text-foreground">
-                    +
-                    {result.baseXP}
-                    {' '}
-                    XP
-                  </span>
-                  <span className="text-sm text-muted-foreground">(base)</span>
-                </motion.div>
+              <motion.div
+                key="breakdown"
+                initial={{ opacity: 0, scale: 0.5, x: 20 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.5, x: 20 }}
+                className="bg-card/95 backdrop-blur-xl border border-border rounded-xl p-3 shadow-xl max-w-xs"
+              >
+                <div className="text-center space-y-4">
+                  {/* Base XP */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: currentStep >= 1 ? 1 : 0.3, y: 0 }}
+                    className="flex items-center justify-center gap-2"
+                  >
+                    <Zap className="w-5 h-5 text-xp" />
+                    <span className="text-lg font-bold text-foreground">
+                      +
+                      {result.baseXP}
+                      {' '}
+                      XP
+                    </span>
+                    <span className="text-sm text-muted-foreground">(base)</span>
+                  </motion.div>
 
-                {/* Multipliers */}
-                {hasMultipliers && (
-                  <div className="space-y-2">
-                    {result.multipliers.streak > 1 && (
-                      <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: currentStep >= 2 ? 1 : 0.3, x: 0 }}
-                        className="flex items-center justify-center gap-2 text-sm"
-                      >
-                        <Flame className="w-4 h-4 text-streak" />
-                        <span className="text-streak font-medium">
-                          x
-                          {result.multipliers.streak.toFixed(1)}
-                          {' '}
-                          série
-                        </span>
-                      </motion.div>
-                    )}
+                  {/* Multipliers */}
+                  {hasMultipliers && (
+                    <div className="space-y-2">
+                      {result.multipliers.streak > 1 && (
+                        <motion.div
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: currentStep >= 2 ? 1 : 0.3, x: 0 }}
+                          className="flex items-center justify-center gap-2 text-sm"
+                        >
+                          <Flame className="w-4 h-4 text-streak" />
+                          <span className="text-streak font-medium">
+                            x
+                            {result.multipliers.streak.toFixed(1)}
+                            {' '}
+                            série
+                          </span>
+                        </motion.div>
+                      )}
 
-                    {result.multipliers.difficulty !== 1 && (
-                      <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: currentStep >= 2 ? 1 : 0.3, x: 0 }}
-                        className="flex items-center justify-center gap-2 text-sm"
-                      >
-                        <Target className="w-4 h-4 text-rare" />
-                        <span className="text-rare font-medium">
-                          x
-                          {result.multipliers.difficulty.toFixed(1)}
-                          {' '}
-                          difficulté
-                        </span>
-                      </motion.div>
-                    )}
+                      {result.multipliers.difficulty !== 1 && (
+                        <motion.div
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: currentStep >= 2 ? 1 : 0.3, x: 0 }}
+                          className="flex items-center justify-center gap-2 text-sm"
+                        >
+                          <Target className="w-4 h-4 text-rare" />
+                          <span className="text-rare font-medium">
+                            x
+                            {result.multipliers.difficulty.toFixed(1)}
+                            {' '}
+                            difficulté
+                          </span>
+                        </motion.div>
+                      )}
 
-                    {result.multipliers.interval > 1 && (
-                      <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: currentStep >= 2 ? 1 : 0.3, x: 0 }}
-                        className="flex items-center justify-center gap-2 text-sm"
-                      >
-                        <Clock className="w-4 h-4 text-epic" />
-                        <span className="text-epic font-medium">
-                          x
-                          {result.multipliers.interval.toFixed(1)}
-                          {' '}
-                          révision espacée
-                        </span>
-                      </motion.div>
-                    )}
-                  </div>
-                )}
+                      {result.multipliers.interval > 1 && (
+                        <motion.div
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: currentStep >= 2 ? 1 : 0.3, x: 0 }}
+                          className="flex items-center justify-center gap-2 text-sm"
+                        >
+                          <Clock className="w-4 h-4 text-epic" />
+                          <span className="text-epic font-medium">
+                            x
+                            {result.multipliers.interval.toFixed(1)}
+                            {' '}
+                            révision espacée
+                          </span>
+                        </motion.div>
+                      )}
+                    </div>
+                  )}
 
-                {/* Bonuses */}
-                {hasBonuses && (
-                  <div className="space-y-2">
-                    {result.bonuses.map((bonus, index) => (
-                      <motion.div
-                        key={bonus.name}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{
-                          opacity: currentStep >= 3 + index ? 1 : 0.3,
-                          scale: currentStep >= 3 + index ? 1 : 0.8,
-                        }}
-                        className="flex items-center justify-center gap-2 text-sm"
-                      >
-                        <Star className="w-4 h-4 text-legendary" />
-                        <span className="text-legendary font-medium">
-                          +
-                          {bonus.value}
-                          {' '}
-                          XP
-                        </span>
-                        <span className="text-muted-foreground">
-                          (
-                          {bonus.name}
-                          )
-                        </span>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )
+                  {/* Bonuses */}
+                  {hasBonuses && (
+                    <div className="space-y-2">
+                      {result.bonuses.map((bonus, index) => (
+                        <motion.div
+                          key={bonus.name}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{
+                            opacity: currentStep >= 3 + index ? 1 : 0.3,
+                            scale: currentStep >= 3 + index ? 1 : 0.8,
+                          }}
+                          className="flex items-center justify-center gap-2 text-sm"
+                        >
+                          <Star className="w-4 h-4 text-legendary" />
+                          <span className="text-legendary font-medium">
+                            +
+                            {bonus.value}
+                            {' '}
+                            XP
+                          </span>
+                          <span className="text-muted-foreground">
+                            (
+                            {bonus.name}
+                            )
+                          </span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )
           : (
-            <motion.div
-              key="total"
-              initial={{ opacity: 0, scale: 0.3, x: 20 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              exit={{ opacity: 0, scale: 0.3, x: 20 }}
-              className="bg-gradient-xp text-white rounded-2xl p-4 shadow-xl"
-            >
-              <div className="text-center">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                  className="mb-2"
-                >
-                  <Zap className="w-8 h-8 mx-auto" />
-                </motion.div>
+              <motion.div
+                key="total"
+                initial={{ opacity: 0, scale: 0.3, x: 20 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.3, x: 20 }}
+                className="bg-gradient-xp text-white rounded-2xl p-4 shadow-xl"
+              >
+                <div className="text-center">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                    className="mb-2"
+                  >
+                    <Zap className="w-8 h-8 mx-auto" />
+                  </motion.div>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <div className="text-2xl font-bold mb-1">
-                    +
-                    {result.totalXP}
-                  </div>
-                  <div className="text-sm opacity-90">
-                    XP Total
-                  </div>
-                </motion.div>
-
-                {/* Achievement badges */}
-                {result.achievements.length > 0 && (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                    className="mt-4 flex flex-wrap justify-center gap-2"
+                    transition={{ delay: 0.4 }}
                   >
-                    {result.achievements.map(achievement => (
-                      <div
-                        key={achievement}
-                        className="bg-white/20 rounded-full px-3 py-1 text-xs font-medium"
-                      >
-                        🏆
-                        {' '}
-                        {achievement}
-                      </div>
-                    ))}
+                    <div className="text-2xl font-bold mb-1">
+                      +
+                      {result.totalXP}
+                    </div>
+                    <div className="text-sm opacity-90">
+                      XP Total
+                    </div>
                   </motion.div>
-                )}
-              </div>
-            </motion.div>
-          )}
+
+                  {/* Achievement badges */}
+                  {result.achievements.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                      className="mt-4 flex flex-wrap justify-center gap-2"
+                    >
+                      {result.achievements.map(achievement => (
+                        <div
+                          key={achievement}
+                          className="bg-white/20 rounded-full px-3 py-1 text-xs font-medium"
+                        >
+                          🏆
+                          {' '}
+                          {achievement}
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            )}
       </AnimatePresence>
     </div>
   )
