@@ -3,6 +3,7 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "jsx": "react-jsx",
     "noUncheckedIndexedAccess": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -11,11 +12,19 @@
     "strict": true,
     "skipLibCheck": true,
     "outDir": "./dist",
-    "lib": ["ESNext"],
+    "lib": [
+      "ESNext"
+    ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
-    "types": ["@cloudflare/workers-types"]
+    "types": [
+      "@cloudflare/workers-types"
+    ]
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }

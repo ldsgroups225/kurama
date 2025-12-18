@@ -2,6 +2,7 @@
 // This file is a good smoke test to make sure the custom server entry is working
 import { setAuth } from '@kurama/data-ops/auth/server'
 import { initDatabase } from '@kurama/data-ops/database/setup'
+import { createSendVerificationOTP } from '@kurama/data-ops/email/resend'
 import handler from '@tanstack/react-start/server-entry'
 import { env } from 'cloudflare:workers'
 
@@ -15,6 +16,15 @@ export default {
       password: env.DATABASE_PASSWORD,
     })
 
+    // Configure Resend for OTP emails
+    const sendVerificationOTP = env.RESEND_API_KEY
+      ? createSendVerificationOTP({
+        apiKey: env.RESEND_API_KEY,
+        fromEmail: env.RESEND_FROM_EMAIL ?? 'noreply@kurama.ci',
+        fromName: 'Kurama',
+      })
+      : undefined
+
     setAuth({
       secret: env.BETTER_AUTH_SECRET,
       socialProviders: {
@@ -23,6 +33,7 @@ export default {
           clientSecret: env.GOOGLE_CLIENT_SECRET,
         },
       },
+      sendVerificationOTP,
       adapter: {
         drizzleDb: db,
         provider: 'pg',

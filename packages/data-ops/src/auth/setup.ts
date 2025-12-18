@@ -3,16 +3,34 @@ import { emailOTP } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 import { userProfiles } from "../drizzle/schema";
 
-export const createBetterAuth = (config: {
+export type SendVerificationOTPParams = {
+  email: string;
+  otp: string;
+  type: "sign-in" | "email-verification" | "forget-password";
+};
+
+export interface BetterAuthConfig {
   database: BetterAuthOptions["database"];
   secret?: BetterAuthOptions["secret"];
   socialProviders?: BetterAuthOptions["socialProviders"];
-  sendVerificationOTP?: (params: {
-    email: string;
-    otp: string;
-    type: "sign-in" | "email-verification" | "forget-password";
-  }) => Promise<void>;
-}): ReturnType<typeof betterAuth> => {
+  /**
+   * Custom OTP email sender. Use createSendVerificationOTP from @kurama/data-ops/email/resend
+   * 
+   * @example
+   * ```ts
+   * import { createSendVerificationOTP } from "@kurama/data-ops/email/resend";
+   * 
+   * const sendVerificationOTP = createSendVerificationOTP({
+   *   apiKey: env.RESEND_API_KEY,
+   *   fromEmail: "noreply@kurama.ci",
+   *   fromName: "Kurama",
+   * });
+   * ```
+   */
+  sendVerificationOTP?: (params: SendVerificationOTPParams) => Promise<void>;
+}
+
+export const createBetterAuth = (config: BetterAuthConfig): ReturnType<typeof betterAuth> => {
   return betterAuth({
     database: config.database,
     secret: config.secret,
@@ -40,6 +58,8 @@ export const createBetterAuth = (config: {
           } else {
             // Default: log to console (for development)
             console.warn(`[Email OTP] Type: ${type}, Email: ${email}, OTP: ${otp}`);
+            console.warn("[Email OTP] Configure Resend to send real emails:");
+            console.warn("  import { createSendVerificationOTP } from '@kurama/data-ops/email/resend'");
           }
         },
         otpLength: 6,
