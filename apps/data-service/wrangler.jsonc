@@ -23,9 +23,11 @@
   // - DATABASE_USERNAME: Neon database username
   // - DATABASE_PASSWORD: Neon database password
   "observability": {
-    "enabled": true,
     "logs": {
-      "enabled": true
+      "enabled": false,
+      "head_sampling_rate": 1,
+      "invocation_logs": true,
+      "persist": true
     }
   },
   "workers_dev": true,

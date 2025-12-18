@@ -11,5 +11,13 @@
     "GOOGLE_CLIENT_ID": "18833168509-f0smil5qed52l0gpcj8nsmthmrervseb.apps.googleusercontent.com"
   },
   "workers_dev": true,
-  "preview_urls": true
+  "preview_urls": true,
+  "observability": {
+    "logs": {
+      "enabled": false,
+      "head_sampling_rate": 1,
+      "invocation_logs": true,
+      "persist": true
+    }
+  }
 }
