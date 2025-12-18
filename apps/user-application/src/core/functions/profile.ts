@@ -122,31 +122,31 @@ export const submitProfile = createServerFn({ method: 'POST' })
     // Prepare student-specific fields
     const studentFields = validatedData.userType === 'student'
       ? {
-        phone: validatedData.phone ?? null,
-        age: validatedData.age ?? null,
-        gender: validatedData.gender ?? null,
-        city: validatedData.city ?? null,
-        idNumber: validatedData.idNumber ?? null,
-        gradeId,
-        seriesId,
-        favoriteSubjects: validatedData.favoriteSubjects ?? null,
-        learningGoals: validatedData.learningGoals ?? null,
-        studyTime: validatedData.studyTime ?? null,
-        childrenMatricules: null,
-      }
+          phone: validatedData.phone ?? null,
+          age: validatedData.age ?? null,
+          gender: validatedData.gender ?? null,
+          city: validatedData.city ?? null,
+          idNumber: validatedData.idNumber ?? null,
+          gradeId,
+          seriesId,
+          favoriteSubjects: validatedData.favoriteSubjects ?? null,
+          learningGoals: validatedData.learningGoals ?? null,
+          studyTime: validatedData.studyTime ?? null,
+          childrenMatricules: null,
+        }
       : {
-        phone: null,
-        age: null,
-        gender: null,
-        city: null,
-        idNumber: null,
-        gradeId: null,
-        seriesId: null,
-        favoriteSubjects: null,
-        learningGoals: null,
-        studyTime: null,
-        childrenMatricules: validatedData.childrenMatricules ?? null,
-      }
+          phone: null,
+          age: null,
+          gender: null,
+          city: null,
+          idNumber: null,
+          gradeId: null,
+          seriesId: null,
+          favoriteSubjects: null,
+          learningGoals: null,
+          studyTime: null,
+          childrenMatricules: validatedData.childrenMatricules ?? null,
+        }
 
     // Insert or update profile
     await db
@@ -194,8 +194,9 @@ export const getProfileStats = createServerFn()
   .middleware([protectedFunctionMiddleware])
   .handler(async ({ context }) => {
     const { getDb: getDatabase } = await import('@kurama/data-ops/database/setup')
-    const { userProfiles, userProgress, studySessions } = await import('@kurama/data-ops/drizzle/schema')
-    const { eq, desc, sql } = await import('@kurama/data-ops/database/drizzle-orm')
+    const { userProfiles, userProgress } = await import('@kurama/data-ops/drizzle/schema')
+    const { eq, sql } = await import('@kurama/data-ops/database/drizzle-orm')
+    const { calculateCurrentStreak } = await import('@kurama/data-ops/queries/streak')
 
     const db = getDatabase()
     const { userId } = context
@@ -250,46 +251,8 @@ export const getProfileStats = createServerFn()
 
     const totalCardsStudied = Number(cardsStudiedResult[0]?.count ?? 0)
 
-    // Calculate current streak
-    const sessionsResult = await db
-      .select({ startedAt: studySessions.startedAt })
-      .from(studySessions)
-      .where(eq(studySessions.userId, userId))
-      .orderBy(desc(studySessions.startedAt))
-
-    const uniqueDates = Array.from(new Set(
-      sessionsResult.map((s) => {
-        const d = new Date(s.startedAt)
-        return d.toISOString().split('T')[0]
-      }),
-    ))
-
-    let currentStreak = 0
-    if (uniqueDates.length > 0) {
-      const today = new Date().toISOString().split('T')[0]
-      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
-
-      if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
-        currentStreak = 1
-        for (let i = 1; i < uniqueDates.length; i++) {
-          const prevDateStr = uniqueDates[i - 1]
-          const currDateStr = uniqueDates[i]
-          if (!prevDateStr || !currDateStr)
-            continue
-
-          const prevDate = new Date(prevDateStr)
-          const currDate = new Date(currDateStr)
-          const diffDays = Math.round(Math.abs(prevDate.getTime() - currDate.getTime()) / (1000 * 60 * 60 * 24))
-
-          if (diffDays === 1) {
-            currentStreak++
-          }
-          else {
-            break
-          }
-        }
-      }
-    }
+    // Calculate current streak using shared utility
+    const currentStreak = await calculateCurrentStreak(db, userId)
 
     return {
       totalXP,
@@ -299,7 +262,6 @@ export const getProfileStats = createServerFn()
       gradeName: profile?.grade?.name ?? null,
     }
   })
-
 
 /**
  * Track that the current user was referred by a referral code

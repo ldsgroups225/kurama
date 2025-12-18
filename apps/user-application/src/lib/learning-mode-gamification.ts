@@ -3,6 +3,9 @@
  * Extends flashcard gamification to quiz and exam modes
  */
 
+// Import for internal use
+import { calculateStreakMultiplier } from '@kurama/data-ops/queries/streak'
+
 export interface LearningSession {
   mode: 'flashcards' | 'quiz' | 'exam' | 'quick-review'
   streakDays: number
@@ -330,20 +333,9 @@ export function calculateLearningModeXP(
   }
 }
 
-/**
- * Calculate streak multiplier
- */
-function calculateStreakMultiplier(streakDays: number): number {
-  if (streakDays >= 30)
-    return 1.5 // 50% bonus for 30+ days
-  if (streakDays >= 14)
-    return 1.4 // 40% bonus for 2+ weeks
-  if (streakDays >= 7)
-    return 1.25 // 25% bonus for 1+ week
-  if (streakDays >= 3)
-    return 1.1 // 10% bonus for 3+ days
-  return 1
-}
+// Re-export streak multiplier from shared utility for consistency
+// This ensures the same calculation is used everywhere
+export { calculateStreakMultiplier } from '@kurama/data-ops/queries/streak'
 
 /**
  * Calculate accuracy multiplier based on mode

@@ -1,6 +1,11 @@
-import { and, desc, eq, gte, sql } from '@kurama/data-ops/database/drizzle-orm'
+import { and, eq, gte, sql } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
 import { studySessions, userLessonMastery, userProfiles } from '@kurama/data-ops/drizzle/schema'
+import {
+  calculateCurrentStreak,
+  calculateStreakBonus,
+  getNewlyUnlockedStreakAchievements,
+} from '@kurama/data-ops/queries/streak'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
 
@@ -14,8 +19,6 @@ const XP_BASE_RATES = {
   'quick-review': 7, // Targeted review of difficult cards
 } as const
 
-const XP_STREAK_BONUS_MULTIPLIER = 0.1 // 10% bonus per streak day (max 50%)
-const XP_STREAK_BONUS_MAX = 0.5
 const XP_PERFECT_SCORE_BONUS = 50 // Bonus for 100% score
 const XP_SPEED_BONUS_THRESHOLD = 30 // Seconds per card for speed bonus
 const XP_SPEED_BONUS = 25 // Bonus for fast completion
@@ -69,53 +72,8 @@ function calculateLevel(xp: number): { level: number, currentXP: number, nextLev
   }
 }
 
-/**
- * Calculate current streak from study sessions
- */
-async function calculateStreak(db: ReturnType<typeof getDb>, userId: string): Promise<number> {
-  const sessionsResult = await db
-    .select({ startedAt: studySessions.startedAt })
-    .from(studySessions)
-    .where(eq(studySessions.userId, userId))
-    .orderBy(desc(studySessions.startedAt))
-
-  const uniqueDates = Array.from(new Set(
-    sessionsResult.map((s) => {
-      const d = new Date(s.startedAt)
-      return d.toISOString().split('T')[0]
-    }),
-  ))
-
-  if (uniqueDates.length === 0)
-    return 0
-
-  const today = new Date().toISOString().split('T')[0]
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
-
-  if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday)
-    return 0
-
-  let streak = 1
-  for (let i = 1; i < uniqueDates.length; i++) {
-    const prevDateStr = uniqueDates[i - 1]
-    const currDateStr = uniqueDates[i]
-    if (!prevDateStr || !currDateStr)
-      continue
-
-    const prevDate = new Date(prevDateStr)
-    const currDate = new Date(currDateStr)
-    const diffDays = Math.round(Math.abs(prevDate.getTime() - currDate.getTime()) / (1000 * 60 * 60 * 24))
-
-    if (diffDays === 1) {
-      streak++
-    }
-    else {
-      break
-    }
-  }
-
-  return streak
-}
+// Streak calculation is now handled by @kurama/data-ops/queries/streak
+// This eliminates code duplication across dashboard.ts, profile.ts, progress.ts
 
 export interface SessionStatsInput {
   lessonId: number
@@ -186,16 +144,16 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
     const previousXP = profile?.xp ?? 0
     const previousLevelInfo = calculateLevel(previousXP)
 
-    // Calculate current streak for bonus
-    const currentStreak = await calculateStreak(db, userId)
+    // Calculate current streak for bonus using shared utility
+    const currentStreak = await calculateCurrentStreak(db, userId)
 
-    // Enhanced XP calculation using the new gamification system
+    // Enhanced XP calculation using the standardized gamification system
     const baseXPRate = XP_BASE_RATES[mode] || XP_BASE_RATES.flashcards
     const baseXP = correctCount * baseXPRate
 
-    // Legacy calculation for compatibility (can be enhanced later)
-    const streakMultiplier = Math.min(currentStreak * XP_STREAK_BONUS_MULTIPLIER, XP_STREAK_BONUS_MAX)
-    const streakBonus = Math.round(baseXP * streakMultiplier)
+    // Use standardized tiered streak bonus system
+    // Tiers: 30+ days = 50%, 14+ = 40%, 7+ = 25%, 3+ = 10%, <3 = 0%
+    const streakBonus = calculateStreakBonus(baseXP, currentStreak)
     const perfectBonus = percentage === 100 ? XP_PERFECT_SCORE_BONUS : 0
     const avgTimePerCard = totalCount > 0 ? duration / totalCount : 0
     const speedBonus = avgTimePerCard > 0 && avgTimePerCard <= XP_SPEED_BONUS_THRESHOLD ? XP_SPEED_BONUS : 0
@@ -323,11 +281,14 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
         achievementsUnlocked.push('level-20')
     }
 
-    // Streak achievements
-    if (currentStreak === 7)
-      achievementsUnlocked.push('streak-7')
-    if (currentStreak === 30)
-      achievementsUnlocked.push('streak-30')
+    // Streak achievements using shared utility
+    // Note: We check for newly unlocked achievements based on current streak
+    // This handles all streak milestones: 3, 7, 14, 30, 60, 100 days
+    const streakAchievements = getNewlyUnlockedStreakAchievements(
+      currentStreak - 1, // Previous streak (before this session)
+      currentStreak,
+    )
+    achievementsUnlocked.push(...streakAchievements)
 
     // Perfect score achievement
     if (percentage === 100)
@@ -375,7 +336,7 @@ export const getUserStats = createServerFn()
 
     const totalXP = profile?.xp ?? 0
     const levelInfo = calculateLevel(totalXP)
-    const currentStreak = await calculateStreak(db, userId)
+    const currentStreak = await calculateCurrentStreak(db, userId)
 
     // Get lessons completed count
     const masteryResult = await db
