@@ -1,4 +1,6 @@
+import path from 'node:path'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 import { cloudflare } from '@cloudflare/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
@@ -8,7 +10,14 @@ import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
 const config = defineConfig({
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
   plugins: [
     // this is the plugin that enables path aliases
     viteTsConfigPaths({
@@ -300,6 +309,16 @@ const config = defineConfig({
       '@tanstack/react-router',
       '@tanstack/react-query',
     ],
+  },
+  ssr: {
+    // Workaround for Vite 7 SSR pre-bundle cache issue with Cloudflare
+    optimizeDeps: {
+      include: [
+        'better-auth',
+        'better-auth/plugins',
+        'better-auth/adapters/drizzle',
+      ],
+    },
   },
 })
 

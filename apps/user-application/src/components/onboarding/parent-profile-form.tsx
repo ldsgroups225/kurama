@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { submitProfile } from '@/core/functions/profile'
+import { submitProfile, trackReferral } from '@/core/functions/profile'
+import { useReferral } from '@/hooks/use-referral'
 import { ArrowLeft, ArrowRight, Loader2, Plus, X } from '@/lib/icons'
 import { generateUUID } from '@/utils/generateUUID'
 
@@ -36,6 +37,7 @@ export function ParentProfileForm({
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { getCurrentReferralCode, clearReferralCode } = useReferral()
 
   const steps: Steps[] = [
     { id: 'personal', label: 'Informations' },
@@ -44,9 +46,26 @@ export function ParentProfileForm({
 
   const currentStepIndex = steps.findIndex(s => s.id === currentStep)
 
+  // Helper to track referral after profile submission
+  const trackReferralIfExists = async () => {
+    const referralCode = getCurrentReferralCode()
+    if (referralCode) {
+      try {
+        await trackReferral({ data: referralCode })
+        clearReferralCode()
+      }
+      catch (error) {
+        // Silently ignore referral tracking errors - don't block onboarding
+        console.warn('Failed to track referral:', error)
+      }
+    }
+  }
+
   const submitMutation = useMutation({
     mutationFn: submitProfile,
     onSuccess: async () => {
+      // Track referral if user was referred
+      await trackReferralIfExists()
       // Pass the form data to parent for caching in localStorage
       onSuccess(formData)
     },
@@ -149,6 +168,8 @@ export function ParentProfileForm({
           childrenMatricules: [],
         },
       })
+      // Track referral if user was referred
+      await trackReferralIfExists()
       onSuccess()
     }
     catch (error) {
@@ -357,14 +378,14 @@ export function ParentProfileForm({
                     >
                       {isSubmitting
                         ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Enregistrement...
-                            </>
-                          )
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Enregistrement...
+                          </>
+                        )
                         : (
-                            'Terminer'
-                          )}
+                          'Terminer'
+                        )}
                     </Button>
                   </div>
                 </>

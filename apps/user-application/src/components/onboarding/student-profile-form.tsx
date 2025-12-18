@@ -15,7 +15,8 @@ import {
 import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { getEducationalData, submitProfile } from '@/core/functions/profile'
+import { getEducationalData, submitProfile, trackReferral } from '@/core/functions/profile'
+import { useReferral } from '@/hooks/use-referral'
 import { ArrowLeft, ArrowRight, Loader2 } from '@/lib/icons'
 import { ProgressIndicator } from './progress-indicator'
 
@@ -64,6 +65,7 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
   const [currentStep, setCurrentStep] = useState<FormStep>('personal')
   const [formData, setFormData] = useState<Partial<StudentProfile>>(INITIAL_FORM_DATA)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const { getCurrentReferralCode, clearReferralCode } = useReferral()
 
   const currentStepIndex = STEPS.findIndex(s => s.id === currentStep)
 
@@ -75,6 +77,19 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
   const submitMutation = useMutation({
     mutationFn: submitProfile,
     onSuccess: async () => {
+      // Track referral if user was referred
+      const referralCode = getCurrentReferralCode()
+      if (referralCode) {
+        try {
+          await trackReferral({ data: referralCode })
+          clearReferralCode()
+        }
+        catch (error) {
+          // Silently ignore referral tracking errors - don't block onboarding
+          console.warn('Failed to track referral:', error)
+        }
+      }
+
       // Pass the form data to parent for caching in localStorage
       onSuccess(formData)
     },
@@ -514,9 +529,9 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                           className={`
                             justify-start border transition-all duration-200
                             ${formData.favoriteSubjects?.includes(subject)
-                          ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400'
-                          : 'border-input bg-background/50 text-muted-foreground hover:bg-accent hover:text-foreground'
-                        }
+                              ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400'
+                              : 'border-input bg-background/50 text-muted-foreground hover:bg-accent hover:text-foreground'
+                            }
                           `}
                         >
                           {subject}
@@ -575,14 +590,14 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                   >
                     {submitMutation.isPending
                       ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Enregistrement...
-                          </>
-                        )
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Enregistrement...
+                        </>
+                      )
                       : (
-                          'Terminer'
-                        )}
+                        'Terminer'
+                      )}
                   </Button>
                 </>
               )}

@@ -1,3 +1,6 @@
+export { OnboardingScreen } from './onboarding-screen'
 export { ParentProfileForm } from './parent-profile-form'
+export { ProgressIndicator } from './progress-indicator'
 export { StudentProfileForm } from './student-profile-form'
 export { UserTypeSelection } from './user-type-selection'
+export { WelcomeScreen } from './welcome-screen'

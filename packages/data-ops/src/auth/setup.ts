@@ -1,7 +1,5 @@
 import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { emailOTP } from "better-auth/plugins";
-import { eq } from "drizzle-orm";
-import { userProfiles } from "../drizzle/schema";
 
 export type SendVerificationOTPParams = {
   email: string;
@@ -68,32 +66,7 @@ export const createBetterAuth = (config: BetterAuthConfig): ReturnType<typeof be
         disableSignUp: false,
       }),
     ],
-    hooks: {
-      after: async (ctx: any) => {
-        // Store referral code when user signs up
-        if (ctx.path === "/sign-up/email" && ctx.method === "POST") {
-          const referralCode = ctx.body?.referralCode as string | undefined;
-
-          if (referralCode && ctx.returned?.user?.id) {
-            try {
-              const db = config.database as any; // Type assertion for Drizzle
-
-              // Update user profile with referral code
-              await db
-                .update(userProfiles)
-                .set({
-                  referredBy: referralCode.toUpperCase(),
-                  updatedAt: new Date().toISOString(),
-                })
-                .where(eq(userProfiles.userId, ctx.returned.user.id));
-
-              console.warn(`Referral tracked: User ${ctx.returned.user.id} referred by ${referralCode}`);
-            } catch (error) {
-              console.error('Error storing referral code:', error);
-            }
-          }
-        }
-      },
-    },
+    // Note: Referral tracking should be handled in the application layer
+    // via a separate API call after sign-up, not in auth hooks
   });
 };
