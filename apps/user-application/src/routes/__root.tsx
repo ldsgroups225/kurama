@@ -1,9 +1,10 @@
+/// <reference types="vite/client" />
+
 /* eslint-disable react-dom/no-dangerously-set-innerhtml */
 import type { QueryClient } from '@tanstack/react-query'
 import { getBrowserEnvironment } from '@kurama/config/environment'
 import { createLogger, setupLogging } from '@kurama/observability/logging'
 import { initBrowserSentry } from '@kurama/observability/sentry/browser'
-/// <reference types="vite/client" />
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -15,6 +16,7 @@ import * as React from 'react'
 import { DefaultCatchBoundary } from '@/components/default-catch-boundary'
 import { NotFound } from '@/components/not-found'
 import { ThemeProvider } from '@/components/theme'
+import { useReferral } from '@/hooks/use-referral'
 import { updateCurrencyRate } from '@/lib/currency'
 import { initPerformanceMonitoring } from '@/lib/performance-monitor'
 import { initPreloading } from '@/lib/preload'
@@ -93,6 +95,9 @@ export const Route = createRootRouteWithContext<{
 
 function RootComponent() {
   const location = useLocation()
+
+  // Capture referral codes from URL
+  useReferral()
 
   // Initialize observability on mount
   React.useEffect(() => {
