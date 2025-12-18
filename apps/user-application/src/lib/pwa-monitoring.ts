@@ -4,10 +4,23 @@
  * Tracks PWA-specific metrics and errors for debugging and optimization
  */
 
-import { createLogger } from '@kurama/observability/logging'
-import { captureException, captureMessage } from '@kurama/observability/sentry/browser'
+// Lazy-loaded observability modules to reduce main bundle size
+let loggerPromise: Promise<ReturnType<typeof import('@kurama/observability/logging').createLogger>> | null = null
+let sentryPromise: Promise<typeof import('@kurama/observability/sentry/browser')> | null = null
 
-const logger = createLogger('pwa')
+async function getLogger() {
+  if (!loggerPromise) {
+    loggerPromise = import('@kurama/observability/logging').then(m => m.createLogger('pwa'))
+  }
+  return loggerPromise
+}
+
+async function getSentry() {
+  if (!sentryPromise) {
+    sentryPromise = import('@kurama/observability/sentry/browser')
+  }
+  return sentryPromise
+}
 
 export interface PWAMetrics {
   /** Service worker errors */
@@ -322,20 +335,24 @@ class PWAMonitoringManager {
    * Send error to monitoring service
    */
   private sendToMonitoringService(log: ErrorLog): void {
-    // Send to Sentry
-    if (log.type === 'service-worker' || log.type === 'cache') {
-      captureException(new Error(log.message), {
-        type: log.type,
-        stack: log.stack,
-        ...log.context,
-      })
-    }
-    else {
-      captureMessage(`[PWA] ${log.type}: ${log.message}`, 'warning')
-    }
+    // Lazy load Sentry and send error
+    void getSentry().then(({ captureException, captureMessage }) => {
+      if (log.type === 'service-worker' || log.type === 'cache') {
+        captureException(new Error(log.message), {
+          type: log.type,
+          stack: log.stack,
+          ...log.context,
+        })
+      }
+      else {
+        captureMessage(`[PWA] ${log.type}: ${log.message}`, 'warning')
+      }
+    })
 
-    // Also log via LogTape
-    logger.error(log.message, { type: log.type, context: log.context })
+    // Lazy load LogTape and log error
+    void getLogger().then((logger) => {
+      logger.error(log.message, { type: log.type, context: log.context })
+    })
   }
 }
 

@@ -3,8 +3,6 @@
 /* eslint-disable react-dom/no-dangerously-set-innerhtml */
 import type { QueryClient } from '@tanstack/react-query'
 import { getBrowserEnvironment } from '@kurama/config/environment'
-import { createLogger, setupLogging } from '@kurama/observability/logging'
-import { initBrowserSentry } from '@kurama/observability/sentry/browser'
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -99,31 +97,35 @@ function RootComponent() {
   // Capture referral codes from URL
   useReferral()
 
-  // Initialize observability on mount
+  // Initialize observability on mount (lazy loaded to reduce main bundle size)
   React.useEffect(() => {
     const env = getBrowserEnvironment()
 
-    // Initialize Sentry
-    initBrowserSentry({
-      dsn: env.sentryDsn || '',
-      environment: env.environment,
-      release: `kurama-frontend@${import.meta.env.VITE_APP_VERSION || 'dev'}`,
-      tracesSampleRate: env.isProduction ? 0.1 : 1.0,
-      replaysSessionSampleRate: 0.1,
-      replaysOnErrorSampleRate: 1.0,
-      sendDefaultPii: env.isDevelopment,
+    // Lazy load Sentry to reduce initial bundle size (~50KB savings)
+    void import('@kurama/observability/sentry/browser').then(({ initBrowserSentry }) => {
+      initBrowserSentry({
+        dsn: env.sentryDsn || '',
+        environment: env.environment,
+        release: `kurama-frontend@${import.meta.env.VITE_APP_VERSION || 'dev'}`,
+        tracesSampleRate: env.isProduction ? 0.1 : 1.0,
+        replaysSessionSampleRate: 0.1,
+        replaysOnErrorSampleRate: 1.0,
+        sendDefaultPii: env.isDevelopment,
+      })
     })
 
-    // Initialize LogTape
-    void setupLogging({
-      level: env.isDevelopment ? 'debug' : 'info',
-      environment: env.environment,
-      sentryDsn: env.sentryDsn,
-      enableConsole: env.isDevelopment,
-    })
+    // Lazy load LogTape
+    void import('@kurama/observability/logging').then(({ setupLogging, createLogger }) => {
+      void setupLogging({
+        level: env.isDevelopment ? 'debug' : 'info',
+        environment: env.environment,
+        sentryDsn: env.sentryDsn,
+        enableConsole: env.isDevelopment,
+      })
 
-    const logger = createLogger('app')
-    logger.info('Application initialized', { environment: env.environment })
+      const logger = createLogger('app')
+      logger.info('Application initialized', { environment: env.environment })
+    })
   }, [])
 
   // Initialize performance monitoring on mount
