@@ -12,6 +12,8 @@ import { handleWebhookEvent } from './handlers'
 // Extended Env type for webhook handler
 interface WebhookEnv {
   POLAR_WEBHOOK_SECRET: string
+  POLAR_ACCESS_TOKEN: string
+  POLAR_ORGANIZATION_ID: string
   DATABASE_HOST: string
   DATABASE_USERNAME: string
   DATABASE_PASSWORD: string
@@ -35,12 +37,20 @@ polarWebhooks.post('/api/webhooks/polar', async (c) => {
     password: c.env.DATABASE_PASSWORD,
   }
 
+  // Polar API config for creating discounts
+  const polarConfig = c.env.POLAR_ACCESS_TOKEN && c.env.POLAR_ORGANIZATION_ID
+    ? {
+      accessToken: c.env.POLAR_ACCESS_TOKEN,
+      organizationId: c.env.POLAR_ORGANIZATION_ID,
+    }
+    : undefined
+
   // Use the Polar Webhooks adapter
   const handler = Webhooks({
     webhookSecret,
     onPayload: async (payload) => {
       try {
-        await handleWebhookEvent(payload, dbConfig)
+        await handleWebhookEvent(payload, dbConfig, polarConfig)
       }
       catch (error) {
         console.error('Error processing webhook payload:', error)

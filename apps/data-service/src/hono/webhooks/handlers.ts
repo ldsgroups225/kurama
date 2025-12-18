@@ -14,7 +14,10 @@ import {
   markOrderPaid,
   markOrderRefunded,
 } from '@kurama/data-ops/queries/orders'
-import { processReferralReward } from '@kurama/data-ops/queries/referrals'
+import {
+  markReferralRewardedWithDiscount,
+  processReferralReward,
+} from '@kurama/data-ops/queries/referrals'
 import {
   updateSubscriptionStatus,
   updateUserSubscriptionTier,
@@ -26,6 +29,12 @@ interface DbConfig {
   host: string
   username: string
   password: string
+}
+
+// Polar API config for creating discounts
+interface PolarConfig {
+  accessToken: string
+  organizationId: string
 }
 
 // Metadata type for our database
@@ -130,15 +139,24 @@ interface PolarWebhookPayload {
   data: PolarSubscriptionData | PolarOrderData | Record<string, unknown>
 }
 
+// Store polar config for use in handlers
+let polarConfig: PolarConfig | null = null
+
 /**
  * Main webhook event handler
  */
 export async function handleWebhookEvent(
   payload: PolarWebhookPayload,
   dbConfig: DbConfig,
+  polar?: PolarConfig,
 ): Promise<void> {
   // Initialize database
   initDatabase(dbConfig)
+
+  // Store polar config for referral rewards
+  if (polar) {
+    polarConfig = polar
+  }
 
   console.warn(`Processing webhook event: ${payload.type}`)
 
@@ -388,15 +406,104 @@ async function handleOrderPaid(data: PolarOrderData): Promise<void> {
 
   // Process referral reward if this is the user's first order
   if (userId) {
-    try {
-      await processReferralReward(userId)
-    }
-    catch (error) {
-      console.error('Error processing referral reward:', error)
-    }
+    await processReferralAndCreateDiscount(userId)
   }
 
   console.warn(`Order ${data.id} marked as paid`)
+}
+
+/**
+ * Process referral reward and create discount code in Polar for the referrer
+ */
+async function processReferralAndCreateDiscount(referredUserId: string): Promise<void> {
+  try {
+    const result = await processReferralReward(referredUserId)
+
+    if (!result.success) {
+      if (result.error !== 'No referral code found for user' && result.error !== 'Referral already rewarded') {
+        console.warn(`Referral processing skipped: ${result.error}`)
+      }
+      return
+    }
+
+    console.warn(`Referral completed for referrer ${result.referrerUserId}, reward: ${result.rewardAmount} cents`)
+
+    // Create discount code in Polar for the referrer
+    if (polarConfig && result.referralId && result.referrerUserId) {
+      const discountCode = await createPolarDiscountForReferrer(
+        result.referrerUserId,
+        result.rewardAmount || 300, // Default $3.00
+      )
+
+      if (discountCode) {
+        // Mark referral as rewarded with the discount code
+        await markReferralRewardedWithDiscount(result.referralId, discountCode)
+        console.warn(`Created Polar discount ${discountCode} for referrer ${result.referrerUserId}`)
+      }
+    }
+    else if (result.referralId) {
+      // No Polar config, just mark as rewarded without discount
+      await markReferralRewardedWithDiscount(result.referralId, 'NO_POLAR_CONFIG')
+      console.warn(`Referral ${result.referralId} marked as rewarded (no Polar discount created)`)
+    }
+  }
+  catch (error) {
+    console.error('Error processing referral reward:', error)
+  }
+}
+
+/**
+ * Create a discount code in Polar for the referrer
+ */
+async function createPolarDiscountForReferrer(
+  referrerUserId: string,
+  amountCents: number,
+): Promise<string | null> {
+  if (!polarConfig) {
+    console.warn('Polar config not available, skipping discount creation')
+    return null
+  }
+
+  try {
+    // Generate unique discount code
+    const discountCode = `REF${referrerUserId.substring(0, 6).toUpperCase()}${Date.now().toString(36).toUpperCase()}`
+
+    // Create discount via Polar API
+    const response = await fetch('https://api.polar.sh/v1/discounts', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${polarConfig.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: `Referral Reward - ${referrerUserId.substring(0, 8)}`,
+        code: discountCode,
+        type: 'fixed',
+        amount: amountCents,
+        currency: 'usd',
+        duration: 'once',
+        max_redemptions: 1,
+        organization_id: polarConfig.organizationId,
+        metadata: {
+          referrerUserId,
+          type: 'referral_reward',
+        },
+      }),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('Failed to create Polar discount:', response.status, errorText)
+      return null
+    }
+
+    const discount = await response.json() as { code?: string }
+    return discount.code || discountCode
+  }
+  catch (error) {
+    console.error('Error creating Polar discount:', error)
+    return null
+  }
 }
 
 /**
