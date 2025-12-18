@@ -1,10 +1,11 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, isNull } from "drizzle-orm";
 import { getDb } from "../database/setup";
 import {
   referrals,
   userProfiles,
   type InsertReferral,
   type SelectReferral,
+  type ReferralStatus,
 } from "../drizzle/schema";
 
 /**
@@ -99,6 +100,7 @@ export async function setUserReferralCode(userId: string, code: string): Promise
 
 /**
  * Get or create user's referral code
+ * Also creates a referral entry in the referrals table
  */
 export async function getOrCreateReferralCode(userId: string): Promise<string> {
   const existingCode = await getUserReferralCode(userId);
@@ -109,6 +111,13 @@ export async function getOrCreateReferralCode(userId: string): Promise<string> {
 
   const newCode = generateReferralCode(userId);
   await setUserReferralCode(userId, newCode);
+
+  // Create a referral entry for tracking
+  await createReferral({
+    referrerUserId: userId,
+    referralCode: newCode,
+    status: 'pending',
+  });
 
   return newCode;
 }
@@ -123,8 +132,14 @@ export async function completeReferral(
   const db = getDb();
   const now = new Date().toISOString();
 
-  // Find the referral by code
-  const referral = await getReferralByCode(referralCode);
+  // Find the referral by code that hasn't been completed yet
+  const referral = await db.query.referrals.findFirst({
+    where: and(
+      eq(referrals.referralCode, referralCode),
+      isNull(referrals.referredUserId)
+    ),
+  });
+
   if (!referral) return null;
 
   // Update the referral
@@ -135,10 +150,38 @@ export async function completeReferral(
       status: 'completed',
       completedAt: now,
     })
-    .where(eq(referrals.referralCode, referralCode))
+    .where(eq(referrals.id, referral.id))
     .returning();
 
   return result[0] || null;
+}
+
+/**
+ * Get pending referral for a referred user
+ */
+export async function getPendingReferralForUser(referredUserId: string): Promise<SelectReferral | null> {
+  const db = getDb();
+
+  // Get the user's referredBy code
+  const profile = await db.query.userProfiles.findFirst({
+    where: eq(userProfiles.userId, referredUserId),
+    columns: {
+      referredBy: true,
+    },
+  });
+
+  if (!profile?.referredBy) return null;
+
+  // Find the referral entry
+  const referral = await db.query.referrals.findFirst({
+    where: and(
+      eq(referrals.referralCode, profile.referredBy),
+      eq(referrals.referredUserId, referredUserId),
+      eq(referrals.status, 'completed')
+    ),
+  });
+
+  return referral || null;
 }
 
 /**
@@ -184,9 +227,22 @@ export async function getReferralStats(userId: string): Promise<{
 }
 
 /**
- * Process referral reward when referred user makes first purchase
+ * Referral reward result
  */
-export async function processReferralReward(referredUserId: string): Promise<void> {
+export interface ReferralRewardResult {
+  success: boolean;
+  referralId?: number;
+  referrerUserId?: string;
+  rewardAmount?: number;
+  discountCode?: string;
+  error?: string;
+}
+
+/**
+ * Process referral reward when referred user makes first purchase
+ * Returns info needed to create discount in Polar
+ */
+export async function processReferralReward(referredUserId: string): Promise<ReferralRewardResult> {
   const db = getDb();
 
   // Get the referred user's profile to find who referred them
@@ -197,22 +253,65 @@ export async function processReferralReward(referredUserId: string): Promise<voi
     },
   });
 
-  if (!profile?.referredBy) return;
-
-  // Find the referral entry
-  const referral = await getReferralByCode(profile.referredBy);
-  if (!referral || referral.status === 'rewarded') return;
-
-  // Complete and reward the referral
-  await completeReferral(profile.referredBy, referredUserId);
-
-  // In a real implementation, you would:
-  // 1. Credit the referrer's account
-  // 2. Send notification to referrer
-  // 3. Mark as rewarded
-  if (referral.id) {
-    await markReferralRewarded(referral.id);
+  if (!profile?.referredBy) {
+    return { success: false, error: 'No referral code found for user' };
   }
+
+  // Find the referral entry that hasn't been rewarded yet
+  const referral = await db.query.referrals.findFirst({
+    where: and(
+      eq(referrals.referralCode, profile.referredBy),
+      eq(referrals.status, 'pending')
+    ),
+  });
+
+  if (!referral) {
+    // Check if already rewarded
+    const existingReferral = await getReferralByCode(profile.referredBy);
+    if (existingReferral?.status === 'rewarded') {
+      return { success: false, error: 'Referral already rewarded' };
+    }
+    return { success: false, error: 'Referral not found' };
+  }
+
+  // Complete the referral (mark as completed with referred user)
+  const completedReferral = await completeReferral(profile.referredBy, referredUserId);
+  if (!completedReferral) {
+    return { success: false, error: 'Failed to complete referral' };
+  }
+
+  return {
+    success: true,
+    referralId: completedReferral.id,
+    referrerUserId: completedReferral.referrerUserId,
+    rewardAmount: completedReferral.rewardAmount,
+  };
+}
+
+/**
+ * Mark referral as rewarded with discount code
+ */
+export async function markReferralRewardedWithDiscount(
+  referralId: number,
+  discountCode: string
+): Promise<SelectReferral | null> {
+  const db = getDb();
+  const now = new Date().toISOString();
+
+  const result = await db
+    .update(referrals)
+    .set({
+      status: 'rewarded',
+      rewardedAt: now,
+    })
+    .where(eq(referrals.id, referralId))
+    .returning();
+
+  // Also store the discount code in the referrer's profile metadata or a separate field
+  // For now, we'll log it
+  console.warn(`Referral ${referralId} rewarded with discount code: ${discountCode}`);
+
+  return result[0] || null;
 }
 
 /**

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { authClient } from '@/lib/auth-client'
+import { useReferral } from '@/hooks/use-referral'
 import { Loader2, Mail } from '@/lib/icons'
 
 interface EmailStepProps {
@@ -13,6 +14,7 @@ export function EmailStep({ onSubmit }: EmailStepProps) {
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const { getCurrentReferralCode } = useReferral()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,9 +28,13 @@ export function EmailStep({ onSubmit }: EmailStepProps) {
     setIsLoading(true)
 
     try {
+      // Get referral code from storage
+      const referralCode = getCurrentReferralCode()
+
       const { error: otpError } = await authClient.emailOtp.sendVerificationOtp({
         email,
         type: 'sign-in',
+        ...(referralCode && { referralCode }),
       })
 
       if (otpError) {
@@ -80,14 +86,14 @@ export function EmailStep({ onSubmit }: EmailStepProps) {
       >
         {isLoading
           ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Envoi en cours...
-              </>
-            )
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Envoi en cours...
+            </>
+          )
           : (
-              'Continuer'
-            )}
+            'Continuer'
+          )}
       </Button>
 
       <p className="text-center text-xs text-muted-foreground">

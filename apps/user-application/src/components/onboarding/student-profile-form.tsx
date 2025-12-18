@@ -74,7 +74,7 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
 
   const submitMutation = useMutation({
     mutationFn: submitProfile,
-    onSuccess: () => {
+    onSuccess: async () => {
       // Pass the form data to parent for caching in localStorage
       onSuccess(formData)
     },
@@ -118,7 +118,7 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
       if (!formData.idNumber)
         newErrors.idNumber = 'Le numéro matricule est requis'
       if (formData.idNumber?.length !== 9)
-        newErrors.idNumber = 'Le numéro matricule est incorrect'
+        newErrors.idNumber = 'Matricule est incorrect (ex.: 01010101A)'
       if (!formData.gradeName)
         newErrors.gradeName = 'Le niveau est requis'
       if (requiresSeries && !formData.seriesName) {
@@ -514,9 +514,9 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                           className={`
                             justify-start border transition-all duration-200
                             ${formData.favoriteSubjects?.includes(subject)
-                          ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400'
-                          : 'border-input bg-background/50 text-muted-foreground hover:bg-accent hover:text-foreground'
-                        }
+                              ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400'
+                              : 'border-input bg-background/50 text-muted-foreground hover:bg-accent hover:text-foreground'
+                            }
                           `}
                         >
                           {subject}
@@ -575,14 +575,14 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                   >
                     {submitMutation.isPending
                       ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Enregistrement...
-                          </>
-                        )
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Enregistrement...
+                        </>
+                      )
                       : (
-                          'Terminer'
-                        )}
+                        'Terminer'
+                      )}
                   </Button>
                 </>
               )}

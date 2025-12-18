@@ -43,9 +43,12 @@ export {
   getOrCreateReferralCode,
   completeReferral,
   markReferralRewarded,
+  markReferralRewardedWithDiscount,
   getReferralStats,
   processReferralReward,
+  getPendingReferralForUser,
   trackReferredBy,
+  type ReferralRewardResult,
 } from "./referrals";
 
 // Re-export Zod schemas and types

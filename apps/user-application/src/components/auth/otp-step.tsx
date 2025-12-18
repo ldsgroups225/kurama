@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { useReferral } from '@/hooks/use-referral'
 import { authClient } from '@/lib/auth-client'
 import { ArrowLeft, Loader2, RefreshCw } from '@/lib/icons'
 
@@ -17,6 +18,7 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
   const [canResend, setCanResend] = useState(false)
   const [countdown, setCountdown] = useState(60)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+  const { getCurrentReferralCode } = useReferral()
 
   const hasFocusedRef = useRef(false)
 
@@ -53,9 +55,13 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
     setError('')
 
     try {
+      // Get referral code from storage
+      const referralCode = getCurrentReferralCode()
+
       const { error: signInError } = await authClient.signIn.emailOtp({
         email,
         otp: otpCode,
+        ...(referralCode && { referralCode }),
       })
 
       if (signInError) {
@@ -148,9 +154,13 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
     setError('')
 
     try {
+      // Get referral code from storage
+      const referralCode = getCurrentReferralCode()
+
       await authClient.emailOtp.sendVerificationOtp({
         email,
         type: 'sign-in',
+        ...(referralCode && { referralCode }),
       })
 
       // Restart countdown
@@ -243,24 +253,24 @@ export function OtpStep({ email, onBack }: OtpStepProps) {
       <div className="text-center">
         {canResend
           ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleResend}
-                className="text-primary hover:text-primary/80"
-              >
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Renvoyer le code
-              </Button>
-            )
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleResend}
+              className="text-primary hover:text-primary/80"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Renvoyer le code
+            </Button>
+          )
           : (
-              <p className="text-sm text-muted-foreground">
-                Renvoyer le code dans
-                {' '}
-                {countdown}
-                s
-              </p>
-            )}
+            <p className="text-sm text-muted-foreground">
+              Renvoyer le code dans
+              {' '}
+              {countdown}
+              s
+            </p>
+          )}
       </div>
     </div>
   )

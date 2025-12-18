@@ -1,5 +1,7 @@
 import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { emailOTP } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
+import { userProfiles } from "../drizzle/schema";
 
 export const createBetterAuth = (config: {
   database: BetterAuthOptions["database"];
@@ -46,5 +48,32 @@ export const createBetterAuth = (config: {
         disableSignUp: false,
       }),
     ],
+    hooks: {
+      after: async (ctx: any) => {
+        // Store referral code when user signs up
+        if (ctx.path === "/sign-up/email" && ctx.method === "POST") {
+          const referralCode = ctx.body?.referralCode as string | undefined;
+
+          if (referralCode && ctx.returned?.user?.id) {
+            try {
+              const db = config.database as any; // Type assertion for Drizzle
+
+              // Update user profile with referral code
+              await db
+                .update(userProfiles)
+                .set({
+                  referredBy: referralCode.toUpperCase(),
+                  updatedAt: new Date().toISOString(),
+                })
+                .where(eq(userProfiles.userId, ctx.returned.user.id));
+
+              console.warn(`Referral tracked: User ${ctx.returned.user.id} referred by ${referralCode}`);
+            } catch (error) {
+              console.error('Error storing referral code:', error);
+            }
+          }
+        }
+      },
+    },
   });
 };
