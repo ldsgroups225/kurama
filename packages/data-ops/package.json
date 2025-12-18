@@ -26,6 +26,10 @@
     "./storage": {
       "types": "./dist/storage/index.d.ts",
       "default": "./dist/storage/index.js"
+    },
+    "./email/*": {
+      "types": "./dist/email/*.d.ts",
+      "default": "./dist/email/*.js"
     }
   },
   "scripts": {
@@ -36,31 +40,36 @@
     "drizzle:pull": "npx dotenv-cli -e .env.development -- drizzle-kit pull --config drizzle.config.ts",
     "seed": "tsx src/seeds/seed-db.ts",
     "seed:lessons": "tsx src/seeds/seed-all-comprehensive.ts",
+    "test:email": "tsx src/email/test-email.ts",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.25.0",
+  "packageManager": "pnpm@10.26.0",
   "dependencies": {
     "@neondatabase/serverless": "catalog:backend",
     "@planetscale/database": "catalog:backend",
     "@polar-sh/better-auth": "catalog:integrations",
     "@polar-sh/sdk": "catalog:integrations",
+    "@react-email/components": "catalog:email",
     "aws4fetch": "catalog:backend",
     "better-auth": "catalog:frontend",
     "better-sqlite3": "catalog:backend",
     "drizzle-orm": "catalog:backend",
+    "resend": "catalog:email",
     "zod": "catalog:shared"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "catalog:backend",
     "@types/better-sqlite3": "catalog:dev",
+    "@types/react": "catalog:dev",
     "dotenv": "catalog:dev",
     "dotenv-cli": "catalog:dev",
     "drizzle-kit": "catalog:backend",
     "mysql2": "catalog:backend",
     "postgres": "catalog:backend",
+    "react": "catalog:frontend",
     "tsc-alias": "catalog:build",
     "tsx": "catalog:dev",
     "typescript": "catalog:dev"
