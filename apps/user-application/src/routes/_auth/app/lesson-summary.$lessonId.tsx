@@ -331,9 +331,9 @@ function SummaryPage() {
                       // Could show a toast notification here
                     }
                   }
-                  catch (error) {
+                  catch {
                     // Silently handle share cancellation or clipboard errors
-                    console.debug('Share cancelled or failed:', error)
+                    // Share cancelled or failed - no action needed
                   }
                 }}
               >

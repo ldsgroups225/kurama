@@ -529,9 +529,9 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                           className={`
                             justify-start border transition-all duration-200
                             ${formData.favoriteSubjects?.includes(subject)
-                              ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400'
-                              : 'border-input bg-background/50 text-muted-foreground hover:bg-accent hover:text-foreground'
-                            }
+                          ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400'
+                          : 'border-input bg-background/50 text-muted-foreground hover:bg-accent hover:text-foreground'
+                        }
                           `}
                         >
                           {subject}
@@ -590,14 +590,14 @@ export function StudentProfileForm({ onBack, onSuccess }: StudentProfileFormProp
                   >
                     {submitMutation.isPending
                       ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Enregistrement...
-                        </>
-                      )
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Enregistrement...
+                          </>
+                        )
                       : (
-                        'Terminer'
-                      )}
+                          'Terminer'
+                        )}
                   </Button>
                 </>
               )}

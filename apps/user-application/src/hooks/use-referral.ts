@@ -1,9 +1,28 @@
 import { useLocation, useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useReducer } from 'react'
 
 const REFERRAL_STORAGE_KEY = 'kurama_referral_code'
 const REFERRAL_EXPIRY_KEY = 'kurama_referral_expiry'
 const REFERRAL_EXPIRY_DAYS = 30
+
+interface ReferralState {
+  referralCode: string | null
+}
+
+type ReferralAction
+  = | { type: 'SET_CODE', payload: string }
+    | { type: 'CLEAR_CODE' }
+
+function referralReducer(state: ReferralState, action: ReferralAction): ReferralState {
+  switch (action.type) {
+    case 'SET_CODE':
+      return { referralCode: action.payload }
+    case 'CLEAR_CODE':
+      return { referralCode: null }
+    default:
+      return state
+  }
+}
 
 /**
  * Hook to manage referral code capture and storage
@@ -11,7 +30,7 @@ const REFERRAL_EXPIRY_DAYS = 30
 export function useReferral() {
   const location = useLocation()
   const navigate = useNavigate()
-  const [referralCode, setReferralCode] = useState<string | null>(null)
+  const [state, dispatch] = useReducer(referralReducer, { referralCode: null })
 
   // Capture referral code from URL on mount
   useEffect(() => {
@@ -27,7 +46,7 @@ export function useReferral() {
       localStorage.setItem(REFERRAL_STORAGE_KEY, refParam.toUpperCase())
       localStorage.setItem(REFERRAL_EXPIRY_KEY, expiryDate.toISOString())
 
-      setReferralCode(refParam.toUpperCase())
+      dispatch({ type: 'SET_CODE', payload: refParam.toUpperCase() })
 
       // Clean URL by removing ref parameter
       const newSearchParams = new URLSearchParams(searchString)
@@ -49,7 +68,7 @@ export function useReferral() {
         const now = new Date()
 
         if (now < expiryDate) {
-          setReferralCode(storedCode)
+          dispatch({ type: 'SET_CODE', payload: storedCode })
         }
         else {
           // Expired, clean up
@@ -83,14 +102,14 @@ export function useReferral() {
   }
 
   // Function to clear referral code
-  const clearReferralCode = () => {
+  const clearReferralCode = useCallback(() => {
     localStorage.removeItem(REFERRAL_STORAGE_KEY)
     localStorage.removeItem(REFERRAL_EXPIRY_KEY)
-    setReferralCode(null)
-  }
+    dispatch({ type: 'CLEAR_CODE' })
+  }, [])
 
   return {
-    referralCode,
+    referralCode: state.referralCode,
     getCurrentReferralCode,
     clearReferralCode,
   }
