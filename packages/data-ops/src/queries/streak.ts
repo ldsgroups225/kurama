@@ -4,11 +4,20 @@
  * Single source of truth for all streak-related calculations.
  * Eliminates code duplication across dashboard.ts, profile.ts, progress.ts, and stats.ts.
  *
+ * Features:
+ * - Consistent timezone handling (Africa/Abidjan)
+ * - Optimized database queries with 365-day lookback
+ * - Tiered XP bonus system
+ * - Achievement tracking
+ * - Streak freeze support (premium feature)
+ * - Longest streak persistence
+ * - Streak statistics and analytics
+ *
  * @module @kurama/data-ops/queries/streak
  */
 
 import { desc, eq, gte, and } from 'drizzle-orm'
-import { studySessions } from '../drizzle/schema'
+import { studySessions, userProfiles } from '../drizzle/schema'
 import type { Database } from '../database/setup'
 
 /**
@@ -337,3 +346,467 @@ export function getNewlyUnlockedStreakAchievements(
 
   return currentUnlocked.filter(id => !previousUnlocked.has(id))
 }
+
+// ============================================
+// STREAK PERSISTENCE & UPDATES
+// ============================================
+
+/**
+ * Update longest streak in user profile if current streak exceeds it
+ * Call this after each study session to keep the cached value up to date
+ */
+export async function updateLongestStreakIfNeeded(
+  db: Database,
+  userId: string,
+  currentStreak: number,
+): Promise<{ updated: boolean, newLongestStreak: number }> {
+  const profile = await db.query.userProfiles.findFirst({
+    where: eq(userProfiles.userId, userId),
+    columns: { longestStreak: true },
+  })
+
+  const storedLongestStreak = profile?.longestStreak ?? 0
+
+  if (currentStreak > storedLongestStreak) {
+    await db
+      .update(userProfiles)
+      .set({
+        longestStreak: currentStreak,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(userProfiles.userId, userId))
+
+    return { updated: true, newLongestStreak: currentStreak }
+  }
+
+  return { updated: false, newLongestStreak: storedLongestStreak }
+}
+
+/**
+ * Get cached longest streak from user profile
+ * Falls back to calculating from sessions if not cached
+ */
+export async function getCachedLongestStreak(
+  db: Database,
+  userId: string,
+): Promise<number> {
+  const profile = await db.query.userProfiles.findFirst({
+    where: eq(userProfiles.userId, userId),
+    columns: { longestStreak: true },
+  })
+
+  // If cached value exists and is > 0, use it
+  if (profile?.longestStreak && profile.longestStreak > 0) {
+    return profile.longestStreak
+  }
+
+  // Otherwise calculate and cache it
+  const calculatedLongest = await calculateLongestStreak(db, userId)
+  if (calculatedLongest > 0) {
+    await db
+      .update(userProfiles)
+      .set({
+        longestStreak: calculatedLongest,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(userProfiles.userId, userId))
+  }
+
+  return calculatedLongest
+}
+
+// ============================================
+// STREAK FREEZE (PREMIUM FEATURE)
+// ============================================
+
+/**
+ * Check if user can use a streak freeze
+ * Premium users get streak freezes based on subscription tier
+ */
+export async function canUseStreakFreeze(
+  db: Database,
+  userId: string,
+): Promise<{ canUse: boolean, freezesRemaining: number, reason?: string }> {
+  const profile = await db.query.userProfiles.findFirst({
+    where: eq(userProfiles.userId, userId),
+    columns: {
+      subscriptionTier: true,
+      streakFreezeCount: true,
+      lastStreakFreezeUsedAt: true,
+    },
+  })
+
+  if (!profile) {
+    return { canUse: false, freezesRemaining: 0, reason: 'Profile not found' }
+  }
+
+  // Free users don't get streak freezes
+  if (profile.subscriptionTier === 'free') {
+    return { canUse: false, freezesRemaining: 0, reason: 'Premium feature' }
+  }
+
+  // Check if already used today
+  if (profile.lastStreakFreezeUsedAt) {
+    const lastUsedDate = normalizeToDateString(profile.lastStreakFreezeUsedAt)
+    const today = getTodayDateString()
+    if (lastUsedDate === today) {
+      return {
+        canUse: false,
+        freezesRemaining: profile.streakFreezeCount ?? 0,
+        reason: 'Already used today',
+      }
+    }
+  }
+
+  const freezesRemaining = profile.streakFreezeCount ?? 0
+  return {
+    canUse: freezesRemaining > 0,
+    freezesRemaining,
+    reason: freezesRemaining === 0 ? 'No freezes remaining' : undefined,
+  }
+}
+
+/**
+ * Use a streak freeze to protect the streak for one day
+ */
+export async function useStreakFreeze(
+  db: Database,
+  userId: string,
+): Promise<{ success: boolean, freezesRemaining: number, error?: string }> {
+  const { canUse, freezesRemaining, reason } = await canUseStreakFreeze(db, userId)
+
+  if (!canUse) {
+    return { success: false, freezesRemaining, error: reason }
+  }
+
+  await db
+    .update(userProfiles)
+    .set({
+      streakFreezeCount: freezesRemaining - 1,
+      lastStreakFreezeUsedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(userProfiles.userId, userId))
+
+  return { success: true, freezesRemaining: freezesRemaining - 1 }
+}
+
+/**
+ * Grant streak freezes to a user (e.g., on subscription upgrade)
+ */
+export async function grantStreakFreezes(
+  db: Database,
+  userId: string,
+  count: number,
+): Promise<void> {
+  const profile = await db.query.userProfiles.findFirst({
+    where: eq(userProfiles.userId, userId),
+    columns: { streakFreezeCount: true },
+  })
+
+  const currentCount = profile?.streakFreezeCount ?? 0
+
+  await db
+    .update(userProfiles)
+    .set({
+      streakFreezeCount: currentCount + count,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(userProfiles.userId, userId))
+}
+
+// ============================================
+// STREAK STATISTICS & ANALYTICS
+// ============================================
+
+/**
+ * Streak statistics for a user
+ */
+export interface StreakStatistics {
+  currentStreak: number
+  longestStreak: number
+  totalStudyDays: number
+  averageStreakLength: number
+  consistencyScore: number // Percentage of days studied in last 30 days
+  bestStudyDayOfWeek: string | null
+  totalStreaksStarted: number
+}
+
+/**
+ * Get comprehensive streak statistics for a user
+ */
+export async function getStreakStatistics(
+  db: Database,
+  userId: string,
+): Promise<StreakStatistics> {
+  const uniqueDates = await fetchStudyDates(db, userId)
+  const currentStreak = calculateCurrentStreakFromDates(uniqueDates)
+  const longestStreak = calculateLongestStreakFromDates(uniqueDates)
+
+  // Calculate total study days
+  const totalStudyDays = uniqueDates.length
+
+  // Calculate average streak length
+  const streaks = calculateAllStreaks(uniqueDates)
+  const averageStreakLength = streaks.length > 0
+    ? streaks.reduce((sum, s) => sum + s, 0) / streaks.length
+    : 0
+
+  // Calculate consistency score (last 30 days)
+  const last30Days = getLast30DaysDates()
+  const studiedInLast30 = uniqueDates.filter(d => last30Days.includes(d)).length
+  const consistencyScore = Math.round((studiedInLast30 / 30) * 100)
+
+  // Find best study day of week
+  const dayOfWeekCounts = getDayOfWeekCounts(uniqueDates)
+  const bestStudyDayOfWeek = getBestDayOfWeek(dayOfWeekCounts)
+
+  return {
+    currentStreak,
+    longestStreak,
+    totalStudyDays,
+    averageStreakLength: Math.round(averageStreakLength * 10) / 10,
+    consistencyScore,
+    bestStudyDayOfWeek,
+    totalStreaksStarted: streaks.length,
+  }
+}
+
+/**
+ * Calculate all individual streaks from study dates
+ */
+function calculateAllStreaks(uniqueDates: string[]): number[] {
+  if (uniqueDates.length === 0) return []
+
+  const streaks: number[] = []
+  let currentStreakLength = 1
+
+  for (let i = 1; i < uniqueDates.length; i++) {
+    const prevDateStr = uniqueDates[i - 1]
+    const currDateStr = uniqueDates[i]
+
+    if (!prevDateStr || !currDateStr) continue
+
+    const diffDays = getDaysDifference(prevDateStr, currDateStr)
+
+    if (diffDays === 1) {
+      currentStreakLength++
+    }
+    else {
+      streaks.push(currentStreakLength)
+      currentStreakLength = 1
+    }
+  }
+
+  // Don't forget the last streak
+  streaks.push(currentStreakLength)
+
+  return streaks
+}
+
+/**
+ * Get the last 30 days as date strings
+ */
+function getLast30DaysDates(): string[] {
+  const dates: string[] = []
+  for (let i = 0; i < 30; i++) {
+    const date = new Date()
+    date.setDate(date.getDate() - i)
+    dates.push(normalizeToDateString(date))
+  }
+  return dates
+}
+
+/**
+ * Count study sessions by day of week
+ */
+function getDayOfWeekCounts(uniqueDates: string[]): Record<string, number> {
+  const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
+  const counts: Record<string, number> = {}
+
+  for (const dayName of dayNames) {
+    counts[dayName] = 0
+  }
+
+  for (const dateStr of uniqueDates) {
+    const date = new Date(dateStr)
+    const dayName = dayNames[date.getDay()]
+    if (dayName) {
+      counts[dayName] = (counts[dayName] ?? 0) + 1
+    }
+  }
+
+  return counts
+}
+
+/**
+ * Get the day of week with most study sessions
+ */
+function getBestDayOfWeek(counts: Record<string, number>): string | null {
+  let bestDay: string | null = null
+  let maxCount = 0
+
+  for (const [day, count] of Object.entries(counts)) {
+    if (count > maxCount) {
+      maxCount = count
+      bestDay = day
+    }
+  }
+
+  return bestDay
+}
+
+// ============================================
+// STREAK NOTIFICATIONS
+// ============================================
+
+/**
+ * Notification types for streak events
+ */
+export type StreakNotificationType =
+  | 'streak_at_risk'
+  | 'streak_broken'
+  | 'streak_milestone'
+  | 'streak_freeze_available'
+  | 'streak_freeze_used'
+
+/**
+ * Streak notification data
+ */
+export interface StreakNotification {
+  type: StreakNotificationType
+  title: string
+  message: string
+  data?: Record<string, unknown>
+}
+
+/**
+ * Get streak notifications for a user
+ */
+export function getStreakNotifications(
+  currentStreak: number,
+  lastStudyDate: string | null,
+  freezesAvailable: number,
+): StreakNotification[] {
+  const notifications: StreakNotification[] = []
+  const today = getTodayDateString()
+  const yesterday = getYesterdayDateString()
+
+  // Check if streak is at risk
+  if (lastStudyDate === yesterday && lastStudyDate !== today) {
+    notifications.push({
+      type: 'streak_at_risk',
+      title: '🔥 Série en danger !',
+      message: `Votre série de ${currentStreak} jours va se terminer si vous n'étudiez pas aujourd'hui.`,
+      data: { currentStreak, hoursRemaining: getHoursUntilMidnight() },
+    })
+
+    // Suggest using streak freeze if available
+    if (freezesAvailable > 0) {
+      notifications.push({
+        type: 'streak_freeze_available',
+        title: '❄️ Gel de série disponible',
+        message: `Vous avez ${freezesAvailable} gel(s) de série. Utilisez-en un pour protéger votre série.`,
+        data: { freezesAvailable },
+      })
+    }
+  }
+
+  // Check for milestone achievements
+  const milestones = [3, 7, 14, 30, 60, 100]
+  if (milestones.includes(currentStreak)) {
+    const achievement = STREAK_ACHIEVEMENTS[`streak-${currentStreak}` as keyof typeof STREAK_ACHIEVEMENTS]
+    if (achievement) {
+      notifications.push({
+        type: 'streak_milestone',
+        title: '🏆 Nouveau record !',
+        message: `Félicitations ! Vous avez atteint une série de ${currentStreak} jours !`,
+        data: { currentStreak, achievement },
+      })
+    }
+  }
+
+  return notifications
+}
+
+/**
+ * Get hours until midnight in server timezone
+ */
+function getHoursUntilMidnight(): number {
+  const now = new Date()
+  const midnight = new Date(now)
+  midnight.setDate(midnight.getDate() + 1)
+  midnight.setHours(0, 0, 0, 0)
+
+  const diffMs = midnight.getTime() - now.getTime()
+  return Math.ceil(diffMs / (1000 * 60 * 60))
+}
+
+// ============================================
+// LEADERBOARD SUPPORT
+// ============================================
+
+/**
+ * Leaderboard entry for streak rankings
+ */
+export interface StreakLeaderboardEntry {
+  userId: string
+  userName: string
+  currentStreak: number
+  longestStreak: number
+  rank: number
+}
+
+/**
+ * Get streak leaderboard (top users by current streak)
+ * Note: This requires calculating streaks for all users, so use with caution
+ * Consider caching results or using a materialized view for production
+ */
+export async function getStreakLeaderboard(
+  db: Database,
+  limit: number = 10,
+): Promise<StreakLeaderboardEntry[]> {
+  // Get users with their longest streaks (cached value)
+  const profiles = await db
+    .select({
+      userId: userProfiles.userId,
+      firstName: userProfiles.firstName,
+      lastName: userProfiles.lastName,
+      longestStreak: userProfiles.longestStreak,
+    })
+    .from(userProfiles)
+    .where(gte(userProfiles.longestStreak, 1))
+    .orderBy(desc(userProfiles.longestStreak))
+    .limit(limit * 2) // Get more to filter by current streak
+
+  // Calculate current streaks for top users
+  const leaderboard: StreakLeaderboardEntry[] = []
+
+  for (const profile of profiles) {
+    const currentStreak = await calculateCurrentStreak(db, profile.userId)
+
+    leaderboard.push({
+      userId: profile.userId,
+      userName: `${profile.firstName} ${profile.lastName.charAt(0)}.`,
+      currentStreak,
+      longestStreak: profile.longestStreak ?? 0,
+      rank: 0, // Will be set after sorting
+    })
+  }
+
+  // Sort by current streak, then longest streak
+  leaderboard.sort((a, b) => {
+    if (b.currentStreak !== a.currentStreak) {
+      return b.currentStreak - a.currentStreak
+    }
+    return b.longestStreak - a.longestStreak
+  })
+
+  // Assign ranks and limit
+  return leaderboard.slice(0, limit).map((entry, index) => ({
+    ...entry,
+    rank: index + 1,
+  }))
+}
+
+

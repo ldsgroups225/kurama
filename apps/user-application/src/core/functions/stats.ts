@@ -5,6 +5,7 @@ import {
   calculateCurrentStreak,
   calculateStreakBonus,
   getNewlyUnlockedStreakAchievements,
+  updateLongestStreakIfNeeded,
 } from '@kurama/data-ops/queries/streak'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
@@ -195,6 +196,9 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
       cardsCorrect: correctCount,
       duration,
     })
+
+    // Update cached longest streak if current streak exceeds it
+    await updateLongestStreakIfNeeded(db, userId, currentStreak)
 
     // Update lesson mastery if passing
     let masteryCount = 0

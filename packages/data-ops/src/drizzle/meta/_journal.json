@@ -64,6 +64,13 @@
       "when": 1765683979496,
       "tag": "0008_orange_dagger",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1766025889618,
+      "tag": "0009_lumpy_tattoo",
+      "breakpoints": true
     }
   ]
 }

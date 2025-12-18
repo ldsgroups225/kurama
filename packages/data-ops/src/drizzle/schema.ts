@@ -1,5 +1,4 @@
 import { pgTable, text, timestamp, unique, boolean, foreignKey, serial, integer, json, primaryKey, customType, index } from "drizzle-orm/pg-core"
-import { sql } from "drizzle-orm"
 
 // Custom type for pgvector
 const vector = customType<{ data: number[]; driverData: string; config: { dimensions: number } }>({
@@ -170,6 +169,8 @@ export const studySessions = pgTable("study_sessions", {
 		foreignColumns: [lessons.id],
 		name: "study_sessions_lesson_id_lessons_id_fk"
 	}).onDelete("cascade"),
+	// Index for streak calculation performance
+	index("idx_study_sessions_user_started").on(table.userId, table.startedAt),
 ]);
 
 export const subjectOfferings = pgTable("subject_offerings", {
@@ -214,6 +215,10 @@ export const userProfiles = pgTable("user_profiles", {
 	studyTime: text("study_time"),
 	childrenMatricules: json("children_matricules").$type<string[]>(),
 	xp: integer("xp").default(0).notNull(),
+	// Streak persistence fields
+	longestStreak: integer("longest_streak").default(0).notNull(),
+	streakFreezeCount: integer("streak_freeze_count").default(0).notNull(), // Premium feature
+	lastStreakFreezeUsedAt: timestamp("last_streak_freeze_used_at", { mode: 'string' }),
 	isCompleted: boolean("is_completed").default(false).notNull(),
 	// Subscription fields
 	subscriptionTier: text("subscription_tier").$type<'free' | 'monthly' | 'quarterly' | 'annual'>().default('free').notNull(),
