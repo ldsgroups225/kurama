@@ -3,6 +3,7 @@ import { getDb } from '@kurama/data-ops/database/setup'
 import { cards, lessons, subjects, userLessonMastery } from '@kurama/data-ops/drizzle/schema'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
+import { getUserGradeId } from './utils'
 
 /**
  * Get all active subjects for the subject selection screen
@@ -20,6 +21,7 @@ export const getSubjects = createServerFn()
 
 /**
  * Get lessons for a specific subject with lock status and mastery progress
+ * and filters lessons by user's grade level
  */
 export const getLessonsBySubject = createServerFn({ method: 'GET' })
   .middleware([protectedFunctionMiddleware])
@@ -33,11 +35,22 @@ export const getLessonsBySubject = createServerFn({ method: 'GET' })
     const db = getDb()
     const userId = context.userId
 
-    // Fetch all published lessons for the subject, ordered by displayOrder
+    // Get user's grade ID
+    const userGradeId = await getUserGradeId(db, userId)
+
+    // If user doesn't have a grade assigned, return empty array
+    // This prevents access to any lessons without proper grade assignment
+    if (!userGradeId) {
+      console.warn(`User ${userId} attempting to access lessons without grade assignment`)
+      return []
+    }
+
+    // Fetch published lessons for the subject AND user's grade, ordered by displayOrder
     const lessonsData = await db.query.lessons.findMany({
       where: and(
         eq(lessons.subjectId, subjectId),
         eq(lessons.isPublished, true),
+        eq(lessons.gradeId, userGradeId),
       ),
       orderBy: [asc(lessons.displayOrder)],
       with: {
@@ -95,6 +108,7 @@ export const getLessonsBySubject = createServerFn({ method: 'GET' })
 
 /**
  * Get a single lesson with all its cards for the learning session
+ * and validates that lesson belongs to user's grade level
  */
 export const getLessonDetails = createServerFn({ method: 'GET' })
   .middleware([protectedFunctionMiddleware])
@@ -104,13 +118,23 @@ export const getLessonDetails = createServerFn({ method: 'GET' })
     }
     return data
   })
-  .handler(async ({ data: lessonId }) => {
+  .handler(async ({ data: lessonId, context }) => {
     const db = getDb()
+    const userId = context.userId
+
+    // Get user's grade ID
+    const userGradeId = await getUserGradeId(db, userId)
+
+    // If user doesn't have a grade assigned, deny access
+    if (!userGradeId) {
+      throw new Error('Access denied: User grade not assigned')
+    }
 
     const lesson = await db.query.lessons.findFirst({
       where: and(
         eq(lessons.id, lessonId),
         eq(lessons.isPublished, true),
+        eq(lessons.gradeId, userGradeId),
       ),
       with: {
         subject: true,
@@ -121,7 +145,7 @@ export const getLessonDetails = createServerFn({ method: 'GET' })
     })
 
     if (!lesson) {
-      throw new Error('Lesson not found')
+      throw new Error('Lesson not found or access denied')
     }
 
     // Type assertion to handle metadata field (json type defaults to unknown)
@@ -136,6 +160,7 @@ export const getLessonDetails = createServerFn({ method: 'GET' })
 
 /**
  * Submit test result and update mastery progress
+ * and validates that lesson belongs to user's grade level
  */
 export const submitTestResult = createServerFn({ method: 'POST' })
   .middleware([protectedFunctionMiddleware])
@@ -152,6 +177,28 @@ export const submitTestResult = createServerFn({ method: 'POST' })
     const db = getDb()
     const userId = context.userId
     const { lessonId, correctCount, totalCount } = data
+
+    // Get user's grade ID
+    const userGradeId = await getUserGradeId(db, userId)
+
+    // If user doesn't have a grade assigned, deny access
+    if (!userGradeId) {
+      throw new Error('Access denied: User grade not assigned')
+    }
+
+    // Validate that the lesson belongs to user's grade
+    const lesson = await db.query.lessons.findFirst({
+      where: and(
+        eq(lessons.id, lessonId),
+        eq(lessons.isPublished, true),
+        eq(lessons.gradeId, userGradeId),
+      ),
+      columns: { id: true, subjectId: true, displayOrder: true },
+    })
+
+    if (!lesson) {
+      throw new Error('Lesson not found or access denied')
+    }
 
     // Calculate percentage
     const percentage = Math.round((correctCount / totalCount) * 100)
@@ -205,11 +252,12 @@ export const submitTestResult = createServerFn({ method: 'POST' })
       })
     }
 
-    // Check if next lesson should be unlocked
+    // Check if next lesson should be unlocked (only within same grade)
     const currentLesson = await db.query.lessons.findFirst({
       where: and(
         eq(lessons.id, lessonId),
         eq(lessons.isPublished, true),
+        eq(lessons.gradeId, userGradeId),
       ),
     })
 
@@ -217,12 +265,13 @@ export const submitTestResult = createServerFn({ method: 'POST' })
     let nextLessonTitle: string | null = null
 
     if (currentLesson && newMasteryCount >= 2) {
-      // Find next lesson in sequence
+      // Find next lesson in sequence (within same grade)
       const nextLesson = await db.query.lessons.findFirst({
         where: and(
           eq(lessons.subjectId, currentLesson.subjectId),
           eq(lessons.displayOrder, currentLesson.displayOrder + 1),
           eq(lessons.isPublished, true),
+          eq(lessons.gradeId, userGradeId),
         ),
       })
 

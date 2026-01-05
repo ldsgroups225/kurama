@@ -1,6 +1,6 @@
 import { and, eq, gte, sql } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
-import { studySessions, userLessonMastery, userProfiles } from '@kurama/data-ops/drizzle/schema'
+import { lessons, studySessions, userLessonMastery, userProfiles } from '@kurama/data-ops/drizzle/schema'
 import {
   calculateCurrentStreak,
   calculateStreakBonus,
@@ -9,6 +9,7 @@ import {
 } from '@kurama/data-ops/queries/streak'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
+import { getUserGradeId } from './utils'
 
 /**
  * XP calculation constants
@@ -133,6 +134,28 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
     const userId = context.userId
     const { lessonId, correctCount, totalCount, duration, mode } = data
 
+    // Get user's grade ID for validation
+    const userGradeId = await getUserGradeId(db, userId)
+
+    // If user doesn't have a grade assigned, deny access
+    if (!userGradeId) {
+      throw new Error('Access denied: User grade not assigned')
+    }
+
+    // Validate that the lesson belongs to user's grade
+    const lesson = await db.query.lessons.findFirst({
+      where: and(
+        eq(lessons.id, lessonId),
+        eq(lessons.isPublished, true),
+        eq(lessons.gradeId, userGradeId),
+      ),
+      columns: { id: true, subjectId: true, displayOrder: true },
+    })
+
+    if (!lesson) {
+      throw new Error('Lesson not found or access denied')
+    }
+
     // Calculate percentage
     const percentage = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0
     const isPassing = percentage >= 80
@@ -249,13 +272,13 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
         })
       }
 
-      // Check for next lesson unlock
+      // Check for next lesson unlock (only within same grade)
       if (nextLessonUnlocked) {
-        const { lessons } = await import('@kurama/data-ops/drizzle/schema')
         const currentLesson = await db.query.lessons.findFirst({
           where: and(
             eq(lessons.id, lessonId),
             eq(lessons.isPublished, true),
+            eq(lessons.gradeId, userGradeId),
           ),
         })
 
@@ -265,6 +288,7 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
               eq(lessons.subjectId, currentLesson.subjectId),
               eq(lessons.displayOrder, currentLesson.displayOrder + 1),
               eq(lessons.isPublished, true),
+              eq(lessons.gradeId, userGradeId),
             ),
           })
           nextLessonTitle = nextLesson?.title ?? null

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { getLessonsBySubject, submitTestResult } from '../learning'
+import { getLessonDetails, getLessonsBySubject, submitTestResult } from '../learning'
 
 // Mock dependencies
 const mockDb = {
@@ -10,6 +10,9 @@ const mockDb = {
     },
     userLessonMastery: {
       findMany: vi.fn(),
+      findFirst: vi.fn(),
+    },
+    userProfiles: {
       findFirst: vi.fn(),
     },
   },
@@ -46,15 +49,20 @@ vi.mock('@/core/middleware/auth', () => ({
 
 describe('learning functions', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.resetAllMocks()
+    // Mock user profile with gradeId by default for existing tests
+    mockDb.query.userProfiles.findFirst.mockResolvedValue({ gradeId: 2 })
+    // Mock successful database operations by default
+    mockDb.insert.mockReturnValue({ values: vi.fn() })
+    mockDb.update.mockReturnValue({ set: vi.fn(() => ({ where: vi.fn() })) })
   })
 
   describe('getLessonsBySubject', () => {
     test('should return lessons with correct lock status', async () => {
       const mockLessons = [
-        { id: 1, title: 'Lesson 1', displayOrder: 1, subjectId: 1 },
-        { id: 2, title: 'Lesson 2', displayOrder: 2, subjectId: 1 },
-        { id: 3, title: 'Lesson 3', displayOrder: 3, subjectId: 1 },
+        { id: 1, title: 'Lesson 1', displayOrder: 1, subjectId: 1, gradeId: 2 },
+        { id: 2, title: 'Lesson 2', displayOrder: 2, subjectId: 1, gradeId: 2 },
+        { id: 3, title: 'Lesson 3', displayOrder: 3, subjectId: 1, gradeId: 2 },
       ]
 
       const mockMastery = [
@@ -93,8 +101,8 @@ describe('learning functions', () => {
 
   describe('submitTestResult', () => {
     test('should record passing test and update mastery', async () => {
-      const mockLesson = { id: 1, subjectId: 1, displayOrder: 1 }
-      const mockNextLesson = { id: 2, subjectId: 1, displayOrder: 2, title: 'Next Lesson' }
+      const mockLesson = { id: 1, subjectId: 1, displayOrder: 1, gradeId: 2 }
+      const mockNextLesson = { id: 2, subjectId: 1, displayOrder: 2, title: 'Next Lesson', gradeId: 2 }
 
       mockDb.query.userLessonMastery.findFirst.mockResolvedValue({
         successfulTestCount: 1,
@@ -102,7 +110,8 @@ describe('learning functions', () => {
       })
 
       mockDb.query.lessons.findFirst
-        .mockResolvedValueOnce(mockLesson) // Current lesson
+        .mockResolvedValueOnce(mockLesson) // Current lesson validation
+        .mockResolvedValueOnce(mockLesson) // Current lesson for next lesson check
         .mockResolvedValueOnce(mockNextLesson) // Next lesson
 
       const handler = submitTestResult as any
@@ -123,10 +132,17 @@ describe('learning functions', () => {
     })
 
     test('should not increment mastery count for failing score', async () => {
+      const mockLesson = { id: 1, subjectId: 1, displayOrder: 1, gradeId: 2 }
+
       mockDb.query.userLessonMastery.findFirst.mockResolvedValue({
         successfulTestCount: 1,
         isUnlocked: false,
       })
+
+      mockDb.query.lessons.findFirst
+        .mockResolvedValueOnce(mockLesson) // Current lesson validation
+        .mockResolvedValueOnce(mockLesson) // Current lesson for mastery update
+        .mockResolvedValueOnce(mockLesson) // Current lesson for next lesson check
 
       const handler = submitTestResult as any
       const result = await handler({
@@ -141,6 +157,82 @@ describe('learning functions', () => {
 
       // Verify DB update (still updates last score but not count)
       expect(mockDb.update).toHaveBeenCalled()
+    })
+  })
+
+  describe('grade-based filtering', () => {
+    test('should return empty array when user has no grade assigned', async () => {
+      // Mock user profile without grade
+      mockDb.query.userProfiles.findFirst.mockResolvedValue({ gradeId: null })
+
+      const handler = getLessonsBySubject as any
+      const result = await handler({ data: 1, context: { userId: 'user1' } })
+
+      expect(result).toStrictEqual([])
+      expect(mockDb.query.lessons.findMany).not.toHaveBeenCalled()
+    })
+
+    test('should filter lessons by user grade', async () => {
+      // Mock user profile with grade ID 2 (Troisième)
+      mockDb.query.userProfiles.findFirst.mockResolvedValue({ gradeId: 2 })
+
+      // Mock lessons returned by database AFTER grade filtering
+      const mockLessons = [
+        { id: 1, title: 'Lesson 1', gradeId: 2, subjectId: 1 }, // Should be returned
+        { id: 3, title: 'Lesson 3', gradeId: 2, subjectId: 1 }, // Should be returned
+      ]
+      mockDb.query.lessons.findMany.mockResolvedValue(mockLessons)
+      mockDb.query.userLessonMastery.findMany.mockResolvedValue([])
+
+      const handler = getLessonsBySubject as any
+      const result = await handler({ data: 1, context: { userId: 'user1' } })
+
+      // Should only return lessons with gradeId: 2 (already filtered by DB)
+      expect(result).toHaveLength(2)
+      expect(result.map((l: any) => l.id)).toStrictEqual([1, 3])
+
+      // Verify the query was called with grade filter
+      expect(mockDb.query.lessons.findMany).toHaveBeenCalled()
+    })
+
+    test('should deny access to lesson from different grade', async () => {
+      // Mock user profile with grade ID 2 (Troisième)
+      mockDb.query.userProfiles.findFirst.mockResolvedValue({ gradeId: 2 })
+
+      // Mock lesson from different grade (gradeId: 3 = Terminale)
+      mockDb.query.lessons.findFirst.mockResolvedValue(null)
+
+      const handler = getLessonDetails as any
+      await expect(
+        handler({
+          data: 1,
+          context: { userId: 'user1' },
+        }),
+      )
+        .rejects
+        .toThrow('Lesson not found or access denied')
+    })
+
+    test('should allow access to lesson from same grade', async () => {
+      // Mock user profile with grade ID 2
+      mockDb.query.userProfiles.findFirst.mockResolvedValue({ gradeId: 2 })
+
+      // Mock lesson from same grade
+      const mockLesson = {
+        id: 1,
+        title: 'Lesson 1',
+        gradeId: 2,
+        subjectId: 1,
+        displayOrder: 1,
+        subject: { name: 'Math' },
+        cards: [],
+      }
+      mockDb.query.lessons.findFirst.mockResolvedValue(mockLesson)
+
+      const handler = getLessonDetails as any
+      const result = await handler({ data: 1, context: { userId: 'user1' } })
+
+      expect(result).toStrictEqual(mockLesson)
     })
   })
 })

@@ -1,9 +1,17 @@
-import { and, eq, gte, sql } from '@kurama/data-ops/database/drizzle-orm'
+import { and, desc, eq, gte, sql } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
-import { studySessions, userLessonMastery, userProfiles, userProgress } from '@kurama/data-ops/drizzle/schema'
+import {
+  lessons,
+  studySessions,
+  subjects,
+  userLessonMastery,
+  userProfiles,
+  userProgress,
+} from '@kurama/data-ops/drizzle/schema'
 import { getStreakData } from '@kurama/data-ops/queries/streak'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
+import { getUserGradeId } from './utils'
 
 /**
  * Get dashboard statistics for the current user
@@ -46,7 +54,7 @@ export const getDashboardStats = createServerFn()
       .where(
         and(
           eq(userProgress.userId, userId),
-          sql`${userProgress.nextReviewAt} <= ${now}`,
+          sql`${userProgress.nextReviewAt} <= ${now} `,
         ),
       )
 
@@ -76,19 +84,38 @@ export const getDashboardStats = createServerFn()
     const streakData = await getStreakData(db, userId)
     const { currentStreak, longestStreak, streakHistory: uniqueDates } = streakData
 
-    // Get recent study sessions
-    const recentSessions = await db.query.studySessions.findMany({
-      where: eq(studySessions.userId, userId),
-      orderBy: (sessions, { desc }) => [desc(sessions.startedAt)],
-      limit: 5,
-      with: {
+    // Get recent study sessions (filtered by user's grade)
+    const userGradeId = await getUserGradeId(db, userId)
+
+    let recentSessions: any[] = []
+    if (userGradeId) {
+      // Only get sessions for lessons belonging to user's grade
+      const sessionsData = await db
+        .select({
+          session: studySessions,
+          lesson: lessons,
+          subject: subjects,
+        })
+        .from(studySessions)
+        .innerJoin(lessons, eq(studySessions.lessonId, lessons.id))
+        .innerJoin(subjects, eq(lessons.subjectId, subjects.id))
+        .where(
+          and(
+            eq(studySessions.userId, userId),
+            eq(lessons.gradeId, userGradeId),
+          ),
+        )
+        .orderBy(desc(studySessions.startedAt))
+        .limit(5)
+
+      recentSessions = sessionsData.map(d => ({
+        ...d.session,
         lesson: {
-          with: {
-            subject: true,
-          },
+          ...d.lesson,
+          subject: d.subject,
         },
-      },
-    })
+      }))
+    }
 
     return {
       totalCardsStudied,
