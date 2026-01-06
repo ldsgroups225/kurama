@@ -36,17 +36,20 @@ function ProfilePage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [isSigningOut, setIsSigningOut] = useState(false)
+  const userId = session?.user?.id
 
   // Fetch real profile stats
   const { data: stats } = useQuery({
-    queryKey: ['profile-stats'],
+    queryKey: ['profile-stats', userId],
     queryFn: () => getProfileStats(),
+    enabled: !!userId && !isSigningOut,
   })
 
   // Fetch subscription tier
   const { data: subscriptionTier } = useQuery({
-    queryKey: ['subscription-tier'],
+    queryKey: ['subscription-tier', userId],
     queryFn: () => getSubscriptionTier(),
+    enabled: !!userId && !isSigningOut,
   })
 
   const isPremium = subscriptionTier && subscriptionTier !== 'free'

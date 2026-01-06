@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Navigate, Outlet } from '@tanstack/react-router'
-import { useSetAtom } from 'jotai'
-import { useEffect, useRef, useState } from 'react'
+import { useAtom } from 'jotai'
+import { useEffect, useRef } from 'react'
 import { GoogleLogin } from '@/components/auth/google-login'
 import {
   ConflictResolutionDialog,
@@ -13,7 +13,7 @@ import { FullScreenLoader } from '@/components/ui/logo-loader'
 import { getProfileStatus, getUserProfile } from '@/core/functions/profile'
 import { useAuthPersistence } from '@/hooks'
 import { userProfileAtom } from '@/lib/atoms'
-import { authClient, syncSessionCache } from '@/lib/auth-client'
+import { authClient, isSigningOut, syncSessionCache } from '@/lib/auth-client'
 import { hasCachedAuthenticatedSession } from '@/lib/auth-session-cache'
 
 export const Route = createFileRoute('/_auth')({
@@ -21,13 +21,15 @@ export const Route = createFileRoute('/_auth')({
 })
 
 function RouteComponent() {
-  const session = authClient.useSession()
-  const setUserProfile = useSetAtom(userProfileAtom)
   const queryClient = useQueryClient()
+  const session = authClient.useSession()
+  const [, setUserProfile] = useAtom(userProfileAtom)
   const previousUserIdRef = useRef<string | null>(null)
 
+  const userId = session.data?.user?.id
+
   // Check if we have a cached authenticated session for instant UI decisions
-  const [hasCachedSession] = useState(() => hasCachedAuthenticatedSession())
+  const hasCachedSession = hasCachedAuthenticatedSession()
 
   // Sync session state to cache whenever it changes
   useEffect(() => {
@@ -54,6 +56,12 @@ function RouteComponent() {
 
     if (hadPreviousUser && userChanged) {
       // Clear user-specific queries when switching users or signing out
+      // Cancel any in-flight requests first
+      queryClient.cancelQueries({ queryKey: ['profile-status'] })
+      queryClient.cancelQueries({ queryKey: ['user-profile'] })
+      queryClient.cancelQueries({ queryKey: ['subscription'] })
+
+      // Then remove them from cache
       queryClient.removeQueries({ queryKey: ['profile-status'] })
       queryClient.removeQueries({ queryKey: ['user-profile'] })
       queryClient.removeQueries({ queryKey: ['subscription'] })
@@ -67,16 +75,16 @@ function RouteComponent() {
 
   // Check profile completion status when user is authenticated
   const { data: profileStatus, isLoading: isLoadingProfile, isFetched: isProfileStatusFetched } = useQuery({
-    queryKey: ['profile-status', session.data?.user?.id],
+    queryKey: ['profile-status', userId],
     queryFn: () => getProfileStatus(),
-    enabled: !!session.data, // Only run when user is authenticated
+    enabled: hasCachedSession && !!userId && !isSigningOut(),
   })
 
   // Fetch and cache user profile if completed
   const { data: userProfile, isLoading: isLoadingUserProfile } = useQuery({
-    queryKey: ['user-profile', session.data?.user?.id],
+    queryKey: ['user-profile', userId],
     queryFn: () => getUserProfile(),
-    enabled: !!session.data && profileStatus?.isCompleted === true,
+    enabled: hasCachedSession && !!userId && !isSigningOut() && profileStatus?.isCompleted === true,
   })
 
   // Cache profile data in localStorage when fetched
@@ -115,6 +123,7 @@ function RouteComponent() {
   const isAuthenticatedButLoadingUserProfile = !!session.data && profileStatus?.isCompleted && isLoadingUserProfile
 
   const shouldShowLoading = isSessionPending
+    || isSigningOut()
     || isWaitingForCachedSession
     || isAuthenticatedButLoadingProfile
     || isAuthenticatedButLoadingUserProfile

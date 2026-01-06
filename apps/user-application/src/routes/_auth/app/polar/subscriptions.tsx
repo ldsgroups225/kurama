@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import {
   ArrowLeft,
@@ -13,11 +13,17 @@ import { motion } from 'motion/react'
 import { PricingCarousel, SubscriptionStatus, useCheckout } from '@/components/payments/polar'
 import { Button } from '@/components/ui/button'
 import { collectSubscription, getProducts, getSubscriptionTier } from '@/core/functions/payments'
-import { authClient } from '@/lib/auth-client'
+import { authClient, isSigningOut } from '@/lib/auth-client'
+import { hasCachedAuthenticatedSession } from '@/lib/auth-session-cache'
 
 export const Route = createFileRoute('/_auth/app/polar/subscriptions')({
   component: RouteComponent,
   loader: async ({ context }) => {
+    // Prevent prefetching if not authenticated or signing out
+    if (!hasCachedAuthenticatedSession() || isSigningOut()) {
+      return
+    }
+
     await Promise.all([
       context.queryClient.prefetchQuery({
         queryKey: ['products'],
@@ -68,26 +74,41 @@ const PREMIUM_FEATURES = [
 
 function RouteComponent() {
   const session = authClient.useSession()
+  const userId = session.data?.user?.id
+  const isCurrentlySigningOut = isSigningOut()
 
-  const { data: products } = useSuspenseQuery({
+  const { data: products, isLoading: isLoadingProducts } = useQuery({
     queryKey: ['products'],
     queryFn: getProducts,
     refetchOnWindowFocus: true,
+    enabled: !isCurrentlySigningOut,
   })
 
-  const { data: subscription } = useSuspenseQuery({
-    queryKey: ['subscription', session.data?.user?.id],
+  const { data: subscription, isLoading: isLoadingSubscription } = useQuery({
+    queryKey: ['subscription', userId],
     queryFn: collectSubscription,
     refetchOnWindowFocus: true,
+    enabled: !!userId && !isCurrentlySigningOut,
   })
 
-  const { data: tier } = useSuspenseQuery({
-    queryKey: ['subscription-tier'],
+  const { data: tier, isLoading: isLoadingTier } = useQuery({
+    queryKey: ['subscription-tier', userId],
     queryFn: getSubscriptionTier,
+    enabled: !!userId && !isCurrentlySigningOut,
   })
 
   const { redirectToCheckout, isCheckoutPending } = useCheckout()
-  const isPremium = tier !== 'free'
+
+  if (isCurrentlySigningOut) {
+    return null
+  }
+
+  if (isLoadingProducts || isLoadingSubscription || isLoadingTier || products === undefined || subscription === undefined || tier === undefined) {
+    return null // Or a loader, but Route handles pendingComponent
+  }
+
+  const currentTier = tier || 'free'
+  const isPremium = currentTier !== 'free'
 
   return (
     <div className="relative min-h-screen bg-background pb-12 text-foreground">

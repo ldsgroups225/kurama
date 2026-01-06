@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { FormSkeleton, PageSkeleton } from '@/components/skeletons'
 import { FullScreenLoader } from '@/components/ui/logo-loader'
 import { hasCompletedOnboardingAtom } from '@/lib/atoms'
-import { authClient, syncSessionCache } from '@/lib/auth-client'
+import { authClient, isSigningOut, syncSessionCache } from '@/lib/auth-client'
 import { hasCachedAuthenticatedSession } from '@/lib/auth-session-cache'
 import { createLazyComponent } from '@/lib/lazy-helpers'
 import { trackRouteLoad } from '@/lib/performance-monitor'
@@ -44,7 +44,7 @@ function LandingPage() {
 
   // Redirect authenticated users to app
   useEffect(() => {
-    if (session.data) {
+    if (session.data && !isSigningOut()) {
       navigate({ to: '/app' })
     }
   }, [session.data, navigate])

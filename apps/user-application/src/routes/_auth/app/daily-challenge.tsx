@@ -16,6 +16,7 @@ import {
   getDailyChallengeStatus,
   startDailyChallenge,
 } from '@/core/functions/daily-challenge'
+import { authClient, isSigningOut } from '@/lib/auth-client'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
 
@@ -31,6 +32,8 @@ const TIME_LIMIT = 10 * 60
 function DailyChallengePage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const session = authClient.useSession()
+  const userId = session.data?.user?.id
 
   const [phase, setPhase] = useState<ChallengePhase>('preview')
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
@@ -48,8 +51,9 @@ function DailyChallengePage() {
   }, [])
 
   const { data: challengeStatus, isLoading } = useQuery({
-    queryKey: ['daily-challenge-status'],
+    queryKey: ['daily-challenge-status', userId],
     queryFn: () => getDailyChallengeStatus(),
+    enabled: !!userId && !isSigningOut(),
   })
 
   // Start Mutation

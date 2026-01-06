@@ -262,33 +262,45 @@ export async function clearUserAuthData(): Promise<void> {
     // Clear session cache immediately for instant UI feedback
     clearCachedSessionState()
 
-    // Clear user-specific IndexedDB data
-    await Promise.all([
-      db.authState.clear(), // Auth tokens
-      db.mutationQueue.clear(), // User's pending mutations
-      // Note: queryCache will be selectively cleared by the auth route guard
-      // to remove user-specific queries while preserving curriculum data
-    ])
+    // Clear user-specific IndexedDB data with verification
+    await db.authState.clear()
+
+    // Add a small delay to ensure IndexedDB has time to commit the clear operation
+    await new Promise(resolve => setTimeout(resolve, 100))
+
+    // Verify the clear worked
+    let remainingCount = await db.authState.count()
+
+    if (remainingCount > 0) {
+      // Force delete all entries one by one
+      const allEntries = await db.authState.toArray()
+      await db.authState.bulkDelete(allEntries.map(entry => entry.userId))
+
+      // Re-check after forced deletion
+      await new Promise(resolve => setTimeout(resolve, 100)) // Small delay
+      remainingCount = await db.authState.count()
+
+      if (remainingCount > 0) {
+        console.error('[Auth] Failed to clear authState completely. Manual intervention may be required.')
+      }
+    }
+
+    await db.mutationQueue.clear()
 
     // Clear session encryption keys
     sessionKey = null
     sessionSalt = null
 
-    // Reset Jotai atoms to their initial values
+    // Reset Jotai atoms
     if (typeof window !== 'undefined' && window.localStorage) {
-      // Reset user profile atom
       localStorage.removeItem('kurama:userProfile')
-
-      // Reset onboarding status
       localStorage.removeItem('kurama:hasCompletedOnboarding')
-
-      // Preserve theme preference - users expect this to persist
-      // Preserve PWA install dismissed - don't spam them
     }
   }
   catch (error) {
-    console.error('Failed to clear user auth data:', error)
-    throw new Error('Failed to clear user authentication data')
+    console.error('[Auth] Failed to clear user auth data:', error)
+    // Don't throw error to prevent logout from failing completely
+    // but log it for debugging
   }
 }
 

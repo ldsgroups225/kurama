@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
-import { authClient } from '@/lib/auth-client'
+import { authClient, isSigningOut } from '@/lib/auth-client'
 import {
-  clearAllAuthStates,
   clearAuthState,
+  clearUserAuthData,
   getAuthState,
   isTokenExpiringSoon,
   storeAuthState,
@@ -20,6 +20,9 @@ export function useAuthPersistence() {
   // Store token when user authenticates
   useEffect(() => {
     const storeToken = async () => {
+      if (isSigningOut()) {
+        return
+      }
       if (!session.data?.session || !session.data?.user) {
         return
       }
@@ -57,6 +60,9 @@ export function useAuthPersistence() {
   // Set up token refresh timer
   useEffect(() => {
     const setupRefreshTimer = async () => {
+      if (isSigningOut()) {
+        return
+      }
       if (!session.data?.user) {
         return
       }
@@ -102,10 +108,12 @@ export function useAuthPersistence() {
   // Clear token on logout
   useEffect(() => {
     const handleLogout = async () => {
+      if (isSigningOut()) {
+        return
+      }
       if (!session.data && hasStoredToken.current) {
         try {
-          // Clear all auth states on logout
-          await clearAllAuthStates()
+          await clearUserAuthData()
           hasStoredToken.current = false
         }
         catch (error) {

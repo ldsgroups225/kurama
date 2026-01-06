@@ -2,6 +2,23 @@ import type { Persister } from '@tanstack/react-query-persist-client'
 import { isServer, QueryClient } from '@tanstack/react-query'
 import { createDexiePersister } from '@/lib/query-persister'
 
+function isAuthError(error: unknown): boolean {
+  if (error instanceof Response) {
+    return error.status === 401 || error.status === 403
+  }
+
+  if (typeof error === 'object' && error !== null && 'status' in error) {
+    const status = (error as any).status
+    return status === 401 || status === 403
+  }
+
+  if (error instanceof Error) {
+    return error.message.toLowerCase().includes('unauthorized')
+  }
+
+  return false
+}
+
 function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
@@ -11,7 +28,12 @@ function makeQueryClient() {
         // Consider data stale after 5 minutes
         staleTime: 1000 * 60 * 5, // 5 minutes
         // Retry failed queries
-        retry: 2,
+        retry: (failureCount, error) => {
+          if (isAuthError(error)) {
+            return false
+          }
+          return failureCount < 2
+        },
         // Refetch on window focus (only when online)
         refetchOnWindowFocus: 'always',
         // Refetch on reconnect
@@ -19,7 +41,12 @@ function makeQueryClient() {
       },
       mutations: {
         // Retry failed mutations
-        retry: 2,
+        retry: (failureCount, error) => {
+          if (isAuthError(error)) {
+            return false
+          }
+          return failureCount < 2
+        },
       },
     },
   })

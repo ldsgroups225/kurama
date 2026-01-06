@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button'
 import { getDailyChallengeStatus } from '@/core/functions/daily-challenge'
 import { getDashboardStats } from '@/core/functions/dashboard'
 import { getReviewCardsCount } from '@/core/functions/review'
+import { authClient, isSigningOut } from '@/lib/auth-client'
 import { Rocket } from '@/lib/icons'
 
 import { trackRouteLoad } from '@/lib/performance-monitor'
@@ -35,6 +36,8 @@ export const Route = createLazyFileRoute('/_auth/app/')({
 
 function AppHome() {
   const navigate = useNavigate()
+  const session = authClient.useSession()
+  const userId = session.data?.user?.id
 
   useEffect(() => {
     const endTracking = trackRouteLoad('app-dashboard')
@@ -42,18 +45,21 @@ function AppHome() {
   }, [])
 
   const { data: dashboardData } = useQuery({
-    queryKey: ['dashboard-stats'],
+    queryKey: ['dashboard-stats', userId],
     queryFn: () => getDashboardStats(),
+    enabled: !!userId && !isSigningOut(),
   })
 
   const { data: dailyChallengeData, isLoading: isDailyChallengeLoading } = useQuery({
-    queryKey: ['daily-challenge-status'],
+    queryKey: ['daily-challenge-status', userId],
     queryFn: () => getDailyChallengeStatus(),
+    enabled: !!userId && !isSigningOut(),
   })
 
   const { data: reviewCountData } = useQuery({
-    queryKey: ['review-cards-count'],
+    queryKey: ['review-cards-count', userId],
     queryFn: () => getReviewCardsCount(),
+    enabled: !!userId && !isSigningOut(),
   })
 
   const userLevel = {

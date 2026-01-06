@@ -8,7 +8,13 @@ async function getAuthContext() {
 
   const session = await auth.api.getSession(req)
   if (!session) {
-    throw new Error('Unauthorized')
+    if (typeof Response !== 'undefined') {
+      throw new Response('Unauthorized', { status: 401 })
+    }
+
+    const error = new Error('Unauthorized')
+      ; (error as any).status = 401
+    throw error
   }
 
   return {

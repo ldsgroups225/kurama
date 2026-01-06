@@ -16,6 +16,7 @@ import {
   getSubscription,
   getSubscriptionTier,
 } from '@/core/functions/payments'
+import { authClient, isSigningOut } from '@/lib/auth-client'
 import { cn } from '@/lib/utils'
 
 interface SubscriptionStatusProps {
@@ -38,20 +39,25 @@ const TIER_COLORS: Record<SubscriptionTier, string> = {
 }
 
 export function SubscriptionStatus({ className, showManageButton = true }: SubscriptionStatusProps) {
+  const session = authClient.useSession()
+  const userId = session.data?.user?.id
+
   const { data: subscription, isLoading: isLoadingSubscription } = useQuery<SelectSubscription | null>({
-    queryKey: ['subscription'],
+    queryKey: ['subscription', userId],
     queryFn: () => getSubscription(),
+    enabled: !!userId && !isSigningOut(),
   })
 
   const { data: tier, isLoading: isLoadingTier } = useQuery({
-    queryKey: ['subscription-tier'],
+    queryKey: ['subscription-tier', userId],
     queryFn: () => getSubscriptionTier(),
+    enabled: !!userId && !isSigningOut(),
   })
 
   const { data: portalUrl, isLoading: isLoadingPortal } = useQuery({
-    queryKey: ['customer-portal-url'],
+    queryKey: ['customer-portal-url', userId],
     queryFn: () => getCustomerPortalUrl(),
-    enabled: showManageButton && tier !== 'free',
+    enabled: showManageButton && tier !== 'free' && !!userId && !isSigningOut(),
   })
 
   const isLoading = isLoadingSubscription || isLoadingTier
