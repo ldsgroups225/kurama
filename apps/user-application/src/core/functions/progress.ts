@@ -76,9 +76,35 @@ export const getProgressStats = createServerFn()
 
     const totalStudyTimeHours = Math.round(totalStudyTimeMinutes / 60)
 
-    // Get weekly activity data (last 7 days)
-    const weeklyActivity: { day: string, cardsStudied: number, date: string }[] = []
+    // Get weekly activity data (last 7 days) - using studySessions for accurate tracking
+    // Optimized: Single query with GROUP BY instead of N+1 queries
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
+    sevenDaysAgo.setHours(0, 0, 0, 0)
+
+    const weeklyData = await db
+      .select({
+        date: sql<string>`DATE(${studySessions.startedAt})`,
+        total: sql<number>`COALESCE(SUM(${studySessions.cardsReviewed}), 0)`,
+      })
+      .from(studySessions)
+      .where(
+        and(
+          eq(studySessions.userId, userId),
+          gte(studySessions.startedAt, sevenDaysAgo.toISOString()),
+        ),
+      )
+      .groupBy(sql`DATE(${studySessions.startedAt})`)
+
+    // Build activity map from query results
+    const activityMap = new Map<string, number>()
+    for (const row of weeklyData) {
+      activityMap.set(row.date, Number(row.total))
+    }
+
+    // Build weekly activity array for last 7 days
     const dayNames = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
+    const weeklyActivity: { day: string, cardsStudied: number, date: string }[] = []
 
     for (let i = 6; i >= 0; i--) {
       const date = new Date()
@@ -86,26 +112,9 @@ export const getProgressStats = createServerFn()
       const dateStr = date.toISOString().split('T')[0] ?? ''
       const dayName = dayNames[date.getDay()] ?? 'D'
 
-      // Count cards studied on this day
-      const dayStart = new Date(dateStr)
-      dayStart.setHours(0, 0, 0, 0)
-      const dayEnd = new Date(dateStr)
-      dayEnd.setHours(23, 59, 59, 999)
-
-      const dayCardsResult = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(userProgress)
-        .where(
-          and(
-            eq(userProgress.userId, userId),
-            gte(userProgress.lastReviewedAt, dayStart.toISOString()),
-            sql`${userProgress.lastReviewedAt} <= ${dayEnd.toISOString()}`,
-          ),
-        )
-
       weeklyActivity.push({
         day: dayName,
-        cardsStudied: Number(dayCardsResult[0]?.count ?? 0),
+        cardsStudied: activityMap.get(dateStr) ?? 0,
         date: dateStr,
       })
     }

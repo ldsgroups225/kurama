@@ -19,7 +19,6 @@ import { getProgressStats } from '@/core/functions/progress'
 import { authClient, isSigningOut } from '@/lib/auth-client'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
-import { generateUUID } from '@/utils/generateUUID'
 
 export const Route = createFileRoute('/_auth/app/progress')({
   component: ProgressPage,
@@ -72,7 +71,7 @@ function ProgressPage() {
 
   const maxWeeklyValue = Math.max(
     ...((data?.weeklyActivity ?? []).map(d => d.cardsStudied)),
-    1,
+    0,
   )
 
   const stats = [
@@ -137,7 +136,7 @@ function ProgressPage() {
           {/* Stats Grid */}
           <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3">
             {stats.map(stat => (
-              <div key={generateUUID()} className="group relative overflow-hidden rounded-2xl border border-border bg-card p-4 backdrop-blur-md">
+              <div key={stat.label} className="group relative overflow-hidden rounded-2xl border border-border bg-card p-4 backdrop-blur-md">
                 <div className={cn('absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity bg-linear-to-br', stat.gradient)} />
                 <div className="flex flex-col gap-2">
                   <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center bg-linear-to-br shadow-lg', stat.gradient)}>
@@ -157,40 +156,71 @@ function ProgressPage() {
           <motion.div variants={itemVariants}>
             <h3 className="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
               <Calendar className="w-5 h-5 text-indigo-500" />
-              Activité
+              Activité Hebdomadaire
             </h3>
             <div className="rounded-3xl border border-border bg-card p-5 backdrop-blur-xl">
+              {/* Chart Legend */}
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Cartes étudiées par jour</span>
+                {maxWeeklyValue === 0
+                  ? (
+                      <span className="text-xs text-muted-foreground">Aucune activité</span>
+                    )
+                  : (
+                      <span className="text-xs text-muted-foreground">
+                        Max:
+                        {' '}
+                        {maxWeeklyValue}
+                        {' '}
+                        carte
+                        {maxWeeklyValue !== 1 ? 's' : ''}
+                      </span>
+                    )}
+              </div>
+
               <div className="flex h-40 items-end justify-between gap-2 md:gap-4">
                 {(data?.weeklyActivity ?? []).map((dayData, i) => {
-                  const height = maxWeeklyValue > 0 ? (dayData.cardsStudied / maxWeeklyValue) * 100 : 0
+                  // Calculate height percentage (0-100%)
+                  let height = 0
+                  if (maxWeeklyValue > 0 && dayData.cardsStudied > 0) {
+                    height = (dayData.cardsStudied / maxWeeklyValue) * 100
+                  }
+
                   const isToday = i === (data?.weeklyActivity?.length ?? 0) - 1 // Assuming last item is today
+                  const hasActivity = dayData.cardsStudied > 0
 
                   return (
-                    <div key={`${dayData.date}-${generateUUID()}`} className="flex flex-1 flex-col items-center gap-2 group">
-                      {dayData.cardsStudied > 0 && (
-                        <div className="mb-1 text-[10px] font-bold text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity absolute -mt-6">
-                          {dayData.cardsStudied}
+                    <div key={dayData.date} className="flex flex-1 flex-col items-center gap-2 group relative">
+                      {/* Tooltip on hover */}
+                      <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                        <div className="bg-foreground text-background text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap">
+                          {hasActivity ? `${dayData.cardsStudied} carte${dayData.cardsStudied !== 1 ? 's' : ''}` : 'Aucune activité'}
                         </div>
-                      )}
-                      <div className="relative w-full rounded-t-lg bg-muted h-32 flex items-end overflow-hidden">
-                        <motion.div
-                          initial={{ height: 0 }}
-                          animate={{ height: `${Math.max(height, 5)}%` }}
-                          transition={{ duration: 1, ease: 'easeOut', delay: i * 0.1 }}
-                          className={cn(
-                            'w-full rounded-t-lg relative',
-                            isToday ? 'bg-emerald-500' : 'bg-emerald-500/50',
-                          )}
-                        >
-                          {isToday && <div className="absolute inset-0 bg-linear-to-t from-emerald-600 to-emerald-400 opacity-50 blur-sm" />}
-                        </motion.div>
+                      </div>
+                      <div className="relative w-full h-32 flex items-end overflow-hidden">
+                        {hasActivity
+                          ? (
+                              <motion.div
+                                initial={{ height: 0 }}
+                                animate={{ height: `${Math.max(height, 8)}%` }} // Minimum 8% for visibility when there's activity
+                                transition={{ duration: 1, ease: 'easeOut', delay: i * 0.1 }}
+                                className={cn(
+                                  'w-full rounded-t-lg relative shadow-sm bg-gradient-success',
+                                  isToday && 'shadow-[0_0_10px_var(--success-from)]',
+                                )}
+                              />
+                            )
+                          : (
+                            // Empty state - subtle indicator at bottom
+                              <div className="w-full h-1 rounded-full bg-muted/30" />
+                            )}
                       </div>
                       <span className={cn(
                         'text-xs font-medium',
                         isToday ? 'text-foreground font-bold' : 'text-muted-foreground',
                       )}
                       >
-                        {dayData.day.substring(0, 3)}
+                        {dayData.day}
                       </span>
                     </div>
                   )
