@@ -8,6 +8,7 @@ import {
   userProfiles,
   userProgress,
 } from '@kurama/data-ops/drizzle/schema'
+import { getXPLeaderboard } from '@kurama/data-ops/queries/leaderboard'
 import { getStreakData } from '@kurama/data-ops/queries/streak'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
@@ -135,5 +136,6 @@ export const getDashboardStats = createServerFn()
         startedAt: session.startedAt,
         duration: session.duration,
       })),
+      leaderboard: await getXPLeaderboard(db, { limit: 5, currentUserId: userId }),
     }
   })

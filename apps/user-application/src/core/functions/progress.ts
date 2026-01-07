@@ -1,6 +1,7 @@
 import { and, eq, gte, sql } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
 import { cards, studySessions, userLessonMastery, userProfiles, userProgress } from '@kurama/data-ops/drizzle/schema'
+import { getXPLeaderboard } from '@kurama/data-ops/queries/leaderboard'
 import { getStreakData } from '@kurama/data-ops/queries/streak'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
@@ -184,6 +185,9 @@ export const getProgressStats = createServerFn()
 
     const unlockedCount = achievements.filter(a => a.unlocked).length
 
+    // Get leaderboard data
+    const leaderboard = await getXPLeaderboard(db, { limit: 10, currentUserId: userId })
+
     return {
       totalCardsStudied,
       totalCardsAvailable,
@@ -197,5 +201,6 @@ export const getProgressStats = createServerFn()
       achievements,
       unlockedCount,
       totalAchievements: achievements.length,
+      leaderboard,
     }
   })

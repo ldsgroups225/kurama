@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useEffect } from 'react'
+import { LeaderboardWidget } from '@/components/gamification'
 import { AppHeader, BottomNav } from '@/components/main'
 import { LogoLoader } from '@/components/ui/logo-loader'
 import { getProgressStats } from '@/core/functions/progress'
@@ -156,7 +157,7 @@ function ProgressPage() {
           <motion.div variants={itemVariants}>
             <h3 className="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
               <Calendar className="w-5 h-5 text-indigo-500" />
-              Activité Hebdomadaire
+              Activité
             </h3>
             <div className="rounded-3xl border border-border bg-card p-5 backdrop-blur-xl">
               <div className="flex h-40 items-end justify-between gap-2 md:gap-4">
@@ -237,6 +238,15 @@ function ProgressPage() {
                 )
               })}
             </div>
+          </motion.div>
+
+          {/* Leaderboard */}
+          <motion.div variants={itemVariants}>
+            <LeaderboardWidget
+              entries={data?.leaderboard ?? []}
+              currentUserId={userId}
+              title="Classement"
+            />
           </motion.div>
         </motion.div>
       </main>

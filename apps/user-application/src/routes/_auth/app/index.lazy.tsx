@@ -15,7 +15,7 @@ import {
 
 import { motion } from 'motion/react'
 import { useEffect } from 'react'
-import { StreakCalendar } from '@/components/gamification'
+import { LeaderboardWidget, StreakCalendar } from '@/components/gamification'
 import { AppHeader, BottomNav } from '@/components/main'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -360,7 +360,7 @@ function AppHome() {
           </motion.section>
 
           {/* Gamification Modules (Streak & Leaderboard) */}
-          <motion.section variants={itemVariants} className="grid grid-cols-1 gap-6">
+          <motion.section variants={itemVariants} className="grid grid-cols-1 gap-4">
             {/* Streamlined Steak Calendar */}
             <StreakCalendar
               currentStreak={dashboardData?.currentStreak ?? 0}
@@ -371,6 +371,14 @@ function AppHome() {
                   completed: true,
                 })) ?? []
               }
+            />
+
+            {/* Leaderboard Widget */}
+            <LeaderboardWidget
+              entries={dashboardData?.leaderboard ?? []}
+              currentUserId={userId}
+              variant="compact"
+              onViewAll={() => navigate({ to: '/app/progress' })}
             />
           </motion.section>
         </motion.div>
