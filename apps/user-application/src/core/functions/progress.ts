@@ -1,6 +1,6 @@
 import { and, eq, gte, sql } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
-import { cards, studySessions, userLessonMastery, userProfiles, userProgress } from '@kurama/data-ops/drizzle/schema'
+import { cards, studySessions, userLessonMastery, userProfiles } from '@kurama/data-ops/drizzle/schema'
 import { getXPLeaderboard } from '@kurama/data-ops/queries/leaderboard'
 import { getStreakData } from '@kurama/data-ops/queries/streak'
 import { createServerFn } from '@tanstack/react-start'
@@ -15,13 +15,13 @@ export const getProgressStats = createServerFn()
     const db = getDb()
     const userId = context.userId
 
-    // Get total cards studied by user
+    // Get total cards studied by user (from study sessions - accurate tracking)
     const cardsStudiedResult = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(userProgress)
-      .where(eq(userProgress.userId, userId))
+      .select({ total: sql<number>`COALESCE(SUM(${studySessions.cardsReviewed}), 0)` })
+      .from(studySessions)
+      .where(eq(studySessions.userId, userId))
 
-    const totalCardsStudied = Number(cardsStudiedResult[0]?.count ?? 0)
+    const totalCardsStudied = Number(cardsStudiedResult[0]?.total ?? 0)
 
     // Get total cards available in the system
     const totalCardsResult = await db
