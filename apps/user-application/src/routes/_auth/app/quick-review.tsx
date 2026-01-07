@@ -1,4 +1,3 @@
-import type { Reward } from '@/components/gamification'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, Brain, SlidersHorizontal, WifiOff } from 'lucide-react'
@@ -11,6 +10,7 @@ import { SessionCounterBadge } from '@/components/learning/session-counter-badge
 import { SessionSettingsDialog } from '@/components/learning/session-settings-dialog'
 import { AppHeader } from '@/components/main'
 import { Button } from '@/components/ui/button'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { LogoLoader } from '@/components/ui/logo-loader'
 import { getCardsForReview } from '@/core/functions/review'
 import { useAutoplay } from '@/hooks/use-autoplay'
@@ -21,6 +21,7 @@ import { useSessionState } from '@/hooks/use-session-state'
 import { useStatsUpdate } from '@/hooks/use-stats-update'
 import { createSwipeHandlers } from '@/hooks/use-swipe-handler'
 import { useViewportHeight } from '@/hooks/use-viewport-height'
+import { authClient, isSigningOut } from '@/lib/auth-client'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
 import { generateUUID } from '@/utils/generateUUID'
@@ -28,6 +29,13 @@ import { generateUUID } from '@/utils/generateUUID'
 export const Route = createFileRoute('/_auth/app/quick-review')({
   component: QuickReviewPage,
 })
+
+interface Reward {
+  type: 'level_up' | 'achievement' | 'streak' | 'xp'
+  title: string
+  description: string
+  value?: number
+}
 
 function QuickReviewPage() {
   const navigate = useNavigate()
@@ -94,10 +102,14 @@ function QuickReviewPage() {
     return endTracking
   }, [])
 
-  const { data: reviewData, isLoading, refetch } = useQuery({
-    queryKey: ['review-cards'],
+  const session = authClient.useSession()
+  const userId = session.data?.user?.id
+
+  const { data: reviewData, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ['review-cards', userId],
     queryFn: () => getCardsForReview({ data: { limit: 20 } }),
     staleTime: 0, // Always fetch fresh data
+    enabled: !!userId && !isSigningOut(),
   })
 
   const cards = useMemo(() => reviewData?.cards ?? [], [reviewData?.cards])
@@ -246,8 +258,8 @@ function QuickReviewPage() {
     onNextCard: goToNextCard,
   })
 
-  // LOADING
-  if (isLoading) {
+  // LOADING - Show when session is pending OR query is loading/fetching
+  if (session.isPending || isLoading || (isFetching && !reviewData)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <LogoLoader size="md" />
@@ -261,16 +273,20 @@ function QuickReviewPage() {
       <div className="min-h-screen bg-background text-foreground">
         <AppHeader title="Révision Rapide" showAvatar={false} className="bg-transparent/0 border-none" />
         <div className="flex flex-col items-center justify-center px-6 pt-20">
-          <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6">
-            <Brain className="w-10 h-10 text-success" />
-          </div>
-          <h2 className="text-xl font-bold text-foreground mb-2">Tout est révisé !</h2>
-          <p className="text-muted-foreground text-center mb-8">
-            Vous n'avez pas de cartes à réviser pour le moment. Continuez à étudier pour débloquer plus de contenu.
-          </p>
-          <Button onClick={navigateBack} className="w-full max-w-xs">
-            Retour à l'accueil
-          </Button>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon" className="bg-success/10">
+                <Brain className="w-5 h-5 text-success" />
+              </EmptyMedia>
+              <EmptyTitle>Tout est révisé !</EmptyTitle>
+              <EmptyDescription>
+                Vous n'avez pas de cartes à réviser pour le moment. Continuez à étudier pour débloquer plus de contenu.
+              </EmptyDescription>
+            </EmptyHeader>
+            <Button onClick={navigateBack} className="w-full max-w-xs">
+              Retour à l'accueil
+            </Button>
+          </Empty>
         </div>
       </div>
     )

@@ -5,8 +5,10 @@ import { motion } from 'motion/react'
 import { useEffect, useMemo } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
 import { Badge } from '@/components/ui/badge'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { LogoLoader } from '@/components/ui/logo-loader'
 import { getLessonsBySubject } from '@/core/functions/learning'
+import { authClient, isSigningOut } from '@/lib/auth-client'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
 
@@ -29,15 +31,21 @@ function LessonsPage() {
     return endTracking
   }, [])
 
-  const { data: lessons, isLoading } = useQuery({
-    queryKey: ['lessons', subjectId],
+  const session = authClient.useSession()
+  const userId = session.data?.user?.id
+
+  const { data: lessons, isLoading, isFetching } = useQuery({
+    queryKey: ['lessons', subjectId, userId],
     queryFn: () => getLessonsBySubject({ data: Number(subjectId) }),
+    enabled: !!userId && !isSigningOut(),
   })
 
   const subjectName = useMemo(
     () => lessons?.[0]?.subject?.name || 'Leçons',
     [lessons],
   )
+
+  const showLoading = session.isPending || isLoading || (isFetching && !lessons)
 
   // Animation variants
   const containerVariants = {
@@ -53,6 +61,42 @@ function LessonsPage() {
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
+  }
+
+  // Early return for loading state - prevents rendering stale data
+  if (showLoading) {
+    return (
+      <div className="min-h-screen bg-background pb-28 text-foreground">
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-[10%] left-[20%] w-[60%] h-[40%] rounded-full bg-blue-600/10 blur-[120px]" />
+          <div className="absolute bottom-[20%] right-[10%] w-[50%] h-[50%] rounded-full bg-indigo-600/10 blur-[120px]" />
+        </div>
+        <AppHeader
+          title="Leçons"
+          showAvatar={false}
+          showBackButton
+          onBackClick={() => navigate({ to: '/app/subjects' })}
+          className="bg-transparent/0 border-none"
+        />
+        <main className="relative z-10 mx-auto max-w-lg px-5 pt-2">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="py-4 text-center"
+          >
+            <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-muted mb-4 shadow-xl border border-border">
+              <BookOpen className="h-6 w-6 text-indigo-500" />
+            </div>
+            <h2 className="mb-2 text-2xl font-bold text-foreground">Choisis ta leçon 📚</h2>
+            <p className="text-muted-foreground px-8">Progresse étape par étape pour maîtriser la matière.</p>
+          </motion.div>
+          <div className="flex items-center justify-center py-20">
+            <LogoLoader size="md" />
+          </div>
+        </main>
+        <BottomNav />
+      </div>
+    )
   }
 
   return (
@@ -85,20 +129,18 @@ function LessonsPage() {
           <p className="text-muted-foreground px-8">Progresse étape par étape pour maîtriser la matière.</p>
         </motion.div>
 
-        {isLoading && (
-          <div className="flex items-center justify-center py-20">
-            <LogoLoader size="md" />
-          </div>
-        )}
-
-        {!isLoading && lessons && lessons.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 px-6 text-center border border-dashed border-border rounded-3xl bg-muted/30">
-            <BookOpen className="mb-4 h-12 w-12 text-muted-foreground" />
-            <p className="mb-2 text-lg font-medium text-foreground">Aucune leçon disponible</p>
-            <p className="text-sm text-muted-foreground">
-              De nouvelles leçons arrivent bientôt ! 🚀
-            </p>
-          </div>
+        {lessons && lessons.length === 0 && (
+          <Empty className="rounded-3xl bg-muted/30">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <BookOpen className="h-5 w-5" />
+              </EmptyMedia>
+              <EmptyTitle>Aucune leçon disponible</EmptyTitle>
+              <EmptyDescription>
+                De nouvelles leçons arrivent bientôt ! 🚀
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )}
 
         <motion.div

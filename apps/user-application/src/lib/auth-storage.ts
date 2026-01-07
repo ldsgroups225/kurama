@@ -245,15 +245,12 @@ export async function clearAuthState(userId: string): Promise<void> {
 /**
  * Clear user-specific authentication data (for logout)
  *
- * CLEARS (user-specific data):
- * - IndexedDB: authState, mutationQueue (user's pending operations)
+ * CLEARS (all user and cached data for security):
+ * - IndexedDB: authState, mutationQueue, queryCache, appState
+ * - Browser cache: offline-content cache storage
  * - Jotai atoms: userProfile, onboarding status (via RESET)
  * - Memory: session encryption keys
- * - Session cache: Cached auth state for instant UI decisions
- *
- * PRESERVES (app-level data):
- * - queryCache: Curriculum data, subjects, lessons (not user-specific)
- * - appState: App configuration, feature flags
+ * PRESERVES (browser-level preferences):
  * - ui-theme: User's theme preference
  * - pwa-install-dismissed: Don't spam install prompt
  */
@@ -286,6 +283,18 @@ export async function clearUserAuthData(): Promise<void> {
     }
 
     await db.mutationQueue.clear()
+    await db.queryCache.clear()
+    await db.appState.clear()
+
+    // Clear browser cache storage for offline content if in browser
+    if (typeof window !== 'undefined' && 'caches' in window) {
+      try {
+        await caches.delete('offline-content')
+      }
+      catch (cacheError) {
+        console.error('[Auth] Failed to clear offline content cache:', cacheError)
+      }
+    }
 
     // Clear session encryption keys
     sessionKey = null

@@ -15,6 +15,7 @@ import { useEffect } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
 import { LogoLoader } from '@/components/ui/logo-loader'
 import { getProgressStats } from '@/core/functions/progress'
+import { authClient, isSigningOut } from '@/lib/auth-client'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
 import { generateUUID } from '@/utils/generateUUID'
@@ -39,9 +40,13 @@ function ProgressPage() {
     return endTracking
   }, [])
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['progress-stats'],
+  const session = authClient.useSession()
+  const userId = session.data?.user?.id
+
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ['progress-stats', userId],
     queryFn: () => getProgressStats(),
+    enabled: !!userId && !isSigningOut(),
   })
 
   // Animation variants
@@ -55,7 +60,8 @@ function ProgressPage() {
     visible: { opacity: 1, y: 0 },
   }
 
-  if (isLoading) {
+  // Show loading when session is pending OR query is loading/fetching
+  if (session.isPending || isLoading || (isFetching && !data)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <LogoLoader />

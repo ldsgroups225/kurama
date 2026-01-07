@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Navigate, Outlet } from '@tanstack/react-router'
 import { useAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
@@ -21,7 +21,6 @@ export const Route = createFileRoute('/_auth')({
 })
 
 function RouteComponent() {
-  const queryClient = useQueryClient()
   const session = authClient.useSession()
   const [, setUserProfile] = useAtom(userProfileAtom)
   const previousUserIdRef = useRef<string | null>(null)
@@ -42,49 +41,33 @@ function RouteComponent() {
   useAuthPersistence()
 
   // Invalidate queries when user changes (different user or signed out)
-  // Important: Only clear when switching FROM one user TO another or signing out
-  // Don't clear on initial load (null → userId) as this causes flash
   useEffect(() => {
     const currentUserId = session.data?.user?.id ?? null
     const previousUserId = previousUserIdRef.current
 
-    // Only clear queries if:
-    // 1. We had a previous user (not initial load)
-    // 2. AND the user changed (different user or signed out)
     const hadPreviousUser = previousUserId !== null
     const userChanged = previousUserId !== currentUserId
 
     if (hadPreviousUser && userChanged) {
-      // Clear user-specific queries when switching users or signing out
-      // Cancel any in-flight requests first
-      queryClient.cancelQueries({ queryKey: ['profile-status'] })
-      queryClient.cancelQueries({ queryKey: ['user-profile'] })
-      queryClient.cancelQueries({ queryKey: ['subscription'] })
-
-      // Then remove them from cache
-      queryClient.removeQueries({ queryKey: ['profile-status'] })
-      queryClient.removeQueries({ queryKey: ['user-profile'] })
-      queryClient.removeQueries({ queryKey: ['subscription'] })
-
       // Clear user profile atom
       setUserProfile(null)
     }
 
     previousUserIdRef.current = currentUserId
-  }, [session.data?.user?.id, queryClient, setUserProfile])
+  }, [session.data?.user?.id, setUserProfile])
 
   // Check profile completion status when user is authenticated
-  const { data: profileStatus, isLoading: isLoadingProfile, isFetched: isProfileStatusFetched } = useQuery({
+  const { data: profileStatus, isPending: isPendingProfile, isFetched: isProfileStatusFetched } = useQuery({
     queryKey: ['profile-status', userId],
     queryFn: () => getProfileStatus(),
-    enabled: hasCachedSession && !!userId && !isSigningOut(),
+    enabled: !!userId && !isSigningOut(),
   })
 
   // Fetch and cache user profile if completed
-  const { data: userProfile, isLoading: isLoadingUserProfile } = useQuery({
+  const { data: userProfile, isPending: isPendingUserProfile } = useQuery({
     queryKey: ['user-profile', userId],
     queryFn: () => getUserProfile(),
-    enabled: hasCachedSession && !!userId && !isSigningOut() && profileStatus?.isCompleted === true,
+    enabled: !!userId && !isSigningOut() && profileStatus?.isCompleted === true,
   })
 
   // Cache profile data in localStorage when fetched
@@ -119,8 +102,8 @@ function RouteComponent() {
   // This prevents the flash: loading → content → loading → content
   const isSessionPending = session.isPending
   const isWaitingForCachedSession = hasCachedSession && session.isPending
-  const isAuthenticatedButLoadingProfile = !!session.data && isLoadingProfile
-  const isAuthenticatedButLoadingUserProfile = !!session.data && profileStatus?.isCompleted && isLoadingUserProfile
+  const isAuthenticatedButLoadingProfile = !!session.data && isPendingProfile
+  const isAuthenticatedButLoadingUserProfile = !!session.data && profileStatus?.isCompleted && isPendingUserProfile
 
   const shouldShowLoading = isSessionPending
     || isSigningOut()

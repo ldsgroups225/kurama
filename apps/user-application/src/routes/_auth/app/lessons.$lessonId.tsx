@@ -10,8 +10,10 @@ import { useEffect } from 'react'
 import { EnhancedModeSelection } from '@/components/learning/enhanced-mode-selection'
 import { AppHeader, BottomNav } from '@/components/main'
 import { Badge } from '@/components/ui/badge'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { LogoLoader } from '@/components/ui/logo-loader'
 import { getLessonDetails } from '@/core/functions/learning'
+import { authClient, isSigningOut } from '@/lib/auth-client'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 
 export const Route = createFileRoute('/_auth/app/lessons/$lessonId')({
@@ -27,9 +29,12 @@ function LessonModePage() {
     return endTracking
   }, [])
 
-  const { data: lesson, isLoading } = useQuery({
-    queryKey: ['lesson', lessonId],
+  const session = authClient.useSession()
+  const userId = session.data?.user?.id
+  const { data: lesson, isLoading, isFetching } = useQuery({
+    queryKey: ['lesson', lessonId, userId],
     queryFn: async () => await getLessonDetails({ data: Number(lessonId) }),
+    enabled: !!userId && !isSigningOut(),
   })
 
   // Animation variants
@@ -43,7 +48,8 @@ function LessonModePage() {
     visible: { opacity: 1, y: 0 },
   }
 
-  if (isLoading) {
+  // Show loading when session is pending OR query is loading/fetching
+  if (session.isPending || isLoading || (isFetching && !lesson)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <LogoLoader />
@@ -55,7 +61,17 @@ function LessonModePage() {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center text-foreground pb-24">
         <AppHeader title="Leçon" showAvatar={false} className="bg-transparent/0 border-none" />
-        <p className="text-zinc-500">Leçon introuvable</p>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <BookOpen className="h-5 w-5" />
+            </EmptyMedia>
+            <EmptyTitle>Leçon introuvable</EmptyTitle>
+            <EmptyDescription>
+              Cette leçon n'existe pas ou a été supprimée.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
         <BottomNav />
       </div>
     )

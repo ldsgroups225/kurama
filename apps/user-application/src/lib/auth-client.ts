@@ -8,9 +8,9 @@ let signingOut = false
 let lastSignOutTime = 0
 
 export function isSigningOut(): boolean {
-  // Return true if currently signing out OR within a 2-second grace period after completion
+  // Return true if currently signing out OR within a 500ms grace period after completion
   // This prevents race conditions where components re-mount/re-render during navigation
-  return signingOut || (Date.now() - lastSignOutTime < 2000)
+  return signingOut || (Date.now() - lastSignOutTime < 500)
 }
 
 export const authClient = createAuthClient({
@@ -24,7 +24,8 @@ export const { useSession } = authClient
  * Call this in components that use session to keep cache updated
  */
 export function syncSessionCache(session: { data: { user?: { id: string } } | null }): void {
-  // Don't sync during sign out process
+  // Skip all synchronization during sign-out process (including grace period)
+  // This prevents race conditions where components re-mount during navigation
   if (isSigningOut()) {
     return
   }
@@ -33,7 +34,7 @@ export function syncSessionCache(session: { data: { user?: { id: string } } | nu
     setCachedSessionState(true, session.data.user.id)
   }
   else if (session.data === null) {
-    // Only clear when we're certain there's no session (not during loading)
+    // Clear when we're certain there's no session
     clearCachedSessionState()
   }
 }
@@ -48,26 +49,10 @@ export async function signOut(queryClient?: QueryClient) {
   signingOut = true
 
   try {
-    // First, cancel and remove user-specific queries to prevent any in-flight requests
+    // First, cancel and remove all queries to prevent any in-flight requests and data leakage
     if (queryClient) {
-      const userQueryKeys: Array<readonly unknown[]> = [
-        ['profile-status'],
-        ['user-profile'],
-        ['subscription'],
-        ['subscription-tier'],
-        ['customer-portal-url'],
-        ['dashboard-stats'],
-        ['daily-challenge-status'],
-        ['review-cards-count'],
-      ]
-
-      await Promise.all(
-        userQueryKeys.map(queryKey => queryClient.cancelQueries({ queryKey })),
-      )
-
-      userQueryKeys.forEach((queryKey) => {
-        queryClient.removeQueries({ queryKey })
-      })
+      await queryClient.cancelQueries()
+      queryClient.clear()
     }
 
     // Clear session cache immediately for instant UI feedback

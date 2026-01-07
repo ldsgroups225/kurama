@@ -21,6 +21,7 @@ import { AppHeader, BottomNav } from '@/components/main'
 import { Badge } from '@/components/ui/badge'
 import { LogoLoader } from '@/components/ui/logo-loader'
 import { getSubjects } from '@/core/functions/learning'
+import { authClient, isSigningOut } from '@/lib/auth-client'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
 
@@ -82,9 +83,13 @@ function SubjectsPage() {
     return endTracking
   }, [])
 
-  const { data: subjects, isLoading } = useQuery({
-    queryKey: ['subjects'],
+  const session = authClient.useSession()
+  const userId = session.data?.user?.id
+
+  const { data: subjects, isLoading, isFetching } = useQuery({
+    queryKey: ['subjects', userId],
     queryFn: () => getSubjects(),
+    enabled: !!userId && !isSigningOut(),
   })
 
   // Animation variants
@@ -101,6 +106,14 @@ function SubjectsPage() {
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
+  }
+
+  if (session.isPending || isLoading || (isFetching && !subjects)) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <LogoLoader />
+      </div>
+    )
   }
 
   return (
@@ -123,12 +136,6 @@ function SubjectsPage() {
           <h2 className="mb-2 text-2xl font-bold text-foreground">Quelle matière travailler ?</h2>
           <p className="text-muted-foreground">Choisis un sujet et progresse à ton rythme.</p>
         </div>
-
-        {isLoading && (
-          <div className="flex items-center justify-center py-20">
-            <LogoLoader size="md" />
-          </div>
-        )}
 
         <motion.div
           variants={containerVariants}

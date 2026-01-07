@@ -1,10 +1,9 @@
-import type { Reward } from '@/components/gamification'
 import type { TestSettings } from '@/components/learning/test-settings-sheet'
 import type { XPCalculationResult } from '@/lib/flashcard-gamification'
 import type { LearningSession } from '@/lib/learning-mode-gamification'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router'
-import { ArrowLeft, SlidersHorizontal, WifiOff } from 'lucide-react'
+import { ArrowLeft, CreditCard, SlidersHorizontal, WifiOff } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { RewardAnimation, XPFeedback } from '@/components/gamification'
@@ -20,6 +19,7 @@ import { TestLoading } from '@/components/learning/test-loading'
 import { TestSettingsSheet } from '@/components/learning/test-settings-sheet'
 import { AppHeader } from '@/components/main'
 import { Button } from '@/components/ui/button'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { LogoLoader } from '@/components/ui/logo-loader'
 import { getLessonDetails } from '@/core/functions/learning'
 import { useAutoplay } from '@/hooks/use-autoplay'
@@ -32,12 +32,20 @@ import { useStatsUpdate } from '@/hooks/use-stats-update'
 import { useStreakVibration } from '@/hooks/use-streak-vibration'
 import { createSwipeHandlers } from '@/hooks/use-swipe-handler'
 import { useViewportHeight } from '@/hooks/use-viewport-height'
+import { authClient, isSigningOut } from '@/lib/auth-client'
 import { db } from '@/lib/db'
 import { calculateFlashcardXP, getCardDifficulty, getIntervalStage } from '@/lib/flashcard-gamification'
 import { getMutationQueueManager } from '@/lib/mutation-queue'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
 import { generateUUID } from '@/utils/generateUUID'
+
+interface Reward {
+  type: 'level_up' | 'achievement' | 'streak' | 'xp'
+  title: string
+  description: string
+  value?: number
+}
 
 interface SearchParams {
   mode?: 'flashcards' | 'quiz' | 'exam'
@@ -172,8 +180,11 @@ function SessionPage() {
     return () => clearInterval(interval)
   }, [])
 
-  const { data: lesson, isLoading } = useQuery({
-    queryKey: ['lesson', lessonId],
+  const session = authClient.useSession()
+  const userId = session.data?.user?.id
+
+  const { data: lesson, isLoading, isFetching } = useQuery({
+    queryKey: ['lesson', lessonId, userId],
     queryFn: async () => {
       if (isOnline) {
         return await getLessonDetails({ data: Number(lessonId) })
@@ -186,6 +197,7 @@ function SessionPage() {
     },
     networkMode: 'offlineFirst',
     staleTime: 5 * 60 * 1000,
+    enabled: !!userId && !isSigningOut(),
   })
 
   const cards = useMemo(() => (lesson as any)?.cards ?? [], [lesson])
@@ -576,8 +588,8 @@ function SessionPage() {
     onNextCard: goToNextCard,
   })
 
-  // LOADING
-  if (isLoading) {
+  // LOADING - Show when session is pending OR query is loading/fetching
+  if (session.isPending || isLoading || (isFetching && !lesson)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <LogoLoader size="md" />
@@ -590,7 +602,17 @@ function SessionPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center text-foreground">
         <AppHeader title="Session" showAvatar={false} className="bg-transparent/0 border-none" />
-        <p className="text-zinc-500">Aucune carte disponible</p>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <CreditCard className="h-5 w-5" />
+            </EmptyMedia>
+            <EmptyTitle>Aucune carte disponible</EmptyTitle>
+            <EmptyDescription>
+              Cette leçon ne contient pas encore de cartes à étudier.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       </div>
     )
   }
