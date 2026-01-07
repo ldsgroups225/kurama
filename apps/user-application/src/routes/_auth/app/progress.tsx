@@ -2,17 +2,27 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   Award,
+  BookMarked,
   BookOpen,
   Calendar,
+  CalendarCheck,
   Clock,
+  Crown,
+  Eye,
   Flame,
+  GraduationCap,
+  Library,
+  Medal,
+  Sparkles,
+  Star,
   Target,
   TrendingUp,
   Trophy,
+  Zap,
 } from 'lucide-react'
 import { motion } from 'motion/react'
-import { useEffect } from 'react'
-import { LeaderboardWidget } from '@/components/gamification'
+import { useEffect, useState } from 'react'
+import { AchievementUnlockToast, LeaderboardWidget } from '@/components/gamification'
 import { AppHeader, BottomNav } from '@/components/main'
 import { LogoLoader } from '@/components/ui/logo-loader'
 import { getProgressStats } from '@/core/functions/progress'
@@ -26,15 +36,49 @@ export const Route = createFileRoute('/_auth/app/progress')({
 
 const iconMap: Record<string, typeof Award> = {
   Award,
+  BookMarked,
+  BookOpen,
+  Calendar,
+  CalendarCheck,
+  Crown,
+  Eye,
   Flame,
+  GraduationCap,
+  Library,
+  Medal,
+  Sparkles,
+  Star,
   Target,
   TrendingUp,
-  Calendar,
   Trophy,
-  BookOpen,
+  Zap,
 }
 
+// Rarity styling maps
+const rarityGradients = {
+  common: 'bg-gradient-common',
+  rare: 'bg-gradient-rare',
+  epic: 'bg-gradient-epic',
+  legendary: 'bg-gradient-legendary',
+} as const
+
+const rarityBorderColors = {
+  common: 'border-zinc-500/20 bg-zinc-500/10',
+  rare: 'border-blue-500/20 bg-blue-500/10',
+  epic: 'border-purple-500/20 bg-purple-500/10',
+  legendary: 'border-amber-500/20 bg-amber-500/10',
+} as const
+
+const rarityLabels = {
+  common: 'COMMUN',
+  rare: 'RARE',
+  epic: 'ÉPIQUE',
+  legendary: 'LÉGENDAIRE',
+} as const
+
 function ProgressPage() {
+  const [newlyUnlockedAchievements, setNewlyUnlockedAchievements] = useState<any[]>([])
+
   useEffect(() => {
     const endTracking = trackRouteLoad('app-progress')
     return endTracking
@@ -48,6 +92,19 @@ function ProgressPage() {
     queryFn: () => getProgressStats(),
     enabled: !!userId && !isSigningOut(),
   })
+
+  // Handle newly unlocked achievements
+  useEffect(() => {
+    if (data?.newlyUnlocked && data.newlyUnlocked.length > 0) {
+      setNewlyUnlockedAchievements(data.newlyUnlocked)
+    }
+  }, [data?.newlyUnlocked])
+
+  const handleDismissAchievements = (achievementIds: string[]) => {
+    setNewlyUnlockedAchievements([])
+    // TODO: Call markAchievementsNotified API
+    console.log('Marking achievements as notified:', achievementIds)
+  }
 
   // Animation variants
   const containerVariants = {
@@ -243,28 +300,90 @@ function ProgressPage() {
               </span>
             </div>
 
-            <div className="grid grid-cols-4 gap-3">
-              {(data?.achievements ?? []).map((badge) => {
-                const Icon = iconMap[badge.icon] ?? Award
+            <div className="grid grid-cols-2 gap-3">
+              {(data?.achievements ?? []).map((achievement) => {
+                const Icon = iconMap[achievement.icon] ?? Award
+                const isNewlyUnlocked = data?.newlyUnlocked?.some(a => a.id === achievement.id)
+
                 return (
-                  <div
-                    key={badge.id}
+                  <motion.div
+                    key={achievement.id}
+                    initial={isNewlyUnlocked ? { scale: 0.8, opacity: 0 } : false}
+                    animate={isNewlyUnlocked ? { scale: 1, opacity: 1 } : false}
+                    transition={isNewlyUnlocked ? { duration: 0.5, ease: 'backOut' } : undefined}
                     className={cn(
-                      'aspect-square flex flex-col items-center justify-center gap-1 rounded-2xl border p-2 transition-all',
-                      badge.unlocked
-                        ? 'border-emerald-500/20 bg-emerald-500/10'
-                        : 'border-border bg-card grayscale opacity-60',
+                      'relative flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all',
+                      achievement.unlocked
+                        ? rarityBorderColors[achievement.rarity]
+                        : 'border-border bg-card opacity-60',
                     )}
                   >
-                    <Icon className={cn(
-                      'h-6 w-6 mb-1',
-                      badge.unlocked ? 'text-emerald-500' : 'text-muted-foreground',
+                    {/* Rarity indicator */}
+                    {achievement.unlocked && achievement.rarity !== 'common' && (
+                      <div className={cn(
+                        'absolute -top-1 -right-1 px-1.5 py-0.5 rounded text-[9px] font-bold text-white',
+                        rarityGradients[achievement.rarity],
+                      )}
+                      >
+                        {rarityLabels[achievement.rarity]}
+                      </div>
                     )}
-                    />
-                    {badge.unlocked && (
-                      <div className="h-1 w-1 rounded-full bg-emerald-400" />
+
+                    {/* Icon */}
+                    <div className={cn(
+                      'h-12 w-12 rounded-full flex items-center justify-center',
+                      achievement.unlocked
+                        ? rarityGradients[achievement.rarity]
+                        : 'bg-muted',
                     )}
-                  </div>
+                    >
+                      <Icon className={cn(
+                        'h-6 w-6',
+                        achievement.unlocked ? 'text-white' : 'text-muted-foreground',
+                      )}
+                      />
+                    </div>
+
+                    {/* Name */}
+                    <span className="text-xs font-semibold text-center">
+                      {achievement.name}
+                    </span>
+
+                    {/* Description */}
+                    <span className="text-[10px] text-muted-foreground text-center leading-tight">
+                      {achievement.description}
+                    </span>
+
+                    {/* Progress bar (for locked) */}
+                    {!achievement.unlocked && (
+                      <div className="w-full mt-1">
+                        <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-muted-foreground/50 rounded-full transition-all duration-300"
+                            style={{ width: `${(achievement.progress / achievement.maxProgress) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] text-muted-foreground mt-1 block">
+                          {achievement.progress}
+                          /
+                          {achievement.maxProgress}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Unlock indicator */}
+                    {achievement.unlocked && (
+                      <motion.div
+                        initial={isNewlyUnlocked ? { scale: 0 } : { scale: 1 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.3, duration: 0.3, ease: 'backOut' }}
+                        className={cn(
+                          'h-2 w-2 rounded-full',
+                          rarityGradients[achievement.rarity],
+                        )}
+                      />
+                    )}
+                  </motion.div>
                 )
               })}
             </div>
@@ -282,6 +401,12 @@ function ProgressPage() {
       </main>
 
       <BottomNav />
+
+      {/* Achievement unlock toast */}
+      <AchievementUnlockToast
+        achievements={newlyUnlockedAchievements}
+        onDismiss={handleDismissAchievements}
+      />
     </div>
   )
 }

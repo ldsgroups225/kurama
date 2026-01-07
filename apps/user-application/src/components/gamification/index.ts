@@ -1,5 +1,6 @@
 export { type Achievement, AchievementBadge } from './achievement-badge'
 export { AchievementShowcase } from './achievement-showcase'
+export { AchievementUnlockToast } from './achievement-unlock-toast'
 export { EnhancedXPDisplay } from './enhanced-xp-display'
 export { GamificationSummary } from './gamification-summary'
 export { type LeaderboardEntry, LeaderboardWidget } from './leaderboard-widget'
