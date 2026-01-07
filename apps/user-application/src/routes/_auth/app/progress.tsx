@@ -1,3 +1,4 @@
+import type { AchievementWithProgress } from '@kurama/data-ops/queries/achievements'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import {
@@ -6,6 +7,7 @@ import {
   BookOpen,
   Calendar,
   CalendarCheck,
+  Check,
   Clock,
   Crown,
   Eye,
@@ -24,6 +26,12 @@ import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { AchievementUnlockToast, LeaderboardWidget } from '@/components/gamification'
 import { AppHeader, BottomNav } from '@/components/main'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { LogoLoader } from '@/components/ui/logo-loader'
 import { getProgressStats } from '@/core/functions/progress'
 import { authClient, isSigningOut } from '@/lib/auth-client'
@@ -54,30 +62,31 @@ const iconMap: Record<string, typeof Award> = {
   Zap,
 }
 
-// Rarity styling maps
-const rarityGradients = {
+// Shared rarity configuration using semantic colors
+const rarityGradientMap = {
   common: 'bg-gradient-common',
   rare: 'bg-gradient-rare',
   epic: 'bg-gradient-epic',
   legendary: 'bg-gradient-legendary',
 } as const
 
-const rarityBorderColors = {
-  common: 'border-zinc-500/20 bg-zinc-500/10',
-  rare: 'border-blue-500/20 bg-blue-500/10',
-  epic: 'border-purple-500/20 bg-purple-500/10',
-  legendary: 'border-amber-500/20 bg-amber-500/10',
+const rarityBgMap = {
+  common: 'bg-common border-common',
+  rare: 'bg-rare border-rare',
+  epic: 'bg-epic border-epic',
+  legendary: 'bg-legendary border-legendary',
 } as const
 
-const rarityLabels = {
-  common: 'COMMUN',
-  rare: 'RARE',
-  epic: 'ÉPIQUE',
-  legendary: 'LÉGENDAIRE',
+const rarityLabelMap = {
+  common: 'Commun',
+  rare: 'Rare',
+  epic: 'Épique',
+  legendary: 'Légendaire',
 } as const
 
 function ProgressPage() {
-  const [newlyUnlockedAchievements, setNewlyUnlockedAchievements] = useState<any[]>([])
+  const [newlyUnlockedAchievements, setNewlyUnlockedAchievements] = useState<AchievementWithProgress[]>([])
+  const [selectedAchievement, setSelectedAchievement] = useState<AchievementWithProgress | null>(null)
 
   useEffect(() => {
     const endTracking = trackRouteLoad('app-progress')
@@ -286,6 +295,15 @@ function ProgressPage() {
             </div>
           </motion.div>
 
+          {/* Leaderboard */}
+          <motion.div variants={itemVariants}>
+            <LeaderboardWidget
+              entries={data?.leaderboard ?? []}
+              currentUserId={userId}
+              title="Classement"
+            />
+          </motion.div>
+
           {/* Achievements Grid */}
           <motion.div variants={itemVariants}>
             <div className="flex items-center justify-between mb-3">
@@ -300,107 +318,186 @@ function ProgressPage() {
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               {(data?.achievements ?? []).map((achievement) => {
                 const Icon = iconMap[achievement.icon] ?? Award
                 const isNewlyUnlocked = data?.newlyUnlocked?.some(a => a.id === achievement.id)
+
+                const gradient = rarityGradientMap[achievement.rarity]
+                const bgStyle = rarityBgMap[achievement.rarity]
+
+                const handleClick = () => setSelectedAchievement(achievement)
+                const handleKeyDown = (e: React.KeyboardEvent) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    setSelectedAchievement(achievement)
+                  }
+                }
 
                 return (
                   <motion.div
                     key={achievement.id}
                     initial={isNewlyUnlocked ? { scale: 0.8, opacity: 0 } : false}
                     animate={isNewlyUnlocked ? { scale: 1, opacity: 1 } : false}
-                    transition={isNewlyUnlocked ? { duration: 0.5, ease: 'backOut' } : undefined}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    role="button"
+                    tabIndex={0}
+                    onClick={handleClick}
+                    onKeyDown={handleKeyDown}
+                    aria-label={`Voir les détails du badge ${achievement.name}`}
+                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                     className={cn(
-                      'relative flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all',
+                      'relative flex flex-col items-center justify-center gap-2 rounded-xl border p-3 aspect-square transition-all overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary',
                       achievement.unlocked
-                        ? rarityBorderColors[achievement.rarity]
-                        : 'border-border bg-card opacity-60',
+                        ? cn('backdrop-blur-md shadow-lg', bgStyle)
+                        : 'border-border/30 bg-muted/10',
                     )}
                   >
-                    {/* Rarity indicator */}
+                    {/* Dynamic Background Glow for Unlocked */}
+                    {achievement.unlocked && (
+                      <div className={cn(
+                        'absolute inset-0 opacity-30',
+                        gradient,
+                      )}
+                      />
+                    )}
+
+                    {/* Rarity Pill (Tiny) */}
                     {achievement.unlocked && achievement.rarity !== 'common' && (
                       <div className={cn(
-                        'absolute -top-1 -right-1 px-1.5 py-0.5 rounded text-[9px] font-bold text-white',
-                        rarityGradients[achievement.rarity],
+                        'absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full shadow-sm',
+                        gradient,
                       )}
-                      >
-                        {rarityLabels[achievement.rarity]}
-                      </div>
+                      />
                     )}
 
                     {/* Icon */}
                     <div className={cn(
-                      'h-12 w-12 rounded-full flex items-center justify-center',
+                      'h-10 w-10 rounded-full flex items-center justify-center relative z-10 shadow-md',
                       achievement.unlocked
-                        ? rarityGradients[achievement.rarity]
-                        : 'bg-muted',
+                        ? cn(gradient, 'text-white')
+                        : 'bg-muted/30 text-muted-foreground/50',
                     )}
                     >
-                      <Icon className={cn(
-                        'h-6 w-6',
-                        achievement.unlocked ? 'text-white' : 'text-muted-foreground',
-                      )}
-                      />
+                      <Icon className="h-5 w-5" />
                     </div>
 
                     {/* Name */}
-                    <span className="text-xs font-semibold text-center">
-                      {achievement.name}
-                    </span>
+                    <div className="z-10 w-full text-center">
+                      <span className={cn(
+                        'text-[10px] sm:text-xs font-bold leading-tight line-clamp-2',
+                        achievement.unlocked ? 'text-foreground drop-shadow-sm' : 'text-muted-foreground/70',
+                      )}
+                      >
+                        {achievement.name}
+                      </span>
+                    </div>
 
-                    {/* Description */}
-                    <span className="text-[10px] text-muted-foreground text-center leading-tight">
-                      {achievement.description}
-                    </span>
-
-                    {/* Progress bar (for locked) */}
+                    {/* Progress (Locked only) */}
                     {!achievement.unlocked && (
-                      <div className="w-full mt-1">
-                        <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                      <div className="w-full mt-auto pt-1">
+                        <div className="h-1 w-full bg-muted/20 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-muted-foreground/50 rounded-full transition-all duration-300"
+                            className="h-full bg-primary/40 rounded-full"
                             style={{ width: `${(achievement.progress / achievement.maxProgress) * 100}%` }}
                           />
                         </div>
-                        <span className="text-[10px] text-muted-foreground mt-1 block">
-                          {achievement.progress}
-                          /
-                          {achievement.maxProgress}
-                        </span>
                       </div>
                     )}
 
-                    {/* Unlock indicator */}
-                    {achievement.unlocked && (
-                      <motion.div
-                        initial={isNewlyUnlocked ? { scale: 0 } : { scale: 1 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: 0.3, duration: 0.3, ease: 'backOut' }}
-                        className={cn(
-                          'h-2 w-2 rounded-full',
-                          rarityGradients[achievement.rarity],
-                        )}
-                      />
+                    {/* Stars/Sparkles for Legendary */}
+                    {achievement.unlocked && achievement.rarity === 'legendary' && (
+                      <>
+                        <Sparkles className="absolute top-1 left-1 w-3 h-3 text-legendary opacity-50 animate-pulse" />
+                        <Sparkles className="absolute bottom-2 right-2 w-2 h-2 text-legendary opacity-30 animate-pulse delay-700" />
+                      </>
                     )}
                   </motion.div>
                 )
               })}
             </div>
           </motion.div>
-
-          {/* Leaderboard */}
-          <motion.div variants={itemVariants}>
-            <LeaderboardWidget
-              entries={data?.leaderboard ?? []}
-              currentUserId={userId}
-              title="Classement"
-            />
-          </motion.div>
         </motion.div>
       </main>
 
       <BottomNav />
+
+      {/* Achievement Details Dialog */}
+      <Dialog open={!!selectedAchievement} onOpenChange={open => !open && setSelectedAchievement(null)}>
+        <DialogContent className="sm:max-w-md bg-card backdrop-blur-xl border-border p-0 overflow-hidden text-foreground">
+          {selectedAchievement && (() => {
+            const Icon = iconMap[selectedAchievement.icon] ?? Award
+            const gradient = rarityGradientMap[selectedAchievement.rarity] || rarityGradientMap.common
+
+            return (
+              <div className="flex flex-col relative">
+                {/* Header / Banner */}
+                <div className={cn('relative h-32 w-full overflow-hidden opacity-20', gradient)}>
+                  <div className="absolute inset-0 bg-linear-to-t from-card to-transparent" />
+                </div>
+
+                <div className="px-6 pb-6 -mt-12 relative z-10 flex flex-col items-center text-center gap-4">
+                  {/* Icon */}
+                  <div className={cn(
+                    'w-24 h-24 rounded-full flex items-center justify-center shadow-2xl ring-4 ring-black/50 mx-auto',
+                    selectedAchievement.unlocked ? gradient : 'bg-muted grayscale opacity-50',
+                  )}
+                  >
+                    <Icon className="w-10 h-10 text-white drop-shadow-md" />
+                  </div>
+
+                  <div className="space-y-1">
+                    <DialogTitle className="text-2xl font-bold">{selectedAchievement.name}</DialogTitle>
+                    <div className={cn(
+                      'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 border border-transparent',
+                      'bg-muted text-muted-foreground uppercase tracking-wider',
+                    )}
+                    >
+                      {rarityLabelMap[selectedAchievement.rarity]}
+                    </div>
+                  </div>
+
+                  <DialogDescription className="text-muted-foreground text-base max-w-xs mx-auto">
+                    {selectedAchievement.description}
+                  </DialogDescription>
+
+                  {/* Footer / Status */}
+                  <div className="w-full mt-4 pt-4 border-t border-border">
+                    {selectedAchievement.unlocked
+                      ? (
+                          <div className="flex items-center justify-center gap-2 text-success font-medium">
+                            <Check className="w-5 h-5" />
+                            <span>Badge débloqué</span>
+                          </div>
+                        )
+                      : (
+                          <div className="space-y-2 w-full">
+                            <div className="flex justify-between text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                              <span>Progression</span>
+                              <span>
+                                {selectedAchievement.progress}
+                                {' '}
+                                /
+                                {' '}
+                                {selectedAchievement.maxProgress}
+                              </span>
+                            </div>
+                            <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-primary rounded-full transition-all duration-500"
+                                style={{ width: `${(selectedAchievement.progress / selectedAchievement.maxProgress) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
+        </DialogContent>
+      </Dialog>
 
       {/* Achievement unlock toast */}
       <AchievementUnlockToast
