@@ -1,8 +1,8 @@
+import { TrendingUp } from 'lucide-react'
 import { useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { useVibration, VibrationPatterns } from '@/hooks'
-import { Star, TrendingUp } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 interface LevelBadgeProps {
@@ -54,9 +54,6 @@ export function LevelBadge({
             <span className="text-lg font-black text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">{level}</span>
           </div>
 
-          <div className="absolute -top-1 -right-1 z-20 animate-pulse">
-            <Star className="text-yellow-100 h-4 w-4 drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-          </div>
         </div>
 
         <div className="min-w-0 flex-1">
@@ -111,9 +108,6 @@ export function LevelBadge({
               <span className="text-3xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]">{level}</span>
             </div>
 
-            <div className="absolute -top-2 -right-2 z-20">
-              <Star className="text-yellow-100 h-6 w-6 drop-shadow-[0_0_12px_rgba(255,255,255,1)] animate-pulse" />
-            </div>
           </div>
 
           <div className="flex-1">
