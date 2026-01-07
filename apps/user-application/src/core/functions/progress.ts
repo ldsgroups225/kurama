@@ -1,8 +1,8 @@
 import { and, eq, gte, sql } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
-import { cards, studySessions, userLessonMastery, userProfiles } from '@kurama/data-ops/drizzle/schema'
+import { cards, studySessions, userProfiles } from '@kurama/data-ops/drizzle/schema'
+import { getUserAchievements } from '@kurama/data-ops/queries/achievements'
 import { getXPLeaderboard } from '@kurama/data-ops/queries/leaderboard'
-import { getStreakData } from '@kurama/data-ops/queries/streak'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
 
@@ -15,14 +15,6 @@ export const getProgressStats = createServerFn()
     const db = getDb()
     const userId = context.userId
 
-    // Get total cards studied by user (from study sessions - accurate tracking)
-    const cardsStudiedResult = await db
-      .select({ total: sql<number>`COALESCE(SUM(${studySessions.cardsReviewed}), 0)` })
-      .from(studySessions)
-      .where(eq(studySessions.userId, userId))
-
-    const totalCardsStudied = Number(cardsStudiedResult[0]?.total ?? 0)
-
     // Get total cards available in the system
     const totalCardsResult = await db
       .select({ count: sql<number>`count(*)` })
@@ -30,7 +22,7 @@ export const getProgressStats = createServerFn()
 
     const totalCardsAvailable = Number(totalCardsResult[0]?.count ?? 0)
 
-    // Get XP from user profile
+    // Get XP from user profile for rank calculation
     const profile = await db.query.userProfiles.findFirst({
       where: eq(userProfiles.userId, userId),
     })
@@ -49,10 +41,6 @@ export const getProgressStats = createServerFn()
     const usersWithLessXP = Number(usersWithLessXPResult[0]?.count ?? 0)
     const totalUsers = Number(totalUsersResult[0]?.count ?? 1)
     const rankPercentage = totalUsers > 0 ? Math.round((usersWithLessXP / totalUsers) * 100) : 0
-
-    // Calculate streak using shared utility (eliminates code duplication)
-    const streakData = await getStreakData(db, userId)
-    const { currentStreak, longestStreak, streakHistory: uniqueDates } = streakData
 
     // Calculate total study time this month
     const startOfMonth = new Date()
@@ -119,96 +107,25 @@ export const getProgressStats = createServerFn()
       })
     }
 
-    // Get lessons completed count
-    const lessonsCompletedResult = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(userLessonMastery)
-      .where(
-        and(
-          eq(userLessonMastery.userId, userId),
-          gte(userLessonMastery.successfulTestCount, 2),
-        ),
-      )
-
-    const lessonsCompleted = Number(lessonsCompletedResult[0]?.count ?? 0)
-
-    // Calculate achievements/badges
-    const achievements = [
-      {
-        id: 'beginner',
-        name: 'Débutant',
-        description: 'Commencer votre parcours',
-        unlocked: totalCardsStudied > 0,
-        icon: 'Award',
-      },
-      {
-        id: 'streak-7',
-        name: 'Série 7j',
-        description: 'Maintenir une série de 7 jours',
-        unlocked: longestStreak >= 7,
-        icon: 'Flame',
-      },
-      {
-        id: 'cards-100',
-        name: '100 Cartes',
-        description: 'Étudier 100 cartes',
-        unlocked: totalCardsStudied >= 100,
-        icon: 'Target',
-      },
-      {
-        id: 'progress',
-        name: 'Progrès',
-        description: 'Compléter une leçon',
-        unlocked: lessonsCompleted >= 1,
-        icon: 'TrendingUp',
-      },
-      {
-        id: 'regular',
-        name: 'Régulier',
-        description: 'Étudier 30 jours au total',
-        unlocked: uniqueDates.length >= 30,
-        icon: 'Calendar',
-      },
-      {
-        id: 'expert',
-        name: 'Expert',
-        description: 'Atteindre 5000 XP',
-        unlocked: totalXP >= 5000,
-        icon: 'Trophy',
-      },
-      {
-        id: 'reader',
-        name: 'Lecteur',
-        description: 'Étudier 500 cartes',
-        unlocked: totalCardsStudied >= 500,
-        icon: 'BookOpen',
-      },
-      {
-        id: 'champion',
-        name: 'Champion',
-        description: 'Atteindre 10000 XP',
-        unlocked: totalXP >= 10000,
-        icon: 'Award',
-      },
-    ]
-
-    const unlockedCount = achievements.filter(a => a.unlocked).length
+    // Get achievements with progress using new centralized system
+    const { achievements, newlyUnlocked, stats } = await getUserAchievements(db, userId)
 
     // Get leaderboard data
     const leaderboard = await getXPLeaderboard(db, { limit: 10, currentUserId: userId })
 
     return {
-      totalCardsStudied,
+      totalCardsStudied: stats.totalCardsStudied, // Now from centralized stats
       totalCardsAvailable,
-      totalXP,
+      totalXP: stats.totalXP, // Now from centralized stats
       rankPercentage,
-      currentStreak,
-      longestStreak,
+      currentStreak: stats.currentStreak, // Now from centralized stats
+      longestStreak: stats.longestStreak, // Now from centralized stats
       totalStudyTimeHours,
       weeklyActivity,
-      lessonsCompleted,
+      lessonsCompleted: stats.lessonsCompleted, // Now from centralized stats
       achievements,
-      unlockedCount,
+      newlyUnlocked,
+      unlockedCount: achievements.filter(a => a.unlocked).length,
       totalAchievements: achievements.length,
       leaderboard,
     }
