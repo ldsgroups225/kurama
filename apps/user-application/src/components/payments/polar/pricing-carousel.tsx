@@ -126,7 +126,7 @@ export function PricingCarousel({
       </div>
 
       {/* Carousel container */}
-      <div className="relative z-10 overflow-visible px-4">
+      <div className="relative z-10 px-4">
         {/* Navigation arrows */}
         <button
           type="button"
@@ -154,23 +154,33 @@ export function PricingCarousel({
           <ChevronRight className="h-5 w-5" />
         </button>
 
-        {/* Cards */}
-        <motion.div
-          className="flex gap-4"
-          animate={{ x: `calc(-${activeIndex * 100}% - ${activeIndex * 16}px)` }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        >
+        {/* Cards - show only active card */}
+        <div className="relative">
           {sortedProducts.map((product, index) => (
-            <PricingCarouselCard
+            <motion.div
               key={product.id}
-              product={product}
-              subscription={subscription}
-              onCheckout={onCheckout}
-              isCheckoutPending={isCheckoutPending}
-              isActive={index === activeIndex}
-            />
+              initial={false}
+              animate={{
+                opacity: index === activeIndex ? 1 : 0,
+                scale: index === activeIndex ? 1 : 0.95,
+                position: index === activeIndex ? 'relative' : 'absolute',
+              }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className={cn(
+                'w-full',
+                index !== activeIndex && 'pointer-events-none inset-0',
+              )}
+              aria-hidden={index !== activeIndex}
+            >
+              <PricingCarouselCard
+                product={product}
+                subscription={subscription}
+                onCheckout={onCheckout}
+                isCheckoutPending={isCheckoutPending}
+              />
+            </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
 
       {/* Swipe hint */}
@@ -190,7 +200,6 @@ interface PricingCarouselCardProps {
   subscription: Subscription
   onCheckout: (productId: string) => void
   isCheckoutPending: boolean
-  isActive: boolean
 }
 
 function PricingCarouselCard({
@@ -198,7 +207,6 @@ function PricingCarouselCard({
   subscription,
   onCheckout,
   isCheckoutPending,
-  isActive,
 }: PricingCarouselCardProps) {
   const price = product.prices[0]
   const interval = price?.type === 'recurring' ? (price.recurringInterval ?? 'month') : 'month'
@@ -256,17 +264,13 @@ function PricingCarouselCard({
   const features = getFeatures()
 
   return (
-    <motion.div
+    <div
       className={cn(
-        'relative min-w-full shrink-0 rounded-3xl border p-6 transition-all duration-300',
-        isActive ? 'scale-100 opacity-100' : 'scale-95 opacity-60 blur-[1px]',
+        'relative w-full rounded-3xl border p-6 transition-all duration-300',
         isCurrentPlan
           ? 'border-emerald-500/50 bg-emerald-900/10 dark:bg-emerald-900/20'
           : 'border-border bg-card/80 backdrop-blur-xl',
       )}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: isActive ? 1 : 0.6, y: 0 }}
-      transition={{ duration: 0.3 }}
     >
       {/* Background Glow */}
       <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
@@ -393,6 +397,6 @@ function PricingCarouselCard({
           7 jours gratuits • Sans engagement
         </p>
       )}
-    </motion.div>
+    </div>
   )
 }
