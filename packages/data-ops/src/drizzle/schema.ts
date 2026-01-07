@@ -353,6 +353,24 @@ export const userLessonMastery = pgTable("user_lesson_mastery", {
 	unique("user_lesson_mastery_user_id_lesson_id_unique").on(table.userId, table.lessonId),
 ]);
 
+export const userAchievements = pgTable("user_achievements", {
+	id: serial().primaryKey().notNull(),
+	userId: text("user_id").notNull(),
+	achievementId: text("achievement_id").notNull(),
+	unlockedAt: timestamp("unlocked_at", { mode: 'string' }).defaultNow().notNull(),
+	notified: boolean("notified").default(false).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+		columns: [table.userId],
+		foreignColumns: [authUser.id],
+		name: "user_achievements_user_id_auth_user_id_fk"
+	}).onDelete("cascade"),
+	unique("user_achievements_user_achievement_unique").on(table.userId, table.achievementId),
+	index("idx_user_achievements_user_id").on(table.userId),
+	index("idx_user_achievements_unlocked_at").on(table.unlockedAt),
+]);
+
 export const levelSeries = pgTable("level_series", {
 	gradeId: integer("grade_id").notNull(),
 	seriesId: integer("series_id").notNull(),
@@ -582,6 +600,7 @@ export type InsertLesson = typeof lessons.$inferInsert;
 export type InsertCard = typeof cards.$inferInsert;
 export type InsertLessonsContentFile = typeof lessonsContentFile.$inferInsert;
 export type InsertLessonsContentChunk = typeof lessonsContentChunks.$inferInsert;
+export type InsertUserAchievement = typeof userAchievements.$inferInsert;
 export type InsertSubscription = typeof subscriptions.$inferInsert;
 export type InsertOrder = typeof orders.$inferInsert;
 export type InsertReferral = typeof referrals.$inferInsert;
@@ -593,6 +612,7 @@ export type SelectGrade = typeof grades.$inferSelect;
 export type SelectSeries = typeof series.$inferSelect;
 export type SelectLessonsContentFile = typeof lessonsContentFile.$inferSelect;
 export type SelectLessonsContentChunk = typeof lessonsContentChunks.$inferSelect;
+export type SelectUserAchievement = typeof userAchievements.$inferSelect;
 export type SelectSubscription = typeof subscriptions.$inferSelect;
 export type SelectOrder = typeof orders.$inferSelect;
 export type SelectReferral = typeof referrals.$inferSelect;
