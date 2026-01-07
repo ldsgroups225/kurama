@@ -40,6 +40,8 @@
     "drizzle:pull": "npx dotenv-cli -e .env.development -- drizzle-kit pull --config drizzle.config.ts",
     "seed": "tsx src/seeds/seed-db.ts",
     "seed:lessons": "tsx src/seeds/seed-all-comprehensive.ts",
+    "test": "vitest --run",
+    "test:watch": "vitest",
     "test:email": "tsx src/email/test-email.ts",
     "typecheck": "tsc --noEmit"
   },
@@ -72,6 +74,7 @@
     "react": "catalog:frontend",
     "tsc-alias": "catalog:build",
     "tsx": "catalog:dev",
-    "typescript": "catalog:dev"
+    "typescript": "catalog:dev",
+    "vitest": "catalog:test"
   }
 }

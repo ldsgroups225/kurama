@@ -1093,6 +1093,9 @@ importers:
       typescript:
         specifier: catalog:dev
         version: 5.9.3
+      vitest:
+        specifier: catalog:test
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@25.0.3)(jiti@2.6.1)(jsdom@27.3.0(postcss@8.5.6))(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/eslint-config:
     dependencies:
