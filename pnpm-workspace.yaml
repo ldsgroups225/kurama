@@ -159,3 +159,7 @@ onlyBuiltDependencies:
   - esbuild
   - sharp
   - workerd
+catalog:
+  '@genkit-ai/google-genai': ^1.27.0
+  '@hono/zod-validator': ^0.7.6
+  genkit: ^1.27.0

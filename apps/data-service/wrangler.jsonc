@@ -22,6 +22,14 @@
   // - DATABASE_HOST: Neon database host
   // - DATABASE_USERNAME: Neon database username
   // - DATABASE_PASSWORD: Neon database password
+  // - GEMINI_API_KEY: Google Gemini API key for AI distractor generation
+  "kv_namespaces": [
+    {
+      "binding": "DISTRACTORS_CACHE",
+      "id": "placeholder_kv_id",
+      "preview_id": "placeholder_kv_preview_id"
+    }
+  ],
   "observability": {
     "logs": {
       "enabled": false,

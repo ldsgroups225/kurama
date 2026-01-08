@@ -6,6 +6,7 @@ import {
 } from '@kurama/observability/sentry/cloudflare'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { genkitRoutes } from '../genkit/routes'
 import { polarWebhooks } from './webhooks'
 
 // Extended Env type for the app
@@ -18,6 +19,9 @@ interface AppEnv {
   CORS_ORIGIN?: string
   API_VERSION?: string
   ENVIRONMENT?: string
+  // Genkit/AI related
+  GEMINI_API_KEY?: string
+  DISTRACTORS_CACHE?: KVNamespace
 }
 
 export const app = new Hono<{ Bindings: AppEnv }>()
@@ -86,6 +90,9 @@ app.get('/api/health', (c) => {
 
 // Mount webhook routes
 app.route('/', polarWebhooks)
+
+// Mount Genkit routes
+app.route('/', genkitRoutes)
 
 // Error handling with Sentry
 app.onError(sentryErrorHandler)

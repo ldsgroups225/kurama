@@ -14,11 +14,14 @@
     "cf-typegen": "wrangler types --env-interface BaseEnv"
   },
   "dependencies": {
+    "@genkit-ai/google-genai": "catalog:",
+    "@hono/zod-validator": "catalog:",
     "@kurama/config": "workspace:*",
     "@kurama/data-ops": "workspace:*",
     "@kurama/observability": "workspace:*",
     "@polar-sh/hono": "catalog:integrations",
     "@polar-sh/sdk": "catalog:integrations",
+    "genkit": "catalog:",
     "hono": "catalog:backend",
     "zod": "catalog:shared"
   },
