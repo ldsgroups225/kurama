@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Check, Clock, Flame, Loader2, Play, Timer, Trophy, X, Zap } from 'lucide-react'
+import { Check, Clock, Flame, Loader2, Play, Sparkles, Target, Timer, Trophy, X, Zap } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { RewardAnimation } from '@/components/gamification'
@@ -439,17 +439,59 @@ function DailyChallengePage() {
                 </div>
                 <div className="text-center">
                   <div className="flex items-center justify-center text-2xl font-bold text-foreground mb-1">
-                    <Timer className="h-6 w-6 text-orange-500" />
+                    <Timer className="h-6 w-6 text-streak" />
                   </div>
                   <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Chrono</div>
                 </div>
               </div>
 
+              {/* Adaptive Challenge Info */}
+              {challengeStatus?.adaptiveStats && !challengeStatus.adaptiveStats.isNewUser && (
+                <div className="border-b border-border pb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Target className="h-4 w-4 text-info" />
+                    <span className="text-sm font-medium text-foreground">Défi personnalisé</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2 bg-error/10 rounded-lg px-3 py-2">
+                      <div className="h-2 w-2 rounded-full bg-error" />
+                      <div className="text-xs">
+                        <span className="font-semibold text-foreground">{challengeStatus.adaptiveStats.weakCardsCount}</span>
+                        <span className="text-muted-foreground"> points faibles</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 bg-success/10 rounded-lg px-3 py-2">
+                      <div className="h-2 w-2 rounded-full bg-success" />
+                      <div className="text-xs">
+                        <span className="font-semibold text-foreground">{challengeStatus.adaptiveStats.newCardsCount}</span>
+                        <span className="text-muted-foreground"> nouvelles</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Ce défi cible vos cartes les moins maîtrisées pour un apprentissage optimal.
+                  </p>
+                </div>
+              )}
+
+              {/* New User Welcome */}
+              {challengeStatus?.adaptiveStats?.isNewUser && (
+                <div className="border-b border-border pb-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="h-4 w-4 text-xp" />
+                    <span className="text-sm font-medium text-foreground">Premier défi</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Complétez ce défi pour débloquer les défis personnalisés basés sur vos performances.
+                  </p>
+                </div>
+              )}
+
               {/* Rewards List */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                    <Zap className="h-4 w-4 text-amber-500 fill-current" />
+                  <div className="h-8 w-8 rounded-lg bg-xp flex items-center justify-center">
+                    <Zap className="h-4 w-4 text-xp fill-current" />
                   </div>
                   <div className="flex-1">
                     <div className="text-sm font-medium text-foreground">Gain d'expérience</div>
@@ -457,8 +499,8 @@ function DailyChallengePage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-orange-500/20 flex items-center justify-center">
-                    <Flame className="h-4 w-4 text-orange-500 fill-current" />
+                  <div className="h-8 w-8 rounded-lg bg-streak flex items-center justify-center">
+                    <Flame className="h-4 w-4 text-streak fill-current" />
                   </div>
                   <div className="flex-1">
                     <div className="text-sm font-medium text-foreground">Bonus de série</div>
@@ -478,11 +520,11 @@ function DailyChallengePage() {
             >
               {startMutation.isPending
                 ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  )
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                )
                 : (
-                    <Play className="mr-2 h-5 w-5 fill-current" />
-                  )}
+                  <Play className="mr-2 h-5 w-5 fill-current" />
+                )}
               {challengeStatus?.isInProgress ? 'Reprendre le défi' : 'Commencer le défi'}
             </Button>
 
@@ -640,15 +682,15 @@ function DailyChallengePage() {
           </Card>
 
           {/* XP Card */}
-          <div className="relative rounded-4xl overflow-hidden border border-amber-500/20 p-6 bg-linear-to-br from-amber-500/10 to-orange-600/10 backdrop-blur-xl">
+          <div className="relative rounded-4xl overflow-hidden border border-xp/20 p-6 bg-gradient-xp backdrop-blur-xl">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center border border-amber-500/20">
-                  <Zap className="h-6 w-6 text-amber-600 fill-current" />
+                <div className="h-10 w-10 rounded-full bg-xp flex items-center justify-center border border-xp/20">
+                  <Zap className="h-6 w-6 text-xp fill-current" />
                 </div>
                 <div>
-                  <div className="text-sm text-yellow-600">Total XP Gagné</div>
-                  <div className="text-2xl font-bold text-amber-600">
+                  <div className="text-sm text-xp">Total XP Gagné</div>
+                  <div className="text-2xl font-bold text-xp">
                     +
                     {totalXP}
                     {' '}
@@ -678,7 +720,7 @@ function DailyChallengePage() {
                 </span>
               </div>
               {streakBonus > 0 && (
-                <div className="flex justify-between text-orange-300 font-medium">
+                <div className="flex justify-between text-streak font-medium">
                   <span className="flex items-center gap-1">
                     <Flame className="w-3 h-3" />
                     {' '}

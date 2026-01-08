@@ -1,6 +1,6 @@
-import { and, eq, sql } from '@kurama/data-ops/database/drizzle-orm'
+import { and, asc, desc, eq, gt, inArray, notInArray, sql } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
-import { studySessions, userProfiles } from '@kurama/data-ops/drizzle/schema'
+import { cards, lessons, studySessions, subjects, userProfiles, userProgress } from '@kurama/data-ops/drizzle/schema'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
 
@@ -10,6 +10,13 @@ import { protectedFunctionMiddleware } from '@/core/middleware/auth'
 const DAILY_CHALLENGE_BASE_XP = 100
 const DAILY_CHALLENGE_SCORE_BONUS_MULTIPLIER = 0.5 // 50% of score as bonus
 const DAILY_CHALLENGE_STREAK_BONUS = 25
+
+/**
+ * Adaptive challenge constants
+ */
+const WEAK_CARDS_PERCENTAGE = 0.7 // 70% weak cards
+const ERROR_RATE_THRESHOLD = 0.7 // Cards with < 70% correct are considered weak
+const MIN_REVIEWS_FOR_WEAK = 1 // Minimum reviews to be considered for weak selection
 
 /**
  * Get today's date in Africa/Abidjan timezone (UTC+0)
@@ -66,6 +73,15 @@ export interface DailyChallengeCard {
   cardType: string
   difficulty: number
   lessonId: number
+  subjectName: string // Added for distractor generation
+  subjectId: number // Added for same-subject fallback
+}
+
+export interface AdaptiveChallengeStats {
+  weakCardsCount: number
+  newCardsCount: number
+  totalCards: number
+  isNewUser: boolean
 }
 
 export interface DailyChallengeStatus {
@@ -82,6 +98,7 @@ export interface DailyChallengeStatus {
   progressCount?: number
   timeUntilReset: number // seconds until midnight
   consecutiveDays: number
+  adaptiveStats?: AdaptiveChallengeStats // Stats about card selection
 }
 
 export interface DailyChallengeResult {
@@ -183,7 +200,7 @@ export const getDailyChallengeStatus = createServerFn()
     // Check if in progress (started but not completed)
     if (existingSession && !existingSession.endedAt) {
       // Get the cards for this challenge
-      const challengeCards = await generateChallengeCards(db, userId, todayDate)
+      const { cards: challengeCards, stats: adaptiveStats } = await generateChallengeCards(db, userId, todayDate)
 
       return {
         isAvailable: true,
@@ -196,11 +213,12 @@ export const getDailyChallengeStatus = createServerFn()
         progressCount: existingSession.cardsReviewed,
         timeUntilReset,
         consecutiveDays,
+        adaptiveStats,
       }
     }
 
     // Generate new challenge
-    const challengeCards = await generateChallengeCards(db, userId, todayDate)
+    const { cards: challengeCards, stats: adaptiveStats } = await generateChallengeCards(db, userId, todayDate)
 
     return {
       isAvailable: true,
@@ -212,79 +230,166 @@ export const getDailyChallengeStatus = createServerFn()
       estimatedMinutes: Math.ceil(challengeCards.length * 0.67),
       timeUntilReset,
       consecutiveDays,
+      adaptiveStats,
     }
   })
 
 /**
- * Generate challenge cards for a user on a specific date
+ * Generate adaptive challenge cards for a user on a specific date
+ * 70% weak cards (based on error rate) + 30% new/mastered cards
  */
 async function generateChallengeCards(
   db: ReturnType<typeof getDb>,
   userId: string,
   dateString: string,
-): Promise<DailyChallengeCard[]> {
-  // Get all available cards
-  const allCards = await db.query.cards.findMany({
-    columns: {
-      id: true,
-      frontContent: true,
-      backContent: true,
-      cardType: true,
-      difficulty: true,
-      lessonId: true,
-    },
-  })
-
-  if (allCards.length === 0) {
-    return []
-  }
-
-  // Generate deterministic seed
+): Promise<{ cards: DailyChallengeCard[], stats: AdaptiveChallengeStats }> {
+  // Generate deterministic seed for consistent daily challenge
   const seed = generateSeed(userId, dateString)
   const random = seededRandom(seed)
 
-  // Shuffle cards deterministically
-  const shuffled = shuffleWithSeed(allCards, random)
+  // Target count: 10-15 cards
+  const targetCount = 10 + Math.floor(random() * 6)
+  const weakCardsTarget = Math.ceil(targetCount * WEAK_CARDS_PERCENTAGE)
 
-  // Select 10-15 cards based on difficulty distribution
-  // 30% easy (difficulty 0), 50% medium (difficulty 1), 20% hard (difficulty 2+)
-  const targetCount = 10 + Math.floor(random() * 6) // 10-15 cards
+  // 1. Get user's weak cards (error rate > 30%, i.e., correctRate < 70%)
+  const weakCardsQuery = await db
+    .select({
+      cardId: userProgress.cardId,
+      lessonId: userProgress.lessonId,
+      totalReviews: userProgress.totalReviews,
+      correctReviews: userProgress.correctReviews,
+      errorRate: sql<number>`1.0 - (${userProgress.correctReviews}::float / NULLIF(${userProgress.totalReviews}, 0))`,
+    })
+    .from(userProgress)
+    .where(
+      and(
+        eq(userProgress.userId, userId),
+        gt(userProgress.totalReviews, MIN_REVIEWS_FOR_WEAK - 1),
+        sql`(${userProgress.correctReviews}::float / NULLIF(${userProgress.totalReviews}, 0)) < ${ERROR_RATE_THRESHOLD}`,
+      ),
+    )
+    .orderBy(
+      // Worst performing first
+      asc(sql`${userProgress.correctReviews}::float / NULLIF(${userProgress.totalReviews}, 0)`),
+      // More practiced = more important to fix
+      desc(userProgress.totalReviews),
+    )
+    .limit(weakCardsTarget * 2) // Get extra for shuffling
 
-  const easyCards = shuffled.filter(c => (c.difficulty ?? 0) === 0)
-  const mediumCards = shuffled.filter(c => (c.difficulty ?? 0) === 1)
-  const hardCards = shuffled.filter(c => (c.difficulty ?? 0) >= 2)
+  const weakCardIds = weakCardsQuery.map(w => w.cardId)
 
-  const selectedCards: typeof allCards = []
+  // 2. Get full card data with subject info for weak cards
+  let weakCards: DailyChallengeCard[] = []
+  if (weakCardIds.length > 0) {
+    const weakCardsData = await db
+      .select({
+        id: cards.id,
+        frontContent: cards.frontContent,
+        backContent: cards.backContent,
+        cardType: cards.cardType,
+        difficulty: cards.difficulty,
+        lessonId: cards.lessonId,
+        subjectId: lessons.subjectId,
+        subjectName: subjects.name,
+      })
+      .from(cards)
+      .innerJoin(lessons, eq(cards.lessonId, lessons.id))
+      .innerJoin(subjects, eq(lessons.subjectId, subjects.id))
+      .where(inArray(cards.id, weakCardIds))
 
-  // Add easy cards (30%)
-  const easyCount = Math.ceil(targetCount * 0.3)
-  selectedCards.push(...easyCards.slice(0, easyCount))
-
-  // Add medium cards (50%)
-  const mediumCount = Math.ceil(targetCount * 0.5)
-  selectedCards.push(...mediumCards.slice(0, mediumCount))
-
-  // Add hard cards (20%)
-  const hardCount = Math.ceil(targetCount * 0.2)
-  selectedCards.push(...hardCards.slice(0, hardCount))
-
-  // If not enough cards in categories, fill from shuffled
-  if (selectedCards.length < targetCount) {
-    const remaining = shuffled.filter(c => !selectedCards.includes(c))
-    selectedCards.push(...remaining.slice(0, targetCount - selectedCards.length))
+    // Shuffle and limit weak cards
+    weakCards = shuffleWithSeed(weakCardsData, random)
+      .slice(0, weakCardsTarget)
+      .map(c => ({
+        id: c.id,
+        frontContent: c.frontContent,
+        backContent: c.backContent,
+        cardType: c.cardType,
+        difficulty: c.difficulty ?? 0,
+        lessonId: c.lessonId,
+        subjectId: c.subjectId,
+        subjectName: c.subjectName,
+      }))
   }
 
-  // Shuffle final selection and limit to target count
-  const finalCards = shuffleWithSeed(selectedCards.slice(0, targetCount), random)
+  // 3. Get new/mastered cards (not in weak cards)
+  const excludeIds = weakCards.map(c => c.id)
+  const otherCardsQuery = await db
+    .select({
+      id: cards.id,
+      frontContent: cards.frontContent,
+      backContent: cards.backContent,
+      cardType: cards.cardType,
+      difficulty: cards.difficulty,
+      lessonId: cards.lessonId,
+      subjectId: lessons.subjectId,
+      subjectName: subjects.name,
+    })
+    .from(cards)
+    .innerJoin(lessons, eq(cards.lessonId, lessons.id))
+    .innerJoin(subjects, eq(lessons.subjectId, subjects.id))
+    .where(
+      excludeIds.length > 0
+        ? notInArray(cards.id, excludeIds)
+        : sql`1=1`,
+    )
 
-  return finalCards.map(c => ({
-    id: c.id,
-    frontContent: c.frontContent,
-    backContent: c.backContent,
-    cardType: c.cardType,
-    difficulty: c.difficulty ?? 0,
-    lessonId: c.lessonId,
-  }))
+  // Shuffle other cards and select based on difficulty distribution
+  const shuffledOther = shuffleWithSeed(otherCardsQuery, random)
+
+  // For new users or when we need more cards, use difficulty distribution
+  const remainingCount = targetCount - weakCards.length
+  let otherCards: DailyChallengeCard[] = []
+
+  if (remainingCount > 0) {
+    // Apply difficulty distribution: 30% easy, 50% medium, 20% hard
+    const easyCards = shuffledOther.filter(c => (c.difficulty ?? 0) === 0)
+    const mediumCards = shuffledOther.filter(c => (c.difficulty ?? 0) === 1)
+    const hardCards = shuffledOther.filter(c => (c.difficulty ?? 0) >= 2)
+
+    const easyCount = Math.ceil(remainingCount * 0.3)
+    const mediumCount = Math.ceil(remainingCount * 0.5)
+    const hardCount = Math.ceil(remainingCount * 0.2)
+
+    const selectedOther = [
+      ...easyCards.slice(0, easyCount),
+      ...mediumCards.slice(0, mediumCount),
+      ...hardCards.slice(0, hardCount),
+    ]
+
+    // Fill remaining if not enough in categories
+    if (selectedOther.length < remainingCount) {
+      const remaining = shuffledOther.filter(c => !selectedOther.some(s => s.id === c.id))
+      selectedOther.push(...remaining.slice(0, remainingCount - selectedOther.length))
+    }
+
+    otherCards = selectedOther.slice(0, remainingCount).map(c => ({
+      id: c.id,
+      frontContent: c.frontContent,
+      backContent: c.backContent,
+      cardType: c.cardType,
+      difficulty: c.difficulty ?? 0,
+      lessonId: c.lessonId,
+      subjectId: c.subjectId,
+      subjectName: c.subjectName,
+    }))
+  }
+
+  // 4. Combine and shuffle final selection
+  const allCards = shuffleWithSeed([...weakCards, ...otherCards], random)
+
+  // Determine if this is a new user (no weak cards found)
+  const isNewUser = weakCardsQuery.length === 0
+
+  return {
+    cards: allCards,
+    stats: {
+      weakCardsCount: weakCards.length,
+      newCardsCount: otherCards.length,
+      totalCards: allCards.length,
+      isNewUser,
+    },
+  }
 }
 
 /**
@@ -316,7 +421,7 @@ export const startDailyChallenge = createServerFn({ method: 'POST' })
     }
 
     // Get challenge cards to find a valid lessonId
-    const challengeCards = await generateChallengeCards(db, userId, todayDate)
+    const { cards: challengeCards } = await generateChallengeCards(db, userId, todayDate)
     if (challengeCards.length === 0) {
       throw new Error('No cards available for daily challenge')
     }
