@@ -1,3 +1,4 @@
+import { GoogleGenAI } from '@google/genai'
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { z } from 'zod'
@@ -125,6 +126,23 @@ genkitRoutes.post(
     const { lessonId, userId, ...distractorInput } = input
 
     try {
+      // Check for API key
+      if (!c.env.GEMINI_API_KEY) {
+        console.warn('GEMINI_API_KEY not configured, using fallback')
+        const distractors = await getSameSubjectDistractors(
+          lessonId,
+          distractorInput.correctAnswer,
+          3,
+        )
+        const subjectName = await getSubjectNameFromLesson(lessonId)
+        return c.json({
+          distractors,
+          cached: false,
+          fallback: true,
+          subject: subjectName,
+        })
+      }
+
       // Rate limiting with KV storage
       const rateLimit = await checkRateLimit(c.env.DISTRACTORS_CACHE, userId)
       if (!rateLimit.allowed) {
@@ -136,7 +154,6 @@ genkitRoutes.post(
 
       // Create cache key
       const cacheKey = createCacheKey(distractorInput)
-      const cached = false
       let fallback = false
 
       // Try cache first (if KV is available)
@@ -160,8 +177,11 @@ genkitRoutes.post(
       let distractors: string[]
 
       try {
+        // Initialize Google GenAI client
+        const ai = new GoogleGenAI({ apiKey: c.env.GEMINI_API_KEY })
+
         // Try Gemini generation
-        const result = await generateDistractors(distractorInput)
+        const result = await generateDistractors(ai, distractorInput)
         distractors = result.distractors
 
         // Cache the result (if KV is available)
@@ -195,7 +215,7 @@ genkitRoutes.post(
 
       return c.json({
         distractors,
-        cached,
+        cached: false,
         fallback,
         subject: subjectName,
       })
@@ -211,7 +231,7 @@ genkitRoutes.post(
 
 /**
  * GET /api/distractors/health
- * Health check for Genkit integration
+ * Health check for GenAI integration
  */
 genkitRoutes.get('/api/distractors/health', async (c) => {
   const hasGeminiKey = !!c.env.GEMINI_API_KEY

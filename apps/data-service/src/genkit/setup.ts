@@ -1,20 +1,30 @@
-import { googleAI } from '@genkit-ai/google-genai'
-import { genkit } from 'genkit'
+import { GoogleGenAI } from '@google/genai'
+
+// Singleton instance (lazy initialized)
+let aiClient: GoogleGenAI | null = null
 
 /**
- * Initialize Genkit with Google AI plugin
+ * Initialize Google GenAI client
  * Uses GEMINI_API_KEY environment variable
  */
-export function initializeGenkit() {
-  return genkit({
-    plugins: [googleAI()],
-  })
+export function initializeGenAI(apiKey: string): GoogleGenAI {
+  if (!aiClient) {
+    aiClient = new GoogleGenAI({ apiKey })
+  }
+  return aiClient
 }
 
 /**
- * Get the configured Gemini model
- * Using gemini-3-flash-preview for best performance/cost ratio
+ * Get the configured Gemini model name
+ * Using gemini-2.0-flash for best performance/cost ratio on Workers
  */
-export function getGeminiModel() {
-  return googleAI.model('gemini-3-flash-preview')
+export function getGeminiModelName(): string {
+  return 'gemini-2.0-flash'
+}
+
+/**
+ * Reset the AI client (useful for testing)
+ */
+export function resetAIClient(): void {
+  aiClient = null
 }

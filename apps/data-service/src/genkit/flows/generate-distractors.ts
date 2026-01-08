@@ -1,5 +1,6 @@
+import type { GoogleGenAI } from '@google/genai'
 import { z } from 'zod'
-import { getGeminiModel, initializeGenkit } from '../setup'
+import { getGeminiModelName } from '../setup'
 
 // Input schema for distractor generation
 export const DistractorInputSchema = z.object({
@@ -64,7 +65,7 @@ TÂCHE:
 Génère exactement 3 réponses FAUSSES mais PLAUSIBLES pour un QCM.
 
 RÈGLES CRITIQUES:
-1. Les réponses doivent être pertinentes pour la matière "${input.subject}"
+1. Les réponses doivent être pertinentes pour la matière "${sanitizedSubject}"
 2. Les réponses doivent sembler crédibles (pas évidemment fausses)
 3. Les réponses doivent avoir une longueur similaire à la bonne réponse
 4. Évite les réponses absurdes ou hors-sujet
@@ -102,16 +103,16 @@ function parseDistractors(text: string): string[] {
 }
 
 /**
- * Generate distractors using Gemini
+ * Generate distractors using Google GenAI SDK (Cloudflare Workers compatible)
  */
-export async function generateDistractors(input: DistractorInput): Promise<DistractorOutput> {
-  const ai = initializeGenkit()
-  const model = getGeminiModel()
-
+export async function generateDistractors(
+  ai: GoogleGenAI,
+  input: DistractorInput,
+): Promise<DistractorOutput> {
   try {
-    const response = await ai.generate({
-      model,
-      prompt: buildPrompt(input),
+    const response = await ai.models.generateContent({
+      model: getGeminiModelName(),
+      contents: buildPrompt(input),
       config: {
         temperature: 0.7, // Some creativity but not too random
         maxOutputTokens: 200, // Keep responses concise
@@ -120,11 +121,12 @@ export async function generateDistractors(input: DistractorInput): Promise<Distr
       },
     })
 
-    if (!response.text) {
+    const text = response.text
+    if (!text) {
       throw new Error('No text received from Gemini')
     }
 
-    const distractors = parseDistractors(response.text)
+    const distractors = parseDistractors(text)
 
     return {
       distractors,
