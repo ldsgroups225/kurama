@@ -4,12 +4,20 @@ import { cards, lessons, subjects } from '@kurama/data-ops/drizzle/schema'
 
 /**
  * Fallback: Get distractors from same subject when Gemini fails
+ * Ensures minimum count is always returned with generic fallbacks if needed
  */
 export async function getSameSubjectDistractors(
   lessonId: number,
   correctAnswer: string,
   count: number = 3,
 ): Promise<string[]> {
+  const genericFallbacks = [
+    'Aucune de ces réponses',
+    'Réponse non disponible',
+    'Option alternative',
+    'Autre possibilité',
+  ]
+
   try {
     const db = getDb()
 
@@ -20,7 +28,8 @@ export async function getSameSubjectDistractors(
     })
 
     if (!lesson) {
-      throw new Error(`Lesson ${lessonId} not found`)
+      console.warn(`Lesson ${lessonId} not found, using generic fallbacks`)
+      return genericFallbacks.slice(0, count)
     }
 
     // Get other cards from the same subject
@@ -38,7 +47,7 @@ export async function getSameSubjectDistractors(
         ),
       )
       .orderBy(sql`RANDOM()`)
-      .limit(count * 2) // Get extra in case of duplicates
+      .limit(count * 3) // Get extra buffer for filtering
 
     // Filter out duplicates and similar answers
     const uniqueAnswers = Array.from(new Set(
@@ -46,25 +55,36 @@ export async function getSameSubjectDistractors(
         .map(card => card.backContent)
         .filter(answer =>
           answer.toLowerCase() !== correctAnswer.toLowerCase()
-          && answer.length > 0,
+          && answer.length > 0
+          && answer.length < 500, // Reasonable length
         ),
     ))
 
-    // Return the requested count, or pad with generic distractors if needed
+    // Start with unique answers from database
     const result = uniqueAnswers.slice(0, count)
 
-    // If we don't have enough, add generic distractors
+    // Pad with generic fallbacks if needed
+    let fallbackIndex = 0
+    while (result.length < count && fallbackIndex < genericFallbacks.length) {
+      const fallback = genericFallbacks[fallbackIndex]
+      if (fallback && !result.includes(fallback)) {
+        result.push(fallback)
+      }
+      fallbackIndex++
+    }
+
+    // Ultimate fallback: numbered options
     while (result.length < count) {
       result.push(`Option ${result.length + 1}`)
     }
 
-    return result
+    return result.slice(0, count)
   }
   catch (error) {
     console.error('Error getting same-subject distractors:', error)
 
     // Ultimate fallback: generic distractors
-    return Array.from({ length: count }, (_, i) => `Option ${i + 1}`)
+    return genericFallbacks.slice(0, count)
   }
 }
 

@@ -11,47 +11,100 @@ import {
 // Extended Env type for Genkit routes
 interface GenkitEnv {
   GEMINI_API_KEY: string
-  DISTRACTORS_CACHE?: KVNamespace // Optional KV binding for caching
+  DISTRACTORS_CACHE?: KVNamespace // KV binding for caching and rate limiting
+}
+
+// Standardized API error response
+interface ApiErrorResponse {
+  error: string
+  code: string
+  details?: unknown
+  timestamp: string
+}
+
+function errorResponse(
+  c: { json: <T>(data: T, status: number) => Response },
+  status: number,
+  code: string,
+  message: string,
+  details?: unknown,
+): Response {
+  return c.json<ApiErrorResponse>({
+    error: message,
+    code,
+    details,
+    timestamp: new Date().toISOString(),
+  }, status)
 }
 
 export const genkitRoutes = new Hono<{ Bindings: GenkitEnv }>()
 
-// Rate limiting (simple in-memory for now)
-const rateLimits = new Map<string, { count: number, resetTime: number }>()
+// Rate limiting constants
 const RATE_LIMIT_PER_MINUTE = 10
 const RATE_LIMIT_PER_DAY = 100
 
-function checkRateLimit(userId: string): boolean {
+/**
+ * Check rate limit using KV storage (works across Workers isolates)
+ * Falls back to allowing requests if KV is unavailable
+ */
+async function checkRateLimit(
+  kv: KVNamespace | undefined,
+  userId: string,
+): Promise<{ allowed: boolean, remaining: { minute: number, day: number } }> {
+  // If no KV, allow but log warning
+  if (!kv) {
+    console.warn('Rate limiting KV not configured - allowing request')
+    return { allowed: true, remaining: { minute: RATE_LIMIT_PER_MINUTE, day: RATE_LIMIT_PER_DAY } }
+  }
+
   const now = Date.now()
-  const minuteKey = `${userId}:${Math.floor(now / 60000)}`
-  const dayKey = `${userId}:${Math.floor(now / 86400000)}`
+  const minuteBucket = Math.floor(now / 60000)
+  const dayBucket = Math.floor(now / 86400000)
 
-  // Check minute limit
-  const minuteLimit = rateLimits.get(minuteKey) || { count: 0, resetTime: now + 60000 }
-  if (minuteLimit.count >= RATE_LIMIT_PER_MINUTE) {
-    return false
-  }
+  const minuteKey = `ratelimit:minute:${userId}:${minuteBucket}`
+  const dayKey = `ratelimit:day:${userId}:${dayBucket}`
 
-  // Check day limit
-  const dayLimit = rateLimits.get(dayKey) || { count: 0, resetTime: now + 86400000 }
-  if (dayLimit.count >= RATE_LIMIT_PER_DAY) {
-    return false
-  }
+  try {
+    // Get current counts
+    const [minuteCount, dayCount] = await Promise.all([
+      kv.get(minuteKey).then(v => v ? Number.parseInt(v, 10) : 0),
+      kv.get(dayKey).then(v => v ? Number.parseInt(v, 10) : 0),
+    ])
 
-  // Update counters
-  rateLimits.set(minuteKey, { ...minuteLimit, count: minuteLimit.count + 1 })
-  rateLimits.set(dayKey, { ...dayLimit, count: dayLimit.count + 1 })
-
-  // Clean up old entries
-  if (rateLimits.size > 1000) {
-    for (const [key, limit] of rateLimits.entries()) {
-      if (limit.resetTime < now) {
-        rateLimits.delete(key)
+    // Check limits
+    if (minuteCount >= RATE_LIMIT_PER_MINUTE) {
+      return {
+        allowed: false,
+        remaining: { minute: 0, day: Math.max(0, RATE_LIMIT_PER_DAY - dayCount) },
       }
     }
-  }
 
-  return true
+    if (dayCount >= RATE_LIMIT_PER_DAY) {
+      return {
+        allowed: false,
+        remaining: { minute: Math.max(0, RATE_LIMIT_PER_MINUTE - minuteCount), day: 0 },
+      }
+    }
+
+    // Increment counters (fire and forget for performance)
+    await Promise.all([
+      kv.put(minuteKey, String(minuteCount + 1), { expirationTtl: 120 }), // 2 min TTL
+      kv.put(dayKey, String(dayCount + 1), { expirationTtl: 90000 }), // 25 hour TTL
+    ])
+
+    return {
+      allowed: true,
+      remaining: {
+        minute: RATE_LIMIT_PER_MINUTE - minuteCount - 1,
+        day: RATE_LIMIT_PER_DAY - dayCount - 1,
+      },
+    }
+  }
+  catch (error) {
+    console.error('Rate limit check failed:', error)
+    // Allow on error to avoid blocking legitimate requests
+    return { allowed: true, remaining: { minute: RATE_LIMIT_PER_MINUTE, day: RATE_LIMIT_PER_DAY } }
+  }
 }
 
 // Request schema with additional metadata
@@ -72,12 +125,13 @@ genkitRoutes.post(
     const { lessonId, userId, ...distractorInput } = input
 
     try {
-      // Rate limiting
-      if (!checkRateLimit(userId)) {
-        return c.json(
-          { error: 'Rate limit exceeded. Please try again later.' },
-          429,
-        )
+      // Rate limiting with KV storage
+      const rateLimit = await checkRateLimit(c.env.DISTRACTORS_CACHE, userId)
+      if (!rateLimit.allowed) {
+        return errorResponse(c, 429, 'RATE_LIMIT_EXCEEDED', 'Rate limit exceeded. Please try again later.', {
+          remaining: rateLimit.remaining,
+          retryAfter: rateLimit.remaining.minute === 0 ? 60 : 86400,
+        })
       }
 
       // Create cache key
@@ -148,10 +202,9 @@ genkitRoutes.post(
     }
     catch (error) {
       console.error('Error in distractor generation:', error)
-      return c.json(
-        { error: 'Failed to generate distractors' },
-        500,
-      )
+      return errorResponse(c, 500, 'INTERNAL_ERROR', 'Failed to generate distractors', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+      })
     }
   },
 )

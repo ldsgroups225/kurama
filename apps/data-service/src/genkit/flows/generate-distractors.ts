@@ -20,20 +20,45 @@ export type DistractorInput = z.infer<typeof DistractorInputSchema>
 export type DistractorOutput = z.infer<typeof DistractorOutputSchema>
 
 /**
+ * Sanitize user input to prevent prompt injection attacks
+ */
+function sanitizeForPrompt(text: string, maxLength: number = 500): string {
+  // Remove control characters (ASCII 0-31 and 127) using character class ranges
+  // eslint-disable-next-line no-control-regex
+  const controlCharsRegex = /[\u0000-\u001F\u007F]/g
+
+  return text
+    // Remove potential control characters
+    .replace(controlCharsRegex, '')
+    // Remove potential prompt injection markers
+    .replace(/^(SYSTEM|USER|ASSISTANT|HUMAN|AI):/gim, '')
+    // Limit consecutive newlines
+    .replace(/\n{3,}/g, '\n\n')
+    // Trim and limit length
+    .trim()
+    .slice(0, maxLength)
+}
+
+/**
  * Build the prompt for Gemini to generate distractors
  */
 function buildPrompt(input: DistractorInput): string {
   const difficultyText = ['facile', 'moyen', 'difficile'][input.difficulty] || 'moyen'
 
+  // Sanitize user inputs to prevent prompt injection
+  const sanitizedQuestion = sanitizeForPrompt(input.question)
+  const sanitizedAnswer = sanitizeForPrompt(input.correctAnswer, 200)
+  const sanitizedSubject = sanitizeForPrompt(input.subject, 50)
+
   return `Tu es un expert en création de QCM éducatifs pour des étudiants ivoiriens préparant le BEPC/BAC.
 
 CONTEXTE:
-- Matière: ${input.subject}
+- Matière: ${sanitizedSubject}
 - Niveau de difficulté: ${difficultyText}
 - Type de carte: ${input.cardType}
 
-QUESTION: ${input.question}
-BONNE RÉPONSE: ${input.correctAnswer}
+QUESTION: ${sanitizedQuestion}
+BONNE RÉPONSE: ${sanitizedAnswer}
 
 TÂCHE:
 Génère exactement 3 réponses FAUSSES mais PLAUSIBLES pour un QCM.

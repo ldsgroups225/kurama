@@ -19,16 +19,21 @@ describe('fallback', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     const { getDb } = await import('@kurama/data-ops/database/setup')
-    vi.mocked(getDb).mockReturnValue(mockDb)
+    // Cast to unknown first to avoid strict type checking on mock
+    vi.mocked(getDb).mockReturnValue(mockDb as unknown as ReturnType<typeof getDb>)
   })
 
   describe('getSameSubjectDistractors', () => {
-    test('should return generic options when lesson not found', async () => {
+    test('should return generic fallbacks when lesson not found', async () => {
       mockDb.query.lessons.findFirst.mockResolvedValue(null)
 
       const result = await getSameSubjectDistractors(999, 'Paris', 3)
 
-      expect(result).toEqual(['Option 1', 'Option 2', 'Option 3'])
+      expect(result).toStrictEqual([
+        'Aucune de ces réponses',
+        'Réponse non disponible',
+        'Option alternative',
+      ])
     })
 
     test('should handle database errors gracefully', async () => {
@@ -36,7 +41,11 @@ describe('fallback', () => {
 
       const result = await getSameSubjectDistractors(1, 'Paris', 3)
 
-      expect(result).toEqual(['Option 1', 'Option 2', 'Option 3'])
+      expect(result).toStrictEqual([
+        'Aucune de ces réponses',
+        'Réponse non disponible',
+        'Option alternative',
+      ])
     })
 
     test('should handle custom count parameter', async () => {
@@ -44,7 +53,10 @@ describe('fallback', () => {
 
       const result = await getSameSubjectDistractors(1, 'Paris', 2)
 
-      expect(result).toEqual(['Option 1', 'Option 2'])
+      expect(result).toStrictEqual([
+        'Aucune de ces réponses',
+        'Réponse non disponible',
+      ])
     })
   })
 
