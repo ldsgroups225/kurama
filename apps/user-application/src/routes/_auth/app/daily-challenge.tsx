@@ -16,6 +16,7 @@ import {
   getDailyChallengeStatus,
   startDailyChallenge,
 } from '@/core/functions/daily-challenge'
+import { generateEnhancedTestQuestions } from '@/core/functions/distractors'
 import { authClient, isSigningOut } from '@/lib/auth-client'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
@@ -98,111 +99,135 @@ function DailyChallengePage() {
       cardType: string
       difficulty: number
       lessonId: number
+      subjectName: string
+      subjectId: number
       questionType: 'multiple-choice' | 'true-false'
       question?: string
       options?: Array<{ id: string, text: string, isCorrect: boolean }>
       correctAnswer?: string | boolean
+      aiGenerated?: boolean
+      cached?: boolean
     }>
   >([])
 
+  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false)
   const currentQuestion = testQuestions[currentCardIndex]
 
-  // Generate test questions (called on start)
-  const generateTestQuestions = useCallback(() => {
+  // Enhanced question generation with AI distractors
+  const generateTestQuestions = useCallback(async () => {
     if (cards.length === 0)
       return []
 
-    return cards.map((card, index) => {
-      const questionType: 'multiple-choice' | 'true-false'
-        = index % 2 === 0 ? 'multiple-choice' : 'true-false'
+    setIsGeneratingQuestions(true)
+    try {
+      const enhancedQuestions = await generateEnhancedTestQuestions({ data: { cards } })
+      return enhancedQuestions
+    }
+    catch (error) {
+      console.error('Failed to generate enhanced questions:', error)
 
-      if (questionType === 'multiple-choice') {
-        const correctAnswer = card.backContent
-        const otherCards = cards.filter((_, i) => i !== index)
+      // Fallback to original logic
+      return cards.map((card, index) => {
+        const questionType: 'multiple-choice' | 'true-false'
+          = index % 2 === 0 ? 'multiple-choice' : 'true-false'
 
-        // Validate we have enough cards for multiple choice
-        if (otherCards.length < 3) {
-          // Fall back to true-false if not enough options
-          const isTrue = index % 3 !== 0
-          const statement = isTrue
-            ? `${card.frontContent} : ${correctAnswer}`
-            : `${card.frontContent} : Réponse incorrecte`
+        if (questionType === 'multiple-choice') {
+          const correctAnswer = card.backContent
+          const otherCards = cards.filter((_, i) => i !== index)
+
+          // Validate we have enough cards for multiple choice
+          if (otherCards.length < 3) {
+            // Fall back to true-false if not enough options
+            const isTrue = index % 3 !== 0
+            const statement = isTrue
+              ? `${card.frontContent} : ${correctAnswer}`
+              : `${card.frontContent} : Réponse incorrecte`
+
+            return {
+              ...card,
+              questionType: 'true-false' as const,
+              question: statement,
+              correctAnswer: isTrue,
+              aiGenerated: false,
+              cached: false,
+            }
+          }
+
+          const shuffledOthers = [...otherCards].sort((a, b) => {
+            const hashA = (a.id * 31 + index) % 1000
+            const hashB = (b.id * 31 + index) % 1000
+            return hashA - hashB
+          })
+
+          // Get unique wrong answers (avoid duplicates)
+          const uniqueWrongAnswers = new Set<string>()
+          const wrongAnswers: string[] = []
+
+          for (const otherCard of shuffledOthers) {
+            if (wrongAnswers.length >= 3)
+              break
+            if (otherCard.backContent !== correctAnswer && !uniqueWrongAnswers.has(otherCard.backContent)) {
+              uniqueWrongAnswers.add(otherCard.backContent)
+              wrongAnswers.push(otherCard.backContent)
+            }
+          }
+
+          // Ensure we have at least 3 wrong answers
+          if (wrongAnswers.length < 3) {
+            // Pad with generic wrong answers if needed
+            while (wrongAnswers.length < 3) {
+              wrongAnswers.push(`Option ${wrongAnswers.length + 1}`)
+            }
+          }
+
+          const options = [
+            { id: 'correct', text: correctAnswer, isCorrect: true },
+            ...wrongAnswers.map((text, i) => ({ id: `wrong-${i}`, text, isCorrect: false })),
+          ].sort((a, b) => {
+            const hashA = (a.id.charCodeAt(0) * 31 + index) % 1000
+            const hashB = (b.id.charCodeAt(0) * 31 + index) % 1000
+            return hashA - hashB
+          })
 
           return {
             ...card,
-            questionType: 'true-false' as const,
-            question: statement,
-            correctAnswer: isTrue,
+            questionType: 'multiple-choice' as const,
+            question: card.frontContent,
+            options,
+            aiGenerated: false,
+            cached: false,
           }
-        }
-
-        const shuffledOthers = [...otherCards].sort((a, b) => {
-          const hashA = (a.id * 31 + index) % 1000
-          const hashB = (b.id * 31 + index) % 1000
-          return hashA - hashB
-        })
-
-        // Get unique wrong answers (avoid duplicates)
-        const uniqueWrongAnswers = new Set<string>()
-        const wrongAnswers: string[] = []
-
-        for (const otherCard of shuffledOthers) {
-          if (wrongAnswers.length >= 3)
-            break
-          if (otherCard.backContent !== correctAnswer && !uniqueWrongAnswers.has(otherCard.backContent)) {
-            uniqueWrongAnswers.add(otherCard.backContent)
-            wrongAnswers.push(otherCard.backContent)
-          }
-        }
-
-        // Ensure we have at least 3 wrong answers
-        if (wrongAnswers.length < 3) {
-          // Pad with generic wrong answers if needed
-          while (wrongAnswers.length < 3) {
-            wrongAnswers.push(`Option ${wrongAnswers.length + 1}`)
-          }
-        }
-
-        const options = [
-          { id: 'correct', text: correctAnswer, isCorrect: true },
-          ...wrongAnswers.map((text, i) => ({ id: `wrong-${i}`, text, isCorrect: false })),
-        ].sort((a, b) => {
-          const hashA = (a.id.charCodeAt(0) * 31 + index) % 1000
-          const hashB = (b.id.charCodeAt(0) * 31 + index) % 1000
-          return hashA - hashB
-        })
-
-        return {
-          ...card,
-          questionType: 'multiple-choice' as const,
-          question: card.frontContent,
-          options,
-        }
-      }
-      else {
-        const isTrue = index % 3 !== 0
-        const correctAnswer = card.backContent
-        let statement: string
-        if (isTrue) {
-          statement = `${card.frontContent} : ${correctAnswer}`
         }
         else {
-          const otherCard = cards.find((_, i) => i !== index)
-          const wrongAnswer = otherCard?.backContent || 'Réponse incorrecte'
-          statement = `${card.frontContent} : ${wrongAnswer}`
+          const isTrue = index % 3 !== 0
+          const correctAnswer = card.backContent
+          let statement: string
+          if (isTrue) {
+            statement = `${card.frontContent} : ${correctAnswer}`
+          }
+          else {
+            const otherCard = cards.find((_, i) => i !== index)
+            const wrongAnswer = otherCard?.backContent || 'Réponse incorrecte'
+            statement = `${card.frontContent} : ${wrongAnswer}`
+          }
+          return {
+            ...card,
+            questionType: 'true-false' as const,
+            frontContent: statement,
+            correctAnswer: isTrue ? 'true' : 'false',
+            aiGenerated: false,
+            cached: false,
+          }
         }
-        return {
-          ...card,
-          questionType: 'true-false' as const,
-          frontContent: statement,
-          correctAnswer: isTrue ? 'true' : 'false',
-        }
-      }
-    })
+      })
+    }
+    finally {
+      setIsGeneratingQuestions(false)
+    }
   }, [cards])
 
-  const handleStart = useCallback(() => {
-    const questions = generateTestQuestions()
+  const handleStart = useCallback(async () => {
+    const questions = await generateTestQuestions()
     setTestQuestions(questions)
     startMutation.mutate()
   }, [startMutation, generateTestQuestions])
@@ -516,16 +541,20 @@ function DailyChallengePage() {
               size="lg"
               className="w-full h-14 text-lg font-bold bg-linear-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 shadow-xl shadow-indigo-500/20 border-0 rounded-2xl text-white"
               onClick={handleStart}
-              disabled={startMutation.isPending}
+              disabled={startMutation.isPending || isGeneratingQuestions}
             >
-              {startMutation.isPending
+              {startMutation.isPending || isGeneratingQuestions
                 ? (
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                )
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  )
                 : (
-                  <Play className="mr-2 h-5 w-5 fill-current" />
-                )}
-              {challengeStatus?.isInProgress ? 'Reprendre le défi' : 'Commencer le défi'}
+                    <Play className="mr-2 h-5 w-5 fill-current" />
+                  )}
+              {isGeneratingQuestions
+                ? 'Génération des questions...'
+                : challengeStatus?.isInProgress
+                  ? 'Reprendre le défi'
+                  : 'Commencer le défi'}
             </Button>
 
             <Button
