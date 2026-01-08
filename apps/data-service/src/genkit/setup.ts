@@ -16,10 +16,10 @@ export function initializeGenAI(apiKey: string): GoogleGenAI {
 
 /**
  * Get the configured Gemini model name
- * Using gemini-2.0-flash for best performance/cost ratio on Workers
+ * Using gemini-3-flash-preview for best performance/cost ratio on Workers
  */
 export function getGeminiModelName(): string {
-  return 'gemini-2.0-flash'
+  return 'gemini-3-flash-preview'
 }
 
 /**
