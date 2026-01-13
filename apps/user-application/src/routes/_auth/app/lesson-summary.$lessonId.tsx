@@ -1,3 +1,5 @@
+import type { AchievementWithProgress } from '@kurama/data-ops/queries/achievements'
+import { ACHIEVEMENTS } from '@kurama/data-ops/queries/achievements'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import {
@@ -13,10 +15,12 @@ import {
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { EnhancedXPDisplay } from '@/components/gamification'
+import { AchievementUnlockToast } from '@/components/gamification/achievement-unlock-toast'
 import { AppHeader } from '@/components/main'
 import { Button } from '@/components/ui/button'
 import { getUserStats } from '@/core/functions/stats'
 import { useOnlineStatus } from '@/hooks/use-online-status'
+import { authClient } from '@/lib/auth-client'
 import { getMutationQueueManager } from '@/lib/mutation-queue'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
@@ -30,6 +34,7 @@ interface SearchParams {
   xpEarned?: number
   leveledUp?: string
   newLevel?: number
+  achievements?: string
 }
 
 export const Route = createFileRoute('/_auth/app/lesson-summary/$lessonId')({
@@ -52,13 +57,14 @@ export const Route = createFileRoute('/_auth/app/lesson-summary/$lessonId')({
       xpEarned: search.xpEarned ? Math.max(0, Number(search.xpEarned)) : undefined,
       leveledUp: search.leveledUp as string | undefined,
       newLevel: search.newLevel ? Math.max(1, Number(search.newLevel)) : undefined,
+      achievements: search.achievements as string | undefined,
     }
   },
 })
 
 function SummaryPage() {
   const { lessonId } = useParams({ from: '/_auth/app/lesson-summary/$lessonId' })
-  const { correct, incorrect, total, duration, mode, xpEarned, leveledUp, newLevel } = useSearch({
+  const { correct, incorrect, total, duration, mode, xpEarned, leveledUp, newLevel, achievements } = useSearch({
     from: '/_auth/app/lesson-summary/$lessonId',
   })
   const navigate = useNavigate()
@@ -79,6 +85,67 @@ function SummaryPage() {
   // Offline support
   const { isOnline } = useOnlineStatus()
   const [pendingMutations, setPendingMutations] = useState(0)
+
+  // Achievement Display Logic
+  const session = authClient.useSession()
+  const userId = session.data?.user?.id
+  const [newlyUnlockedAchievements, setNewlyUnlockedAchievements] = useState<AchievementWithProgress[]>([])
+
+  useEffect(() => {
+    if (achievements && userId) {
+      const unlockedIds = achievements.split(',')
+
+      // Filter localStorage to avoid duplicates (using common key)
+      const storageKey = `seen_achievements_${userId}`
+      let seenIds = new Set<string>()
+      try {
+        const stored = localStorage.getItem(storageKey)
+        seenIds = new Set(stored ? JSON.parse(stored) : [])
+      }
+      catch (e) {
+        console.error('Error reading seen achievements', e)
+      }
+
+      // Filter to only truly new ones
+      const trulyNewIds = unlockedIds.filter(id => !seenIds.has(id))
+
+      if (trulyNewIds.length > 0) {
+        // Map to full objects
+        const unlockedObjects = trulyNewIds
+          .map((id) => {
+            const def = ACHIEVEMENTS.find(a => a.id === id)
+            if (!def)
+              return null
+            return {
+              ...def,
+              unlocked: true,
+              unlockedAt: new Date().toISOString(),
+              progress: def.condition.threshold,
+              maxProgress: def.condition.threshold,
+            } as AchievementWithProgress
+          })
+          .filter((a): a is AchievementWithProgress => a !== null)
+
+        if (unlockedObjects.length > 0) {
+          // Delay display to allow summary to load
+          const timer = setTimeout(() => {
+            setNewlyUnlockedAchievements(unlockedObjects)
+
+            // Mark as seen in localStorage immediately when queuing to show
+            try {
+              const updatedSeenIds = [...Array.from(seenIds), ...trulyNewIds]
+              localStorage.setItem(storageKey, JSON.stringify(updatedSeenIds))
+            }
+            catch (e) {
+              console.error('Error saving seen achievements', e)
+            }
+          }, 800) // 800ms delay
+
+          return () => clearTimeout(timer)
+        }
+      }
+    }
+  }, [achievements, userId])
 
   // Track route load performance
   useEffect(() => {
@@ -344,6 +411,12 @@ function SummaryPage() {
           </motion.div>
         </motion.div>
       </main>
+
+      {/* Delayed Achievement Notification */}
+      <AchievementUnlockToast
+        achievements={newlyUnlockedAchievements}
+        onDismiss={() => setNewlyUnlockedAchievements([])}
+      />
     </div>
   )
 }
