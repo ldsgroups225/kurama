@@ -1,6 +1,6 @@
 import type { AchievementWithProgress } from '@kurama/data-ops/queries/achievements'
 import { ACHIEVEMENTS } from '@kurama/data-ops/queries/achievements'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import {
   Check,
@@ -18,6 +18,7 @@ import { EnhancedXPDisplay } from '@/components/gamification'
 import { AchievementUnlockToast } from '@/components/gamification/achievement-unlock-toast'
 import { AppHeader } from '@/components/main'
 import { Button } from '@/components/ui/button'
+import { markAchievementsAsNotified } from '@/core/functions/progress'
 import { getUserStats } from '@/core/functions/stats'
 import { useOnlineStatus } from '@/hooks/use-online-status'
 import { authClient } from '@/lib/auth-client'
@@ -90,6 +91,10 @@ function SummaryPage() {
   const session = authClient.useSession()
   const userId = session.data?.user?.id
   const [newlyUnlockedAchievements, setNewlyUnlockedAchievements] = useState<AchievementWithProgress[]>([])
+
+  const markNotifiedMutation = useMutation({
+    mutationFn: (ids: string[]) => markAchievementsAsNotified({ data: ids }),
+  })
 
   useEffect(() => {
     if (achievements && userId) {
@@ -415,7 +420,13 @@ function SummaryPage() {
       {/* Delayed Achievement Notification */}
       <AchievementUnlockToast
         achievements={newlyUnlockedAchievements}
-        onDismiss={() => setNewlyUnlockedAchievements([])}
+        onDismiss={() => {
+          const ids = newlyUnlockedAchievements.map(a => a.id)
+          setNewlyUnlockedAchievements([])
+          if (ids.length > 0) {
+            markNotifiedMutation.mutate(ids)
+          }
+        }}
       />
     </div>
   )

@@ -1,6 +1,6 @@
 import { and, eq, gte, sql } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
-import { lessons, studySessions, userLessonMastery, userProfiles } from '@kurama/data-ops/drizzle/schema'
+import { lessons, studySessions, subjects, userLessonMastery, userProfiles } from '@kurama/data-ops/drizzle/schema'
 import {
   calculateCurrentStreak,
   calculateStreakBonus,
@@ -78,7 +78,8 @@ function calculateLevel(xp: number): { level: number, currentXP: number, nextLev
 // This eliminates code duplication across dashboard.ts, profile.ts, progress.ts
 
 export interface SessionStatsInput {
-  lessonId: number
+  lessonId?: number
+  subjectId?: number
   correctCount: number
   totalCount: number
   duration: number // in seconds
@@ -118,8 +119,8 @@ export interface SessionStatsResult {
 export const updateSessionStats = createServerFn({ method: 'POST' })
   .middleware([protectedFunctionMiddleware])
   .inputValidator((data: SessionStatsInput) => {
-    if (typeof data.lessonId !== 'number' || Number.isNaN(data.lessonId)) {
-      throw new TypeError('Invalid input: lessonId must be a number')
+    if (data.lessonId === undefined && data.subjectId === undefined) {
+      throw new TypeError('Invalid input: either lessonId or subjectId must be provided')
     }
     if (typeof data.correctCount !== 'number' || typeof data.totalCount !== 'number') {
       throw new TypeError('Invalid input: correctCount and totalCount must be numbers')
@@ -132,7 +133,7 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }): Promise<SessionStatsResult> => {
     const db = getDb()
     const userId = context.userId
-    const { lessonId, correctCount, totalCount, duration, mode } = data
+    const { lessonId, subjectId, correctCount, totalCount, duration, mode } = data
 
     // Get user's grade ID for validation
     const userGradeId = await getUserGradeId(db, userId)
@@ -142,18 +143,26 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
       throw new Error('Access denied: User grade not assigned')
     }
 
-    // Validate that the lesson belongs to user's grade
-    const lesson = await db.query.lessons.findFirst({
-      where: and(
-        eq(lessons.id, lessonId),
-        eq(lessons.isPublished, true),
-        eq(lessons.gradeId, userGradeId),
-      ),
-      columns: { id: true, subjectId: true, displayOrder: true },
-    })
-
-    if (!lesson) {
-      throw new Error('Lesson not found or access denied')
+    // Validate that the lesson/subject belongs to user's curriculum
+    if (lessonId) {
+      const lesson = await db.query.lessons.findFirst({
+        where: and(
+          eq(lessons.id, lessonId),
+          eq(lessons.isPublished, true),
+          eq(lessons.gradeId, userGradeId),
+        ),
+      })
+      if (!lesson) {
+        throw new Error('Lesson not found or access denied')
+      }
+    }
+    else if (subjectId) {
+      const subject = await db.query.subjects.findFirst({
+        where: eq(subjects.id, subjectId),
+      })
+      if (!subject) {
+        throw new Error('Subject not found')
+      }
     }
 
     // Calculate percentage
@@ -211,7 +220,8 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
     // Record study session
     await db.insert(studySessions).values({
       userId,
-      lessonId,
+      lessonId: lessonId ?? null,
+      subjectId: subjectId ?? null,
       mode,
       startedAt: new Date(Date.now() - duration * 1000).toISOString(),
       endedAt: new Date().toISOString(),
@@ -226,13 +236,13 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
     // Update cached longest streak if current streak exceeds it
     await updateLongestStreakIfNeeded(db, userId, currentStreak)
 
-    // Update lesson mastery if passing
+    // Update lesson mastery if passing and it's a lesson-specific session
     let masteryCount = 0
     let isLessonCompleted = false
     let nextLessonUnlocked = false
     let nextLessonTitle: string | null = null
 
-    if (isPassing) {
+    if (isPassing && lessonId) {
       const existingMastery = await db.query.userLessonMastery.findFirst({
         where: and(
           eq(userLessonMastery.userId, userId),

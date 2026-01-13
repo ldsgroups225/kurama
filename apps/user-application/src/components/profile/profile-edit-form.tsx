@@ -61,7 +61,7 @@ function InputLabel({ children, htmlFor }: { children: React.ReactNode, htmlFor?
 export function ProfileEditForm({ profile, onBack, onSuccess }: ProfileEditFormProps) {
   const { toast } = useToast()
   const [formData, setFormData] = useState<Partial<StudentProfile | ParentProfile>>({
-    userType: profile?.userType || 'student',
+    userType: (profile?.userType === 'parent' ? 'parent' : 'student') as 'student' | 'parent',
     firstName: profile?.firstName || '',
     lastName: profile?.lastName || '',
     ...(profile?.userType === 'student' && {
@@ -458,10 +458,10 @@ export function ProfileEditForm({ profile, onBack, onSuccess }: ProfileEditFormP
             <CardContent className="space-y-4">
               {(!(formData as ParentProfile).childrenMatricules
                 || (formData as ParentProfile).childrenMatricules!.length === 0) && (
-                <p className="py-4 text-center text-sm text-zinc-500">
-                  Aucun enfant ajouté. Cliquez sur "Ajouter" pour lier un enfant.
-                </p>
-              )}
+                  <p className="py-4 text-center text-sm text-zinc-500">
+                    Aucun enfant ajouté. Cliquez sur "Ajouter" pour lier un enfant.
+                  </p>
+                )}
 
               {(formData as ParentProfile).childrenMatricules?.map((matricule, index) => (
                 <div key={generateUUID()} className="space-y-2">
@@ -529,14 +529,14 @@ export function ProfileEditForm({ profile, onBack, onSuccess }: ProfileEditFormP
           >
             {submitMutation.isPending
               ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Enregistrement...
-                  </>
-                )
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Enregistrement...
+                </>
+              )
               : (
-                  'Enregistrer les Modifications'
-                )}
+                'Enregistrer les Modifications'
+              )}
           </Button>
         </div>
       </form>

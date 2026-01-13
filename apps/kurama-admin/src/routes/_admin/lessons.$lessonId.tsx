@@ -5,20 +5,26 @@ import {
   ArrowLeft,
   BookOpen,
   Clock,
+  Copy,
   ExternalLink,
+  Eye,
   FileText,
   GraduationCap,
   Loader2,
   Pencil,
+  Plus,
   Save,
   Sparkles,
+  Trash2,
+  Upload,
   X,
 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { BulkImportDialog, CardForm, CardPreview } from '@/components/admin/cards'
 import { AttachmentsSheet } from '@/components/admin/lessons/attachments-sheet'
-import { MarkdownRenderer, PageHeader } from '@/components/shared'
+import { ConfirmDialog, DataTable, MarkdownRenderer, PageHeader } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -45,6 +51,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -53,7 +65,14 @@ import {
   saveGeneratedCards,
   updateTeachPlan,
 } from '@/core/functions/ai-generation'
-import { getCards } from '@/core/functions/cards'
+import {
+  bulkCreateCards,
+  createCard,
+  deleteCard,
+  duplicateCard,
+  getCards,
+  updateCard,
+} from '@/core/functions/cards'
 import { getLesson } from '@/core/functions/lessons'
 import { getGradesSimple } from '@/core/functions/users'
 import { generateUUID } from '@/utils/generateUUID'
@@ -118,6 +137,11 @@ function LessonDetailPage() {
     difficulty: number
   }>>([])
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
+  const [cardFormOpen, setCardFormOpen] = useState(false)
+  const [editingCard, setEditingCard] = useState<any>(null)
+  const [deletingCard, setDeletingCard] = useState<any>(null)
+  const [previewCard, setPreviewCard] = useState<any>(null)
+  const [importOpen, setImportOpen] = useState(false)
 
   // Queries
   const { data: lesson, isLoading } = useQuery({
@@ -230,6 +254,56 @@ function LessonDetailPage() {
     },
   })
 
+  // Card Mutations
+  const createCardMutation = useMutation({
+    mutationFn: (input: any) => createCard({ data: { ...input, lessonId: lessonIdNum } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cards', { lessonId: lessonIdNum }] })
+      setCardFormOpen(false)
+      toast.success('Carte créée avec succès')
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+
+  const updateCardMutation = useMutation({
+    mutationFn: (input: any) => updateCard({ data: input }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cards', { lessonId: lessonIdNum }] })
+      setEditingCard(null)
+      toast.success('Carte modifiée avec succès')
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+
+  const duplicateCardMutation = useMutation({
+    mutationFn: (id: number) => duplicateCard({ data: id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cards', { lessonId: lessonIdNum }] })
+      toast.success('Carte dupliquée')
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+
+  const deleteCardMutation = useMutation({
+    mutationFn: (id: number) => deleteCard({ data: id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cards', { lessonId: lessonIdNum }] })
+      setDeletingCard(null)
+      toast.success('Carte supprimée')
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+
+  const bulkImportMutation = useMutation({
+    mutationFn: (data: any) => bulkCreateCards({ data: { lessonId: lessonIdNum, cards: data } }),
+    onSuccess: (result: any) => {
+      queryClient.invalidateQueries({ queryKey: ['cards', { lessonId: lessonIdNum }] })
+      setImportOpen(false)
+      toast.success(`${result.created} cartes importées`)
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+
   const handleStartEdit = () => {
     setEditedTeachPlan(lesson?.teachPlan || '')
     setIsEditing(true)
@@ -239,6 +313,55 @@ function LessonDetailPage() {
     setIsEditing(false)
     setEditedTeachPlan('')
   }
+
+  const cardTypeLabels: Record<string, string> = {
+    basic: 'Basique',
+    multichoice: 'Choix multiple',
+    true_false: 'Vrai/Faux',
+    fill_blank: 'Texte à trous',
+  }
+
+  const cardColumns = [
+    {
+      key: 'frontContent',
+      header: 'Contenu',
+      cell: (card: any) => (
+        <div className="max-w-[300px] truncate font-medium">
+          {card.frontContent}
+        </div>
+      ),
+    },
+    {
+      key: 'cardType',
+      header: 'Type',
+      cell: (card: any) => (
+        <Badge variant="outline">
+          {cardTypeLabels[card.cardType] || card.cardType}
+        </Badge>
+      ),
+    },
+    {
+      key: 'actions',
+      header: '',
+      cell: (card: any) => (
+        <div className="flex justify-end gap-1">
+          <Button variant="ghost" size="icon" onClick={() => setPreviewCard(card)}>
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => duplicateCardMutation.mutate(card.id)}>
+            <Copy className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => setEditingCard(card)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => setDeletingCard(card)}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+      className: 'w-40',
+    },
+  ]
 
   const difficultyLabels: Record<string, string> = {
     easy: 'Facile',
@@ -396,71 +519,71 @@ function LessonDetailPage() {
           <CardContent>
             {isEditing
               ? (
-                  <div className="space-y-4">
-                    <Textarea
-                      value={editedTeachPlan}
-                      onChange={e => setEditedTeachPlan(e.target.value)}
-                      className="min-h-[400px] font-mono text-sm"
-                      placeholder="Contenu Markdown du plan de leçon..."
-                    />
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={handleCancelEdit}>
-                        <X className="mr-2 h-4 w-4" />
-                        Annuler
-                      </Button>
-                      <Button
-                        onClick={() => updatePlanMutation.mutate()}
-                        disabled={updatePlanMutation.isPending}
-                      >
-                        {updatePlanMutation.isPending
-                          ? (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            )
-                          : (
-                              <Save className="mr-2 h-4 w-4" />
-                            )}
-                        Enregistrer
-                      </Button>
-                    </div>
+                <div className="space-y-4">
+                  <Textarea
+                    value={editedTeachPlan}
+                    onChange={e => setEditedTeachPlan(e.target.value)}
+                    className="min-h-[400px] font-mono text-sm"
+                    placeholder="Contenu Markdown du plan de leçon..."
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={handleCancelEdit}>
+                      <X className="mr-2 h-4 w-4" />
+                      Annuler
+                    </Button>
+                    <Button
+                      onClick={() => updatePlanMutation.mutate()}
+                      disabled={updatePlanMutation.isPending}
+                    >
+                      {updatePlanMutation.isPending
+                        ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )
+                        : (
+                          <Save className="mr-2 h-4 w-4" />
+                        )}
+                      Enregistrer
+                    </Button>
                   </div>
-                )
+                </div>
+              )
               : lesson.teachPlan
                 ? (
-                    <div className="space-y-6">
-                      <MarkdownRenderer content={lesson.teachPlan} />
+                  <div className="space-y-6">
+                    <MarkdownRenderer content={lesson.teachPlan} />
 
-                      {/* Sources */}
-                      {metadata?.sources && metadata.sources.length > 0 && (
-                        <div className="border-t pt-6">
-                          <h4 className="text-sm font-semibold mb-3">Sources</h4>
-                          <ul className="space-y-2">
-                            {metadata.sources.map(source => (
-                              <li key={generateUUID()} className="flex items-start gap-2">
-                                <ExternalLink className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
-                                <a
-                                  href={source.uri}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-sm text-primary hover:underline break-all"
-                                >
-                                  {source.title || source.uri}
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  )
+                    {/* Sources */}
+                    {metadata?.sources && metadata.sources.length > 0 && (
+                      <div className="border-t pt-6">
+                        <h4 className="text-sm font-semibold mb-3">Sources</h4>
+                        <ul className="space-y-2">
+                          {metadata.sources.map(source => (
+                            <li key={generateUUID()} className="flex items-start gap-2">
+                              <ExternalLink className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                              <a
+                                href={source.uri}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-primary hover:underline break-all"
+                              >
+                                {source.title || source.uri}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )
                 : (
-                    <div className="text-center py-12">
-                      <Sparkles className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                      <h3 className="mt-4 text-lg font-semibold">Aucun plan d'enseignement</h3>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        Cliquez sur "Générer avec IA" pour créer un plan de leçon basé sur le curriculum ivoirien.
-                      </p>
-                    </div>
-                  )}
+                  <div className="text-center py-12">
+                    <Sparkles className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                    <h3 className="mt-4 text-lg font-semibold">Aucun plan d'enseignement</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Cliquez sur "Générer avec IA" pour créer un plan de leçon basé sur le curriculum ivoirien.
+                    </p>
+                  </div>
+                )}
           </CardContent>
         </Card>
       </motion.div>
@@ -550,17 +673,17 @@ function LessonDetailPage() {
             >
               {generatePlanMutation.isPending
                 ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Génération...
-                    </>
-                  )
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Génération...
+                  </>
+                )
                 : (
-                    <>
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Générer
-                    </>
-                  )}
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Générer
+                  </>
+                )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -603,17 +726,17 @@ function LessonDetailPage() {
             >
               {generateCardsMutation.isPending
                 ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Génération...
-                    </>
-                  )
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Génération...
+                  </>
+                )
                 : (
-                    <>
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Générer
-                    </>
-                  )}
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Générer
+                  </>
+                )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -700,25 +823,132 @@ function LessonDetailPage() {
             >
               {saveCardsMutation.isPending
                 ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Enregistrement...
-                    </>
-                  )
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Enregistrement...
+                  </>
+                )
                 : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Enregistrer
-                      {' '}
-                      {generatedCards.length}
-                      {' '}
-                      cartes
-                    </>
-                  )}
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Enregistrer
+                    {' '}
+                    {generatedCards.length}
+                    {' '}
+                    cartes
+                  </>
+                )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Cards List Section */}
+      <motion.div variants={item}>
+        <Card className="border-border/50 bg-background/50 backdrop-blur-xl shadow-lg">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-3 text-xl">
+                <div className="bg-primary/10 p-2 rounded-lg">
+                  <FileText className="h-6 w-6 text-primary" />
+                </div>
+                Cartes de la leçon
+              </CardTitle>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
+                <Upload className="mr-2 h-4 w-4" />
+                Import JSON
+              </Button>
+              <Button size="sm" onClick={() => setCardFormOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nouvelle carte
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              columns={cardColumns}
+              data={cardsData?.cards || []}
+              page={cardsData?.page || 1}
+              totalPages={cardsData?.totalPages || 1}
+              total={cardsData?.total || 0}
+              onPageChange={() => { }} // Not implemented here as we show all
+              isLoading={isLoading}
+              emptyMessage="Aucune carte dans cette leçon."
+            />
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Card Form & Dialogs */}
+      {cardFormOpen && (
+        <CardForm
+          open={cardFormOpen}
+          onOpenChange={setCardFormOpen}
+          onSubmit={async (data) => { await createCardMutation.mutateAsync(data) }}
+          lessons={[{ id: lesson.id, title: lesson.title, subjectId: lesson.subjectId }]}
+          defaultValues={{ lessonId: lesson.id }}
+          isLoading={createCardMutation.isPending}
+        />
+      )}
+
+      {editingCard && (
+        <CardForm
+          key={editingCard.id}
+          open={!!editingCard}
+          onOpenChange={open => !open && setEditingCard(null)}
+          onSubmit={async (data) => { await updateCardMutation.mutateAsync({ ...data, id: editingCard.id }) }}
+          lessons={[{ id: lesson.id, title: lesson.title, subjectId: lesson.subjectId }]}
+          defaultValues={editingCard}
+          isEditing
+          isLoading={updateCardMutation.isPending}
+        />
+      )}
+
+      <ConfirmDialog
+        open={!!deletingCard}
+        onOpenChange={open => !open && setDeletingCard(null)}
+        title="Supprimer la carte"
+        description="Êtes-vous sûr de vouloir supprimer cette carte ?"
+        onConfirm={() => deleteCardMutation.mutate(deletingCard.id)}
+        isLoading={deleteCardMutation.isPending}
+        variant="destructive"
+      />
+
+      <Sheet open={!!previewCard} onOpenChange={open => !open && setPreviewCard(null)}>
+        <SheetContent className="sm:max-w-lg">
+          <SheetHeader>
+            <SheetTitle>Aperçu de la carte</SheetTitle>
+          </SheetHeader>
+          {previewCard && (
+            <div className="mt-6">
+              <CardPreview {...previewCard} />
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
+
+      <BulkImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        lessonId={lessonIdNum}
+        onImport={async (cards) => {
+          const formattedCards = cards.map(card => ({
+            ...card,
+            lessonId: lessonIdNum,
+            options: card.options?.map((opt, idx) => ({
+              id: idx.toString(),
+              text: opt,
+              isCorrect: card.correctAnswer === idx,
+            })),
+            correctAnswer: card.correctAnswer?.toString(),
+            difficulty: card.difficulty === 'easy' ? 0 : card.difficulty === 'medium' ? 1 : 2,
+            displayOrder: 0,
+          }))
+          await bulkImportMutation.mutateAsync(formattedCards)
+        }}
+        isLoading={bulkImportMutation.isPending}
+      />
     </motion.div>
   )
 }

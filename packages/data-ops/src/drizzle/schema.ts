@@ -150,8 +150,9 @@ export const series = pgTable("series", {
 export const studySessions = pgTable("study_sessions", {
 	id: serial().primaryKey().notNull(),
 	userId: text("user_id").notNull(),
-	lessonId: integer("lesson_id").notNull(),
-	mode: text("mode").notNull(), // Added mode column
+	lessonId: integer("lesson_id"), // Now optional for transversal reviews
+	subjectId: integer("subject_id"), // New column for subject-level sessions
+	mode: text("mode").notNull(),
 	startedAt: timestamp("started_at", { mode: 'string' }).defaultNow().notNull(),
 	endedAt: timestamp("ended_at", { mode: 'string' }),
 	cardsReviewed: integer("cards_reviewed").default(0).notNull(),
@@ -168,7 +169,12 @@ export const studySessions = pgTable("study_sessions", {
 		columns: [table.lessonId],
 		foreignColumns: [lessons.id],
 		name: "study_sessions_lesson_id_lessons_id_fk"
-	}).onDelete("cascade"),
+	}).onDelete("set null"),
+	foreignKey({
+		columns: [table.subjectId],
+		foreignColumns: [subjects.id],
+		name: "study_sessions_subject_id_subjects_id_fk"
+	}).onDelete("set null"),
 	// Index for streak calculation performance
 	index("idx_study_sessions_user_started").on(table.userId, table.startedAt),
 ]);

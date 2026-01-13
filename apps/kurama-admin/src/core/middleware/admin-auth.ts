@@ -1,7 +1,7 @@
+import { getAuth } from '@kurama/data-ops/auth/server'
 import { eq } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
 import { userProfiles } from '@kurama/data-ops/drizzle/schema'
-import { getAuth } from '@kurama/data-ops/auth/server'
 import { createMiddleware } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 

@@ -1,6 +1,6 @@
 import { and, asc, eq, inArray } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
-import { cards, lessons, subjects, userLessonMastery } from '@kurama/data-ops/drizzle/schema'
+import { cards, lessons, studySessions, subjects, userLessonMastery } from '@kurama/data-ops/drizzle/schema'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
 import { getUserGradeId } from './utils'
@@ -290,4 +290,37 @@ export const submitTestResult = createServerFn({ method: 'POST' })
       nextLessonUnlocked,
       nextLessonTitle,
     }
+  })
+
+/**
+ * Initialize a study session (lesson or subject level)
+ */
+export const startStudySession = createServerFn({ method: 'POST' })
+  .middleware([protectedFunctionMiddleware])
+  .inputValidator((data: { lessonId?: number, subjectId?: number, mode: string }) => {
+    if (!data.lessonId && !data.subjectId) {
+      throw new Error('Either lessonId or subjectId is required')
+    }
+    return data
+  })
+  .handler(async ({ data, context }) => {
+    const db = getDb()
+    const userId = context.userId
+    const { lessonId, subjectId, mode } = data
+
+    const [session] = await db.insert(studySessions).values({
+      userId,
+      lessonId: lessonId ?? null,
+      subjectId: subjectId ?? null,
+      mode,
+      startedAt: new Date().toISOString(),
+      cardsReviewed: 0,
+      cardsCorrect: 0,
+    }).returning({ id: studySessions.id })
+
+    if (!session) {
+      throw new Error('Failed to create study session')
+    }
+
+    return { sessionId: session.id }
   })
