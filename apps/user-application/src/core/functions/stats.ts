@@ -168,8 +168,8 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
     const previousXP = profile?.xp ?? 0
     const previousLevelInfo = calculateLevel(previousXP)
 
-    // Calculate current streak for bonus using shared utility
-    const currentStreak = await calculateCurrentStreak(db, userId)
+    // Calculate streak for bonus (before this session registers as complete)
+    const preSessionStreak = await calculateCurrentStreak(db, userId)
 
     // Enhanced XP calculation using the standardized gamification system
     const baseXPRate = XP_BASE_RATES[mode] || XP_BASE_RATES.flashcards
@@ -177,7 +177,7 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
 
     // Use standardized tiered streak bonus system
     // Tiers: 30+ days = 50%, 14+ = 40%, 7+ = 25%, 3+ = 10%, <3 = 0%
-    const streakBonus = calculateStreakBonus(baseXP, currentStreak)
+    const streakBonus = calculateStreakBonus(baseXP, preSessionStreak)
     const perfectBonus = percentage === 100 ? XP_PERFECT_SCORE_BONUS : 0
     const avgTimePerCard = totalCount > 0 ? duration / totalCount : 0
     const speedBonus = avgTimePerCard > 0 && avgTimePerCard <= XP_SPEED_BONUS_THRESHOLD ? XP_SPEED_BONUS : 0
@@ -219,6 +219,9 @@ export const updateSessionStats = createServerFn({ method: 'POST' })
       cardsCorrect: correctCount,
       duration,
     })
+
+    // Calculate current streak again to reflect the completed session
+    const currentStreak = await calculateCurrentStreak(db, userId)
 
     // Update cached longest streak if current streak exceeds it
     await updateLongestStreakIfNeeded(db, userId, currentStreak)
