@@ -105,8 +105,15 @@ function SessionPage() {
     }
   })
 
+  // Track navigation state to prevent flash
+  const [isNavigatingToSummary, setIsNavigatingToSummary] = useState(false)
+
   const { updateStats } = useStatsUpdate({
     onLevelUp: (newLevel) => {
+      // Don't show level up if we are about to navigate
+      if (isNavigatingToSummary)
+        return
+
       setCurrentReward({
         type: 'level_up',
         title: `Niveau ${newLevel} !`,
@@ -116,6 +123,10 @@ function SessionPage() {
       setShowReward(true)
     },
     onAchievementUnlocked: (achievements) => {
+      // Don't show achievement if we are about to navigate
+      if (isNavigatingToSummary)
+        return
+
       if (achievements.length > 0) {
         setCurrentReward({
           type: 'achievement',
@@ -225,6 +236,9 @@ function SessionPage() {
 
   const navigateToSummary = useCallback(
     async (finalCorrect?: number, finalIncorrect?: number) => {
+      // Set navigation flag to suppress rewards
+      setIsNavigatingToSummary(true)
+
       const duration = Math.floor((Date.now() - startTime) / 1000)
       const correct = finalCorrect ?? sessionStats.correct
       const incorrect = finalIncorrect ?? sessionStats.incorrect
@@ -250,6 +264,10 @@ function SessionPage() {
           xpEarned: result?.xpEarned ?? correct * 10,
           leveledUp: result?.leveledUp ? 'true' : undefined,
           newLevel: result?.currentLevel,
+          // Pass unlocked achievements to summary
+          achievements: result?.achievementsUnlocked && result.achievementsUnlocked.length > 0
+            ? result.achievementsUnlocked.join(',')
+            : undefined,
         },
       })
     },
