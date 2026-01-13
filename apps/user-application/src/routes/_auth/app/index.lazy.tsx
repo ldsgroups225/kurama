@@ -12,9 +12,9 @@ import {
   Trophy,
   Zap,
 } from 'lucide-react'
-
 import { motion } from 'motion/react'
 import { useEffect } from 'react'
+
 import { LeaderboardWidget, StreakCalendar } from '@/components/gamification'
 import { AppHeader, BottomNav } from '@/components/main'
 import { Badge } from '@/components/ui/badge'

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { createFileRoute, Navigate, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Navigate, Outlet, useLocation, useNavigate } from '@tanstack/react-router'
 import { useAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
 import { GoogleLogin } from '@/components/auth/google-login'
@@ -135,6 +135,9 @@ function RouteComponent() {
   // Authenticated and profile completed - show app
   return (
     <>
+      {/* Global Redirection for Parents */}
+      <ParentRedirectGuard userType={userProfile?.userType} />
+
       {/* PWA Components */}
       <OfflineBanner />
       <InstallPrompt />
@@ -145,4 +148,22 @@ function RouteComponent() {
       <Outlet />
     </>
   )
+}
+
+/**
+ * Guard component that redirects parents away from student routes
+ */
+function ParentRedirectGuard({ userType }: { userType?: string | null }) {
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    // If user is a parent and is on a student route (starting with /app but not /app/parent)
+    if (userType === 'parent' && pathname.startsWith('/app') && !pathname.startsWith('/app/parent')) {
+      console.log('Parent detected on student route, redirecting to parent dashboard...')
+      navigate({ to: '/app/parent', replace: true })
+    }
+  }, [userType, pathname, navigate])
+
+  return null
 }

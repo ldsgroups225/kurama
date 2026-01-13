@@ -97,11 +97,11 @@ export function ReferralShareCard({ className }: ShareCardProps) {
             >
               {copied
                 ? (
-                  <Check className="h-4 w-4 text-emerald-400" />
-                )
+                    <Check className="h-4 w-4 text-emerald-400" />
+                  )
                 : (
-                  <Copy className="h-4 w-4" />
-                )}
+                    <Copy className="h-4 w-4" />
+                  )}
             </Button>
           </div>
         </div>
