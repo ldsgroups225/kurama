@@ -4,7 +4,7 @@
  * Displays user's referral code, sharing options, and referral statistics.
  */
 
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { Gift } from 'lucide-react'
 import { AppHeader } from '@/components/main'
 import { ReferralShareCard, ReferralStats } from '@/components/referrals'
@@ -14,6 +14,19 @@ export const Route = createFileRoute('/_auth/app/referrals')({
 })
 
 function ReferralsPage() {
+  const router = useRouter()
+
+  const handleBack = () => {
+    // Check if we can go back in history
+    // window.history.length > 2 usually implies we have somewhere to go back to (current + previous + root)
+    if (window.history.length > 2) {
+      router.history.back()
+    } else {
+      // Fallback to dashboard
+      router.navigate({ to: '/app' })
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background pb-24 text-foreground">
       {/* Ambient Background */}
@@ -22,7 +35,12 @@ function ReferralsPage() {
         <div className="absolute bottom-[20%] right-[10%] w-[50%] h-[50%] rounded-full bg-xp-from/10 blur-[120px]" />
       </div>
 
-      <AppHeader title="Parrainage" className="bg-transparent/0 border-none relative z-20" />
+      <AppHeader
+        title="Parrainage"
+        showBackButton={true}
+        onBackClick={handleBack}
+        className="bg-transparent/0 border-none relative z-20"
+      />
 
       <div className="container mx-auto max-w-2xl px-4 py-8 relative z-10">
         {/* Header */}
