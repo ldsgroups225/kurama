@@ -66,13 +66,13 @@ export function ReferralShareCard({ className }: ShareCardProps) {
   }
 
   return (
-    <Card className={cn('border-white/5 bg-zinc-900/40 backdrop-blur-xl', className)}>
+    <Card className={cn('backdrop-blur-xl bg-card/40', className)}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-white">
-          <Gift className="h-5 w-5 text-indigo-400" />
+        <CardTitle className="flex items-center gap-2 text-foreground">
+          <Gift className="h-5 w-5 text-info-from" />
           Parrainage
         </CardTitle>
-        <CardDescription className="text-zinc-400">
+        <CardDescription className="text-muted-foreground">
           Invite tes amis et gagne 3€ de crédit pour chaque inscription !
         </CardDescription>
       </CardHeader>
@@ -80,12 +80,12 @@ export function ReferralShareCard({ className }: ShareCardProps) {
       <CardContent className="space-y-4">
         {/* Referral Code */}
         <div className="space-y-2">
-          <span className="text-sm font-medium text-zinc-300">Ton code de parrainage</span>
+          <span className="text-sm font-medium text-muted-foreground">Ton code de parrainage</span>
           <div className="flex gap-2">
             <Input
               value={referralCode || ''}
               readOnly
-              className="font-mono text-center text-lg tracking-wider bg-zinc-800/50 border-white/10 text-white"
+              className="font-mono text-center text-lg tracking-wider bg-muted/50 border-input text-foreground"
               aria-label="Code de parrainage"
             />
             <Button
@@ -93,27 +93,27 @@ export function ReferralShareCard({ className }: ShareCardProps) {
               size="icon"
               onClick={() => handleCopy(referralCode || '')}
               aria-label={copied ? 'Copié' : 'Copier le code'}
-              className="border-white/10 bg-transparent text-white hover:bg-white/5"
+              className="border-input bg-transparent text-foreground hover:bg-muted/20"
             >
               {copied
                 ? (
-                    <Check className="h-4 w-4 text-emerald-400" />
-                  )
+                  <Check className="h-4 w-4 text-emerald-400" />
+                )
                 : (
-                    <Copy className="h-4 w-4" />
-                  )}
+                  <Copy className="h-4 w-4" />
+                )}
             </Button>
           </div>
         </div>
 
         {/* Referral Link */}
         <div className="space-y-2">
-          <span className="text-sm font-medium text-zinc-300">Lien de parrainage</span>
+          <span className="text-sm font-medium text-muted-foreground">Lien de parrainage</span>
           <div className="flex gap-2">
             <Input
               value={referralLink}
               readOnly
-              className="text-sm text-zinc-400 bg-zinc-800/50 border-white/10"
+              className="text-sm text-muted-foreground bg-muted/50 border-input"
               aria-label="Lien de parrainage"
             />
             <Button
@@ -121,7 +121,7 @@ export function ReferralShareCard({ className }: ShareCardProps) {
               size="icon"
               onClick={() => handleCopy(referralLink)}
               aria-label="Copier le lien"
-              className="border-white/10 bg-transparent text-white hover:bg-white/5"
+              className="border-input bg-transparent text-foreground hover:bg-muted/20"
             >
               <Copy className="h-4 w-4" />
             </Button>
@@ -130,7 +130,7 @@ export function ReferralShareCard({ className }: ShareCardProps) {
 
         {/* Share Button */}
         <Button
-          className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-90 text-white border-0"
+          className="w-full bg-linear-to-r from-info-from to-xp-to hover:opacity-90 text-white border-0"
           onClick={handleShare}
         >
           <Share2 className="h-4 w-4 mr-2" />
@@ -138,12 +138,12 @@ export function ReferralShareCard({ className }: ShareCardProps) {
         </Button>
 
         {/* Reward Info */}
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-sm">
-          <Users className="h-4 w-4 text-indigo-400" />
-          <span className="text-indigo-200">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-info-from/10 border border-info-from/20 text-sm">
+          <Users className="h-4 w-4 text-info-from" />
+          <span className="text-info-from">
             Tu gagnes
             {' '}
-            <span className="font-semibold text-indigo-300">3€</span>
+            <span className="font-semibold text-info-from">3€</span>
             {' '}
             pour chaque ami qui s'abonne !
           </span>
@@ -155,21 +155,21 @@ export function ReferralShareCard({ className }: ShareCardProps) {
 
 function ReferralShareCardSkeleton({ className }: { className?: string }) {
   return (
-    <Card className={cn('border-white/5 bg-zinc-900/40', className)}>
+    <Card className={cn('bg-card/40', className)}>
       <CardHeader>
-        <Skeleton className="h-6 w-32 bg-zinc-800" />
-        <Skeleton className="h-4 w-full mt-2 bg-zinc-800" />
+        <Skeleton className="h-6 w-32 bg-muted/50" />
+        <Skeleton className="h-4 w-full mt-2 bg-muted/50" />
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Skeleton className="h-4 w-24 bg-zinc-800" />
-          <Skeleton className="h-10 w-full bg-zinc-800" />
+          <Skeleton className="h-4 w-24 bg-muted/50" />
+          <Skeleton className="h-10 w-full bg-muted/50" />
         </div>
         <div className="space-y-2">
-          <Skeleton className="h-4 w-24 bg-zinc-800" />
-          <Skeleton className="h-10 w-full bg-zinc-800" />
+          <Skeleton className="h-4 w-24 bg-muted/50" />
+          <Skeleton className="h-10 w-full bg-muted/50" />
         </div>
-        <Skeleton className="h-10 w-full bg-zinc-800" />
+        <Skeleton className="h-10 w-full bg-muted/50" />
       </CardContent>
     </Card>
   )
