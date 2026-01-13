@@ -16,7 +16,7 @@
  * @module @kurama/data-ops/queries/streak
  */
 
-import { desc, eq, gte, and } from 'drizzle-orm'
+import { desc, eq, gte, and, isNotNull, gt } from 'drizzle-orm'
 import { studySessions, userProfiles } from '../drizzle/schema'
 import type { Database } from '../database/setup'
 
@@ -104,6 +104,7 @@ function getDaysDifference(dateStr1: string, dateStr2: string): number {
 async function fetchStudyDates(
   db: Database,
   userId: string,
+  mode?: string,
 ): Promise<string[]> {
   // Limit query to recent sessions for performance
   const cutoffDate = new Date()
@@ -116,6 +117,9 @@ async function fetchStudyDates(
       and(
         eq(studySessions.userId, userId),
         gte(studySessions.startedAt, cutoffDate.toISOString()),
+        isNotNull(studySessions.endedAt),
+        gt(studySessions.cardsReviewed, 0),
+        mode ? eq(studySessions.mode, mode) : undefined,
       ),
     )
     .orderBy(desc(studySessions.startedAt))
@@ -202,8 +206,9 @@ function calculateLongestStreakFromDates(uniqueDates: string[]): number {
 export async function calculateCurrentStreak(
   db: Database,
   userId: string,
+  mode?: string,
 ): Promise<number> {
-  const uniqueDates = await fetchStudyDates(db, userId)
+  const uniqueDates = await fetchStudyDates(db, userId, mode)
   return calculateCurrentStreakFromDates(uniqueDates)
 }
 
@@ -213,8 +218,9 @@ export async function calculateCurrentStreak(
 export async function calculateLongestStreak(
   db: Database,
   userId: string,
+  mode?: string,
 ): Promise<number> {
-  const uniqueDates = await fetchStudyDates(db, userId)
+  const uniqueDates = await fetchStudyDates(db, userId, mode)
   return calculateLongestStreakFromDates(uniqueDates)
 }
 
@@ -225,8 +231,9 @@ export async function calculateLongestStreak(
 export async function getStreakData(
   db: Database,
   userId: string,
+  mode?: string,
 ): Promise<StreakResult> {
-  const uniqueDates = await fetchStudyDates(db, userId)
+  const uniqueDates = await fetchStudyDates(db, userId, mode)
 
   const today = getTodayDateString()
   const mostRecentDate = uniqueDates[0] ?? null

@@ -1,6 +1,7 @@
 import { and, asc, desc, eq, gt, inArray, notInArray, sql } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
 import { cards, lessons, studySessions, subjects, userProfiles, userProgress } from '@kurama/data-ops/drizzle/schema'
+import { calculateCurrentStreak } from '@kurama/data-ops/queries/streak'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
 
@@ -138,39 +139,8 @@ export const getDailyChallengeStatus = createServerFn()
       ),
     })
 
-    // Calculate consecutive days
-    const recentSessions = await db
-      .select({ startedAt: studySessions.startedAt })
-      .from(studySessions)
-      .where(
-        and(
-          eq(studySessions.userId, userId),
-          eq(studySessions.mode, 'daily_challenge'),
-        ),
-      )
-      .orderBy(sql`${studySessions.startedAt} DESC`)
-      .limit(31)
-
-    const uniqueDates = Array.from(new Set(
-      recentSessions.map(s => s.startedAt.split('T')[0]),
-    )).sort().reverse()
-
-    let consecutiveDays = 0
-    const yesterday = new Date(now.getTime() - 86400000).toISOString().split('T')[0]
-
-    for (let i = 0; i < uniqueDates.length; i++) {
-      const expectedDate = new Date(now.getTime() - (i * 86400000)).toISOString().split('T')[0]
-      // Allow today or yesterday as starting point
-      if (i === 0 && uniqueDates[i] !== todayDate && uniqueDates[i] !== yesterday) {
-        break
-      }
-      if (uniqueDates[i] === expectedDate || (i === 0 && uniqueDates[i] === yesterday)) {
-        consecutiveDays++
-      }
-      else {
-        break
-      }
-    }
+    // Calculate consecutive days using shared utility
+    const consecutiveDays = await calculateCurrentStreak(db, userId, 'daily_challenge')
 
     // If completed today, return completed status
     if (existingSession && existingSession.endedAt) {
@@ -492,34 +462,8 @@ export const completeDailyChallenge = createServerFn({ method: 'POST' })
       })
       .where(eq(studySessions.id, sessionId))
 
-    // Calculate consecutive days
-    const recentSessions = await db
-      .select({ startedAt: studySessions.startedAt })
-      .from(studySessions)
-      .where(
-        and(
-          eq(studySessions.userId, userId),
-          eq(studySessions.mode, 'daily_challenge'),
-          sql`${studySessions.endedAt} IS NOT NULL`,
-        ),
-      )
-      .orderBy(sql`${studySessions.startedAt} DESC`)
-      .limit(31)
-
-    const uniqueDates = Array.from(new Set(
-      recentSessions.map(s => s.startedAt.split('T')[0]),
-    )).sort().reverse()
-
-    let consecutiveDays = 1 // Today counts
-    for (let i = 1; i < uniqueDates.length; i++) {
-      const expectedDate = new Date(Date.now() - (i * 86400000)).toISOString().split('T')[0]
-      if (uniqueDates[i] === expectedDate) {
-        consecutiveDays++
-      }
-      else {
-        break
-      }
-    }
+    // Calculate consecutive days using shared utility
+    const consecutiveDays = await calculateCurrentStreak(db, userId, 'daily_challenge')
 
     // Calculate XP
     const baseXP = DAILY_CHALLENGE_BASE_XP
