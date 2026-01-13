@@ -60,3 +60,21 @@ export const userProfileAtom = atomWithStorage<UserProfileData | null>(
   },
   defaultOpts,
 )
+
+/**
+ * Synchronous helper to get stored user profile directly from localStorage
+ * Useful in non-React contexts like route beforeLoad hooks
+ */
+export function getStoredUserProfile(): UserProfileData | null {
+  if (!isClient)
+    return null
+  try {
+    const item = localStorage.getItem('kurama:userProfile')
+    if (item === null)
+      return null
+    return JSON.parse(item)
+  }
+  catch {
+    return null
+  }
+}

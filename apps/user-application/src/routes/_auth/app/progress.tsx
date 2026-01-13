@@ -134,7 +134,7 @@ function ProgressPage() {
   const handleDismissAchievements = (achievementIds: string[]) => {
     setNewlyUnlockedAchievements([])
     // TODO: Call markAchievementsNotified API
-    console.log('Marking achievements as notified:', achievementIds)
+    console.warn('Marking achievements as notified:', achievementIds)
   }
 
   // Animation variants
@@ -252,18 +252,18 @@ function ProgressPage() {
                 <span className="text-sm text-muted-foreground">Cartes étudiées par jour</span>
                 {maxWeeklyValue === 0
                   ? (
-                    <span className="text-xs text-muted-foreground">Aucune activité</span>
-                  )
+                      <span className="text-xs text-muted-foreground">Aucune activité</span>
+                    )
                   : (
-                    <span className="text-xs text-muted-foreground">
-                      Max:
-                      {' '}
-                      {maxWeeklyValue}
-                      {' '}
-                      carte
-                      {maxWeeklyValue !== 1 ? 's' : ''}
-                    </span>
-                  )}
+                      <span className="text-xs text-muted-foreground">
+                        Max:
+                        {' '}
+                        {maxWeeklyValue}
+                        {' '}
+                        carte
+                        {maxWeeklyValue !== 1 ? 's' : ''}
+                      </span>
+                    )}
               </div>
 
               <div className="flex h-40 items-end justify-between gap-2 md:gap-4">
@@ -288,20 +288,20 @@ function ProgressPage() {
                       <div className="relative w-full h-32 flex items-end overflow-hidden">
                         {hasActivity
                           ? (
-                            <motion.div
-                              initial={{ height: 0 }}
-                              animate={{ height: `${Math.max(height, 8)}%` }} // Minimum 8% for visibility when there's activity
-                              transition={{ duration: 1, ease: 'easeOut', delay: i * 0.1 }}
-                              className={cn(
-                                'w-full rounded-t-lg relative shadow-sm bg-gradient-success',
-                                isToday && 'shadow-[0_0_10px_var(--success-from)]',
-                              )}
-                            />
-                          )
+                              <motion.div
+                                initial={{ height: 0 }}
+                                animate={{ height: `${Math.max(height, 8)}%` }} // Minimum 8% for visibility when there's activity
+                                transition={{ duration: 1, ease: 'easeOut', delay: i * 0.1 }}
+                                className={cn(
+                                  'w-full rounded-t-lg relative shadow-sm bg-gradient-success',
+                                  isToday && 'shadow-[0_0_10px_var(--success-from)]',
+                                )}
+                              />
+                            )
                           : (
                             // Empty state - subtle indicator at bottom
-                            <div className="w-full h-1 rounded-full bg-muted/30" />
-                          )}
+                              <div className="w-full h-1 rounded-full bg-muted/30" />
+                            )}
                       </div>
                       <span className={cn(
                         'text-xs font-medium',
@@ -488,31 +488,31 @@ function ProgressPage() {
                   <div className="w-full mt-4 pt-4 border-t border-border">
                     {selectedAchievement.unlocked
                       ? (
-                        <div className="flex items-center justify-center gap-2 text-success font-medium">
-                          <Check className="w-5 h-5" />
-                          <span>Badge débloqué</span>
-                        </div>
-                      )
+                          <div className="flex items-center justify-center gap-2 text-success font-medium">
+                            <Check className="w-5 h-5" />
+                            <span>Badge débloqué</span>
+                          </div>
+                        )
                       : (
-                        <div className="space-y-2 w-full">
-                          <div className="flex justify-between text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                            <span>Progression</span>
-                            <span>
-                              {selectedAchievement.progress}
-                              {' '}
-                              /
-                              {' '}
-                              {selectedAchievement.maxProgress}
-                            </span>
+                          <div className="space-y-2 w-full">
+                            <div className="flex justify-between text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                              <span>Progression</span>
+                              <span>
+                                {selectedAchievement.progress}
+                                {' '}
+                                /
+                                {' '}
+                                {selectedAchievement.maxProgress}
+                              </span>
+                            </div>
+                            <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-primary rounded-full transition-all duration-500"
+                                style={{ width: `${(selectedAchievement.progress / selectedAchievement.maxProgress) * 100}%` }}
+                              />
+                            </div>
                           </div>
-                          <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-primary rounded-full transition-all duration-500"
-                              style={{ width: `${(selectedAchievement.progress / selectedAchievement.maxProgress) * 100}%` }}
-                            />
-                          </div>
-                        </div>
-                      )}
+                        )}
                   </div>
                 </div>
               </div>
