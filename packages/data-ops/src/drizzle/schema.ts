@@ -200,7 +200,7 @@ export const subjectOfferings = pgTable("subject_offerings", {
 
 export const userProfiles = pgTable("user_profiles", {
 	userId: text("user_id").primaryKey().notNull(),
-	userType: text("user_type").$type<'student' | 'parent'>().notNull(),
+	userType: text("user_type").$type<'student' | 'parent' | 'admin'>().notNull(),
 	firstName: text("first_name").notNull(),
 	lastName: text("last_name").notNull(),
 	phone: text(),
@@ -369,6 +369,21 @@ export const userAchievements = pgTable("user_achievements", {
 	unique("user_achievements_user_achievement_unique").on(table.userId, table.achievementId),
 	index("idx_user_achievements_user_id").on(table.userId),
 	index("idx_user_achievements_unlocked_at").on(table.unlockedAt),
+]);
+
+export const parentAlertReads = pgTable("parent_alert_reads", {
+	id: serial().primaryKey().notNull(),
+	parentId: text("parent_id").notNull(),
+	alertId: text("alert_id").notNull(),
+	readAt: timestamp("read_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+		columns: [table.parentId],
+		foreignColumns: [authUser.id],
+		name: "parent_alert_reads_parent_id_auth_user_id_fk"
+	}).onDelete("cascade"),
+	unique("parent_alert_reads_unique").on(table.parentId, table.alertId),
+	index("idx_parent_alert_reads_parent_id").on(table.parentId),
 ]);
 
 export const levelSeries = pgTable("level_series", {
