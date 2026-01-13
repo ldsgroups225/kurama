@@ -282,6 +282,9 @@ export const userProgress = pgTable("user_progress", {
 		foreignColumns: [lessons.id],
 		name: "user_progress_lesson_id_lessons_id_fk"
 	}).onDelete("cascade"),
+	unique("user_progress_user_id_card_id_unique").on(table.userId, table.cardId),
+	index("idx_user_progress_user_next_review").on(table.userId, table.nextReviewAt),
+	index("idx_user_progress_card_id").on(table.cardId),
 ]);
 
 // Type for teach plan metadata

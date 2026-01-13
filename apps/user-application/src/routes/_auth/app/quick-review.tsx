@@ -12,6 +12,7 @@ import { AppHeader } from '@/components/main'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { LogoLoader } from '@/components/ui/logo-loader'
+import { updateCardProgress } from '@/core/functions/progress'
 import { getCardsForReview } from '@/core/functions/review'
 import { useAutoplay } from '@/hooks/use-autoplay'
 import { useCardHeight } from '@/hooks/use-card-height'
@@ -61,6 +62,9 @@ function QuickReviewPage() {
     popFromHistory,
     resetSession,
   } = useSessionState()
+
+  // Track individual card results for SM-2
+  const [cardResults, setCardResults] = useState<{ cardId: number, quality: number, lessonId: number }[]>([])
 
   // Animation and layout
   const viewportHeight = useViewportHeight()
@@ -145,6 +149,11 @@ function QuickReviewPage() {
         })
       }
 
+      // Submit card-level results for SM-2
+      if (cardResults.length > 0) {
+        await updateCardProgress({ data: cardResults })
+      }
+
       navigate({
         to: '/app/lesson-summary/$lessonId',
         params: { lessonId: String(lessonId || 'review') },
@@ -158,7 +167,7 @@ function QuickReviewPage() {
         },
       })
     },
-    [navigate, startTime, sessionStats, updateStats],
+    [navigate, startTime, sessionStats, updateStats, cardResults],
   )
 
   const handleFlip = useCallback(() => {
@@ -170,6 +179,16 @@ function QuickReviewPage() {
   const handleResponse = useCallback(
     (response: 'correct' | 'incorrect') => {
       incrementStat(response)
+
+      // Track result for SM-2
+      if (currentCard) {
+        const quality = response === 'correct' ? 4 : 0
+        setCardResults(prev => [...prev, {
+          cardId: currentCard.id,
+          quality,
+          lessonId: currentCard.lessonId,
+        }])
+      }
 
       if (isLastCard) {
         const finalCorrect = response === 'correct' ? sessionStats.correct + 1 : sessionStats.correct
@@ -184,6 +203,7 @@ function QuickReviewPage() {
     },
     [
       cards,
+      currentCard,
       incrementStat,
       isLastCard,
       navigateToSummary,

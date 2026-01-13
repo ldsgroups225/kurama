@@ -1,10 +1,11 @@
 import { and, eq, gte, sql } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
-import { cards, studySessions, userProfiles } from '@kurama/data-ops/drizzle/schema'
+import { cards, studySessions, userProfiles, userProgress } from '@kurama/data-ops/drizzle/schema'
 import { markAchievementsNotified as dbMarkAchievementsNotified, getUserAchievements } from '@kurama/data-ops/queries/achievements'
 import { getXPLeaderboard } from '@kurama/data-ops/queries/leaderboard'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
+import { calculateSM2 } from '@/utils/sm2'
 
 /**
  * Get progress statistics for the current user
@@ -144,4 +145,118 @@ export const markAchievementsAsNotified = createServerFn()
     await dbMarkAchievementsNotified(db, userId, achievementIds)
 
     return { success: true }
+  })
+
+/**
+ * Update card progress based on SM-2 algorithm
+ */
+export const updateCardProgress = createServerFn({ method: 'POST' })
+  .middleware([protectedFunctionMiddleware])
+  .inputValidator((data: { cardId: number, quality: number, lessonId: number }[]) => data)
+  .handler(async ({ context, data }) => {
+    const db = getDb()
+    const userId = context.userId
+
+    for (const item of data) {
+      const { cardId, quality, lessonId } = item
+
+      // Get existing progress
+      const existing = await db.query.userProgress.findFirst({
+        where: and(
+          eq(userProgress.userId, userId),
+          eq(userProgress.cardId, cardId),
+        ),
+      })
+
+      const sm2Input = {
+        quality,
+        repetitions: existing?.repetitions ?? 0,
+        easeFactor: existing?.easeFactor ?? 2.5,
+        interval: existing?.interval ?? 0,
+      }
+
+      const sm2Output = calculateSM2(sm2Input)
+
+      const values = {
+        userId,
+        cardId,
+        lessonId,
+        easeFactor: sm2Output.easeFactor,
+        interval: sm2Output.interval,
+        repetitions: sm2Output.repetitions,
+        lastReviewedAt: new Date().toISOString(),
+        nextReviewAt: sm2Output.nextReviewAt,
+        totalReviews: (existing?.totalReviews ?? 0) + 1,
+        correctReviews: (existing?.correctReviews ?? 0) + (quality >= 3 ? 1 : 0),
+        updatedAt: new Date().toISOString(),
+      }
+
+      await db
+        .insert(userProgress)
+        .values({
+          ...values,
+          createdAt: new Date().toISOString(),
+        })
+        .onConflictDoUpdate({
+          target: [userProgress.userId, userProgress.cardId],
+          set: values,
+        })
+    }
+
+    return { success: true }
+  })
+
+/**
+ * Get count of cards due for review today
+ */
+export const getDueCardsCount = createServerFn({ method: 'GET' })
+  .middleware([protectedFunctionMiddleware])
+  .handler(async ({ context }) => {
+    const db = getDb()
+    const userId = context.userId
+    const now = new Date().toISOString()
+
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(userProgress)
+      .where(
+        and(
+          eq(userProgress.userId, userId),
+          sql`${userProgress.nextReviewAt} <= ${now}`,
+        ),
+      )
+
+    return Number(result[0]?.count ?? 0)
+  })
+
+/**
+ * Get cards due for review today
+ */
+export const getDueCards = createServerFn({ method: 'GET' })
+  .middleware([protectedFunctionMiddleware])
+  .handler(async ({ context }) => {
+    const db = getDb()
+    const userId = context.userId
+    const now = new Date().toISOString()
+
+    const dueCards = await db
+      .select({
+        card: cards,
+        progress: userProgress,
+      })
+      .from(userProgress)
+      .innerJoin(cards, eq(userProgress.cardId, cards.id))
+      .where(
+        and(
+          eq(userProgress.userId, userId),
+          sql`${userProgress.nextReviewAt} <= ${now}`,
+        ),
+      )
+      .limit(50) // Limit to 50 cards per session for focus
+
+    return dueCards.map(item => ({
+      ...item.card,
+      metadata: (item.card.metadata ?? {}) as object,
+      progress: item.progress,
+    }))
   })

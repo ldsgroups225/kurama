@@ -519,71 +519,71 @@ function LessonDetailPage() {
           <CardContent>
             {isEditing
               ? (
-                <div className="space-y-4">
-                  <Textarea
-                    value={editedTeachPlan}
-                    onChange={e => setEditedTeachPlan(e.target.value)}
-                    className="min-h-[400px] font-mono text-sm"
-                    placeholder="Contenu Markdown du plan de leçon..."
-                  />
-                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={handleCancelEdit}>
-                      <X className="mr-2 h-4 w-4" />
-                      Annuler
-                    </Button>
-                    <Button
-                      onClick={() => updatePlanMutation.mutate()}
-                      disabled={updatePlanMutation.isPending}
-                    >
-                      {updatePlanMutation.isPending
-                        ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )
-                        : (
-                          <Save className="mr-2 h-4 w-4" />
-                        )}
-                      Enregistrer
-                    </Button>
-                  </div>
-                </div>
-              )
-              : lesson.teachPlan
-                ? (
-                  <div className="space-y-6">
-                    <MarkdownRenderer content={lesson.teachPlan} />
-
-                    {/* Sources */}
-                    {metadata?.sources && metadata.sources.length > 0 && (
-                      <div className="border-t pt-6">
-                        <h4 className="text-sm font-semibold mb-3">Sources</h4>
-                        <ul className="space-y-2">
-                          {metadata.sources.map(source => (
-                            <li key={generateUUID()} className="flex items-start gap-2">
-                              <ExternalLink className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
-                              <a
-                                href={source.uri}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-primary hover:underline break-all"
-                              >
-                                {source.title || source.uri}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                  <div className="space-y-4">
+                    <Textarea
+                      value={editedTeachPlan}
+                      onChange={e => setEditedTeachPlan(e.target.value)}
+                      className="min-h-[400px] font-mono text-sm"
+                      placeholder="Contenu Markdown du plan de leçon..."
+                    />
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={handleCancelEdit}>
+                        <X className="mr-2 h-4 w-4" />
+                        Annuler
+                      </Button>
+                      <Button
+                        onClick={() => updatePlanMutation.mutate()}
+                        disabled={updatePlanMutation.isPending}
+                      >
+                        {updatePlanMutation.isPending
+                          ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            )
+                          : (
+                              <Save className="mr-2 h-4 w-4" />
+                            )}
+                        Enregistrer
+                      </Button>
+                    </div>
                   </div>
                 )
+              : lesson.teachPlan
+                ? (
+                    <div className="space-y-6">
+                      <MarkdownRenderer content={lesson.teachPlan} />
+
+                      {/* Sources */}
+                      {metadata?.sources && metadata.sources.length > 0 && (
+                        <div className="border-t pt-6">
+                          <h4 className="text-sm font-semibold mb-3">Sources</h4>
+                          <ul className="space-y-2">
+                            {metadata.sources.map(source => (
+                              <li key={generateUUID()} className="flex items-start gap-2">
+                                <ExternalLink className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                                <a
+                                  href={source.uri}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-primary hover:underline break-all"
+                                >
+                                  {source.title || source.uri}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )
                 : (
-                  <div className="text-center py-12">
-                    <Sparkles className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                    <h3 className="mt-4 text-lg font-semibold">Aucun plan d'enseignement</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      Cliquez sur "Générer avec IA" pour créer un plan de leçon basé sur le curriculum ivoirien.
-                    </p>
-                  </div>
-                )}
+                    <div className="text-center py-12">
+                      <Sparkles className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                      <h3 className="mt-4 text-lg font-semibold">Aucun plan d'enseignement</h3>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Cliquez sur "Générer avec IA" pour créer un plan de leçon basé sur le curriculum ivoirien.
+                      </p>
+                    </div>
+                  )}
           </CardContent>
         </Card>
       </motion.div>
@@ -673,17 +673,17 @@ function LessonDetailPage() {
             >
               {generatePlanMutation.isPending
                 ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Génération...
-                  </>
-                )
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Génération...
+                    </>
+                  )
                 : (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Générer
-                  </>
-                )}
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Générer
+                    </>
+                  )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -726,17 +726,17 @@ function LessonDetailPage() {
             >
               {generateCardsMutation.isPending
                 ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Génération...
-                  </>
-                )
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Génération...
+                    </>
+                  )
                 : (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Générer
-                  </>
-                )}
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Générer
+                    </>
+                  )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -823,21 +823,21 @@ function LessonDetailPage() {
             >
               {saveCardsMutation.isPending
                 ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Enregistrement...
-                  </>
-                )
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Enregistrement...
+                    </>
+                  )
                 : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Enregistrer
-                    {' '}
-                    {generatedCards.length}
-                    {' '}
-                    cartes
-                  </>
-                )}
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Enregistrer
+                      {' '}
+                      {generatedCards.length}
+                      {' '}
+                      cartes
+                    </>
+                  )}
             </Button>
           </DialogFooter>
         </DialogContent>

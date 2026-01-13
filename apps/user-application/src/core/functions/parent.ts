@@ -243,7 +243,7 @@ export const getParentAlerts = createServerFn()
 
       // Success Alert (Streak milestone example)
       const streakData = await getStreakData(db, child.userId)
-      const streakId = `streak-7-${child.userId}` // Simplified ID for persistence
+      const streakId = `streak-7-${child.userId}`
       if (!readAlertIds.has(streakId)) {
         if (streakData.currentStreak >= 7) {
           alerts.push({
@@ -252,6 +252,32 @@ export const getParentAlerts = createServerFn()
             title: 'Série incroyable !',
             description: `${child.firstName} a une série de ${streakData.currentStreak} jours !`,
             createdAt: new Date(),
+            read: false,
+            childId: child.userId,
+          })
+        }
+      }
+
+      // Academic Excellence Alert
+      const excellentSessions = await db.query.studySessions.findMany({
+        where: and(
+          eq(studySessions.userId, child.userId),
+          sql`${studySessions.cardsCorrect}::float / NULLIF(${studySessions.cardsReviewed}, 0)::float >= 0.9`,
+        ),
+        orderBy: desc(studySessions.startedAt),
+        limit: 1,
+      })
+
+      if (excellentSessions.length > 0 && excellentSessions[0]) {
+        const session = excellentSessions[0]
+        const excellenceId = `excellence-${session.id}`
+        if (!readAlertIds.has(excellenceId)) {
+          alerts.push({
+            id: excellenceId,
+            type: 'success',
+            title: 'Excellence académique !',
+            description: `${child.firstName} a obtenu un score de 90%+ dans une session récente.`,
+            createdAt: new Date(session.startedAt || Date.now()),
             read: false,
             childId: child.userId,
           })

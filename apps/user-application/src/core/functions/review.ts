@@ -126,20 +126,14 @@ export const getReviewCardsCount = createServerFn({ method: 'GET' })
     const userId = context.userId
     const now = new Date().toISOString()
 
-    // Count cards needing review
+    // Count cards due for review according to SM-2
     const result = await db
       .select({ count: sql<number>`count(*)` })
       .from(userProgress)
       .where(
         and(
           eq(userProgress.userId, userId),
-          or(
-            lt(userProgress.easeFactor, 2500),
-            sql`${userProgress.nextReviewAt} <= ${now}`,
-            sql`CASE WHEN ${userProgress.totalReviews} > 0 
-                THEN (${userProgress.correctReviews}::float / ${userProgress.totalReviews}::float) < 0.7 
-                ELSE false END`,
-          ),
+          sql`${userProgress.nextReviewAt} <= ${now}`,
         ),
       )
 

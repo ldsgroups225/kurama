@@ -149,11 +149,11 @@ function UsersPage() {
           <Badge variant={user.profile.userType === 'student' ? 'default' : 'secondary'}>
             {user.profile.userType === 'student'
               ? (
-                <GraduationCap className="mr-1 h-3 w-3" />
-              )
+                  <GraduationCap className="mr-1 h-3 w-3" />
+                )
               : (
-                <UsersIcon className="mr-1 h-3 w-3" />
-              )}
+                  <UsersIcon className="mr-1 h-3 w-3" />
+                )}
             {userTypeLabels[user.profile.userType]}
           </Badge>
         )
@@ -185,11 +185,11 @@ function UsersPage() {
         <div className="flex flex-col gap-1">
           {user.profile?.isCompleted
             ? (
-              <Badge className="bg-success text-success-foreground">Profil complet</Badge>
-            )
+                <Badge className="bg-success text-success-foreground">Profil complet</Badge>
+              )
             : (
-              <Badge variant="outline">Profil incomplet</Badge>
-            )}
+                <Badge variant="outline">Profil incomplet</Badge>
+              )}
           {user.emailVerified && (
             <Badge variant="secondary" className="text-xs">Email vérifié</Badge>
           )}
