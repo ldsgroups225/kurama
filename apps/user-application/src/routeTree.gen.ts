@@ -14,6 +14,8 @@ import { Route as AuthRouteRouteImport } from './routes/_auth/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiMetricsRouteImport } from './routes/api/metrics'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as PublicTermsRouteImport } from './routes/_public/terms'
+import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
 import { Route as AuthAppIndexRouteImport } from './routes/_auth/app/index'
 import { Route as ApiStudyStartRouteImport } from './routes/api/study/start'
 import { Route as ApiStudyProgressRouteImport } from './routes/api/study/progress'
@@ -64,6 +66,16 @@ const ApiMetricsRoute = ApiMetricsRouteImport.update({
 const ApiHealthRoute = ApiHealthRouteImport.update({
   id: '/api/health',
   path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicTermsRoute = PublicTermsRouteImport.update({
+  id: '/_public/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicPrivacyRoute = PublicPrivacyRouteImport.update({
+  id: '/_public/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthAppIndexRoute = AuthAppIndexRouteImport.update({
@@ -213,6 +225,8 @@ const AuthAppPolarCheckoutSuccessRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PublicPrivacyRoute
+  '/terms': typeof PublicTermsRoute
   '/api/health': typeof ApiHealthRoute
   '/api/metrics': typeof ApiMetricsRoute
   '/app/daily-challenge': typeof AuthAppDailyChallengeRoute
@@ -246,6 +260,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PublicPrivacyRoute
+  '/terms': typeof PublicTermsRoute
   '/api/health': typeof ApiHealthRoute
   '/api/metrics': typeof ApiMetricsRoute
   '/app/daily-challenge': typeof AuthAppDailyChallengeRoute
@@ -281,6 +297,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_auth': typeof AuthRouteRouteWithChildren
   '/onboarding': typeof OnboardingRoute
+  '/_public/privacy': typeof PublicPrivacyRoute
+  '/_public/terms': typeof PublicTermsRoute
   '/api/health': typeof ApiHealthRoute
   '/api/metrics': typeof ApiMetricsRoute
   '/_auth/app/daily-challenge': typeof AuthAppDailyChallengeRoute
@@ -316,6 +334,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/onboarding'
+    | '/privacy'
+    | '/terms'
     | '/api/health'
     | '/api/metrics'
     | '/app/daily-challenge'
@@ -349,6 +369,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/onboarding'
+    | '/privacy'
+    | '/terms'
     | '/api/health'
     | '/api/metrics'
     | '/app/daily-challenge'
@@ -383,6 +405,8 @@ export interface FileRouteTypes {
     | '/'
     | '/_auth'
     | '/onboarding'
+    | '/_public/privacy'
+    | '/_public/terms'
     | '/api/health'
     | '/api/metrics'
     | '/_auth/app/daily-challenge'
@@ -418,6 +442,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
+  PublicPrivacyRoute: typeof PublicPrivacyRoute
+  PublicTermsRoute: typeof PublicTermsRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiMetricsRoute: typeof ApiMetricsRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -461,6 +487,20 @@ declare module '@tanstack/react-router' {
       path: '/api/health'
       fullPath: '/api/health'
       preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public/terms': {
+      id: '/_public/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof PublicTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public/privacy': {
+      id: '/_public/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PublicPrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_auth/app/': {
@@ -715,6 +755,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
+  PublicPrivacyRoute: PublicPrivacyRoute,
+  PublicTermsRoute: PublicTermsRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiMetricsRoute: ApiMetricsRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

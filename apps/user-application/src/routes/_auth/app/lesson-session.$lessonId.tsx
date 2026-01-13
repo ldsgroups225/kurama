@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { LogoLoader } from '@/components/ui/logo-loader'
 import { getLessonDetails } from '@/core/functions/learning'
+import { updateCardProgress } from '@/core/functions/progress'
 import { useAutoplay } from '@/hooks/use-autoplay'
 import { useCardHeight } from '@/hooks/use-card-height'
 import { useCardSwipeAnimations } from '@/hooks/use-card-swipe-animations'
@@ -104,6 +105,9 @@ function SessionPage() {
       struggledAnswers: 0,
     }
   })
+
+  // Track individual card results for SM-2
+  const [cardResults, setCardResults] = useState<{ cardId: number, quality: number, lessonId: number }[]>([])
 
   // Track navigation state to prevent flash
   const [isNavigatingToSummary, setIsNavigatingToSummary] = useState(false)
@@ -252,6 +256,11 @@ function SessionPage() {
         mode: mode as 'flashcards' | 'quiz' | 'exam',
       })
 
+      // Submit card-level results for SM-2
+      if (cardResults.length > 0) {
+        await updateCardProgress({ data: cardResults })
+      }
+
       navigate({
         to: '/app/lesson-summary/$lessonId',
         params: { lessonId },
@@ -303,6 +312,27 @@ function SessionPage() {
           ? (prev.struggledAnswers || 0) + 1
           : prev.struggledAnswers || 0,
       }))
+
+      // Track result for SM-2
+      if (currentCard) {
+        let quality = 0
+        if (response === 'correct') {
+          if ((timeSpent || 0) < 3)
+            quality = 5
+          else if ((timeSpent || 0) < 8)
+            quality = 4
+          else quality = 3
+        }
+        else {
+          quality = 0 // Incorrect
+        }
+
+        setCardResults(prev => [...prev, {
+          cardId: currentCard.id,
+          quality,
+          lessonId: Number(lessonId),
+        }])
+      }
 
       // Trigger vibration feedback based on mode and response
       if (response === 'correct') {

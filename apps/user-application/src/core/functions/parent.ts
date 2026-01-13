@@ -2,6 +2,7 @@ import { and, desc, eq, gte, inArray, sql } from '@kurama/data-ops/database/driz
 import { getDb } from '@kurama/data-ops/database/setup'
 import {
   lessons,
+  parentAlertReads,
   studySessions,
   subjects,
   userProfiles,
@@ -209,6 +210,12 @@ export const getParentAlerts = createServerFn()
 
     const alerts: any[] = []
 
+    // 2. Fetch read alerts for this parent
+    const readAlerts = await db.query.parentAlertReads.findMany({
+      where: eq(parentAlertReads.parentId, parentId),
+    })
+    const readAlertIds = new Set(readAlerts.map((r: { alertId: string }) => r.alertId))
+
     for (const child of children) {
       // Fetch child's last activity
       const lastSession = await db.query.studySessions.findFirst({
@@ -219,32 +226,105 @@ export const getParentAlerts = createServerFn()
       const lastActiveAt = lastSession ? new Date(lastSession.startedAt) : null
 
       // Inactivity Alert
-      if (!lastActiveAt || (Date.now() - lastActiveAt.getTime()) > (3 * 24 * 60 * 60 * 1000)) {
-        alerts.push({
-          id: `inactivity-${child.userId}`,
-          type: 'warning',
-          title: 'Inactivité prolongée',
-          description: `${child.firstName} n'a pas étudié depuis ${lastActiveAt ? '3 jours' : 'longtemps'}.`,
-          createdAt: new Date(),
-          read: false,
-          childId: child.userId,
-        })
+      const inactivityId = `inactivity-${child.userId}`
+      if (!readAlertIds.has(inactivityId)) {
+        if (!lastActiveAt || (Date.now() - lastActiveAt.getTime()) > (3 * 24 * 60 * 60 * 1000)) {
+          alerts.push({
+            id: inactivityId,
+            type: 'warning',
+            title: 'Inactivité prolongée',
+            description: `${child.firstName} n'a pas étudié depuis ${lastActiveAt ? '3 jours' : 'longtemps'}.`,
+            createdAt: new Date(),
+            read: false,
+            childId: child.userId,
+          })
+        }
       }
 
       // Success Alert (Streak milestone example)
       const streakData = await getStreakData(db, child.userId)
-      if (streakData.currentStreak >= 7) {
-        alerts.push({
-          id: `streak-7-${child.userId}-${Date.now()}`,
-          type: 'success',
-          title: 'Série incroyable !',
-          description: `${child.firstName} a une série de ${streakData.currentStreak} jours !`,
-          createdAt: new Date(),
-          read: false,
-          childId: child.userId,
-        })
+      const streakId = `streak-7-${child.userId}`
+      if (!readAlertIds.has(streakId)) {
+        if (streakData.currentStreak >= 7) {
+          alerts.push({
+            id: streakId,
+            type: 'success',
+            title: 'Série incroyable !',
+            description: `${child.firstName} a une série de ${streakData.currentStreak} jours !`,
+            createdAt: new Date(),
+            read: false,
+            childId: child.userId,
+          })
+        }
+      }
+
+      // Academic Excellence Alert
+      const excellentSessions = await db.query.studySessions.findMany({
+        where: and(
+          eq(studySessions.userId, child.userId),
+          sql`${studySessions.cardsCorrect}::float / NULLIF(${studySessions.cardsReviewed}, 0)::float >= 0.9`,
+        ),
+        orderBy: desc(studySessions.startedAt),
+        limit: 1,
+      })
+
+      if (excellentSessions.length > 0 && excellentSessions[0]) {
+        const session = excellentSessions[0]
+        const excellenceId = `excellence-${session.id}`
+        if (!readAlertIds.has(excellenceId)) {
+          alerts.push({
+            id: excellenceId,
+            type: 'success',
+            title: 'Excellence académique !',
+            description: `${child.firstName} a obtenu un score de 90%+ dans une session récente.`,
+            createdAt: new Date(session.startedAt || Date.now()),
+            read: false,
+            childId: child.userId,
+          })
+        }
       }
     }
 
     return alerts
+  })
+
+/**
+ * Mark a specific alert as read
+ */
+export const markAlertAsRead = createServerFn()
+  .middleware([protectedFunctionMiddleware])
+  .inputValidator((alertId: string) => alertId)
+  .handler(async ({ context, data: alertId }) => {
+    const db = getDb()
+    const { userId: parentId } = context
+
+    await db.insert(parentAlertReads).values({
+      parentId,
+      alertId,
+    }).onConflictDoNothing()
+
+    return { success: true }
+  })
+
+/**
+ * Mark all alerts for a child or all children as read
+ */
+export const markAllAlertsAsRead = createServerFn()
+  .middleware([protectedFunctionMiddleware])
+  .inputValidator((alertIds: string[]) => alertIds)
+  .handler(async ({ context, data: alertIds }) => {
+    const db = getDb()
+    const { userId: parentId } = context
+
+    if (alertIds.length === 0)
+      return { success: true }
+
+    await db.insert(parentAlertReads).values(
+      alertIds.map(id => ({
+        parentId,
+        alertId: id,
+      })),
+    ).onConflictDoNothing()
+
+    return { success: true }
   })

@@ -150,8 +150,9 @@ export const series = pgTable("series", {
 export const studySessions = pgTable("study_sessions", {
 	id: serial().primaryKey().notNull(),
 	userId: text("user_id").notNull(),
-	lessonId: integer("lesson_id").notNull(),
-	mode: text("mode").notNull(), // Added mode column
+	lessonId: integer("lesson_id"), // Now optional for transversal reviews
+	subjectId: integer("subject_id"), // New column for subject-level sessions
+	mode: text("mode").notNull(),
 	startedAt: timestamp("started_at", { mode: 'string' }).defaultNow().notNull(),
 	endedAt: timestamp("ended_at", { mode: 'string' }),
 	cardsReviewed: integer("cards_reviewed").default(0).notNull(),
@@ -168,7 +169,12 @@ export const studySessions = pgTable("study_sessions", {
 		columns: [table.lessonId],
 		foreignColumns: [lessons.id],
 		name: "study_sessions_lesson_id_lessons_id_fk"
-	}).onDelete("cascade"),
+	}).onDelete("set null"),
+	foreignKey({
+		columns: [table.subjectId],
+		foreignColumns: [subjects.id],
+		name: "study_sessions_subject_id_subjects_id_fk"
+	}).onDelete("set null"),
 	// Index for streak calculation performance
 	index("idx_study_sessions_user_started").on(table.userId, table.startedAt),
 ]);
@@ -200,7 +206,7 @@ export const subjectOfferings = pgTable("subject_offerings", {
 
 export const userProfiles = pgTable("user_profiles", {
 	userId: text("user_id").primaryKey().notNull(),
-	userType: text("user_type").$type<'student' | 'parent'>().notNull(),
+	userType: text("user_type").$type<'student' | 'parent' | 'admin'>().notNull(),
 	firstName: text("first_name").notNull(),
 	lastName: text("last_name").notNull(),
 	phone: text(),
@@ -276,6 +282,9 @@ export const userProgress = pgTable("user_progress", {
 		foreignColumns: [lessons.id],
 		name: "user_progress_lesson_id_lessons_id_fk"
 	}).onDelete("cascade"),
+	unique("user_progress_user_id_card_id_unique").on(table.userId, table.cardId),
+	index("idx_user_progress_user_next_review").on(table.userId, table.nextReviewAt),
+	index("idx_user_progress_card_id").on(table.cardId),
 ]);
 
 // Type for teach plan metadata
@@ -359,6 +368,7 @@ export const userAchievements = pgTable("user_achievements", {
 	achievementId: text("achievement_id").notNull(),
 	unlockedAt: timestamp("unlocked_at", { mode: 'string' }).defaultNow().notNull(),
 	notified: boolean("notified").default(false).notNull(),
+	notifiedAt: timestamp("notified_at", { mode: 'string' }),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	foreignKey({
@@ -369,6 +379,21 @@ export const userAchievements = pgTable("user_achievements", {
 	unique("user_achievements_user_achievement_unique").on(table.userId, table.achievementId),
 	index("idx_user_achievements_user_id").on(table.userId),
 	index("idx_user_achievements_unlocked_at").on(table.unlockedAt),
+]);
+
+export const parentAlertReads = pgTable("parent_alert_reads", {
+	id: serial().primaryKey().notNull(),
+	parentId: text("parent_id").notNull(),
+	alertId: text("alert_id").notNull(),
+	readAt: timestamp("read_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+		columns: [table.parentId],
+		foreignColumns: [authUser.id],
+		name: "parent_alert_reads_parent_id_auth_user_id_fk"
+	}).onDelete("cascade"),
+	unique("parent_alert_reads_unique").on(table.parentId, table.alertId),
+	index("idx_parent_alert_reads_parent_id").on(table.parentId),
 ]);
 
 export const levelSeries = pgTable("level_series", {

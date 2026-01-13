@@ -127,7 +127,7 @@ interface RecentSession {
   userId: string
   userName: string | null
   userEmail: string | null
-  lessonId: number
+  lessonId: number | null
   lessonTitle: string | null
   mode: string
   cardsReviewed: number

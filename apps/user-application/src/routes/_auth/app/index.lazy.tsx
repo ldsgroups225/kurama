@@ -260,6 +260,42 @@ function AppHome() {
             </div>
           </motion.section>
 
+          {/* SM-2 Due Today Card (if count > 0) */}
+          {reviewCount > 0 && (
+            <motion.section variants={itemVariants}>
+              <div className="relative overflow-hidden rounded-3xl border border-indigo-500/20 bg-indigo-500/5 p-6 backdrop-blur-xl">
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                  <Brain className="w-24 h-24 text-indigo-400" />
+                </div>
+                <div className="relative">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="h-2 w-2 rounded-full bg-indigo-400 animate-pulse" />
+                    <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Révision Spacée</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-foreground">À réviser aujourd'hui</h3>
+                  <p className="text-sm text-muted-foreground mt-1 mb-4">
+                    {reviewCount}
+                    {' '}
+                    carte
+                    {reviewCount > 1 ? 's sont' : ' est'}
+                    {' '}
+                    prête
+                    {reviewCount > 1 ? 's' : ''}
+                    {' '}
+                    pour un ancrage mémoriel optimal.
+                  </p>
+                  <Button
+                    onClick={() => navigate({ to: '/app/quick-review' })}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl px-6 h-10 shadow-lg shadow-indigo-500/20 active:scale-95 transition-all text-sm"
+                  >
+                    Réviser maintenant
+                    <Zap className="w-4 h-4 ml-2 fill-current" />
+                  </Button>
+                </div>
+              </div>
+            </motion.section>
+          )}
+
           {/* Quick Actions Grid */}
           <motion.section variants={itemVariants}>
             <div className="flex items-center justify-between mb-4 px-1">

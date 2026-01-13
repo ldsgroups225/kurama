@@ -3,7 +3,7 @@ import { z } from "zod";
 /**
  * User type selection schema
  */
-export const userTypeSchema = z.enum(["student", "parent"]);
+export const userTypeSchema = z.enum(["student", "parent", "admin"]);
 
 /**
  * Student profile schema

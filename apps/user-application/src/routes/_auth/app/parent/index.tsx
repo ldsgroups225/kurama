@@ -7,6 +7,7 @@ import {
   ParentBottomNav,
   ParentHeader,
   StreakCard,
+  SubjectPerformanceGrid,
   WeeklyStudyCard,
 } from '@/components/parent-dashboard'
 import { useParentDashboard } from '@/hooks'
@@ -98,6 +99,19 @@ function ParentDashboard() {
               longestStreak={childStats.longestStreak}
             />
           </div>
+
+          {/* Subject Performance Grid */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="space-y-3"
+          >
+            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider px-1">
+              Performance par Matière
+            </h3>
+            <SubjectPerformanceGrid performance={childStats.subjectPerformance} />
+          </motion.div>
 
           {/* Quick Summary Section */}
           <motion.div

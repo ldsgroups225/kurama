@@ -30,7 +30,7 @@ interface UserData {
   image: string | null
   createdAt: string
   profile: {
-    userType: 'student' | 'parent' | null
+    userType: 'student' | 'parent' | 'admin' | null
     firstName: string | null
     lastName: string | null
     phone: string | null
@@ -55,6 +55,7 @@ interface Grade {
 const userTypeLabels: Record<string, string> = {
   student: 'Élève',
   parent: 'Parent',
+  admin: 'Administrateur',
 }
 
 function UsersPage() {

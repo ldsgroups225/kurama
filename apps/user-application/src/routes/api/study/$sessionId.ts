@@ -1,6 +1,6 @@
-import { eq } from '@kurama/data-ops/database/drizzle-orm'
+import { eq, inArray } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
-import { cards, studySessions } from '@kurama/data-ops/drizzle/schema'
+import { cards, lessons, studySessions } from '@kurama/data-ops/drizzle/schema'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/api/study/$sessionId')({
@@ -24,7 +24,6 @@ export const Route = createFileRoute('/api/study/$sessionId')({
           }
 
           // Get Cards
-          // Logic depends on session mode and lessonId
           let sessionCards: typeof cards.$inferSelect[] = []
 
           if (session.lessonId) {
@@ -33,9 +32,26 @@ export const Route = createFileRoute('/api/study/$sessionId')({
               orderBy: (cards, { asc }) => [asc(cards.displayOrder)],
             })
           }
-          else {
-            // TODO: Handle subject-level or deck-level sessions
-            // For now return empty or mock
+          else if (session.subjectId) {
+            // TRANSVERSAL REVIEW: Get cards from all lessons in this subject
+            // Note: In a real app, we'd filter by user's grade/series here too
+            // But since studySessions are created for a specific user,
+            // the subjectId should already imply their curriculum.
+
+            const subjectLessons = await db.query.lessons.findMany({
+              where: eq(lessons.subjectId, session.subjectId),
+              columns: { id: true },
+            })
+
+            const lessonIds = subjectLessons.map(l => l.id)
+
+            if (lessonIds.length > 0) {
+              sessionCards = await db.query.cards.findMany({
+                where: inArray(cards.lessonId, lessonIds),
+                orderBy: (cards, { asc }) => [asc(cards.lessonId), asc(cards.displayOrder)],
+                limit: 50, // Limit for broad subject sessions to avoid overload
+              })
+            }
           }
 
           // Filter cards based on mode if needed (e.g. only multichoice for Quiz mode)

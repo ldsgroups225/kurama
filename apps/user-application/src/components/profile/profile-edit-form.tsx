@@ -61,7 +61,7 @@ function InputLabel({ children, htmlFor }: { children: React.ReactNode, htmlFor?
 export function ProfileEditForm({ profile, onBack, onSuccess }: ProfileEditFormProps) {
   const { toast } = useToast()
   const [formData, setFormData] = useState<Partial<StudentProfile | ParentProfile>>({
-    userType: profile?.userType || 'student',
+    userType: (profile?.userType === 'parent' ? 'parent' : 'student') as 'student' | 'parent',
     firstName: profile?.firstName || '',
     lastName: profile?.lastName || '',
     ...(profile?.userType === 'student' && {

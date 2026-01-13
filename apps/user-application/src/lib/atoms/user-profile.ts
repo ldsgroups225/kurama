@@ -7,7 +7,7 @@ const isClient = typeof window !== 'undefined'
 
 // Extended profile data with additional fields from session
 export interface UserProfileData {
-  userType?: 'student' | 'parent'
+  userType?: 'student' | 'parent' | 'admin'
   firstName?: string
   lastName?: string
   email?: string
