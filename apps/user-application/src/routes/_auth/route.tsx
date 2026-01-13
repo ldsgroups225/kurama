@@ -160,7 +160,6 @@ function ParentRedirectGuard({ userType }: { userType?: string | null }) {
   useEffect(() => {
     // If user is a parent and is on a student route (starting with /app but not /app/parent)
     if (userType === 'parent' && pathname.startsWith('/app') && !pathname.startsWith('/app/parent')) {
-      console.log('Parent detected on student route, redirecting to parent dashboard...')
       navigate({ to: '/app/parent', replace: true })
     }
   }, [userType, pathname, navigate])

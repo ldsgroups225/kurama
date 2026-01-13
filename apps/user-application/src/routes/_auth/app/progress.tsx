@@ -134,7 +134,7 @@ function ProgressPage() {
   const handleDismissAchievements = (achievementIds: string[]) => {
     setNewlyUnlockedAchievements([])
     // TODO: Call markAchievementsNotified API
-    console.log('Marking achievements as notified:', achievementIds)
+    console.warn('Marking achievements as notified:', achievementIds)
   }
 
   // Animation variants

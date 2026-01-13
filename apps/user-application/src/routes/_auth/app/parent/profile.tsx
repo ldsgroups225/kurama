@@ -27,6 +27,7 @@ function ParentProfilePage() {
     selectedChild,
     selectChild,
     unreadAlertsCount,
+    isLoading,
   } = useParentDashboard()
 
   const handleSignOut = async () => {
@@ -54,6 +55,10 @@ function ParentProfilePage() {
 
   const getChildInitials = (firstName: string, lastName: string) => {
     return `${firstName[0]}${lastName[0]}`.toUpperCase()
+  }
+
+  if (isLoading && children.length === 0) {
+    return <div className="flex items-center justify-center min-h-screen">Chargement...</div>
   }
 
   if (!selectedChild)

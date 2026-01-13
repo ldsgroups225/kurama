@@ -52,7 +52,8 @@ function ParentAlertsPage() {
     }
   }
 
-  const formatTime = (date: Date) => {
+  const formatTime = (dateInput: Date | string) => {
+    const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput
     const now = new Date()
     const diffMs = now.getTime() - date.getTime()
     const diffHours = Math.floor(diffMs / 3600000)

@@ -170,6 +170,7 @@ export function AchievementUnlockToast({ achievements, onDismiss }: AchievementU
 
               {/* Close button */}
               <button
+                type="button"
                 onClick={handleClose}
                 aria-label="Fermer"
                 className="absolute top-4 right-4 p-2 rounded-full text-white/50 hover:bg-white/10 hover:text-white transition-colors z-20"
@@ -235,9 +236,9 @@ export function AchievementUnlockToast({ achievements, onDismiss }: AchievementU
                   </motion.div>
 
                   {/* Floating Particles */}
-                  {[...Array.from({ length: 6 })].map((_, i) => (
+                  {[1, 2, 3, 4, 5, 6].map((key, i) => (
                     <motion.div
-                      key={i}
+                      key={key}
                       initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
                       animate={{
                         opacity: [0, 1, 0],
@@ -290,6 +291,7 @@ export function AchievementUnlockToast({ achievements, onDismiss }: AchievementU
                 >
                   {/* Action Button */}
                   <button
+                    type="button"
                     onClick={handleNext}
                     className={cn(
                       'group w-full py-4 px-6 rounded-xl font-bold text-white shadow-lg transition-all',
@@ -320,9 +322,9 @@ export function AchievementUnlockToast({ achievements, onDismiss }: AchievementU
                   {/* Progress Dots */}
                   {achievements.length > 1 && (
                     <div className="flex justify-center gap-2 pt-2">
-                      {achievements.map((_, i) => (
+                      {achievements.map((achievement, i) => (
                         <div
-                          key={i}
+                          key={achievement.id}
                           className={cn(
                             'h-1.5 rounded-full transition-all duration-300',
                             i === currentIndex

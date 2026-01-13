@@ -25,6 +25,7 @@ function ParentDashboard() {
     selectChild,
     childStats,
     unreadAlertsCount,
+    isLoading,
   } = useParentDashboard()
 
   // Redirect students if they land here
@@ -33,6 +34,10 @@ function ParentDashboard() {
       navigate({ to: '/app', replace: true })
     }
   }, [userProfile?.userType, navigate])
+
+  if (isLoading && children.length === 0) {
+    return <div className="flex items-center justify-center min-h-screen">Chargement...</div>
+  }
 
   if (!selectedChild || !childStats)
     return null
