@@ -1,4 +1,5 @@
 import type { UserType } from '@kurama/data-ops/zod-schema/profile'
+import { Link } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ArrowRight, GraduationCap, Users } from '@/lib/icons'
@@ -112,27 +113,21 @@ export function UserTypeSelection({ onSelect }: UserTypeSelectionProps) {
         <p className="mt-10 text-center text-xs text-muted-foreground font-medium">
           En continuant, vous acceptez nos
           {' '}
-          <button
-            type="button"
+          <Link
+            to="/terms"
             className="text-indigo-400 hover:text-indigo-300 transition-colors underline underline-offset-4"
-            onClick={() => {
-              // TODO: Navigate to terms page
-            }}
           >
             Conditions d'utilisation
-          </button>
+          </Link>
           {' '}
           et notre
           {' '}
-          <button
-            type="button"
+          <Link
+            to="/privacy"
             className="text-indigo-400 hover:text-indigo-300 transition-colors underline underline-offset-4"
-            onClick={() => {
-              // TODO: Navigate to privacy page
-            }}
           >
             Politique de confidentialité
-          </button>
+          </Link>
         </p>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { authUser, authAccount, authSession, lessons, cards, studySessions, grades, subjectOfferings, subjects, series, userProfiles, userProgress, userLessonMastery, levelSeries, subscriptions, orders, referrals, discountUsage } from "./schema";
+import { authUser, authAccount, authSession, lessons, cards, studySessions, grades, subjectOfferings, subjects, series, userProfiles, userProgress, userLessonMastery, levelSeries, subscriptions, orders, referrals, discountUsage, parentAlertReads } from "./schema";
 
 export const authAccountRelations = relations(authAccount, ({ one }) => ({
 	authUser: one(authUser, {
@@ -189,5 +189,12 @@ export const discountUsageRelations = relations(discountUsage, ({ one }) => ({
 	order: one(orders, {
 		fields: [discountUsage.orderId],
 		references: [orders.id]
+	}),
+}));
+
+export const parentAlertReadsRelations = relations(parentAlertReads, ({ one }) => ({
+	parent: one(authUser, {
+		fields: [parentAlertReads.parentId],
+		references: [authUser.id],
 	}),
 }));

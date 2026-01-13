@@ -359,6 +359,7 @@ export const userAchievements = pgTable("user_achievements", {
 	achievementId: text("achievement_id").notNull(),
 	unlockedAt: timestamp("unlocked_at", { mode: 'string' }).defaultNow().notNull(),
 	notified: boolean("notified").default(false).notNull(),
+	notifiedAt: timestamp("notified_at", { mode: 'string' }),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	foreignKey({

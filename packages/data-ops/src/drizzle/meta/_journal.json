@@ -85,6 +85,13 @@
       "when": 1768338859476,
       "tag": "0011_real_pyro",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1768339227294,
+      "tag": "0012_burly_karnak",
+      "breakpoints": true
     }
   ]
 }

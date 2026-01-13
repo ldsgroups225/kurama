@@ -28,19 +28,19 @@
   - [x] 1.2 Add `notifiedAt` (timestamp) to achievement tracking (verify existing table name)
   - [x] 1.3 Create a table or mechanism to track "read" state for parent alerts
   - [x] 1.4 Generate and apply migrations
-- [ ] 2.0 Parent Alerts Persistence Logic
-  - [ ] 2.1 Implement `markAlertAsRead` and `markAllAlertsAsRead` server functions in `parent.ts`
-  - [ ] 2.2 Update `useParentAlerts` hook to use actual server functions instead of `console.warn`
-  - [ ] 2.3 Refactor `getParentAlerts` to exclude or mark read alerts based on DB state
-- [ ] 3.0 Achievement Notification Tracking
-  - [ ] 3.1 Implement `markAchievementsNotified` server function
-  - [ ] 3.2 Update `AchievementUnlockToast` or its parent to call this function after display
-  - [ ] 3.3 Ensure the progress page only triggers celebrations for unnotified achievements
-- [ ] 4.0 Public Legal Pages & Navigation Links
-  - [ ] 4.1 Create `/_public/terms` route and component with placeholder content
-  - [ ] 4.2 Create `/_public/privacy` route and component with placeholder content
-  - [ ] 4.3 Update `AuthScreen` and `UserTypeSelection` links to point to these new routes
-- [ ] 5.0 Admin Access Security Implementation
-  - [ ] 5.1 Update admin middleware to verify `userType === 'admin'`
-  - [ ] 5.2 Add a security check in `kurama-admin` to prevent non-admin access
-  - [ ] 5.3 Final cleanup of all identified "TODO" comments in the codebase
+- [x] 2.0 Parent Alerts Persistence Logic
+  - [x] 2.1 Implement `markAlertAsRead` and `markAllAlertsAsRead` server functions in `parent.ts`
+  - [x] 2.2 Update `useParentAlerts` hook to use actual server functions instead of `console.warn`
+  - [x] 2.3 Refactor `getParentAlerts` to exclude or mark read alerts based on DB state
+- [x] 3.0 Achievement Notification Tracking
+  - [x] 3.1 Implement `markAchievementsNotified` server function
+  - [x] 3.2 Update `AchievementUnlockToast` or its parent to call this function after display
+  - [x] 3.3 Ensure the progress page only triggers celebrations for unnotified achievements
+- [x] 4.0 Public Legal Pages & Navigation Links
+  - [x] 4.1 Create `/_public/terms` route and component with placeholder content
+  - [x] 4.2 Create `/_public/privacy` route and component with placeholder content
+  - [x] 4.3 Update `AuthScreen` and `UserTypeSelection` links to point to these new routes
+- [x] 5.0 Admin Access Security Implementation
+  - [x] 5.1 Update admin middleware to verify `userType === 'admin'`
+  - [x] 5.2 Add a security check in `kurama-admin` to prevent non-admin access
+  - [x] 5.3 Final cleanup of all identified "TODO" comments in the codebase

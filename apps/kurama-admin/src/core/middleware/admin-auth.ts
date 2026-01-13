@@ -1,3 +1,6 @@
+import { eq } from '@kurama/data-ops/database/drizzle-orm'
+import { getDb } from '@kurama/data-ops/database/setup'
+import { userProfiles } from '@kurama/data-ops/drizzle/schema'
 import { getAuth } from '@kurama/data-ops/auth/server'
 import { createMiddleware } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
@@ -11,14 +14,21 @@ async function getAuthContext() {
     throw new Error('Unauthorized')
   }
 
-  // TODO: Add admin role check here when schema is ready
-  // const adminRole = await db.query.adminRoles.findFirst(...)
+  const db = getDb()
+  const profile = await db.query.userProfiles.findFirst({
+    where: eq(userProfiles.userId, session.user.id),
+  })
+
+  if (!profile || profile.userType !== 'admin') {
+    throw new Error('Forbidden: Admin access required')
+  }
 
   return {
     auth,
     userId: session.user.id,
     email: session.user.email,
     session,
+    profile,
   }
 }
 

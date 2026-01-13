@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { Suspense, useState } from 'react'
 import { createLazyComponent } from '@/lib/lazy-helpers'
 import { SocialAuth } from './social-auth'
@@ -59,11 +60,11 @@ export function AuthScreen() {
           >
             {step === 'email'
               ? (
-                  <EmailStep onSubmit={handleEmailSubmit} />
-                )
+                <EmailStep onSubmit={handleEmailSubmit} />
+              )
               : (
-                  <OtpStep email={email} onBack={handleBackToEmail} />
-                )}
+                <OtpStep email={email} onBack={handleBackToEmail} />
+              )}
           </Suspense>
 
           {/* Divider */}
@@ -83,27 +84,21 @@ export function AuthScreen() {
         <p className="mt-8 text-center text-xs text-muted-foreground animate-in fade-in slide-in-from-bottom-5 duration-700 delay-200">
           En continuant, vous acceptez nos
           {' '}
-          <button
-            type="button"
+          <Link
+            to="/terms"
             className="text-primary hover:text-primary/80 transition-colors font-medium underline underline-offset-4"
-            onClick={() => {
-              // TODO: Navigate to terms page
-            }}
           >
             Conditions d'utilisation
-          </button>
+          </Link>
           {' '}
           et notre
           {' '}
-          <button
-            type="button"
+          <Link
+            to="/privacy"
             className="text-primary hover:text-primary/80 transition-colors font-medium underline underline-offset-4"
-            onClick={() => {
-              // TODO: Navigate to privacy page
-            }}
           >
             Politique de confidentialité
-          </button>
+          </Link>
         </p>
       </div>
     </div>

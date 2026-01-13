@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useAtom } from 'jotai'
 import { useCallback, useMemo } from 'react'
-import { getChildStats, getLinkedChildren, getParentAlerts } from '@/core/functions/parent'
+import { getChildStats, getLinkedChildren, getParentAlerts, markAlertAsRead, markAllAlertsAsRead } from '@/core/functions/parent'
 import { currentChildIdAtom } from '@/lib/atoms/parent-dashboard'
 
 /**
@@ -85,15 +85,26 @@ export function useParentAlerts() {
 
   const unreadCount = alerts.filter(a => !a.read).length
 
-  const markAsRead = useCallback((_alertId: string) => {
-    // TODO: For now, since no backend table exists, we mock the effect
-    // In production, this would call a mutation
-    console.warn('Mark alert as read:', _alertId)
-  }, [])
+  const markReadMutation = useMutation({
+    mutationFn: (alertId: string) => markAlertAsRead({ data: alertId }),
+    onSuccess: () => refetch(),
+  })
+
+  const markAllReadMutation = useMutation({
+    mutationFn: (alertIds: string[]) => markAllAlertsAsRead({ data: alertIds }),
+    onSuccess: () => refetch(),
+  })
+
+  const markAsRead = useCallback((alertId: string) => {
+    markReadMutation.mutate(alertId)
+  }, [markReadMutation])
 
   const markAllAsRead = useCallback(() => {
-    console.warn('Mark all alerts as read')
-  }, [])
+    const unreadIds = alerts.filter(a => !a.read).map(a => a.id)
+    if (unreadIds.length > 0) {
+      markAllReadMutation.mutate(unreadIds)
+    }
+  }, [alerts, markAllReadMutation])
 
   return {
     alerts,

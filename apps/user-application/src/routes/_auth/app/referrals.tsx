@@ -21,7 +21,8 @@ function ReferralsPage() {
     // window.history.length > 2 usually implies we have somewhere to go back to (current + previous + root)
     if (window.history.length > 2) {
       router.history.back()
-    } else {
+    }
+    else {
       // Fallback to dashboard
       router.navigate({ to: '/app' })
     }

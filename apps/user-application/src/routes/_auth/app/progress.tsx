@@ -1,5 +1,5 @@
 import type { AchievementWithProgress } from '@kurama/data-ops/queries/achievements'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   Award,
@@ -33,7 +33,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { LogoLoader } from '@/components/ui/logo-loader'
-import { getProgressStats } from '@/core/functions/progress'
+import { getProgressStats, markAchievementsAsNotified } from '@/core/functions/progress'
 import { authClient, isSigningOut } from '@/lib/auth-client'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
@@ -103,38 +103,19 @@ function ProgressPage() {
   })
 
   // Handle newly unlocked achievements with localStorage filtering
+  const markNotifiedMutation = useMutation({
+    mutationFn: (ids: string[]) => markAchievementsAsNotified({ data: ids }),
+  })
+
   useEffect(() => {
-    if (data?.newlyUnlocked && data.newlyUnlocked.length > 0 && userId) {
-      const storageKey = `seen_achievements_${userId}`
-
-      try {
-        // Read previously seen achievements
-        const stored = localStorage.getItem(storageKey)
-        const seenIds = new Set(stored ? JSON.parse(stored) : [])
-
-        // Filter out achievements that have been seen
-        const trulyNew = data.newlyUnlocked.filter(a => !seenIds.has(a.id))
-
-        if (trulyNew.length > 0) {
-          setNewlyUnlockedAchievements(trulyNew)
-
-          // Update localStorage immediately to mark these as seen
-          const updatedSeenIds = [...Array.from(seenIds), ...trulyNew.map(a => a.id)]
-          localStorage.setItem(storageKey, JSON.stringify(updatedSeenIds))
-        }
-      }
-      catch (error) {
-        console.error('Error accessing localStorage for achievements:', error)
-        // Fallback: show them all if storage fails
-        setNewlyUnlockedAchievements(data.newlyUnlocked)
-      }
+    if (data?.newlyUnlocked && data.newlyUnlocked.length > 0) {
+      setNewlyUnlockedAchievements(data.newlyUnlocked)
     }
-  }, [data?.newlyUnlocked, userId])
+  }, [data?.newlyUnlocked])
 
   const handleDismissAchievements = (achievementIds: string[]) => {
     setNewlyUnlockedAchievements([])
-    // TODO: Call markAchievementsNotified API
-    console.warn('Marking achievements as notified:', achievementIds)
+    markNotifiedMutation.mutate(achievementIds)
   }
 
   // Animation variants

@@ -1,7 +1,7 @@
 import { and, eq, gte, sql } from '@kurama/data-ops/database/drizzle-orm'
 import { getDb } from '@kurama/data-ops/database/setup'
 import { cards, studySessions, userProfiles } from '@kurama/data-ops/drizzle/schema'
-import { getUserAchievements } from '@kurama/data-ops/queries/achievements'
+import { markAchievementsNotified as dbMarkAchievementsNotified, getUserAchievements } from '@kurama/data-ops/queries/achievements'
 import { getXPLeaderboard } from '@kurama/data-ops/queries/leaderboard'
 import { createServerFn } from '@tanstack/react-start'
 import { protectedFunctionMiddleware } from '@/core/middleware/auth'
@@ -129,4 +129,19 @@ export const getProgressStats = createServerFn()
       totalAchievements: achievements.length,
       leaderboard,
     }
+  })
+
+/**
+ * Mark achievements as notified to prevent repeating animations
+ */
+export const markAchievementsAsNotified = createServerFn()
+  .middleware([protectedFunctionMiddleware])
+  .inputValidator((achievementIds: string[]) => achievementIds)
+  .handler(async ({ context, data: achievementIds }) => {
+    const db = getDb()
+    const userId = context.userId
+
+    await dbMarkAchievementsNotified(db, userId, achievementIds)
+
+    return { success: true }
   })

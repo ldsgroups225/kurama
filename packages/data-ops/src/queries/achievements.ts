@@ -359,7 +359,7 @@ export async function getUserAchievements(
     .where(eq(userAchievements.userId, userId))
 
   const unlockedMap = new Map(
-    unlockedRecords.map(r => [r.achievementId, r.unlockedAt])
+    unlockedRecords.map(r => [r.achievementId, { unlockedAt: r.unlockedAt, notified: r.notified }])
   )
 
   // Calculate achievement status
@@ -374,15 +374,18 @@ export async function getUserAchievements(
     const achievement: AchievementWithProgress = {
       ...def,
       unlocked: isNowUnlocked,
-      unlockedAt: unlockedMap.get(def.id) ?? null,
+      unlockedAt: unlockedMap.get(def.id)?.unlockedAt ?? null,
       progress,
       maxProgress: def.condition.threshold,
     }
 
     achievements.push(achievement)
 
-    // Track newly unlocked
-    if (isNowUnlocked && !wasUnlocked) {
+    // Track for notification: 
+    // - Newly unlocked in this request
+    // - OR unlocked previously but never notified
+    const isNotified = unlockedMap.get(def.id)?.notified ?? false
+    if (isNowUnlocked && (!wasUnlocked || !isNotified)) {
       newlyUnlocked.push(achievement)
     }
   }
@@ -415,7 +418,7 @@ export async function markAchievementsNotified(
 
   await db
     .update(userAchievements)
-    .set({ notified: true })
+    .set({ notified: true, notifiedAt: new Date().toISOString() })
     .where(
       and(
         eq(userAchievements.userId, userId),
