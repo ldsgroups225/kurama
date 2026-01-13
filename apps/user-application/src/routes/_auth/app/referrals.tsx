@@ -18,8 +18,8 @@ function ReferralsPage() {
     <div className="min-h-screen bg-background pb-24 text-foreground">
       {/* Ambient Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[10%] left-[20%] w-[60%] h-[40%] rounded-full bg-indigo-600/10 blur-[120px]" />
-        <div className="absolute bottom-[20%] right-[10%] w-[50%] h-[50%] rounded-full bg-purple-600/10 blur-[120px]" />
+        <div className="absolute top-[10%] left-[20%] w-[60%] h-[40%] rounded-full bg-info-from/10 blur-[120px]" />
+        <div className="absolute bottom-[20%] right-[10%] w-[50%] h-[50%] rounded-full bg-xp-from/10 blur-[120px]" />
       </div>
 
       <AppHeader title="Parrainage" className="bg-transparent/0 border-none relative z-20" />
@@ -27,7 +27,7 @@ function ReferralsPage() {
       <div className="container mx-auto max-w-2xl px-4 py-8 relative z-10">
         {/* Header */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/25 animate-pulse">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-info-from to-xp-to shadow-lg shadow-info-from/25 animate-pulse">
             <Gift className="h-8 w-8 text-foreground" />
           </div>
           <h1 className="mb-2 text-3xl font-bold bg-linear-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
@@ -51,7 +51,7 @@ function ReferralsPage() {
             <h2 className="mb-4 text-lg font-semibold text-foreground">Comment ça marche ?</h2>
             <ol className="space-y-4">
               <li className="flex gap-4">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 border border-indigo-500/30 text-sm font-bold text-indigo-300">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-info-from/20 border border-info-from/30 text-sm font-bold text-info-from">
                   1
                 </span>
                 <div>
@@ -62,7 +62,7 @@ function ReferralsPage() {
                 </div>
               </li>
               <li className="flex gap-4">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 border border-indigo-500/30 text-sm font-bold text-indigo-300">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-info-from/20 border border-info-from/30 text-sm font-bold text-info-from">
                   2
                 </span>
                 <div>
@@ -73,7 +73,7 @@ function ReferralsPage() {
                 </div>
               </li>
               <li className="flex gap-4">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 border border-indigo-500/30 text-sm font-bold text-indigo-300">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-info-from/20 border border-info-from/30 text-sm font-bold text-info-from">
                   3
                 </span>
                 <div>
@@ -81,7 +81,7 @@ function ReferralsPage() {
                   <p className="text-sm text-muted-foreground">
                     Tu reçois
                     {' '}
-                    <span className="text-indigo-400 font-semibold">3€</span>
+                    <span className="text-info-from font-semibold">3€</span>
                     {' '}
                     de crédit et ton ami bénéficie d'une réduction
                   </p>
