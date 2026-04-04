@@ -9,9 +9,8 @@ import {
   Target,
   Trophy,
 } from 'lucide-react'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { Button } from '@/components/ui/button'
-import { generateUUID } from '@/utils/generateUUID'
 
 interface WelcomeScreenProps {
   onGetStarted: () => void
@@ -78,6 +77,21 @@ const pulseVariants = {
 }
 
 export function WelcomeScreen({ onGetStarted, onSignIn }: WelcomeScreenProps) {
+  const prefersReducedMotion = useReducedMotion()
+  const entryAnimation = prefersReducedMotion
+    ? undefined
+    : {
+        initial: 'hidden' as const,
+        animate: 'visible' as const,
+      }
+  const bottomAnimation = prefersReducedMotion
+    ? undefined
+    : {
+        initial: { opacity: 0, y: 50 },
+        animate: { opacity: 1, y: 0 },
+        transition: { delay: 0.8, type: 'spring' as const, stiffness: 100 },
+      }
+
   return (
     <div className="flex min-h-screen flex-col bg-background overflow-hidden relative">
       {/* Ambient Background */}
@@ -92,8 +106,7 @@ export function WelcomeScreen({ onGetStarted, onSignIn }: WelcomeScreenProps) {
         <motion.div
           className="w-full max-w-sm space-y-10"
           variants={containerVariants}
-          initial="hidden"
-          animate="visible"
+          {...entryAnimation}
         >
           {/* Hero Icon */}
           <motion.div
@@ -105,8 +118,8 @@ export function WelcomeScreen({ onGetStarted, onSignIn }: WelcomeScreenProps) {
               <motion.div
                 className="relative flex h-40 w-40 items-center justify-center rounded-[2.5rem] bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-2xl shadow-indigo-500/30 border border-white/10"
                 variants={iconVariants}
-                whileHover={{ scale: 1.05, rotate: 5 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={prefersReducedMotion ? undefined : { scale: 1.05, rotate: 5 }}
+                whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
               >
                 <GraduationCap
                   className="h-20 w-20 text-white drop-shadow-md"
@@ -117,7 +130,7 @@ export function WelcomeScreen({ onGetStarted, onSignIn }: WelcomeScreenProps) {
               <motion.div
                 className="absolute -top-3 -right-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-background border border-white/10 shadow-xl"
                 variants={floatVariants}
-                animate="animate"
+                animate={prefersReducedMotion ? undefined : 'animate'}
               >
                 <div className="flex h-full w-full items-center justify-center rounded-xl bg-yellow-500/10">
                   <Star className="h-6 w-6 text-yellow-400 fill-yellow-400/20" />
@@ -126,7 +139,7 @@ export function WelcomeScreen({ onGetStarted, onSignIn }: WelcomeScreenProps) {
               <motion.div
                 className="absolute -bottom-2 -left-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-background border border-white/10 shadow-xl"
                 variants={pulseVariants}
-                animate="animate"
+                animate={prefersReducedMotion ? undefined : 'animate'}
               >
                 <div className="flex h-full w-full items-center justify-center rounded-xl bg-blue-500/10">
                   <BookOpen className="h-6 w-6 text-blue-400" />
@@ -179,10 +192,10 @@ export function WelcomeScreen({ onGetStarted, onSignIn }: WelcomeScreenProps) {
               },
             ].map(feature => (
               <motion.div
-                key={generateUUID()}
+                key={feature.title}
                 className="group flex items-center gap-4 rounded-2xl bg-card border border-border p-4 backdrop-blur-md transition-all hover:bg-accent hover:border-accent-foreground/10"
-                whileHover={{ scale: 1.02, x: 4 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={prefersReducedMotion ? undefined : { scale: 1.02, x: 4 }}
+                whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
               >
                 <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${feature.bg}`}>
                   <feature.icon className={`h-6 w-6 ${feature.color}`} />
@@ -204,11 +217,12 @@ export function WelcomeScreen({ onGetStarted, onSignIn }: WelcomeScreenProps) {
       {/* Bottom CTA */}
       <motion.div
         className="space-y-6 px-6 pb-10 relative z-10"
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, type: 'spring', stiffness: 100 }}
+        {...bottomAnimation}
       >
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+        <motion.div
+          whileHover={prefersReducedMotion ? undefined : { scale: 1.02 }}
+          whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+        >
           <Button
             onClick={onGetStarted}
             size="lg"
@@ -221,9 +235,9 @@ export function WelcomeScreen({ onGetStarted, onSignIn }: WelcomeScreenProps) {
 
         <motion.p
           className="text-center text-sm font-medium text-muted-foreground"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
+          initial={prefersReducedMotion ? undefined : { opacity: 0 }}
+          animate={prefersReducedMotion ? undefined : { opacity: 1 }}
+          transition={prefersReducedMotion ? undefined : { delay: 1 }}
         >
           Déjà un compte?
           {' '}

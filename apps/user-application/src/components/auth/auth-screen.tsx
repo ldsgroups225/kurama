@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { useReducedMotion } from 'motion/react'
 import { Suspense, useState } from 'react'
 import { createLazyComponent } from '@/lib/lazy-helpers'
 import { SocialAuth } from './social-auth'
@@ -10,6 +11,7 @@ const OtpStep = createLazyComponent(() => import('./otp-step'))
 type AuthStep = 'email' | 'otp'
 
 export function AuthScreen() {
+  const prefersReducedMotion = useReducedMotion()
   const [step, setStep] = useState<AuthStep>('email')
   const [email, setEmail] = useState('')
 
@@ -33,7 +35,7 @@ export function AuthScreen() {
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo and Title */}
-        <div className="mb-8 text-center animate-in fade-in slide-in-from-bottom-5 duration-700">
+        <div className={`mb-8 text-center ${prefersReducedMotion ? '' : 'animate-in fade-in slide-in-from-bottom-5 duration-700'}`}>
           <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-white shadow-2xl shadow-indigo-500/20">
             <img
               src="/pwa-192x192.png"
@@ -50,7 +52,7 @@ export function AuthScreen() {
         </div>
 
         {/* Auth Card */}
-        <div className="rounded-3xl border border-border bg-card/50 backdrop-blur-xl p-8 shadow-2xl animate-in fade-in slide-in-from-bottom-5 duration-700 delay-100">
+        <div className={`rounded-3xl border border-border bg-card/50 backdrop-blur-xl p-8 shadow-2xl ${prefersReducedMotion ? '' : 'animate-in fade-in slide-in-from-bottom-5 duration-700 delay-100'}`}>
           <Suspense fallback={(
             <div className="animate-pulse space-y-4">
               <div className="h-10 rounded-xl bg-muted" />
@@ -81,7 +83,7 @@ export function AuthScreen() {
         </div>
 
         {/* Footer */}
-        <p className="mt-8 text-center text-xs text-muted-foreground animate-in fade-in slide-in-from-bottom-5 duration-700 delay-200">
+        <p className={`mt-8 text-center text-xs text-muted-foreground ${prefersReducedMotion ? '' : 'animate-in fade-in slide-in-from-bottom-5 duration-700 delay-200'}`}>
           En continuant, vous acceptez nos
           {' '}
           <Link

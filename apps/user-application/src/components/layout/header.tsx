@@ -42,6 +42,7 @@ export function Header({ className, onMobileMenuToggle }: HeaderProps) {
           size="icon"
           className="lg:hidden"
           onClick={onMobileMenuToggle}
+          aria-label="Open navigation menu"
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -66,7 +67,12 @@ export function Header({ className, onMobileMenuToggle }: HeaderProps) {
 
       {/* Right side - Notifications and user menu */}
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative"
+          aria-label="Open notifications"
+        >
           <Bell className="h-5 w-5" />
           <span className={`
             absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive

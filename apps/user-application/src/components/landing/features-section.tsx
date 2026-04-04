@@ -50,32 +50,28 @@ const features = [
 
 const templateFeatures = [
   {
-    image: '/cloudflare.png',
+    icon: Zap,
     title: 'Technology Edge',
     description: 'Application web progressive (PWA) construite avec TanStack Start, React 19 et optimisée pour Cloudflare.',
     badge: 'Performance',
-    highlight: true,
   },
   {
-    image: '/better-auth.png',
+    icon: Shield,
     title: 'Sécurité & Vie Privée',
     description: 'Authentification sécurisée et protection des données des étudiants conforme aux normes de confidentialité.',
     badge: 'Confiance',
-    highlight: true,
   },
   {
-    image: '/polar.png',
+    icon: Palette,
     title: 'Accessible à Tous',
     description: 'Application gratuite pour les étudiants avec des fonctionnalités premium optionnelles pour un apprentissage avancé.',
     badge: 'Gratuit',
-    highlight: true,
   },
   {
-    image: '/pnpm.webp',
+    icon: Code,
     title: 'Architecture Moderne',
     description: 'Base de code robuste avec TypeScript, tests automatisés et déploiement continu pour une qualité optimale.',
     badge: 'Qualité',
-    highlight: true,
   },
 ]
 
@@ -115,6 +111,7 @@ export function FeaturesSection() {
         `}
         >
           {templateFeatures.map((feature) => {
+            const IconComponent = feature.icon
             return (
               <Card
                 key={feature.title}
@@ -127,14 +124,10 @@ export function FeaturesSection() {
                   <div className="mb-2 flex items-center justify-between">
                     <div className={`
                       flex h-12 w-12 items-center justify-center rounded-lg
-                      border bg-background p-2
+                      border bg-background
                     `}
                     >
-                      <img
-                        src={feature.image}
-                        alt={feature.title}
-                        className="h-full w-full object-contain"
-                      />
+                      <IconComponent className="h-5 w-5 text-primary" />
                     </div>
                     <Badge variant="default" className="text-xs">
                       {feature.badge}

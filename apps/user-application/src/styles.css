@@ -284,9 +284,6 @@
     padding: 0;
     /* Prevent pull-to-refresh/rubber-banding on the body itself */
     overscroll-behavior-y: none;
-    /* Disable text selection globally to feel like an app UI */
-    -webkit-user-select: none;
-    user-select: none;
     /* Disable callout menus (long press context menu) */
     -webkit-touch-callout: none;
   }
@@ -323,16 +320,6 @@
   img,
   a {
     -webkit-user-drag: none;
-  }
-
-  /* Hide Scrollbars Globally but allow scrolling */
-  *::-webkit-scrollbar {
-    display: none;
-  }
-
-  * {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
   }
 
   * {
@@ -676,17 +663,4 @@
 @utility active-press {
   /* Native-like press effect: Scale down slightly and reduce opacity */
   @apply transition-all duration-75 ease-out active:scale-[0.97] active:opacity-80;
-}
-
-/* Utility to hide scrollbar but keep scrolling functionality */
-@utility no-scrollbar {
-  -ms-overflow-style: none;
-  /* IE and Edge */
-  scrollbar-width: none;
-
-  /* Firefox */
-  &::-webkit-scrollbar {
-    display: none;
-    /* Chrome, Safari and Opera */
-  }
 }

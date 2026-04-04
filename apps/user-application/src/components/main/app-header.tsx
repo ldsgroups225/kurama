@@ -154,6 +154,7 @@ export function AppHeader({
                   size="icon"
                   className="relative h-10 w-10 rounded-full bg-card/50 border border-border text-muted-foreground hover:bg-accent hover:text-foreground transition-all backdrop-blur-sm"
                   onClick={() => navigate({ to: '/app/notifications' })}
+                  aria-label="Open notifications"
                 >
                   <Bell className="h-5 w-5" />
                   {hasNotifications && (
@@ -215,6 +216,7 @@ export function AppHeader({
                 size="icon"
                 onClick={handleBack}
                 className="h-10 w-10 shrink-0 rounded-full bg-card/50 border border-border text-muted-foreground hover:bg-accent hover:text-foreground transition-all backdrop-blur-sm"
+                aria-label="Go back"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
@@ -265,6 +267,7 @@ export function AppHeader({
               size="icon"
               className="relative h-10 w-10 rounded-full bg-card/50 border border-border text-muted-foreground hover:bg-accent hover:text-foreground transition-all backdrop-blur-sm"
               onClick={() => navigate({ to: '/app/notifications' })}
+              aria-label="Open notifications"
             >
               <Bell className="h-5 w-5" />
               {hasNotifications && (

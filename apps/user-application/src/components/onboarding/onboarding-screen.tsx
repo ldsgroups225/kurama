@@ -8,10 +8,9 @@ import {
   Star,
   Users,
 } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { generateUUID } from '@/utils/generateUUID'
 
 /**
  * Ambient background colors for onboarding steps
@@ -123,6 +122,7 @@ export function OnboardingScreen({
   onComplete,
   onSkip,
 }: OnboardingScreenProps) {
+  const prefersReducedMotion = useReducedMotion()
   const [currentStep, setCurrentStep] = useState(0)
   const [direction, setDirection] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
@@ -189,9 +189,9 @@ export function OnboardingScreen({
       {/* Header */}
       <motion.div
         className="relative z-10 flex items-center justify-between px-6 pt-8 pb-4"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        initial={prefersReducedMotion ? undefined : { opacity: 0, y: -20 }}
+        animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+        transition={prefersReducedMotion ? undefined : { delay: 0.2 }}
       >
         <div className="w-16">
           <AnimatePresence mode="wait">
@@ -199,11 +199,11 @@ export function OnboardingScreen({
               <motion.button
                 onClick={handlePrevious}
                 className="text-muted-foreground transition-colors hover:text-foreground"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                whileHover={{ scale: 1.1, x: -2 }}
-                whileTap={{ scale: 0.9 }}
+                initial={prefersReducedMotion ? undefined : { opacity: 0, x: -20 }}
+                animate={prefersReducedMotion ? undefined : { opacity: 1, x: 0 }}
+                exit={prefersReducedMotion ? undefined : { opacity: 0, x: -20 }}
+                whileHover={prefersReducedMotion ? undefined : { scale: 1.1, x: -2 }}
+                whileTap={prefersReducedMotion ? undefined : { scale: 0.9 }}
               >
                 <ArrowLeft className="h-6 w-6" />
               </motion.button>
@@ -226,23 +226,25 @@ export function OnboardingScreen({
           <motion.div
             key={currentStep}
             custom={direction}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: 'spring', stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 },
-            }}
+            variants={prefersReducedMotion ? undefined : slideVariants}
+            initial={prefersReducedMotion ? undefined : 'enter'}
+            animate={prefersReducedMotion ? undefined : 'center'}
+            exit={prefersReducedMotion ? undefined : 'exit'}
+            transition={prefersReducedMotion
+              ? undefined
+              : {
+                  x: { type: 'spring', stiffness: 300, damping: 30 },
+                  opacity: { duration: 0.2 },
+                }}
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.7}
+            dragElastic={prefersReducedMotion ? 0.2 : 0.7}
             onDragStart={() => setIsDragging(true)}
             onDragEnd={(event, info) => {
               setIsDragging(false)
               handleDragEnd(event, info)
             }}
-            whileDrag={{ scale: 0.95 }}
+            whileDrag={prefersReducedMotion ? undefined : { scale: 0.95 }}
             className="w-full max-w-sm cursor-grab touch-pan-y space-y-12 active:cursor-grabbing"
           >
             {/* Icon with decorative element */}
@@ -255,10 +257,10 @@ export function OnboardingScreen({
                     flex items-center justify-center rounded-[2.5rem] shadow-2xl ${step.shadow}
                   `}
                   variants={iconVariants}
-                  initial="initial"
-                  animate="animate"
-                  whileHover={{ scale: 1.05, rotate: 5 }}
-                  whileTap={{ scale: 0.95 }}
+                  initial={prefersReducedMotion ? undefined : 'initial'}
+                  animate={prefersReducedMotion ? undefined : 'animate'}
+                  whileHover={prefersReducedMotion ? undefined : { scale: 1.05, rotate: 5 }}
+                  whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
                 >
                   <Icon className="h-20 w-20 text-white drop-shadow-lg" strokeWidth={1.5} />
                 </motion.div>
@@ -266,7 +268,7 @@ export function OnboardingScreen({
                 <motion.div
                   className="absolute -top-4 -right-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-900 border border-white/10 shadow-lg"
                   variants={starVariants}
-                  animate="animate"
+                  animate={prefersReducedMotion ? undefined : 'animate'}
                 >
                   <Star className="h-5 w-5 text-yellow-500" fill="currentColor" />
                 </motion.div>
@@ -276,9 +278,9 @@ export function OnboardingScreen({
             {/* Text content */}
             <motion.div
               className="space-y-4 text-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
+              animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+              transition={prefersReducedMotion ? undefined : { delay: 0.2 }}
             >
               <h2 className="text-3xl font-bold text-foreground tracking-tight">
                 {step.title}
@@ -291,13 +293,13 @@ export function OnboardingScreen({
             {/* Progress indicators */}
             <motion.div
               className="flex justify-center gap-3"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
+              initial={prefersReducedMotion ? undefined : { opacity: 0 }}
+              animate={prefersReducedMotion ? undefined : { opacity: 1 }}
+              transition={prefersReducedMotion ? undefined : { delay: 0.3 }}
             >
               {onboardingSteps.map((s, index) => (
                 <motion.button
-                  key={generateUUID()}
+                  key={s.title}
                   onClick={() => handleDotClick(index)}
                   className={`
                     h-2 rounded-full transition-all duration-300
@@ -306,8 +308,8 @@ export function OnboardingScreen({
                   : 'w-2 bg-white/10 hover:bg-white/20'
                 }
                   `}
-                  whileHover={{ scale: 1.2 }}
-                  whileTap={{ scale: 0.9 }}
+                  whileHover={prefersReducedMotion ? undefined : { scale: 1.2 }}
+                  whileTap={prefersReducedMotion ? undefined : { scale: 0.9 }}
                   aria-label={`Go to step ${index + 1}`}
                 />
               ))}
@@ -317,9 +319,9 @@ export function OnboardingScreen({
             {currentStep === 0 && !isDragging && (
               <motion.div
                 className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground font-medium"
-                variants={swipeHintVariants}
-                initial="initial"
-                animate="animate"
+                variants={prefersReducedMotion ? undefined : swipeHintVariants}
+                initial={prefersReducedMotion ? undefined : 'initial'}
+                animate={prefersReducedMotion ? undefined : 'animate'}
               >
                 <span>Glissez pour continuer</span>
                 <ArrowRight className="h-4 w-4" />
@@ -332,11 +334,14 @@ export function OnboardingScreen({
       {/* Bottom CTA */}
       <motion.div
         className="px-6 pb-10 pt-4 relative z-10"
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
+        initial={prefersReducedMotion ? undefined : { opacity: 0, y: 50 }}
+        animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+        transition={prefersReducedMotion ? undefined : { delay: 0.4 }}
       >
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+        <motion.div
+          whileHover={prefersReducedMotion ? undefined : { scale: 1.02 }}
+          whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+        >
           <Button
             onClick={handleNext}
             size="lg"
@@ -351,8 +356,8 @@ export function OnboardingScreen({
             {isLastStep ? 'C\'est parti !' : 'Suivant'}
             <motion.div
               className="ml-2 inline-block"
-              animate={{ x: [0, 4, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
+              animate={prefersReducedMotion ? undefined : { x: [0, 4, 0] }}
+              transition={prefersReducedMotion ? undefined : { duration: 1.5, repeat: Infinity }}
             >
               <ArrowRight className="h-5 w-5" />
             </motion.div>
