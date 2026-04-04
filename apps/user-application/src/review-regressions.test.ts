@@ -46,9 +46,9 @@ describe('review regressions', () => {
     const dashboardRoute = readAppFile('src/routes/_auth/app/index.lazy.tsx')
 
     expect(dashboardRoute).not.toContain('key={generateUUID()}')
-    expect(dashboardRoute).toContain("key={stat.label}")
-    expect(dashboardRoute).toContain("key={action.label}")
-    expect(dashboardRoute).toContain("onClick={() => navigate({ to: '/app/progress' })}")
+    expect(dashboardRoute).toContain('key={stat.label}')
+    expect(dashboardRoute).toContain('key={action.label}')
+    expect(dashboardRoute).toContain('onClick={() => navigate({ to: \'/app/progress\' })}')
   })
 
   test('community page does not expose inert primary actions', () => {
@@ -68,15 +68,18 @@ describe('review regressions', () => {
     expect(welcomeScreen).toContain('useReducedMotion')
     expect(onboardingScreen).toContain('useReducedMotion')
     expect(authScreen).toContain('useReducedMotion')
+    expect(onboardingScreen).toContain('animate={prefersReducedMotion ? undefined : { backgroundColor: AMBIENT_COLORS[step.blobColor] }}')
   })
 
   test('icon-only buttons expose accessible names', () => {
     const header = readAppFile('src/components/layout/header.tsx')
     const appHeader = readAppFile('src/components/main/app-header.tsx')
+    const onboardingScreen = readAppFile('src/components/onboarding/onboarding-screen.tsx')
 
     expect(header).toContain('aria-label="Open navigation menu"')
     expect(header).toContain('aria-label="Open notifications"')
     expect(appHeader).toContain('aria-label="Open notifications"')
     expect(appHeader).toContain('aria-label="Go back"')
+    expect(onboardingScreen).toContain('aria-label="Go to previous onboarding step"')
   })
 })

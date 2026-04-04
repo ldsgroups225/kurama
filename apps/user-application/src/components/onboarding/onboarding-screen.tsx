@@ -181,7 +181,8 @@ export function OnboardingScreen({
       <div className="absolute inset-0 pointer-events-none">
         <motion.div
           className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] rounded-full blur-[120px] transition-colors duration-700"
-          animate={{ backgroundColor: AMBIENT_COLORS[step.blobColor] }}
+          animate={prefersReducedMotion ? undefined : { backgroundColor: AMBIENT_COLORS[step.blobColor] }}
+          style={prefersReducedMotion ? { backgroundColor: AMBIENT_COLORS[step.blobColor] } : undefined}
         />
         <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] rounded-full bg-blue-600/10 blur-[120px]" />
       </div>
@@ -198,6 +199,7 @@ export function OnboardingScreen({
             {currentStep > 0 && (
               <motion.button
                 onClick={handlePrevious}
+                aria-label="Go to previous onboarding step"
                 className="text-muted-foreground transition-colors hover:text-foreground"
                 initial={prefersReducedMotion ? undefined : { opacity: 0, x: -20 }}
                 animate={prefersReducedMotion ? undefined : { opacity: 1, x: 0 }}
@@ -213,8 +215,8 @@ export function OnboardingScreen({
         <motion.button
           onClick={onSkip}
           className="text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
+          whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
         >
           Passer
         </motion.button>
