@@ -37,11 +37,13 @@ export function createSwipeHandlers({
     setTimeout(onDragEnd, DRAG_END_DELAY)
 
     const { offset, velocity } = info
+    const finalX = x.get()
     const absVelocity = Math.abs(velocity.x)
 
     // Swipe right - mark as correct
     if (
-      offset.x > SWIPE_THRESHOLD
+      finalX >= SWIPE_THRESHOLD
+      || offset.x >= SWIPE_THRESHOLD
       || (offset.x > VELOCITY_DISTANCE_THRESHOLD && absVelocity > VELOCITY_THRESHOLD)
     ) {
       // Animate card off-screen to the right, then trigger callback
@@ -55,7 +57,8 @@ export function createSwipeHandlers({
 
     // Swipe left - mark as incorrect
     if (
-      offset.x < -SWIPE_THRESHOLD
+      finalX <= -SWIPE_THRESHOLD
+      || offset.x <= -SWIPE_THRESHOLD
       || (offset.x < -VELOCITY_DISTANCE_THRESHOLD && absVelocity > VELOCITY_THRESHOLD)
     ) {
       // Animate card off-screen to the left, then trigger callback
