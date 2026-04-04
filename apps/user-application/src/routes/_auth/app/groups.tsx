@@ -1,10 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ArrowRight, MessageCircle, Plus, Users } from 'lucide-react'
 import { motion } from 'motion/react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { AppHeader, BottomNav } from '@/components/main'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn } from '@/lib/utils'
 
@@ -56,10 +64,18 @@ const groups = [
 ]
 
 function GroupsPage() {
+  const [isComingSoonOpen, setIsComingSoonOpen] = useState(false)
+  const [selectedGroupName, setSelectedGroupName] = useState<string | null>(null)
+
   useEffect(() => {
     const endTracking = trackRouteLoad('app-groups')
     return endTracking
   }, [])
+
+  const openComingSoonDialog = (groupName?: string) => {
+    setSelectedGroupName(groupName ?? null)
+    setIsComingSoonOpen(true)
+  }
 
   // Animations
   const containerVariants = {
@@ -92,10 +108,12 @@ function GroupsPage() {
         {/* CTA */}
         <div className="mb-8">
           <Button
+            type="button"
+            onClick={() => openComingSoonDialog()}
             className="w-full h-14 rounded-2xl bg-linear-to-r from-violet-600 to-indigo-600 text-white font-semibold text-lg shadow-lg shadow-indigo-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
             <Plus className="mr-2 h-5 w-5" />
-            Créer un nouveau groupe
+            Groupes bientôt disponibles
           </Button>
         </div>
 
@@ -164,7 +182,14 @@ function GroupsPage() {
 
                 {/* Arrow */}
                 <div className="self-center">
-                  <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-foreground/10">
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => openComingSoonDialog(group.name)}
+                    className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-foreground/10"
+                    aria-label={`Voir les details du groupe ${group.name}`}
+                  >
                     <ArrowRight className="h-5 w-5" />
                   </Button>
                 </div>
@@ -175,6 +200,24 @@ function GroupsPage() {
       </main>
 
       <BottomNav />
+
+      <Dialog open={isComingSoonOpen} onOpenChange={setIsComingSoonOpen}>
+        <DialogContent className="rounded-3xl border border-border bg-card/95 backdrop-blur-xl">
+          <DialogHeader>
+            <DialogTitle>Communauté en préparation</DialogTitle>
+            <DialogDescription>
+              {selectedGroupName
+                ? `${selectedGroupName} sera disponible dès que la messagerie et la création de groupes seront prêtes.`
+                : 'La création de groupes, les discussions et les invitations arrivent prochainement dans Kurama.'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" onClick={() => setIsComingSoonOpen(false)}>
+              Compris
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

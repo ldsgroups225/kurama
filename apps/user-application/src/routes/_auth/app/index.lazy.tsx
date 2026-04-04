@@ -28,7 +28,6 @@ import { Rocket } from '@/lib/icons'
 import { trackRouteLoad } from '@/lib/performance-monitor'
 import { cn, isDefined } from '@/lib/utils'
 import { getXPRateText } from '@/lib/xp-rates'
-import { generateUUID } from '@/utils/generateUUID'
 
 export const Route = createLazyFileRoute('/_auth/app/')({
   component: AppHome,
@@ -175,7 +174,7 @@ function AppHome() {
           <motion.section variants={itemVariants} className="grid grid-cols-3 gap-3">
             {stats.map(stat => (
               <div
-                key={generateUUID()}
+                key={stat.label}
                 className={cn(
                   'group relative overflow-hidden rounded-2xl border p-3 flex flex-col items-center justify-center gap-2 backdrop-blur-md transition-all hover:bg-accent',
                   stat.bg,
@@ -308,7 +307,7 @@ function AppHome() {
               {quickActions.map(action => (
                 <button
                   type="button"
-                  key={generateUUID()}
+                  key={action.label}
                   onClick={action.action}
                   className="group relative flex flex-col p-4 rounded-2xl border border-border bg-card backdrop-blur-md transition-all hover:bg-accent hover:scale-[1.02] active:scale-95 text-left overflow-hidden"
                 >
@@ -347,7 +346,11 @@ function AppHome() {
                 <TrendingUp className="w-5 h-5 text-emerald-400" />
                 Activité Récente
               </h2>
-              <button type="button" className="text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors uppercase tracking-wide">
+              <button
+                type="button"
+                onClick={() => navigate({ to: '/app/progress' })}
+                className="text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors uppercase tracking-wide"
+              >
                 Voir tout
               </button>
             </div>
